@@ -14,7 +14,7 @@
 /dts-v1/;
 
 #include "am33xx.dtsi"
-#include <dt-bindings/interrupt-controller/irq.h> 
+#include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/pwm/pwm.h>
 
 
@@ -34,50 +34,50 @@
 	};
 
 
-        wlcore {
-                compatible = "wlcore";  
-                gpio = <28>; /* Bank0, pin28 */
+	wlcore {
+		compatible = "wlcore";
+		gpio = <28>; /* Bank0, pin28 */
 
-                /*
-                 * TODO: use edge irqs for suspend/resume.
-                 * in newer kerenls, we seem to miss interrupts when
-                 * working with edge irqs, so revert back to level irqs.
-                 */
-                platform-quirks = <1>;
+		/*
+		 * TODO: use edge irqs for suspend/resume.
+		 * in newer kerenls, we seem to miss interrupts when
+		 * working with edge irqs, so revert back to level irqs.
+		 */
+		platform-quirks = <1>;
 
-                /* if a 12xx card is there, configure the clock to
-                   WL12XX_REFCLOCK_38_XTAL */
-                board-ref-clock = <4>;
-        };
-
-
-
-        kim {
-                compatible = "kim";
-                nshutdown_gpio = <97>;  /* Bank3, pin1 */
-                dev_name = "/dev/ttyO3";
-                flow_cntrl = <1>;
-                baud_rate = <3000000>;
-        };
-
-        btwilink {
-                compatible = "btwilink";
-        };
+		/* if a 12xx card is there, configure the clock to
+		   WL12XX_REFCLOCK_38_XTAL */
+		board-ref-clock = <4>;
+	};
 
 
-        gpio_buttons: gpio_buttons@0 {
-                compatible = "gpio-keys";
-                #address-cells = <1>;
-                #size-cells = <0>;
 
-                switch@1 {
-                        label = "txt-pwr";
+	kim {
+		compatible = "kim";
+		nshutdown_gpio = <97>;  /* Bank3, pin1 */
+		dev_name = "/dev/ttyO3";
+		flow_cntrl = <1>;
+		baud_rate = <3000000>;
+	};
+
+	btwilink {
+		compatible = "btwilink";
+	};
+
+
+	gpio_buttons: gpio_buttons@0 {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		switch@1 {
+			label = "txt-pwr";
 			gpio-key,wakeup = <1>;
-                        linux,code = <59>; /* F1 */
-                        gpios = <&gpio1 16 GPIO_ACTIVE_LOW>;
-                };
+			linux,code = <59>; /* F1 */
+			gpios = <&gpio1 16 GPIO_ACTIVE_LOW>;
+		};
 
-        };
+	};
 
 	leds {
 		compatible = "gpio-leds";
@@ -106,10 +106,10 @@
 				0x040 (PIN_INPUT | MUX_MODE7)	/* <ON-INT> gpmc_a0.gpio1_16 */
 				0x044 (PIN_OUTPUT | MUX_MODE7)	/* <OFF-UC> gpmc_a1.gpio1_17 */
 				/* TP 19 - 22 */
-                                0x180 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_rxd.gpio0_14 */
-                                0x184 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_txd.gpio0_15 */
-                                0x178 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_ctsn.gpio0_12 */
-                                0x17c (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_rtsn.gpio0_13 */
+				0x180 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_rxd.gpio0_14 */
+				0x184 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_txd.gpio0_15 */
+				0x178 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_ctsn.gpio0_12 */
+				0x17c (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* uart1_rtsn.gpio0_13 */
 			>;
 		};
 
@@ -153,58 +153,58 @@
 
 		uart2_pins_sleep: pinmux_uart2_pins_sleep {
 			pinctrl-single,pins = <
-				0x150 (PIN_INPUT_PULLDOWN | MUX_MODE7)	
-				0x154 (PIN_INPUT_PULLDOWN | MUX_MODE7)	
+				0x150 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x154 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 			>;
 		};
 
 
 
-                uart3_pins_default: pinmux_uart3_pins_default {
-                        pinctrl-single,pins = <
-                                0x148 (PIN_INPUT | MUX_MODE3)		/* mdi0.uart3_ctsn */
-                                0x14C (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* mdc.uart3_rtsn */
-                                0x134 (PIN_INPUT | MUX_MODE1)	/* mii1_rxd3.uart3_rxd */
-                                0x138 (PIN_OUTPUT | MUX_MODE1)	/* mii1_rxd2.uart3_txd */
-                        >;
-                };
+		uart3_pins_default: pinmux_uart3_pins_default {
+			pinctrl-single,pins = <
+				0x148 (PIN_INPUT | MUX_MODE3)		/* mdi0.uart3_ctsn */
+				0x14C (PIN_OUTPUT_PULLDOWN | MUX_MODE3)	/* mdc.uart3_rtsn */
+				0x134 (PIN_INPUT | MUX_MODE1)	/* mii1_rxd3.uart3_rxd */
+				0x138 (PIN_OUTPUT | MUX_MODE1)	/* mii1_rxd2.uart3_txd */
+			>;
+		};
 
-                uart3_pins_sleep: pinmux_uart3_pins_sleep {
-                        pinctrl-single,pins = <
-                                0x148 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x14C (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x134 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x138 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                        >;
-                };
+		uart3_pins_sleep: pinmux_uart3_pins_sleep {
+			pinctrl-single,pins = <
+				0x148 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x14C (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x134 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x138 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+			>;
+		};
 
-                mmc1_pins_default: pinmux_mmc1_pins {
-                        pinctrl-single,pins = <
-                                0x0F0 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat3.mmc0_dat3 */ 
-                                0x0F4 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat2.mmc0_dat2 */ 
-                                0x0F8 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat1.mmc0_dat1 */
-                                0x0FC (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat0.mmc0_dat0 */
-                                0x100 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_clk.mmc0_clk */
-                                0x104 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_cmd.mmc0_cmd */
+		mmc1_pins_default: pinmux_mmc1_pins {
+			pinctrl-single,pins = <
+				0x0F0 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat3.mmc0_dat3 */
+				0x0F4 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat2.mmc0_dat2 */
+				0x0F8 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat1.mmc0_dat1 */
+				0x0FC (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_dat0.mmc0_dat0 */
+				0x100 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_clk.mmc0_clk */
+				0x104 (PIN_INPUT_PULLUP | MUX_MODE0)    /* mmc0_cmd.mmc0_cmd */
 				0x1A8 (PIN_INPUT | MUX_MODE7) /* mcasp0_axr1.gpio3_20 */
-                        >;
-                };
+			>;
+		};
 
-                mmc1_pins_sleep: pinmux_mmc1_pins_sleep {
-                        pinctrl-single,pins = <
-                                0x0F0 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x0F4 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x0F8 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x0FC (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x100 (PIN_INPUT_PULLDOWN | MUX_MODE7)
-                                0x104 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+		mmc1_pins_sleep: pinmux_mmc1_pins_sleep {
+			pinctrl-single,pins = <
+				0x0F0 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x0F4 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x0F8 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x0FC (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x100 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+				0x104 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 				0x1A8 (PIN_INPUT | MUX_MODE7)	/* mcasp0_axr1.gpio3_20 */
-                        >;
-                };
+			>;
+		};
 
 
-	        mmc3_pins_default: pinmux_mmc3_pins { 
-        		pinctrl-single,pins = < 
+		mmc3_pins_default: pinmux_mmc3_pins {
+			pinctrl-single,pins = <
 				0x118 (PIN_INPUT_PULLUP | MUX_MODE5)	/* mii1_rx_dv.mmc2_dat0, INPUT_PULLUP | MODE5 */
 				0x11C (PIN_INPUT_PULLUP | MUX_MODE5)	/* mii1_txd3.mmc2_dat1, INPUT_PULLUP | MODE5 */
 				0x120 (PIN_INPUT_PULLUP | MUX_MODE5)	/* mii1_txd2.mmc2_dat2, INPUT_PULLUP | MODE5 */
@@ -214,9 +214,9 @@
 			>;
 		};
 
-	        mmc3_pins_sleep: pinmux_mmc3_pins_sleep { 
-        		pinctrl-single,pins = < 
-				0x118 (PIN_INPUT_PULLDOWN | MUX_MODE7)	
+		mmc3_pins_sleep: pinmux_mmc3_pins_sleep {
+			pinctrl-single,pins = <
+				0x118 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 				0x11C (PIN_INPUT_PULLDOWN | MUX_MODE7)
 				0x120 (PIN_INPUT_PULLDOWN | MUX_MODE7)
 				0x108 (PIN_INPUT_PULLDOWN | MUX_MODE7)
@@ -233,34 +233,34 @@
 		};
 
 		/* wl12xx/wl18xx card on mmc3 */
-	        wlan_pins: pinmux_wlan_pins { 
-        		pinctrl-single,pins = < 
-                		0x110 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* mii1_rx_er.gpio3_2 (WL_EN) */ 
-		                0x128 (PIN_INPUT | MUX_MODE7)	/* mii1_txd0.gpio0_28 (WLAN_IRQ) */ 
-		                0x10C (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* mii1_crs.gpio3_1 (BT_EN) */ 
+		wlan_pins: pinmux_wlan_pins {
+			pinctrl-single,pins = <
+				0x110 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* mii1_rx_er.gpio3_2 (WL_EN) */
+				0x128 (PIN_INPUT | MUX_MODE7)	/* mii1_txd0.gpio0_28 (WLAN_IRQ) */
+				0x10C (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* mii1_crs.gpio3_1 (BT_EN) */
 			>;
 		};
 
 
 		nandflash_pins_s0: nandflash_pins_s0 {
- 			pinctrl-single,pins = <
-		 	0x0 0x30 /* gpmc_ad0.gpmc_ad0, INPUT | PULLUP | MODE0 */
-		 	0x4 0x30 /* gpmc_ad1.gpmc_ad1, INPUT | PULLUP | MODE0 */
-		 	0x8 0x30 /* gpmc_ad2.gpmc_ad2, INPUT | PULLUP | MODE0 */
-	 		0xc 0x30 /* gpmc_ad3.gpmc_ad3, INPUT | PULLUP | MODE0 */
-		 	0x10 0x30 /* gpmc_ad4.gpmc_ad4, INPUT | PULLUP | MODE0 */
-		 	0x14 0x30 /* gpmc_ad5.gpmc_ad5, INPUT | PULLUP | MODE0 */
-		 	0x18 0x30 /* gpmc_ad6.gpmc_ad6, INPUT | PULLUP | MODE0 */
-		 	0x1c 0x30 /* gpmc_ad7.gpmc_ad7, INPUT | PULLUP | MODE0 */
-		 	0x70 0x30 /* gpmc_wait0.gpmc_wait0, INPUT | PULLUP | MODE0 */
-		 	0x74 0x37 /* gpmc_wpn.gpio0_30, INPUT | PULLUP | MODE7 */
-		 	0x7c 0x8 /* gpmc_csn0.gpmc_csn0, PULL DISA */
-		 	0x90 0x8 /* gpmc_advn_ale.gpmc_advn_ale, PULL DISA */
-		 	0x94 0x8 /* gpmc_oen_ren.gpmc_oen_ren, PULL DISA */
-		 	0x98 0x8 /* gpmc_wen.gpmc_wen, PULL DISA */
-		 	0x9c 0x8 /* gpmc_be0n_cle.gpmc_be0n_cle, PULL DISA */
-		 	>;
-	 	};
+			pinctrl-single,pins = <
+			0x0 0x30 /* gpmc_ad0.gpmc_ad0, INPUT | PULLUP | MODE0 */
+			0x4 0x30 /* gpmc_ad1.gpmc_ad1, INPUT | PULLUP | MODE0 */
+			0x8 0x30 /* gpmc_ad2.gpmc_ad2, INPUT | PULLUP | MODE0 */
+			0xc 0x30 /* gpmc_ad3.gpmc_ad3, INPUT | PULLUP | MODE0 */
+			0x10 0x30 /* gpmc_ad4.gpmc_ad4, INPUT | PULLUP | MODE0 */
+			0x14 0x30 /* gpmc_ad5.gpmc_ad5, INPUT | PULLUP | MODE0 */
+			0x18 0x30 /* gpmc_ad6.gpmc_ad6, INPUT | PULLUP | MODE0 */
+			0x1c 0x30 /* gpmc_ad7.gpmc_ad7, INPUT | PULLUP | MODE0 */
+			0x70 0x30 /* gpmc_wait0.gpmc_wait0, INPUT | PULLUP | MODE0 */
+			0x74 0x37 /* gpmc_wpn.gpio0_30, INPUT | PULLUP | MODE7 */
+			0x7c 0x8 /* gpmc_csn0.gpmc_csn0, PULL DISA */
+			0x90 0x8 /* gpmc_advn_ale.gpmc_advn_ale, PULL DISA */
+			0x94 0x8 /* gpmc_oen_ren.gpmc_oen_ren, PULL DISA */
+			0x98 0x8 /* gpmc_wen.gpmc_wen, PULL DISA */
+			0x9c 0x8 /* gpmc_be0n_cle.gpmc_be0n_cle, PULL DISA */
+			>;
+		};
 
 	};
 
@@ -297,15 +297,15 @@
 
 
 
-                        /* Set OPP50 (0.95V) for VDD core */
-                        sleep-sequence = /bits/ 8 <
-                                0x02 0x2d 0x25 0x1f /* Set VDD2 to 0.95V */
-                        >;
+			/* Set OPP50 (0.95V) for VDD core */
+			sleep-sequence = /bits/ 8 <
+				0x02 0x2d 0x25 0x1f /* Set VDD2 to 0.95V */
+			>;
 
-                        /* Set OPP100 (1.10V) for VDD core */
-                        wake-sequence = /bits/ 8 <
-                                0x02 0x2d 0x25 0x2b /* Set VDD2 to 1.1V */
-                        >;
+			/* Set OPP100 (1.10V) for VDD core */
+			wake-sequence = /bits/ 8 <
+				0x02 0x2d 0x25 0x2b /* Set VDD2 to 1.1V */
+			>;
 
 			tps: tps@2d {
 				reg = <0x2d>;
@@ -354,127 +354,124 @@
 		regulator-boot-on;
 	};
 
-	wlan_en_reg: fixedregulator@1 { 
-        	compatible = "regulator-fixed"; 
-		regulator-name = "wlan-en-regulator"; 
-		regulator-min-microvolt = <1800000>; 
-		regulator-max-microvolt = <1800000>; 
-		gpio = <&gpio3 2 0>; 
-		startup-delay-us = <70000>; 
-		enable-active-high; 
+	wlan_en_reg: fixedregulator@1 {
+		compatible = "regulator-fixed";
+		regulator-name = "wlan-en-regulator";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		gpio = <&gpio3 2 0>;
+		startup-delay-us = <70000>;
+		enable-active-high;
 		regulator-boot-on;
-	}; 
+	};
 
 };
 
 
 &elm {
 	status = "okay";
-     };
+};
 
 &gpmc {
-	 	status = "okay";
-	 	pinctrl-names = "default";
-	 	pinctrl-0 = <&nandflash_pins_s0>;
-	 	ranges = <0 0 0x08000000 0x10000000>; /* CS0: NAND */
-	 	nand@0,0 {
-	 	reg = <0 0 0>; /* CS0, offset 0 */
-	 	nand-bus-width = <8>;
-	 	ti,nand-ecc-opt = "bch8";
-	 	gpmc,device-nand = "true";
-	 	gpmc,device-width = <1>;
-	 	gpmc,sync-clk-ps = <0>;
-	 	gpmc,cs-on-ns = <0>;
-	 	gpmc,cs-rd-off-ns = <44>;
-	 	gpmc,cs-wr-off-ns = <44>;
-	 	gpmc,adv-on-ns = <6>;
-	 	gpmc,adv-rd-off-ns = <34>;
-	 	gpmc,adv-wr-off-ns = <44>;
-	 	gpmc,we-on-ns = <0>;
-	 	gpmc,we-off-ns = <40>;
-	 	gpmc,oe-on-ns = <0>;
-	 	gpmc,oe-off-ns = <54>;
-	 	gpmc,access-ns = <64>;
-	 	gpmc,rd-cycle-ns = <82>;
-	 	gpmc,wr-cycle-ns = <82>;
-	 	gpmc,wait-on-read = "true";
-	 	gpmc,wait-on-write = "true";
-	 	gpmc,bus-turnaround-ns = <0>;
-	 	gpmc,cycle2cycle-delay-ns = <0>;
-	 	gpmc,clk-activation-ns = <0>;
-	 	gpmc,wait-monitoring-ns = <0>;
-	 	gpmc,wr-access-ns = <40>;
-	 	gpmc,wr-data-mux-bus-ns = <0>;
-	 	
-	 	#address-cells = <1>;
-	 	#size-cells = <1>;
-	 	ti,elm-id = <&elm>;
-	 	
-	 	/* MTD partition table */
-	 	partition@0 {
-		 	label = "SPL1";
-		 	reg = <0x00000000 0x000020000>;
-	 		};
-	 	
-	 	partition@1 {
-		 	label = "SPL2";
-		 	reg = <0x00020000 0x00020000>;
-	 		};
-	 	
-	 	partition@2 {
-		 	label = "SPL3";
-		 	reg = <0x00040000 0x00020000>;
-	 		};
-	 	
-	 	partition@3 {
-		 	label = "SPL4";
-		 	reg = <0x00060000 0x00020000>;
-	 		};
-		
-	 	partition@4 {
-	 		label = "dtb";
-			reg = <0x00080000 0x00040000>;
- 			};
- 	
-	 	partition@5 {
-		 	label = "U-boot";
-		 	reg = <0x000c0000 0x00100000>;
-	 		};
-	 	
-	 	partition@6 {
-		 	label = "U-boot-env";
-		 	reg = <0x001c0000 0x00020000>;
-	 		};
-	 	
-	 	partition@7 {
-		 	label = "U-boot-env-backup";
-		 	reg = <0x001E0000 0x00020000>;
-	 		};
-	 	
-	 	partition@8 {
-		 	label = "uImage";
-		 	reg = <0x00200000 0x00500000>;
-	 		};
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&nandflash_pins_s0>;
+	ranges = <0 0 0x08000000 0x10000000>; /* CS0: NAND */
+	nand@0,0 {
+	reg = <0 0 0>; /* CS0, offset 0 */
+	nand-bus-width = <8>;
+	ti,nand-ecc-opt = "bch8";
+	gpmc,device-nand = "true";
+	gpmc,device-width = <1>;
+	gpmc,sync-clk-ps = <0>;
+	gpmc,cs-on-ns = <0>;
+	gpmc,cs-rd-off-ns = <44>;
+	gpmc,cs-wr-off-ns = <44>;
+	gpmc,adv-on-ns = <6>;
+	gpmc,adv-rd-off-ns = <34>;
+	gpmc,adv-wr-off-ns = <44>;
+	gpmc,we-on-ns = <0>;
+	gpmc,we-off-ns = <40>;
+	gpmc,oe-on-ns = <0>;
+	gpmc,oe-off-ns = <54>;
+	gpmc,access-ns = <64>;
+	gpmc,rd-cycle-ns = <82>;
+	gpmc,wr-cycle-ns = <82>;
+	gpmc,wait-on-read = "true";
+	gpmc,wait-on-write = "true";
+	gpmc,bus-turnaround-ns = <0>;
+	gpmc,cycle2cycle-delay-ns = <0>;
+	gpmc,clk-activation-ns = <0>;
+	gpmc,wait-monitoring-ns = <0>;
+	gpmc,wr-access-ns = <40>;
+	gpmc,wr-data-mux-bus-ns = <0>;
 
-	 	partition@9 {
-		 	label = "bootlogo";
-		 	reg = <0x00700000 0x00040000>;
-	 		};
+	#address-cells = <1>;
+	#size-cells = <1>;
+	ti,elm-id = <&elm>;
 
-	 	partition@10 {
-		 	label = "rootfs";
-		 	reg = <0x00740000 0x078C0000>;
-	 		};
- 		};
+	/* MTD partition table */
+	partition@0 {
+		label = "SPL1";
+		reg = <0x00000000 0x000020000>;
+		};
+
+	partition@1 {
+		label = "SPL2";
+		reg = <0x00020000 0x00020000>;
+		};
+
+	partition@2 {
+		label = "SPL3";
+		reg = <0x00040000 0x00020000>;
+		};
+
+	partition@3 {
+		label = "SPL4";
+		reg = <0x00060000 0x00020000>;
+		};
+
+	partition@4 {
+		label = "dtb";
+		reg = <0x00080000 0x00040000>;
+		};
+
+	partition@5 {
+		label = "U-boot";
+		reg = <0x000c0000 0x00100000>;
+		};
+
+	partition@6 {
+		label = "U-boot-env";
+		reg = <0x001c0000 0x00020000>;
+		};
+
+	partition@7 {
+		label = "U-boot-env-backup";
+		reg = <0x001E0000 0x00020000>;
+		};
+
+	partition@8 {
+		label = "uImage";
+		reg = <0x00200000 0x00500000>;
+		};
+
+	partition@9 {
+		label = "bootlogo";
+		reg = <0x00700000 0x00040000>;
+		};
+
+	partition@10 {
+		label = "rootfs";
+		reg = <0x00740000 0x078C0000>;
+		};
 	};
-
-
+};
 
 &usb {
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&usb_pins>;
-
 };
 
 &usb_ctrl_mod {
@@ -509,7 +506,7 @@
 	compatible = "ti,tps65910";
 
 	interrupt-parent = <&intc>;
-        interrupts = < 0 6 0x04 >;
+	interrupts = < 0 6 0x04 >;
 
 	#gpio-cells = <2>;
 	gpio-controller;
@@ -560,7 +557,7 @@
 		};
 
 		vdig1_reg: regulator@5 {
-		        regulator-name = "vmmc_reg"; 
+			regulator-name = "vmmc_reg";
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <3300000>;
 			regulator-always-on;
@@ -591,7 +588,7 @@
 		};
 
 		vmmc_reg: regulator@12 {
-		        /*regulator-name = "vmmc_reg";*/ 
+			/*regulator-name = "vmmc_reg";*/
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <3300000>;
 			regulator-always-on;
@@ -618,13 +615,13 @@
 };
 
 &mmc1 {
-        status = "okay";  
-        vmmc-supply = <&vmmc_reg>;
-        /*vmmc-supply = <&vdig1_reg>;*/
-        bus-width = <4>;
-        pinctrl-names = "default", "sleep";
-        pinctrl-0 = <&mmc1_pins_default>;
-        pinctrl-1 = <&mmc1_pins_sleep>;
+	status = "okay";
+	vmmc-supply = <&vmmc_reg>;
+	/*vmmc-supply = <&vdig1_reg>;*/
+	bus-width = <4>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&mmc1_pins_default>;
+	pinctrl-1 = <&mmc1_pins_sleep>;
 	cd-gpios = <&gpio3 20 GPIO_ACTIVE_LOW>;
 };
 
@@ -635,35 +632,34 @@
 };
 
 &mmc3 {
-        /* these are on the crossbar and are outlined in the
-        xbar-event-map element */
-        dmas = <&edma 12
-                &edma 13>;
-        dma-names = "tx", "rx";   
+	/* these are on the crossbar and are outlined in the
+	xbar-event-map element */
+	dmas = <&edma 12
+		&edma 13>;
+	dma-names = "tx", "rx";
 
-        status = "okay";
-        vmmc-supply = <&wlan_en_reg>;  
-        bus-width = <4>;
+	status = "okay";
+	vmmc-supply = <&wlan_en_reg>;
+	bus-width = <4>;
 		pinctrl-names = "default", "sleep";
 		pinctrl-0 = <&mmc3_pins_default>;
 		pinctrl-1 = <&mmc3_pins_sleep>;
 
-        ti,non-removable;
-        ti,needs-special-hs-handling;
-        /*cap-power-off-card;*/
-        keep-power-in-suspend;
+	ti,non-removable;
+	ti,needs-special-hs-handling;
+	/*cap-power-off-card;*/
+	keep-power-in-suspend;
 };
 
 &sham {
-        status = "okay";
+	status = "okay";
 };
 
 &aes {
-        status = "okay";
+	status = "okay";
 };
 
-
-&lcdc {	
+&lcdc {
 	clocks = <&lcd_gclk>;
 	clock-names = "fck";
 	status = "disabled";
