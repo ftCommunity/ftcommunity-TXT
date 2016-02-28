@@ -175,7 +175,7 @@
 
 &am33xx_pinmux {
 	pinctrl-names = "default";
-	pinctrl-0 = <&ddr3_vtt_toggle &wlan_pins &io_pins>;
+	pinctrl-0 = <&ddr3_vtt_toggle &io_pins>;
 
 	ddr3_vtt_toggle: ddr3_vtt_toggle {
 		pinctrl-single,pins = <
@@ -607,32 +607,26 @@
 	cd-gpios = <&gpio3 20 GPIO_ACTIVE_LOW>;
 };
 
-&edma {
-	/* Map eDMA MMC2 Events from Crossbar */
-	ti,edma-xbar-event-map = /bits/ 16  <1 12
-				   2 13>;
-};
-
 &mmc3 {
-	/* these are on the crossbar and are outlined in the
-	xbar-event-map element */
-	dmas = <&edma 12
-		&edma 13>;
+	/* these are on the crossbar */
+	dmas = <&edma_xbar 12 0 1
+		&edma_xbar 13 0 2>;
 	dma-names = "tx", "rx";
 
 	status = "okay";
 	vmmc-supply = <&wlan_en_reg>;
 	bus-width = <4>;
 	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&mmc3_pins_default>;
-	pinctrl-1 = <&mmc3_pins_sleep>;
+	pinctrl-0 = <&mmc3_pins_default &wlan_pins>;
+	pinctrl-1 = <&mmc3_pins_sleep &wlan_pins>;
 
 	ti,non-removable;
 	ti,needs-special-hs-handling;
 	/*cap-power-off-card;*/
 	keep-power-in-suspend;
-	wlcore: wlcore@3 {
+	wlcore: wlcore@0 {
 		compatible = "ti,wl1831";
+		reg = <2>;
 		interrupt-parent = <&gpio0>;
 		interrupts = <28 IRQ_TYPE_LEVEL_HIGH>;
 		ref-clock-frequency = <38400000>;
