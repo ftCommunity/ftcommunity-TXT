@@ -1,0 +1,150 @@
+--- psplash-orig/psplash.c	2012-08-14 17:22:56.000000000 +0200
++++ psplash-afd4e228c606a9998feae44a3fed4474803240b7/psplash.c	2014-11-24 12:29:43.353149596 +0100
+@@ -22,9 +22,11 @@
+ #include "psplash-poky-img.h"
+ #include "psplash-bar-img.h"
+ #include "radeon-font.h"
+-
+ #define MSG ""
+ 
++int YPos = -1;
++unsigned long BarCol=0xFFFFFFFF;
++
+ void
+ psplash_exit (int signum)
+ {
+@@ -66,7 +68,11 @@
+ 
+   /* 4 pix border */
+   x      = ((fb->width  - BAR_IMG_WIDTH)/2) + 4 ;
+-  y      = fb->height - (fb->height/6) + 4;
++  if(YPos < 0)
++   y      = fb->height - (fb->height/6) + 4;
++   else
++   y = YPos + 4;
++   
+   width  = BAR_IMG_WIDTH - 8; 
+   height = BAR_IMG_HEIGHT - 8;
+ 
+@@ -76,8 +82,21 @@
+       psplash_fb_draw_rect (fb, x + barwidth, y, 
+     			width - barwidth, height,
+ 			PSPLASH_BAR_BACKGROUND_COLOR);
+-      psplash_fb_draw_rect (fb, x, y, barwidth,
++			
++      if(BarCol == 0xFFFFFFFF)			
++       psplash_fb_draw_rect (fb, x, y, barwidth,
+ 			    height, PSPLASH_BAR_COLOR);
++       else {
++            uint8 r,g,b;
++            
++            b = BarCol & 0x000000FF;
++            g = (BarCol >> 8) & 0x000000FF;
++            r = (BarCol >> 16) & 0x000000FF;
++       psplash_fb_draw_rect (fb, x, y, barwidth,
++			    height, r, g, b);
++            
++            
++       }
+     }
+   else
+     {
+@@ -200,11 +219,16 @@
+ int 
+ main (int argc, char** argv) 
+ {
++  char 	FileName[250];
++  
+   char      *tmpdir;
+   int        pipe_fd, i = 0, angle = 0, ret = 0;
+   PSplashFB *fb;
+   bool       disable_console_switch = FALSE;
+   
++  
++  memset(FileName, 0, sizeof(FileName));
++  
+   signal(SIGHUP, psplash_exit);
+   signal(SIGINT, psplash_exit);
+   signal(SIGQUIT, psplash_exit);
+@@ -223,10 +247,33 @@
+ 	  angle = atoi(argv[i]);
+ 	  continue;
+ 	}
++      if (!strcmp(argv[i],"-y") || !strcmp(argv[i],"--YPos"))
++        {
++	  if (++i >= argc) goto fail;
++	  YPos = atoi(argv[i]);
++	  continue;
++	}
++
++      if (!strcmp(argv[i],"--BarCol"))
++        {
++	  if (++i >= argc) goto fail;
++	  sscanf(argv[i],"%X", &BarCol);
++	  continue;
++	}
++      
++      if (!strcmp(argv[i],"-f") || !strcmp(argv[i],"--filename"))
++        {
++	  if (++i >= argc) goto fail;
++	  sprintf(FileName, argv[i]);
++	  angle = atoi(argv[i]);
++	  continue;
++	}
+       
+     fail:
+       fprintf(stderr, 
+-	      "Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>]\n", 
++	      "Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>] [-f|--filename] [-y|--YPos]\n"
++	      "\t\t [--BarCol]\n"
++	      , 
+ 	      argv[0]);
+       exit(-1);
+     }
+@@ -264,22 +311,29 @@
+   }
+ 
+   /* Clear the background with #ecece1 */
+-  psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
++  if(strlen(FileName) == 0) {
++   psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
+                         PSPLASH_BACKGROUND_COLOR);
+ 
+-  /* Draw the Poky logo  */
+-  psplash_fb_draw_image (fb, 
++   /* Draw the Poky logo  */
++   psplash_fb_draw_image (fb, 
+ 			 (fb->width  - POKY_IMG_WIDTH)/2, 
+ 			 ((fb->height * 5) / 6 - POKY_IMG_HEIGHT)/2,
+ 			 POKY_IMG_WIDTH,
+ 			 POKY_IMG_HEIGHT,
+ 			 POKY_IMG_BYTES_PER_PIXEL,
+ 			 POKY_IMG_RLE_PIXEL_DATA);
++ } else {
++  char Cmd[512];
++  memset(Cmd, 0, sizeof(Cmd));
++  sprintf(Cmd,"fbv -s1 %s", FileName);
++  system(Cmd); /* Draw file with fbv command */
++ }			 
+ 
+   /* Draw progress bar border */
+   psplash_fb_draw_image (fb, 
+ 			 (fb->width  - BAR_IMG_WIDTH)/2, 
+-			 fb->height - (fb->height/6), 
++			 (YPos < 0)?fb->height - (fb->height/6):YPos, 
+ 			 BAR_IMG_WIDTH,
+ 			 BAR_IMG_HEIGHT,
+ 			 BAR_IMG_BYTES_PER_PIXEL,
+@@ -287,11 +341,10 @@
+ 
+   psplash_draw_progress (fb, 0);
+ 
+-  psplash_draw_msg (fb, MSG);
++  if(strlen(FileName) == 0) psplash_draw_msg (fb, MSG);
+ 
+   psplash_main (fb, pipe_fd, 0);
+ 
+-
+   psplash_fb_destroy (fb);
+ 
+  fb_fail:
