@@ -1,32 +1,29 @@
---- psplash-orig/psplash.c	2012-08-14 17:22:56.000000000 +0200
-+++ psplash-afd4e228c606a9998feae44a3fed4474803240b7/psplash.c	2014-11-24 12:29:43.353149596 +0100
-@@ -22,9 +22,11 @@
- #include "psplash-poky-img.h"
+--- psplash.orig/psplash.c	2014-10-31 16:24:47.000000000 +0100
++++ psplash-14c8f7b705de944beb4de3f296506d80871e410f/psplash.c	2016-03-02 11:42:21.456995767 +0100
+@@ -25,6 +25,9 @@
  #include "psplash-bar-img.h"
  #include "radeon-font.h"
--
- #define MSG ""
  
 +int YPos = -1;
 +unsigned long BarCol=0xFFFFFFFF;
 +
- void
- psplash_exit (int signum)
- {
-@@ -66,7 +68,11 @@
+ #define SPLIT_LINE_POS(fb)                                  \
+ 	(  (fb)->height                                     \
+ 	 - ((  PSPLASH_IMG_SPLIT_DENOMINATOR                \
+@@ -73,7 +76,11 @@
  
    /* 4 pix border */
    x      = ((fb->width  - BAR_IMG_WIDTH)/2) + 4 ;
--  y      = fb->height - (fb->height/6) + 4;
+-  y      = SPLIT_LINE_POS(fb) + 4;
 +  if(YPos < 0)
-+   y      = fb->height - (fb->height/6) + 4;
-+   else
-+   y = YPos + 4;
-+   
++    y      = SPLIT_LINE_POS(fb) + 4;
++  else
++    y      = YPos + 4;
++
    width  = BAR_IMG_WIDTH - 8; 
    height = BAR_IMG_HEIGHT - 8;
  
-@@ -76,8 +82,21 @@
+@@ -83,8 +90,21 @@
        psplash_fb_draw_rect (fb, x + barwidth, y, 
      			width - barwidth, height,
  			PSPLASH_BAR_BACKGROUND_COLOR);
@@ -49,7 +46,7 @@
      }
    else
      {
-@@ -200,11 +219,16 @@
+@@ -207,11 +227,16 @@
  int 
  main (int argc, char** argv) 
  {
@@ -66,7 +63,7 @@
    signal(SIGHUP, psplash_exit);
    signal(SIGINT, psplash_exit);
    signal(SIGQUIT, psplash_exit);
-@@ -223,10 +247,33 @@
+@@ -230,10 +255,33 @@
  	  angle = atoi(argv[i]);
  	  continue;
  	}
@@ -101,50 +98,47 @@
  	      argv[0]);
        exit(-1);
      }
-@@ -264,22 +311,29 @@
+@@ -271,11 +319,12 @@
    }
  
    /* Clear the background with #ecece1 */
 -  psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
 +  if(strlen(FileName) == 0) {
-+   psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
++    psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
                          PSPLASH_BACKGROUND_COLOR);
  
 -  /* Draw the Poky logo  */
 -  psplash_fb_draw_image (fb, 
-+   /* Draw the Poky logo  */
-+   psplash_fb_draw_image (fb, 
++    /* Draw the Poky logo  */
++    psplash_fb_draw_image (fb, 
  			 (fb->width  - POKY_IMG_WIDTH)/2, 
- 			 ((fb->height * 5) / 6 - POKY_IMG_HEIGHT)/2,
- 			 POKY_IMG_WIDTH,
- 			 POKY_IMG_HEIGHT,
+ #if PSPLASH_IMG_FULLSCREEN
+ 			 (fb->height - POKY_IMG_HEIGHT)/2,
+@@ -288,11 +337,17 @@
  			 POKY_IMG_BYTES_PER_PIXEL,
+ 			 POKY_IMG_ROWSTRIDE,
  			 POKY_IMG_RLE_PIXEL_DATA);
-+ } else {
-+  char Cmd[512];
-+  memset(Cmd, 0, sizeof(Cmd));
-+  sprintf(Cmd,"fbv -s1 %s", FileName);
-+  system(Cmd); /* Draw file with fbv command */
-+ }			 
++  } else {
++    char Cmd[512];
++    memset(Cmd, 0, sizeof(Cmd));
++    sprintf(Cmd,"fbv -s1 %s", FileName);
++    system(Cmd); /* Draw file with fbv command */
++  }
  
    /* Draw progress bar border */
    psplash_fb_draw_image (fb, 
  			 (fb->width  - BAR_IMG_WIDTH)/2, 
--			 fb->height - (fb->height/6), 
-+			 (YPos < 0)?fb->height - (fb->height/6):YPos, 
+-			 SPLIT_LINE_POS(fb),
++			 (YPos < 0)?SPLIT_LINE_POS(fb):YPos, 
  			 BAR_IMG_WIDTH,
  			 BAR_IMG_HEIGHT,
  			 BAR_IMG_BYTES_PER_PIXEL,
-@@ -287,11 +341,10 @@
- 
+@@ -302,7 +357,7 @@
    psplash_draw_progress (fb, 0);
  
--  psplash_draw_msg (fb, MSG);
-+  if(strlen(FileName) == 0) psplash_draw_msg (fb, MSG);
+ #ifdef PSPLASH_STARTUP_MSG
+-  psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
++  if(strlen(FileName) == 0) psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
+ #endif
  
    psplash_main (fb, pipe_fd, 0);
- 
--
-   psplash_fb_destroy (fb);
- 
-  fb_fail:
