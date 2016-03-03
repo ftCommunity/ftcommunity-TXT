@@ -1,1 +1,2 @@
-ROBOPro 1000 ROBOPro 1000 =ROBOPro /opt/knobloch /bin/sh users,tty,video
+ROBOPro 1000 ROBOPro 1000 !=ROBOPro /opt/knobloch /bin/sh users,tty,video
+ftc 1001 ftc 1001 - /home/ftc /bin/sh users,tty,video,sudo
