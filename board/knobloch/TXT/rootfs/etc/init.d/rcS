@@ -1,19 +1,30 @@
 #!/bin/sh
 
-psplash -n -f /etc/ftc-logo.bmp -y 212 --BarCol 00FF00 --BarBkCol 0000FF --BkCol 000000&
+# load ftc splash image. Use FT colors for progress bar
+psplash -n -f /etc/ftc-logo.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
+
+# count scripts to be executed
+SPLASH_MAX=0
+for i in /etc/init.d/S??* ;do
+     # Ignore dangling symlinks (if any).
+     [ ! -f "$i" ] && continue
+     SPLASH_MAX=$((SPLASH_MAX+1))
+done
+
+# calculate the step size for the progress bar
+SPLASH_STEP=$((100/SPLASH_MAX))
 
 # Start all init scripts in /etc/init.d
 # executing them in numerical order.
 #
 SPLASH=0
-
 for i in /etc/init.d/S??* ;do
 
      # Ignore dangling symlinks (if any).
      [ ! -f "$i" ] && continue
 
-     SPLASH=$((SPLASH+7))
-     psplash-write PROGRESS\ $SPLASH
+     SPLASH=$((SPLASH+SPLASH_STEP))
+     psplash-write "PROGRESS $SPLASH"
 
      case "$i" in
 	*.sh)
@@ -31,4 +42,6 @@ for i in /etc/init.d/S??* ;do
     esac
 done
 
+# make sure progress bar ends at 100%
+psplash-write "PROGRESS 100"
 psplash-write "QUIT"
