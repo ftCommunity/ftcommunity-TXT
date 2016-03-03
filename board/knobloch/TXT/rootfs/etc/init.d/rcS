@@ -45,3 +45,7 @@ done
 # make sure progress bar ends at 100%
 psplash-write "PROGRESS 100"
 psplash-write "QUIT"
+
+# lanuch ftc gui
+export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
+/opt/ftc/ftc_gui -qws -stylesheet=/opt/ftc/txt.qss &

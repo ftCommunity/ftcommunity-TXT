@@ -1,0 +1,65 @@
+/* QT theme for fischertechnik TXT
+/* http://doc.qt.io/qt-4.8/stylesheet-reference.html */
+/* http://doc.qt.io/qt-4.8/stylesheet-examples.html */
+
+/* widgets by default let the background shine through and use a big white font */
+QWidget { 
+    background-color: rgba(255, 255, 255, 80);
+    font: bold 32px; 
+    color: white;
+    outline: 0;
+    border-color: grey;
+}
+
+/* the toplevel has a gradient background look the splash screen */
+#centralwidget {
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc); 
+}
+
+/* qlabel has a transparent background and is in "TXT" orange */
+QLabel {
+    background-color: rgba(255, 255, 255, 0);
+    color: #fcce04;
+}
+
+QPushButton {
+    border-style: outset;
+    border-width: 4px;
+    border-radius: 10px;
+    min-width: 2em;
+    padding: 6px;
+}
+
+QPushButton:pressed {
+    background-color: rgba(255, 255, 255, 40);
+    border-style: inset;
+    color: lightgrey;
+}
+
+QComboBox {
+    border-style: outset;
+    border-width: 4px;
+    border-radius: 10px;
+    min-width: 2em;
+    padding: 6px;
+}
+
+QComboBox::down-arrow {
+    image: url("downicon");
+}
+
+QComboBox::drop-down {
+    border-style: none;
+    width: 30px;
+    padding: 6px;
+}
+
+QComboBox QListView {
+    background: #5c96cc; 
+    text-decoration: 0;
+    border-style: outset;
+    border-width: 4px;
+    border-radius: 10px;
+    selection-color: white;
+    selection-background-color: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:1 #0c6acc );
+}
