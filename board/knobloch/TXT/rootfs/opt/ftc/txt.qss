@@ -22,6 +22,11 @@ QLabel {
     color: #fcce04;
 }
 
+#smalllabel {
+    font: 24px;
+    color: white;
+}
+
 QPushButton {
     border-style: outset;
     border-width: 4px;
