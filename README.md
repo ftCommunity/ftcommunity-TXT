@@ -22,7 +22,7 @@ will build the entire root file system and the kernel and place the resulting fi
 
 ## Prepare SD Card
 
-You need an empty micro SD card with for the ftcommunity firmware. Create two partitions on the SD card. The first partition should be about 20-40 MB in size and must be formatted as `FAT`, the second partition can use the rest of the available space on the SD card and must be formatted as `ext4`. 
+You need an empty micro SD card for the ftcommunity firmware. Create two partitions on the SD card. The first partition should be about 20-40 MB in size and must be formatted as `FAT`, the second partition can use the rest of the available space on the SD card and must be formatted as `ext4`.
 
 The following commands will do this on a linux system where the SD card slot is named `
 /dev/mmcblk0`. *Make sure this is really the empty SD card, the following commands will destroy all data on `/dev/mmcblk0`*:
@@ -68,9 +68,17 @@ fw_setenv bootboth "run reset_wl18xx; mtdparts default; nand read 0x80200000 NAN
 
 Validate the settings by running
 ```
-fw_printenv loadsduimg loadsduimg setsdargs bootboth
+fw_printenv loadsduimg loadsddtb setsdargs bootboth
 ```
-and compare the result carefully against the settings above. 
+
+The result should be
+```
+loadsduimg=fatload mmc 0 0x80200000 uImage
+loadsddtb=fatload mmc 0 0x80F00000 am335x-kno_txt.dtb
+setsdargs=setenv bootargs fbtft_device.name=txt_ili9341 fbtft_device.fps=10 console=ttyO0,115200 root=/dev/mmcblk0p2 rw rootwait quiet
+bootboth=run reset_wl18xx; mtdparts default; nand read 0x80200000 NAND.uImage; nand read 0x80F00000 NAND.dtb; setenv bootargs fbtft_device.name=txt_ili9341 fbtft_device.fps=10 console=ttyO0,115200 ubi.mtd=10 root=ubi0:rootfs rootfstype=ubifs rootwait quiet; run loadsduimg loadsddtb setsdargs; fdt addr 0x80F00000; run opp; bootm 0x80200000 - 0x80F00000
+```
+
 
 If all settings are correct, activate them by running
 
@@ -78,13 +86,13 @@ If all settings are correct, activate them by running
 fw_setenv bootcmd "run bootboth"
 ```
 
-Note: Do **not** run this last command if any of the configuration settings are not OK. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.
+Note: Compare the settings carefully and do **not** run this last command if any of the configuration settings are not OK. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.
 
 ## Run the ftcommunity firmware
 
 Switch off the TXT, insert the SD card with the ftcommunity firmware in the SD card slot and restart the TXT. If you see the note "community edition" on the bootup splash screen, the ftcommunity firmware is running.
 
-The ftcommunity firmware enables ssh login via USB by default, network settings for USB are the same as with the original firmware: The TXT will has address 192.168.7.2, the host computer has address 192.168.7.1. On most systems, the host computer address should be set up automatically when you connect the USB cable.
+The ftcommunity firmware enables ssh login via USB by default, network settings for USB are the same as with the original firmware: The TXT has address 192.168.7.2, the host computer has address 192.168.7.1. On most systems, the host computer address should be set up automatically when you connect the USB cable.
 
 You can log in to the TXT either via [serial console](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) or using ssh. 
 
