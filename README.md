@@ -68,7 +68,7 @@ fw_setenv bootboth "run reset_wl18xx; mtdparts default; nand read 0x80200000 NAN
 
 Validate the settings by running
 ```
-fw_printenv loadsduimg loadsduimg setsdargs bootboth
+fw_printenv loadsduimg loadsddtb setsdargs bootboth
 ```
 and compare the result carefully against the settings above. 
 
