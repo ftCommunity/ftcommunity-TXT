@@ -3,19 +3,23 @@
 /* http://doc.qt.io/qt-4.8/stylesheet-examples.html */
 
 /* widgets by default let the background shine through and use a big white font */
-QWidget { 
+* { 
     background-color: rgba(255, 255, 255, 80);
-    font: bold 32px; 
+    font: bold 32px "sans-serif"; 
     color: white;
     outline: 0;
     border: 0;
     padding: 0;
     border-width: 0;
     border-color: grey;
+    margin: 0;
+    min-height: 0;
+    spacing: 0;
 }
 
 #titlebar {
-     background-color: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
+	  background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
+	  padding: 10;
 }
 
 /* the toplevel has a gradient background look the splash screen */
@@ -77,7 +81,7 @@ QComboBox {
 }
 
 QComboBox::down-arrow {
-    image: url("downicon");
+    image: url("downicon.png");
 }
 
 QComboBox::drop-down {

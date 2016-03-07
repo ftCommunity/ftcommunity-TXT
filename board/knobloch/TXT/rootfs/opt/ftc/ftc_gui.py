@@ -9,19 +9,11 @@ from PyQt4.QtGui import *
 base = os.path.dirname(os.path.realpath(__file__))
 
 # The TXTs window title bar
-class TxtTitle(QWidget):
+class TxtTitle(QLabel):
     def __init__(self,str):
-        QWidget.__init__(self)
+        QLabel.__init__(self,str)
         self.setObjectName("titlebar")
-        self.hbox = QHBoxLayout()
-
-        self.lbl = QLabel(str)
-        self.lbl.setAlignment(Qt.AlignCenter)
-        self.lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.hbox.addWidget(self.lbl)
-
-        self.setLayout(self.hbox)
-        self.setVisible(True)
+        self.setAlignment(Qt.AlignCenter)
 
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
@@ -77,7 +69,7 @@ class FtcGuiApplication(QApplication):
         # search for apps
         iconnr = 0
         for name in os.listdir(base + "/apps"):
-            iconname = base + "/apps/" + name + "/icon.svg"
+            iconname = base + "/apps/" + name + "/icon.png"
             if os.path.isfile(iconname):
                 pix = QPixmap(iconname)
                 icn = QIcon(pix)

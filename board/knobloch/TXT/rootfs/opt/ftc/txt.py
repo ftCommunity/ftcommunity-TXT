@@ -2,33 +2,23 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 # The TXTs window title bar
-class TxtTitle(QWidget):
+class TxtTitle(QLabel):
     def __init__(self,base,str):
-        QWidget.__init__(self)
+        QLabel.__init__(self,str)
         self.setObjectName("titlebar")
-        self.hbox = QHBoxLayout()
-
-        self.lbl = QLabel(str)
-        self.lbl.setAlignment(Qt.AlignCenter)
-        self.lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.hbox.addWidget(self.lbl)
-
-        self.close = QPushButton()
+        self.setAlignment(Qt.AlignCenter)
+#        self.setText(self.font().family())
+        self.close = QPushButton(self)
         pix = QPixmap(base + "closeicon.png")
         icn = QIcon(pix)
-        but = QPushButton()
         self.close.setIcon(icn)
         self.close.setIconSize(pix.size())
         self.close.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.close.setObjectName("iconbut")
         self.close.clicked.connect(exit)
-        self.hbox.addWidget(self.close)
+        self.close.move(200,8)
 
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-
-        self.setLayout(self.hbox)
-
-        self.setVisible(True)
 
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
@@ -50,6 +40,9 @@ class TxtWindow(QWidget):
 
     def addWidget(self,w):
         self.layout.addWidget(w)
+
+    def addStretch(self):
+        self.layout.addStretch()
 
         # TXT windows are always fullscreen
     def show(self):

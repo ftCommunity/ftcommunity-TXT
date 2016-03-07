@@ -15,7 +15,7 @@
    viewBox="0 0 64.000031 64.000033"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="icon.svg"
    inkscape:export-filename="/home/harbaum/projekte/private_stuff/txt/apps/clock/icon.png"
    inkscape:export-xdpi="90"
@@ -62,9 +62,9 @@
      showgrid="true"
      units="px"
      inkscape:window-width="1280"
-     inkscape:window-height="1004"
-     inkscape:window-x="-2"
-     inkscape:window-y="-3"
+     inkscape:window-height="965"
+     inkscape:window-x="1280"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -104,20 +104,19 @@
        cy="1036.4242"
        rx="15.34031"
        ry="15.376954"
-       d="m 31.239423,1036.4242 c 0,8.4925 -6.868091,15.3769 -15.34031,15.3769 -8.4722196,0 -15.3403104,-6.8844 -15.3403104,-15.3769 0,-8.4925 6.8680908,-15.377 15.3403104,-15.377 8.472219,0 15.34031,6.8845 15.34031,15.377 z"
        sodipodi:cx="15.899113"
        sodipodi:cy="1036.4242"
        sodipodi:rx="15.34031"
        sodipodi:ry="15.376954"
        transform="matrix(2.045135,0,0,2.0402613,-0.51583089,-1094.2161)" />
     <path
-       style="fill:none;stroke:#f4f4f4;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="m 32.097986,993.71019 c 0,24.48301 0,24.48301 0,24.48301"
+       style="fill:none;stroke:#f4f4f4;stroke-width:5.9000001;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 32.097986,995.49614 c 0,24.48186 0,24.48186 0,24.48186"
        id="path3341"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#f4f4f4;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="m 32.097986,1018.1932 c 16.361079,0 16.361079,0 16.361079,0"
+       style="fill:none;stroke:#f4f4f4;stroke-width:5.9000001;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 32.097986,1019.978 c 16.361079,0 16.361079,0 16.361079,0"
        id="path3343"
        inkscape:connector-curvature="0" />
   </g>
