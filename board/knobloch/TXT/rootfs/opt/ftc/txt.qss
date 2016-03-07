@@ -8,18 +8,49 @@ QWidget {
     font: bold 32px; 
     color: white;
     outline: 0;
+    border: 0;
+    padding: 0;
+    border-width: 0;
     border-color: grey;
+}
+
+#titlebar {
+     background-color: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
 }
 
 /* the toplevel has a gradient background look the splash screen */
 #centralwidget {
-    background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc); 
+     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
 }
 
 /* qlabel has a transparent background and is in "TXT" orange */
 QLabel {
-    background-color: rgba(255, 255, 255, 0);
+    background-color: rgba(0, 0, 0, 0);
     color: #fcce04;
+}
+
+/* having transparent aspects in qlineedit makes the line flash on input :-( */
+QLineEdit {
+    background-color: #8EB6DC;
+}
+
+#noicon {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#iconbut {
+    border-style: none;  
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#iconbut:pressed {
+    background-color: rgba(0, 0, 0, 64);
+}
+
+#icongrid {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0;
+    border-style: inset;
 }
 
 #smalllabel {
@@ -31,8 +62,6 @@ QPushButton {
     border-style: outset;
     border-width: 4px;
     border-radius: 10px;
-    min-width: 2em;
-    padding: 6px;
 }
 
 QPushButton:pressed {
@@ -45,8 +74,6 @@ QComboBox {
     border-style: outset;
     border-width: 4px;
     border-radius: 10px;
-    min-width: 2em;
-    padding: 6px;
 }
 
 QComboBox::down-arrow {
