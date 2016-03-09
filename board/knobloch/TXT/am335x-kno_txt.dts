@@ -36,8 +36,8 @@
 
 	kim {
 		compatible = "kim";
-		nshutdown-gpios = <&gpio3 1 GPIO_ACTIVE_HIGH>;
-		serial-device = <&uart3>;
+		nshutdown_gpio = <97>;  /* Bank3, pin1 */
+		dev_name = "/dev/ttyO3";
 		flow_cntrl = <1>;
 		baud_rate = <3000000>;
 	};
