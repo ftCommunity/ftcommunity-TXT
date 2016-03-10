@@ -55,7 +55,7 @@
 		switch@1 {
 			label = "txt-pwr";
 			gpio-key,wakeup = <1>;
-			linux,code = <59>; /* F1 */
+			linux,code = <116>; /* POWER */
 			gpios = <&gpio1 16 GPIO_ACTIVE_LOW>;
 		};
 
