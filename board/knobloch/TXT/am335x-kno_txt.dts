@@ -61,13 +61,9 @@
 
 	};
 
-	leds {
-		compatible = "gpio-leds";
-		led@1 {
-			label = "off-uc";
-			gpios = <&gpio1 17 0>;
-			default-state = "off";
-		};
+	gpio-poweroff {
+		compatible = "gpio-poweroff";
+		gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
 	};
 
 	ocp {
