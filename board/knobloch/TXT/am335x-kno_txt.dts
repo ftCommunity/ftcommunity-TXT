@@ -51,6 +51,7 @@
 		compatible = "gpio-keys";
 		#address-cells = <1>;
 		#size-cells = <0>;
+		autorepeat;
 
 		switch@1 {
 			label = "txt-pwr";
