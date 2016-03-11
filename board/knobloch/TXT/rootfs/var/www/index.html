@@ -3,39 +3,32 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Fischertechnik TXT community firmware</title>
-    <style type="text/css" media="screen">
-      body, html {
-        padding: 3px 3px 3px 3px;
-        background-color: #649acc;
-        font-family: Arial, sans-serif;
-        font-size: 14pt;
-        color: white;
-      }
-      h1, h2 {
-        text-align: center; 
-      }
-      .outline {
-        color: black;
-        font-weight: bold;
-        text-shadow:
-           2px  0px 0 white,
-          -2px  0px 0 white,
-           0px  2px 0 white,
-           0px -2px 0 white,  
-          -2px -2px 0 white,
-           2px -2px 0 white,
-          -2px  2px 0 white,
-           2px  2px 0 white;  
-      }
-      a {
-        color: white;
-      }
-    </style>
+    <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>fischertechnik TXT community firmware</title>
+    <link rel="stylesheet" href="txt.css">
   </head>
+  
   <body>
     <h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>
-    <h2><a href="https://github.com/ftCommunity/ftcommunity-TXT">community edition</a></h2>
+    <center><a href="https://github.com/ftCommunity/ftcommunity-TXT">community edition</a></center>
+    
+    <center><div>
+	<hr/>
+
+	<h2>Installed apps</h2>
+	<!--#exec cmd="python /var/www/applist.py" -->
+
+	<hr/>
+	<h2>App upload</h2>
+	<form action="upload.py" method="post" enctype="multipart/form-data">
+	  <p>Choose a zip file containing a TXT app to upload:</p>
+	  <input name="appfile" type="file" size="30" accept="application/zip"/>
+	  <button type="submit">Upload</button>
+	</form>
+	
+    </div></center>
+    
   </body>
 </html>
 

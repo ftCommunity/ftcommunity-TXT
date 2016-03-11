@@ -38,6 +38,11 @@ QLineEdit {
     background-color: #8EB6DC;
 }
 
+#iconlabel {
+    color: white;
+    font-size: 12px; 
+}
+
 #noicon {
     background-color: rgba(0, 0, 0, 0);
 }
