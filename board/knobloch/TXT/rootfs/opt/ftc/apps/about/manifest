@@ -1,0 +1,7 @@
+[app]
+name: About
+cathegory: System
+icon: icon.png
+desc: About the community firmware
+exec: about.py
+managed: yes

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-# http://apps.javispedro.com/nit/hicg/
+
+import ConfigParser
 import sys, os
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -38,7 +39,12 @@ class TxtTopWidget(QWidget):
 
         # TXT windows are always fullscreen
     def show(self):
-        QWidget.showFullScreen(self)
+        # if the FTC_GUI_MANAGED enviroment variable is set we
+        # don't go fullscreen. Useful for testing in a PC
+        if os.environ.has_key('FTC_GUI_MANAGED'):
+            QWidget.show(self)
+        else:
+            QWidget.showFullScreen(self)
 
 class FtcGuiApplication(QApplication):
     def __init__(self, args):
@@ -52,10 +58,9 @@ class FtcGuiApplication(QApplication):
         self.exec_()        
 
     def launch(self,clicked):
-        appname = self.sender().property("appname").toString()
-        print "Lauch " + appname
-        app = str(base + "/apps/" + appname + "/" + appname + ".py &")
-        os.system(app)
+        executable = self.sender().property("executable").toString()
+        print "Lauch " + executable
+        os.system(str(executable + " &"))
         
     def addWidgets(self):
         self.w = TxtTopWidget("TXT")
@@ -68,9 +73,25 @@ class FtcGuiApplication(QApplication):
 
         # search for apps
         iconnr = 0
-        for name in os.listdir(base + "/apps"):
-            iconname = base + "/apps/" + name + "/icon.png"
-            if os.path.isfile(iconname):
+        for app_dir in os.listdir(base + "/apps"):
+            manifestfile = base + "/apps/" + app_dir + "/manifest"
+            if os.path.isfile(manifestfile):
+                manifest = ConfigParser.RawConfigParser()
+                manifest.read(manifestfile)
+
+                # get various fields from manifest
+                appname = manifest.get('app', 'name')
+                executable = base + "/apps/" + app_dir + "/" + manifest.get('app', 'exec')
+                iconname = base + "/apps/" + app_dir + "/" + manifest.get('app', 'icon')
+
+                # the icon consists of the icon and the text below in a vbox
+                vboxw = QWidget()
+                vboxw.setObjectName("icongrid")
+                vbox = QVBoxLayout()
+                vbox.setSpacing(0)
+                vbox.setContentsMargins(0,0,0,0)
+                vboxw.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
                 pix = QPixmap(iconname)
                 icn = QIcon(pix)
                 but = QPushButton()
@@ -78,10 +99,21 @@ class FtcGuiApplication(QApplication):
                 but.setIconSize(pix.size())
                 but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 but.clicked.connect(self.launch)
-                but.setProperty("appname", name)
+
+                # set properties from manifest settings
+                but.setProperty("executable", executable)
                 but.setObjectName("iconbut")
                 but.setFixedSize(QSize(72,72))
-                self.grid.addWidget(but,iconnr/3,iconnr%3)
+                vbox.addWidget(but)
+
+                lbl = QLabel(appname)
+                lbl.setObjectName("iconlabel")
+                lbl.setAlignment(Qt.AlignCenter)
+                lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                vbox.addWidget(lbl)
+
+                vboxw.setLayout(vbox)
+                self.grid.addWidget(vboxw,iconnr/3,iconnr%3)
                 iconnr = iconnr + 1
 
         # fill rest of grid with empty widgets
@@ -89,6 +121,7 @@ class FtcGuiApplication(QApplication):
             empty = QWidget()
             empty.setObjectName("noicon")
             empty.setFixedSize(QSize(72,72))
+            empty.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self.grid.addWidget(empty,iconnr/3,iconnr%3)
             iconnr = iconnr + 1
 
