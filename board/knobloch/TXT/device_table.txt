@@ -1,0 +1,11 @@
+# See package/makedevs/README for details
+#
+# This device table is used to assign proper ownership and permissions
+# on various files.
+#
+# It gives the whole www tree to the www-data user.
+#
+# <name>                                <type>  <mode>  <uid>   <gid>   <major> <minor> <start> <inc>   <count>
+/var/www                                r       755     33      33      -       -       -       -       -
+/opt/ftc                                r       755     1001    1001    -       -       -       -       -
+/opt/ftc/apps                           d       755     33      33      -       -       -       -       -
