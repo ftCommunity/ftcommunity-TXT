@@ -1,0 +1,7 @@
+[app]
+name: Test 3
+cathegory: Tests
+icon: icon.png
+desc: A simple test app
+exec: test.py
+managed: yes
