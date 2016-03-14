@@ -1,6 +1,7 @@
 auto lo
 auto usb0
 auto wlan0
+auto eth0
 
 iface lo inet loopback
 
@@ -14,3 +15,5 @@ iface usb0 inet static
 iface wlan0 inet dhcp
       pre-up wpa_supplicant -B -Dnl80211 -iwlan0 -c/etc/wpa_supplicant.conf
       post-down killall -q wpa_supplicant
+
+iface eth0 inet dhcp
