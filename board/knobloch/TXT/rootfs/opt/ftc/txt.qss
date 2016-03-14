@@ -27,9 +27,14 @@
      background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
 }
 
+QTabBar {
+    color: #fcce04;
+    font: bold 28px; 
+}
+
 /* qlabel has a transparent background and is in "TXT" orange */
 QLabel {
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0); 
     color: #fcce04;
 }
 

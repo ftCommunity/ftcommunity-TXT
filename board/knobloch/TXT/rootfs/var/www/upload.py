@@ -7,6 +7,7 @@ import getpass
 import cgi
 import zipfile
 import sys, os
+import socket
 
 print "Content-Type: text/html"
 print ""
@@ -102,7 +103,22 @@ if ok:
         
         print "Making executable: " + executable + "<br/>"
         os.chmod(executable, 0744)
-    
+
+    # finally send gui a request to refresh its icons
+
+    # Create a socket (SOCK_STREAM means a TCP socket)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        print "Requesting rescan ...</br>"
+        # Connect to server and send data
+        sock.connect(("localhost", 9000))
+        sock.sendall("rescan\n")
+    except socket.error, msg:
+        print "Unable to connect to Launcher: ", msg
+
+    finally:
+        sock.close()
+
 else:
     print "<h1>Error: " + zip_name + "</h1>"
 

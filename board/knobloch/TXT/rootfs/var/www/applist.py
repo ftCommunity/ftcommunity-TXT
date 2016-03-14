@@ -9,11 +9,11 @@ base = "/opt/ftc"
 
 print '<table cellspacing="20">'
 
-cols = 4   # 3 is same as on TXT itself
+cols = 5   # 3 is same as on TXT itself
 count = 0
 
 # find all manifest files in the apps directory
-for name in os.listdir(base + "/apps"):
+for name in sorted(os.listdir(base + "/apps")):
     manifestfile = base + "/apps/" + name + "/manifest"
     if os.path.isfile(manifestfile):
         manifest = ConfigParser.RawConfigParser()
@@ -29,8 +29,11 @@ for name in os.listdir(base + "/apps"):
             
         print '<td align="center">'
         print '<div title="' + description + '">'
+        appname_enc = appname.replace(' ','%20')
+        print '<a href="launch.py?app=' + appname_enc + '">'
         print '<img src="' + iconname + '"><br>'
-        print appname + '</div></td>'
+
+        print appname + '</a></div></td>'
 
         count += 1
         if count == cols:
