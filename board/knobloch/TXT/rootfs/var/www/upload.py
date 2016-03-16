@@ -15,8 +15,9 @@ print '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://ww
 print '<html xmlns="http://www.w3.org/1999/xhtml">'
 print '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
 print '<title>fischertechnik TXT community firmware</title>'
-print '<link rel="stylesheet" href="txt.css"></head>'
-print "<body>"
+print '<link rel="stylesheet" href="txt.css" />'
+print '<link rel="icon" href="/favicon.ico" type="image/x-icon" />'
+print '</head><body>'
 print '<h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>'
  
 upload_dir = "/tmp"
@@ -105,8 +106,6 @@ if ok:
         os.chmod(executable, 0744)
 
     # finally send gui a request to refresh its icons
-
-    # Create a socket (SOCK_STREAM means a TCP socket)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         print "Requesting rescan ...</br>"

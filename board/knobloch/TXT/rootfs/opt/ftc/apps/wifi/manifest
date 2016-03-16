@@ -1,0 +1,7 @@
+[app]
+name: WiFi
+cathegory: System
+icon: icon.png
+desc: Wireless LAN configuration
+exec: wifi.py
+managed: yes

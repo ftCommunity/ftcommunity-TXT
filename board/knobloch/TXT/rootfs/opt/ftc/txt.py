@@ -18,6 +18,7 @@ class TxtTitle(QLabel):
         self.close.move(200,8)
 
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        QIcon.setThemeSearchPaths("/opt/ftc")
 
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen

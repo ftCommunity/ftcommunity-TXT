@@ -32,6 +32,12 @@ QTabBar {
     font: bold 28px; 
 }
 
+QTabBar::tab:selected, QTabBar::tab:hover {
+    color: white;
+}
+
+QTabWidget::tab-bar { alignment: center; }
+
 /* qlabel has a transparent background and is in "TXT" orange */
 QLabel {
     background-color: rgba(0, 0, 0, 0); 
@@ -72,6 +78,10 @@ QLineEdit {
     color: white;
 }
 
+QPushButton:!enabled {
+    color: lightgrey;
+}
+
 QPushButton {
     border-style: outset;
     border-width: 4px;
@@ -91,7 +101,7 @@ QComboBox {
 }
 
 QComboBox::down-arrow {
-    image: url("downicon.png");
+    image: url("/opt/ftc/downicon.png");
 }
 
 QComboBox::drop-down {
