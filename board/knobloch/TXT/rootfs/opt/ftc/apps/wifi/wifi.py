@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 #
 
-# TODO: 
-# save config when connection is successful
-# start dhcp client when connection is successful
-
 # assume wpa has been started e.g. by
 # sudo wpa_supplicant -B -Dwext -i wlan0 -C/var/run/wpa_supplicant
 
@@ -117,9 +113,23 @@ def connect_to_network(_iface, _ssid, _type, _pass=None):
 def save_config(_iface):
     run_program("wpa_cli -i %s save_config" % _iface)
 
+def check4dhcp(_iface):
+    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+    for pid in pids:
+        try:
+            cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read().split('\0')
+#            print "cmds", len(cmds), cmds
+            if cmds[0] == "udhcpc" and _iface in cmds:
+                print "PID", pid, "is the dhcp for", _iface
+                return True
+
+        except IOError: # proc has already terminated
+            continue
+    return False
+
 def run_dhcp(_iface):
-    # TODO: check if there's already a udhcpc running for wlan0
-    run_program("udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
+    if not check4dhcp(_iface):
+        run_program("udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
 
 def _disconnect_all(_iface):
     """
@@ -273,13 +283,6 @@ class FtcGuiApplication(QApplication):
         networks = []
         networks_dup = get_networks(IFACE)
         if networks_dup:
-#            for network in networks_dup:
-#                print " SSID:\t%s" % network['ssid']
-#                print " Sig:\t%s" % network['sig']
-#                print " BSSID:\t%s" % network['bssid']
-#                print " Flags:\t%s" % network['flag']
-#                print " Freq:\t%s\n" % network['freq']
-
             # remove duplicate ssids
             networks = []
             if len(networks_dup) > 1:
@@ -363,7 +366,8 @@ class FtcGuiApplication(QApplication):
         key = dialog.exec_()
         # enable connect button if key was entered
         if key != "":
-            self.connect.setDisabled(False)
+            # but only if the current network isn't already connected
+            self.connect.setDisabled(connected_ssid == self.ssids_w.currentText())
             self.key.setText(key)
         else:
             self.connect.setDisabled(True)
