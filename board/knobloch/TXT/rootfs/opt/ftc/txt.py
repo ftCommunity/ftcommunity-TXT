@@ -3,11 +3,10 @@ from PyQt4.QtGui import *
 
 # The TXTs window title bar
 class TxtTitle(QLabel):
-    def __init__(self,base,str):
+    def __init__(self,parent,base,str):
         QLabel.__init__(self,str)
         self.setObjectName("titlebar")
         self.setAlignment(Qt.AlignCenter)
-#        self.setText(self.font().family())
         self.close = QPushButton(self)
         pix = QPixmap(base + "closeicon.png")
         icn = QIcon(pix)
@@ -15,10 +14,11 @@ class TxtTitle(QLabel):
         self.close.setIconSize(pix.size())
         self.close.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.close.setObjectName("iconbut")
-        self.close.clicked.connect(exit)
+        self.close.clicked.connect(parent.close)
         self.close.move(200,8)
 
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        QIcon.setThemeSearchPaths("/opt/ftc")
 
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
@@ -33,7 +33,7 @@ class TxtWindow(QWidget):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(base,str))
+        self.layout.addWidget(TxtTitle(self,base,str))
         self.layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(self.layout)        

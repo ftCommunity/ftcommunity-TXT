@@ -1,10 +1,17 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# This is the fischertechnik community app launcher
+
 import ConfigParser
-import sys, os
+import sys, os, subprocess, threading
+import SocketServer
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from PyQt4.QtNetwork import *
+
+CTRL_PORT = 9000
 
 # make sure all file access happens relative to this script
 base = os.path.dirname(os.path.realpath(__file__))
@@ -54,35 +61,85 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
+        # create TCP server so other programs can request a icon list refresh
+        # or launch an app
+        self.tcpServer = QTcpServer(self)               
+        self.tcpServer.listen(QHostAddress("0.0.0.0"), CTRL_PORT)
+        self.connect(self.tcpServer, SIGNAL("newConnection()"), 
+                    self.addConnection)
+        self.connections = []
+
         self.addWidgets()
         self.exec_()        
 
-    def launch(self,clicked):
+    def addConnection(self):
+        clientConnection = self.tcpServer.nextPendingConnection()
+        self.connections.append(clientConnection)
+
+        self.connect(clientConnection, SIGNAL("readyRead()"), 
+                self.receiveMessage)
+        self.connect(clientConnection, SIGNAL("disconnected()"), 
+                self.removeConnection)
+        self.connect(clientConnection, SIGNAL("error()"), 
+                self.socketError)
+
+    def receiveMessage(self):
+        # check clients for data
+        for s in self.connections:
+            if s.canReadLine():
+                line = str(s.readLine()).strip()
+                cmd = line.split()[0]
+                parm = line[len(cmd):].strip()
+                if cmd == "rescan":
+                    self.rescan.emit()
+                elif cmd == "launch":
+                    self.launch.emit(parm)
+                else:
+                    print "Unknown command ", cmd
+
+    def removeConnection(self):
+        pass
+
+    def socketError(self):
+        pass
+
+    def do_launch(self,clicked):
         executable = self.sender().property("executable").toString()
-        print "Lauch " + executable
-        os.system(str(executable + " &"))
-        
-    def addWidgets(self):
-        self.w = TxtTopWidget("TXT")
+        print "Lauch " + executable 
+        subprocess.Popen(str(executable))
 
-        self.gridw = QWidget()
-        self.gridw.setObjectName("icongrid")
-        self.grid = QGridLayout()
-        self.grid.setSpacing(0)
-        self.grid.setContentsMargins(0,0,0,0)
+    rescan = pyqtSignal()
+    launch = pyqtSignal(str)
 
+    @pyqtSlot()
+    def on_rescan(self):
+        self.addIcons(self.grid)
+
+    @pyqtSlot(str)
+    def on_launch(self, name):
+        # check if there's an icon with that name
+        for i in range(0,self.grid.count()):
+            item = self.grid.itemAt(i)
+            if item:
+                if item.widget().property("appname").toString() == name:
+                    executable = item.widget().property("executable").toString()
+                    print "Lauch " + executable 
+                    subprocess.Popen(str(executable))
+
+    def addIcons(self, grid):
         # search for apps
         iconnr = 0
-        for app_dir in os.listdir(base + "/apps"):
-            manifestfile = base + "/apps/" + app_dir + "/manifest"
-            if os.path.isfile(manifestfile):
+        for app_dir in sorted(os.listdir(base + "/apps")):
+            app_path = base + "/apps/" + app_dir + "/"
+            manifestfile = app_path + "manifest"
+            if os.path.isfile(manifestfile) :
                 manifest = ConfigParser.RawConfigParser()
                 manifest.read(manifestfile)
 
                 # get various fields from manifest
                 appname = manifest.get('app', 'name')
-                executable = base + "/apps/" + app_dir + "/" + manifest.get('app', 'exec')
-                iconname = base + "/apps/" + app_dir + "/" + manifest.get('app', 'icon')
+                executable = app_path + manifest.get('app', 'exec')
+                iconname = app_path + manifest.get('app', 'icon')
 
                 # the icon consists of the icon and the text below in a vbox
                 vboxw = QWidget()
@@ -98,9 +155,10 @@ class FtcGuiApplication(QApplication):
                 but.setIcon(icn)
                 but.setIconSize(pix.size())
                 but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-                but.clicked.connect(self.launch)
+                but.clicked.connect(self.do_launch)
 
-                # set properties from manifest settings
+                # set properties from manifest settings on clickable icon to
+                # allow click event to launch the matching app
                 but.setProperty("executable", executable)
                 but.setObjectName("iconbut")
                 but.setFixedSize(QSize(72,72))
@@ -113,7 +171,18 @@ class FtcGuiApplication(QApplication):
                 vbox.addWidget(lbl)
 
                 vboxw.setLayout(vbox)
-                self.grid.addWidget(vboxw,iconnr/3,iconnr%3)
+
+                # check if there's already something and delete it
+                previtem = grid.itemAtPosition(iconnr/3,iconnr%3);
+                if previtem:
+                    previtem.widget().deleteLater()
+
+                # set properties on element stored in grid to 
+                # allow network launch to get the executable name
+                # from it
+                vboxw.setProperty("appname", appname)
+                vboxw.setProperty("executable", executable)
+                grid.addWidget(vboxw,iconnr/3,iconnr%3)
                 iconnr = iconnr + 1
 
         # fill rest of grid with empty widgets
@@ -122,8 +191,28 @@ class FtcGuiApplication(QApplication):
             empty.setObjectName("noicon")
             empty.setFixedSize(QSize(72,72))
             empty.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.grid.addWidget(empty,iconnr/3,iconnr%3)
+            # check if there's already something
+            previtem = grid.itemAtPosition(iconnr/3,iconnr%3);
+            if previtem:
+                previtem.widget().deleteLater()
+            grid.addWidget(empty,iconnr/3,iconnr%3)
             iconnr = iconnr + 1
+
+
+    def addWidgets(self):
+        # receive signals from network server
+        self.rescan.connect(self.on_rescan)
+        self.launch.connect(self.on_launch)
+
+        self.w = TxtTopWidget("TXT")
+        
+        self.gridw = QWidget()
+        self.gridw.setObjectName("icongrid")
+        self.grid = QGridLayout()
+        self.grid.setSpacing(0)
+        self.grid.setContentsMargins(0,0,0,0)
+
+        self.addIcons(self.grid)
 
         self.gridw.setLayout(self.grid)
         self.w.addWidget(self.gridw);
