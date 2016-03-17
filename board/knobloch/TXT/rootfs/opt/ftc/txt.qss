@@ -4,7 +4,7 @@
 
 /* widgets by default let the background shine through and use a big white font */
 * { 
-    background-color: rgba(255, 255, 255, 80);
+    background-color: rgba(255,255,255,40);
     font: bold 32px "sans-serif"; 
     color: white;
     outline: 0;
@@ -38,9 +38,15 @@ QTabBar::tab:selected, QTabBar::tab:hover {
 
 QTabWidget::tab-bar { alignment: center; }
 
+/*
+QTabWidget, QTabWidget::pane, QStackedWidget {
+   background: none;
+}
+*/
+
 /* qlabel has a transparent background and is in "TXT" orange */
 QLabel {
-    background-color: rgba(0, 0, 0, 0); 
+    background: none; 
     color: #fcce04;
 }
 
@@ -55,12 +61,12 @@ QLineEdit {
 }
 
 #noicon {
-    background-color: rgba(0, 0, 0, 0);
+    background: none;
 }
 
 #iconbut {
     border-style: none;  
-    background-color: rgba(0, 0, 0, 0);
+    background: none;
 }
 
 #iconbut:pressed {
@@ -68,7 +74,7 @@ QLineEdit {
 }
 
 #icongrid {
-    background-color: rgba(0, 0, 0, 0);
+    background: none;
     padding: 0;
     border-style: inset;
 }

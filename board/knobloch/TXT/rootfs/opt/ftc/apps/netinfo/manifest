@@ -1,0 +1,7 @@
+[app]
+name: NetInfo
+cathegory: System
+icon: icon.png
+desc: Network information
+exec: netinfo.py
+managed: yes
