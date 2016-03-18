@@ -25,9 +25,9 @@ BR2_TARGET_ENABLE_ROOT_LOGIN=y
 # filesystem
 BR2_PACKAGE_AM33X_CM3=y
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
-BR2_ROOTFS_USERS_TABLES="board/knobloch/TXT/user.tab"
-BR2_ROOTFS_POST_BUILD_SCRIPT="board/knobloch/TXT/post-build.sh"
-BR2_ROOTFS_DEVICE_TABLE="system/device_table.txt board/knobloch/TXT/device_table.txt"
+BR2_ROOTFS_USERS_TABLES="board/fischertechnik/TXT/user.tab"
+BR2_ROOTFS_POST_BUILD_SCRIPT="board/fischertechnik/TXT/post-build.sh"
+BR2_ROOTFS_DEVICE_TABLE="system/device_table.txt board/fischertechnik/TXT/device_table.txt"
 
 # Linux headers same as kernel, a 4.1 series
 BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_4_1=y
@@ -38,12 +38,12 @@ BR2_LINUX_KERNEL_CUSTOM_GIT=y
 BR2_LINUX_KERNEL_CUSTOM_REPO_URL="git://git.ti.com/ti-linux-kernel/ti-linux-kernel.git"
 BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="ti-linux-4.1.y"
 BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
-BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="board/knobloch/TXT/tisdk_am335x-knobloch_txt_defconfig"
+BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="board/fischertechnik/TXT/tisdk_am335x-fischertechnik_txt_defconfig"
 BR2_LINUX_KERNEL_UIMAGE_LOADADDR="0x80008000"
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
 BR2_LINUX_KERNEL_USE_CUSTOM_DTS=y
-BR2_LINUX_KERNEL_CUSTOM_DTS_PATH="board/knobloch/TXT/am335x-kno_txt.dts"
-BR2_LINUX_KERNEL_PATCH="board/knobloch/TXT/patches"
+BR2_LINUX_KERNEL_CUSTOM_DTS_PATH="board/fischertechnik/TXT/am335x-kno_txt.dts"
+BR2_LINUX_KERNEL_PATCH="board/fischertechnik/TXT/patches/linux"
 
 # packages
 BR2_PACKAGE_BUSYBOX_SHOW_OTHERS=y
