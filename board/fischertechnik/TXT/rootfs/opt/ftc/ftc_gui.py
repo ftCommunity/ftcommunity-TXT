@@ -16,6 +16,28 @@ CTRL_PORT = 9000
 # make sure all file access happens relative to this script
 base = os.path.dirname(os.path.realpath(__file__))
 
+class MessageDialog(QDialog):
+    def __init__(self,base,str):
+        QDialog.__init__(self)
+        self.setFixedSize(240, 320)
+        self.setObjectName("centralwidget")
+        self.layout = QVBoxLayout()
+
+        self.setLayout(self.layout)        
+
+        self.layout.addStretch()
+
+        lbl = QLabel(str)
+        lbl.setWordWrap(True);
+        lbl.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(lbl)
+
+        self.layout.addStretch()
+
+    def exec_(self):
+        QDialog.showFullScreen(self)
+        QDialog.exec_(self)
+
 # The TXTs window title bar
 class TxtTitle(QLabel):
     def __init__(self,str):
@@ -94,6 +116,8 @@ class FtcGuiApplication(QApplication):
                     self.rescan.emit()
                 elif cmd == "launch":
                     self.launch.emit(parm)
+                elif cmd == "msg":
+                    self.message.emit(parm)
                 else:
                     print "Unknown command ", cmd
 
@@ -110,6 +134,7 @@ class FtcGuiApplication(QApplication):
 
     rescan = pyqtSignal()
     launch = pyqtSignal(str)
+    message = pyqtSignal(str)
 
     @pyqtSlot()
     def on_rescan(self):
@@ -125,6 +150,11 @@ class FtcGuiApplication(QApplication):
                     executable = item.widget().property("executable").toString()
                     print "Lauch " + executable 
                     subprocess.Popen(str(executable))
+
+    @pyqtSlot(str)
+    def on_message(self, str):
+        print "Message:", str
+        MessageDialog(base, str).exec_()
 
     def addIcons(self, grid):
         # search for apps
@@ -203,6 +233,7 @@ class FtcGuiApplication(QApplication):
         # receive signals from network server
         self.rescan.connect(self.on_rescan)
         self.launch.connect(self.on_launch)
+        self.message.connect(self.on_message)
 
         self.w = TxtTopWidget("TXT")
         
