@@ -1,5 +1,5 @@
-auth        sufficient   /usr/lib/security/pam_rootok.so
-auth        required     /usr/lib/security/pam_unix.so shadow
-account     required     /usr/lib/security/pam_unix.so
-password    required     /usr/lib/security/pam_unix.so shadow use_authtok
-session     required     /usr/lib/security/pam_unix.so
+auth        sufficient   /lib/security/pam_rootok.so
+auth        required     /lib/security/pam_unix.so shadow
+account     required     /lib/security/pam_unix.so
+password    required     /lib/security/pam_unix.so shadow use_authtok
+session     required     /lib/security/pam_unix.so
