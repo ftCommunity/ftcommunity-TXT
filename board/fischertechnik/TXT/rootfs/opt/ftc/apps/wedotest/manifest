@@ -1,0 +1,7 @@
+[app]
+name: WeDo
+cathegory: Tests
+icon: icon.png
+desc: WeDo test application
+exec: wedotest.py
+managed: yes
