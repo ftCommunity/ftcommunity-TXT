@@ -1,0 +1,10 @@
+#!/bin/sh
+
+while [ -f /rom/run/txtcontrol-service -o -f /rom/run/txtcontrol-app ] ; do
+    if [ -f /rom/run/txtcontrol-app ] ; then
+        DISPLAY=""
+    else
+        DISPLAY="SDL_VIDEODRIVER=dummy"
+    fi
+    chroot /rom/ su ROBOPro -c "$DISPLAY /opt/knobloch/TxtControlMain /dev/ttyO2 65000"
+done
