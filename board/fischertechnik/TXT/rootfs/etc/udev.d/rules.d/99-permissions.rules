@@ -1,0 +1,7 @@
+KERNEL=="fb0",       GROUP="video", MODE="0660"
+KERNEL=="event0",    GROUP="video", MODE="0660"
+KERNEL=="event1",    GROUP="video", MODE="0660"
+KERNEL=="spidev1.0", GROUP="video", MODE="0660"
+KERNEL=="tty0",      GROUP="tty",   MODE="0660"
+KERNEL=="tty1",      GROUP="tty",   MODE="0660"
+KERNEL=="ttyO2",     GROUP="tty",   MODE="0660"
