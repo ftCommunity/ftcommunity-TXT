@@ -1,0 +1,7 @@
+[app]
+name: FT-GUI
+cathegory: System
+icon: icon.png
+desc: Start the original TXT GUI
+exec: ftgui.py
+managed: yes
