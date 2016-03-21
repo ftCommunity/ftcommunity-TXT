@@ -1,0 +1,7 @@
+[app]
+name: Idas Ampel
+cathegory: Tests
+icon: icon.png
+desc: Idas Schleichtierampel
+exec: idas_ampel.py
+managed: yes
