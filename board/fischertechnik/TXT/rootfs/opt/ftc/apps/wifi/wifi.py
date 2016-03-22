@@ -152,7 +152,7 @@ def get_associated(_iface):
     return ""
 
 class TxtDialog(QDialog):
-    def __init__(self,base,title,str):
+    def __init__(self,title,str):
         QDialog.__init__(self)
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
@@ -162,11 +162,11 @@ class TxtDialog(QDialog):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(self,base,title))
+        self.layout.addWidget(TxtTitle(self,title))
         self.layout.setContentsMargins(0,0,0,0)
 
         edit = QWidget()
-        edit.setObjectName("icongrid")
+        edit.setObjectName("empty")
         edit.hbox = QHBoxLayout()
         edit.hbox.setContentsMargins(0,0,0,0)
 
@@ -276,7 +276,7 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base,"Wifi")
+        self.w = TxtWindow("Wifi")
 
         self.w.addStretch()
 
@@ -362,7 +362,7 @@ class FtcGuiApplication(QApplication):
 
     def do_key(self):
         global key
-        dialog = TxtDialog(base,"Key",key)
+        dialog = TxtDialog("Key",key)
         key = dialog.exec_()
         # enable connect button if key was entered
         if key != "":

@@ -14,11 +14,11 @@ class FtcGuiApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
         # load stylesheet from the same place the script was loaded from
-        with open(os.path.dirname(os.path.realpath(__file__)) + "/../../txt.qss","r") as fh:
+        with open(base + "txt.qss","r") as fh:
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base, "About")
+        self.w = TxtWindow("About")
 
         self.txt = QLabel("Fischertechnik TXT firmware "
                           "community edition V0.0.\n\n"

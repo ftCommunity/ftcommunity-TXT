@@ -214,7 +214,7 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base, "Calc")
+        self.w = TxtWindow("Calc")
         self.w.addWidget(CalcWidget())
 
         self.w.show() 

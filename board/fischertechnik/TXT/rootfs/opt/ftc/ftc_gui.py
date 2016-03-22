@@ -16,6 +16,9 @@ CTRL_PORT = 9000
 # make sure all file access happens relative to this script
 base = os.path.dirname(os.path.realpath(__file__))
 
+current_cathegory = "All"
+current_page = 0
+
 class MessageDialog(QDialog):
     def __init__(self,base,str):
         QDialog.__init__(self)
@@ -39,16 +42,18 @@ class MessageDialog(QDialog):
         QDialog.exec_(self)
 
 # The TXTs window title bar
-class TxtTitle(QLabel):
-    def __init__(self,str):
-        QLabel.__init__(self,str)
+class TxtTitle(QComboBox):
+    def __init__(self,cathegories):
+        QComboBox.__init__(self)
         self.setObjectName("titlebar")
-        self.setAlignment(Qt.AlignCenter)
-
+        self.addItem("All")
+        for i in cathegories:
+            self.addItem(i)
+ 
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
 class TxtTopWidget(QWidget):
-    def __init__(self,str):
+    def __init__(self,parent,cathegories):
         QWidget.__init__(self)
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
@@ -58,7 +63,9 @@ class TxtTopWidget(QWidget):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(str))
+        self.cathegory_w = TxtTitle(cathegories)
+        self.cathegory_w.activated[str].connect(parent.set_cathegory)
+        self.layout.addWidget(self.cathegory_w)
         self.layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(self.layout)        
@@ -156,87 +163,202 @@ class FtcGuiApplication(QApplication):
         print "Message:", str
         MessageDialog(base, str).exec_()
 
-    def addIcons(self, grid):
-        # search for apps
-        iconnr = 0
-        for app_dir in sorted(os.listdir(base + "/apps")):
+    # read the manifet files of all installed apps and scan them
+    # for their cathegory. Generate a unique set of cathegories from this
+    def scan_cathegories(self):
+        # get list of all subdirectories in the application directory
+        app_dirs = sorted(os.listdir(base + "/apps"))
+
+        # extract all those that have a manifest file
+        cathegories = set()
+        for app_dir in app_dirs:
             app_path = base + "/apps/" + app_dir + "/"
             manifestfile = app_path + "manifest"
-            if os.path.isfile(manifestfile) :
+            if os.path.isfile(manifestfile):
                 manifest = ConfigParser.RawConfigParser()
                 manifest.read(manifestfile)
+                if manifest.has_option('app', 'cathegory'):
+                    cathegories.add(manifest.get('app', 'cathegory'))
+                else:
+                    print "App has no cathegory:", app_dir
 
-                # get various fields from manifest
-                appname = manifest.get('app', 'name')
-                executable = app_path + manifest.get('app', 'exec')
-                iconname = app_path + manifest.get('app', 'icon')
+        return sorted(cathegories)
 
-                # the icon consists of the icon and the text below in a vbox
-                vboxw = QWidget()
-                vboxw.setObjectName("icongrid")
-                vbox = QVBoxLayout()
-                vbox.setSpacing(0)
-                vbox.setContentsMargins(0,0,0,0)
-                vboxw.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+    # handler of the "next" button
+    def do_next(self):
+        global current_page
+        current_page += 1
+        self.addIcons(self.grid)
 
-                pix = QPixmap(iconname)
-                icn = QIcon(pix)
-                but = QPushButton()
-                but.setIcon(icn)
-                but.setIconSize(pix.size())
-                but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-                but.clicked.connect(self.do_launch)
+    # handler of the "prev" button
+    def do_prev(self):
+        global current_page
+        current_page -= 1
+        self.addIcons(self.grid)
 
-                # set properties from manifest settings on clickable icon to
-                # allow click event to launch the matching app
-                but.setProperty("executable", executable)
-                but.setObjectName("iconbut")
-                but.setFixedSize(QSize(72,72))
-                vbox.addWidget(but)
+    # create an icon with label
+    def createIcon(self, iconfile=None, on_click=None, appname=None, executable=None):
+        # the icon consists of the icon and the text below in a vbox
+        vboxw = QWidget()
+        vboxw.setObjectName("icongrid")
+        vbox = QVBoxLayout()
+        vbox.setSpacing(0)
+        vbox.setContentsMargins(0,0,0,0)
+        vboxw.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-                lbl = QLabel(appname)
-                lbl.setObjectName("iconlabel")
-                lbl.setAlignment(Qt.AlignCenter)
-                lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-                vbox.addWidget(lbl)
+        if iconfile:
+            pix = QPixmap(iconfile)
+            icn = QIcon(pix)
+            but = QPushButton()
+            but.setIcon(icn)
+            but.setIconSize(pix.size())
+            but.clicked.connect(on_click)
+            # set properties from manifest settings on clickable icon to
+            # allow click event to launch the appropriate app
+            but.setProperty("executable", executable)
+        else:
+            but = QWidget()
 
-                vboxw.setLayout(vbox)
+        but.setObjectName("iconbut")
+        but.setFixedSize(QSize(72,72))
+        but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-                # check if there's already something and delete it
-                previtem = grid.itemAtPosition(iconnr/3,iconnr%3);
-                if previtem:
-                    previtem.widget().deleteLater()
+        vbox.addWidget(but)
+
+        lbl = QLabel(appname)
+        lbl.setObjectName("iconlabel")
+        lbl.setAlignment(Qt.AlignCenter)
+        lbl.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        vbox.addWidget(lbl)
+
+        vboxw.setLayout(vbox)
+        vboxw.setProperty("appname", appname)
+        vboxw.setProperty("executable", executable)
+        
+        return vboxw
+
+    # add and icon to the grid. Remove any previous icon
+    def addIcon(self, grid, w, index):
+        previtem = grid.itemAtPosition(index/3, index%3);
+        if previtem: previtem.widget().deleteLater()
+        grid.addWidget(w,index/3, index%3)
+
+    # add all icons to the grid
+    def addIcons(self, grid):
+        global current_page
+        global current_cathegory
+
+        iconnr = 0
+
+        # get list of all directories in the application directory
+        app_dirs = sorted(os.listdir(base + "/apps"))
+
+        # extract all those that have a manifest file an check for
+        # current cathegory
+        app_list = []
+        for app_dir in app_dirs:
+            manifestfile = base + "/apps/" + app_dir + "/manifest"
+            if os.path.isfile(manifestfile):
+                if current_cathegory == "All":
+                    app_list.append(app_dir)
+                else:
+                    manifest = ConfigParser.RawConfigParser()
+                    manifest.read(manifestfile)
+                    try:
+                        if(manifest.get('app', 'cathegory') == current_cathegory):
+                            app_list.append(app_dir)
+                    except ConfigParser.NoOptionError:
+                        pass
+
+        # calculate icons to be displayed on current page
+        apps = len(app_list)
+
+        icon_1st = 0
+        icon_last = 7       # the first page can hold 8 icons
+        if current_page > 0:
+            icon_1st += 8   # first page holds 8 icons
+            icon_last += 7  # the secong page holds 7 icons
+            if current_page > 1:    # all further pages hold 7 icons
+                icon_1st += 7*(current_page-1)
+                icon_last += 7*(current_page-1)
+
+        # if the current page is the last one then one more icon fits
+        # since no "next" arrow is needed
+        if apps <= icon_last+2:
+            icon_last += 1
+
+        # if this is not the first page then there's a prev button
+        if current_page > 0:
+            # the prev button is always icon 0 on screen
+            # but = self.createSimpleIcon("prev", self.do_prev)
+            but = self.createIcon("prev", self.do_prev)
+            self.addIcon(grid, but, 0)
+
+        # scan through the list of all applications
+        for app_dir in app_list:
+            app_path = base + "/apps/" + app_dir + "/"
+            manifestfile = app_path + "manifest"
+            manifest = ConfigParser.RawConfigParser()
+            manifest.read(manifestfile)
+
+            # get various fields from manifest
+            appname = manifest.get('app', 'name')
+            executable = app_path + manifest.get('app', 'exec')
+            iconname = app_path + manifest.get('app', 'icon')
+        
+            # check if this app is on the current page
+            if (iconnr >= icon_1st and iconnr <= icon_last):
+                # print "Paint page", page, "iconnr", iconnr
+
+                # number of this icon in srceen
+                icon_on_screen = iconnr - icon_1st
+                if current_page > 0: icon_on_screen += 1
 
                 # set properties on element stored in grid to 
                 # allow network launch to get the executable name
                 # from it
-                vboxw.setProperty("appname", appname)
-                vboxw.setProperty("executable", executable)
-                grid.addWidget(vboxw,iconnr/3,iconnr%3)
-                iconnr = iconnr + 1
+                but = self.createIcon(iconname, self.do_launch, appname, executable)
+                self.addIcon(grid, but, icon_on_screen)
 
-        # fill rest of grid with empty widgets
-        while iconnr < 9:
-            empty = QWidget()
-            empty.setObjectName("noicon")
-            empty.setFixedSize(QSize(72,72))
-            empty.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            # check if there's already something
-            previtem = grid.itemAtPosition(iconnr/3,iconnr%3);
-            if previtem:
-                previtem.widget().deleteLater()
-            grid.addWidget(empty,iconnr/3,iconnr%3)
             iconnr = iconnr + 1
 
+        # is there another page? Then display the "next" icon
+        # print "iconnr after paint", iconnr, "last", icon_last
+        if iconnr > icon_last+1:
+            # print "Next PAGE"
+            but = self.createIcon("next", self.do_next)
+            # the next button is always icon 8 on screen
+            self.addIcon(grid, but, 8)
+            
+        # fill rest of grid with empty widgets
+        while iconnr < icon_last+1:
+            icon_on_screen = iconnr - icon_1st
+            if current_page > 0: icon_on_screen += 1
+
+            # print "Adding space for", icon_on_screen 
+            empty = self.createIcon()
+            self.addIcon(grid, empty, icon_on_screen)
+            iconnr = iconnr + 1
+
+    def set_cathegory(self, cath):
+        global current_cathegory
+        global current_page
+        if current_cathegory != cath:
+            current_cathegory = cath
+            current_page = 0
+            self.addIcons(self.grid)
 
     def addWidgets(self):
+        global current_page
+
         # receive signals from network server
         self.rescan.connect(self.on_rescan)
         self.launch.connect(self.on_launch)
         self.message.connect(self.on_message)
 
-        self.w = TxtTopWidget("TXT")
-        
+        self.cathegories = self.scan_cathegories()
+        self.w = TxtTopWidget(self, self.cathegories)
+
         self.gridw = QWidget()
         self.gridw.setObjectName("icongrid")
         self.grid = QGridLayout()

@@ -8,8 +8,7 @@ from PyQt4.QtGui import *
 from wedo import WeDo
 
 # import TXT style
-local = os.path.dirname(os.path.realpath(__file__)) + "/"
-base = local + "../../"
+base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
 sys.path.append(base)
 from txt import *
 from ctypes import *
@@ -24,7 +23,7 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base,"WeDo")
+        self.w = TxtWindow("WeDo")
 
         try:
             wd = WeDo()
@@ -52,7 +51,7 @@ class FtcGuiApplication(QApplication):
             self.w.addWidget(lbl)
 
             hbox_w = QWidget()
-            hbox_w.setObjectName("icongrid")
+            hbox_w.setObjectName("empty")
             hbox = QHBoxLayout()
             hbox_w.setLayout(hbox)
             

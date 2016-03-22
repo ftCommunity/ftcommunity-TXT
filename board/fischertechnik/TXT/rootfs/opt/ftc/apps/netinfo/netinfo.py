@@ -7,8 +7,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 # import TXT style
-local = os.path.dirname(os.path.realpath(__file__)) + "/"
-base = local + "../../"
+base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
 sys.path.append(base)
 from txt import *
 from ctypes import *
@@ -55,7 +54,7 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base,"NetInfo")
+        self.w = TxtWindow("NetInfo")
 
         ifs = all_interfaces()
 

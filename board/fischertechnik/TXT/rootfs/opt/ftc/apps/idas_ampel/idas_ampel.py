@@ -8,8 +8,7 @@ from PyQt4.QtGui import *
 import ftrobopy
 
 # import TXT style
-local = os.path.dirname(os.path.realpath(__file__)) + "/"
-base = local + "../../"
+base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
 sys.path.append(base)
 from txt import *
 
@@ -34,12 +33,12 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base,"Ampel")
+        self.w = TxtWindow("Ampel")
 
         self.w.addStretch()
 
-        but = QPushButton("Blink!")
-        but.clicked.connect(self.button_pressed)
+        but = QCheckBox("Blink!")
+        but.stateChanged.connect(self.button_pressed)
         self.w.addWidget(but)
 
         self.w.addStretch()
@@ -62,7 +61,7 @@ class FtcGuiApplication(QApplication):
               (txt.C_SWITCH, txt.C_DIGITAL ) ]
         txt.setConfig(M, I)
         txt.updateConfig()
-        
+
         self.w.show() 
         self.exec_()        
 

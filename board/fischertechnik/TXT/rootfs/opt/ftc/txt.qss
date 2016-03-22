@@ -18,13 +18,13 @@
 }
 
 #titlebar {
-	  background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
-	  padding: 10;
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
+    padding: 10;
 }
 
 /* the toplevel has a gradient background look the splash screen */
 #centralwidget {
-     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
 }
 
 QTabBar {
@@ -55,12 +55,16 @@ QLineEdit {
     background-color: #8EB6DC;
 }
 
-#iconlabel {
-    color: white;
-    font-size: 12px; 
+QPushButton#closebut {
+    image: url(/opt/ftc/txt_style_images/closeicon.png);
+    border-style: none; 
+    background: none;
+    width: 32px;
+    height: 40px;
 }
 
-#noicon {
+#iconbut {
+    border-style: none;  
     background: none;
 }
 
@@ -71,6 +75,10 @@ QLineEdit {
 
 #iconbut:pressed {
     background-color: rgba(0, 0, 0, 64);
+}
+
+#empty {
+    background: none;
 }
 
 #icongrid {
@@ -107,7 +115,7 @@ QComboBox {
 }
 
 QComboBox::down-arrow {
-    image: url("/opt/ftc/downicon.png");
+    image: url("/opt/ftc/txt_style_images/downicon.png");
 }
 
 QComboBox::drop-down {
@@ -124,4 +132,22 @@ QComboBox QListView {
     border-radius: 10px;
     selection-color: white;
     selection-background-color: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:1 #0c6acc );
+}
+
+QCheckBox {
+    spacing: 16px;
+    background: none; 
+}
+
+QCheckBox::indicator {
+    width: 34px;
+    height: 34px;
+}
+
+QCheckBox::indicator:checked {
+    image: url(/opt/ftc/txt_style_images/checkbox_checked.png);
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(/opt/ftc/txt_style_images/checkbox_unchecked.png);
 }
