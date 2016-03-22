@@ -18,10 +18,10 @@ class FtcGuiApplication(QApplication):
             self.setStyleSheet(fh.read())
             fh.close()
 
-        self.w = TxtWindow(base,"Test 3")
+        self.w = TxtWindow("Test 3")
         self.dummy = QWidget()
         ## the icongrid is transparent
-        self.dummy.setObjectName("icongrid")
+        self.dummy.setObjectName("empty")
         self.w.addWidget(self.dummy)
 
         self.w.show() 

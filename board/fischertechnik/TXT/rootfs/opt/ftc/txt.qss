@@ -63,9 +63,9 @@ QPushButton#closebut {
     height: 40px;
 }
 
-#iconbut {
-    border-style: none;  
-    background: none;
+#iconlabel {
+    color: white;
+    font-size: 12px; 
 }
 
 #iconbut {

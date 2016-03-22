@@ -20,7 +20,7 @@ current_cathegory = "All"
 current_page = 0
 
 class MessageDialog(QDialog):
-    def __init__(self,base,str):
+    def __init__(self,str):
         QDialog.__init__(self)
         self.setFixedSize(240, 320)
         self.setObjectName("centralwidget")
@@ -161,7 +161,7 @@ class FtcGuiApplication(QApplication):
     @pyqtSlot(str)
     def on_message(self, str):
         print "Message:", str
-        MessageDialog(base, str).exec_()
+        MessageDialog(str).exec_()
 
     # read the manifet files of all installed apps and scan them
     # for their cathegory. Generate a unique set of cathegories from this
@@ -291,7 +291,7 @@ class FtcGuiApplication(QApplication):
         if current_page > 0:
             # the prev button is always icon 0 on screen
             # but = self.createSimpleIcon("prev", self.do_prev)
-            but = self.createIcon("prev", self.do_prev)
+            but = self.createIcon(base + "/prev.png", self.do_prev)
             self.addIcon(grid, but, 0)
 
         # scan through the list of all applications
@@ -326,7 +326,7 @@ class FtcGuiApplication(QApplication):
         # print "iconnr after paint", iconnr, "last", icon_last
         if iconnr > icon_last+1:
             # print "Next PAGE"
-            but = self.createIcon("next", self.do_next)
+            but = self.createIcon(base + "/next.png", self.do_next)
             # the next button is always icon 8 on screen
             self.addIcon(grid, but, 8)
             
