@@ -56,7 +56,7 @@ QLineEdit {
 }
 
 QPushButton#closebut {
-    image: url(/opt/ftc/txt_style_images/closeicon.png);
+    image: url(closeicon);
     border-style: none; 
     background: none;
     width: 32px;
@@ -115,7 +115,7 @@ QComboBox {
 }
 
 QComboBox::down-arrow {
-    image: url("/opt/ftc/txt_style_images/downicon.png");
+    image: url(downicon);
 }
 
 QComboBox::drop-down {
@@ -145,9 +145,9 @@ QCheckBox::indicator {
 }
 
 QCheckBox::indicator:checked {
-    image: url(/opt/ftc/txt_style_images/checkbox_checked.png);
+    image: url(checkbox_checked);
 }
 
 QCheckBox::indicator:unchecked {
-    image: url(/opt/ftc/txt_style_images/checkbox_unchecked.png);
+    image: url(checkbox_unchecked);
 }

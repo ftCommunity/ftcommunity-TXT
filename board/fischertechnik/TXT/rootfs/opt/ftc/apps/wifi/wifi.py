@@ -6,15 +6,10 @@
 # sudo wpa_supplicant -B -Dwext -i wlan0 -C/var/run/wpa_supplicant
 
 import sys, os, shlex, time
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 from subprocess import Popen, call, PIPE
+from TxtStyle import *
 
-# import TXT style
 local = os.path.dirname(os.path.realpath(__file__)) + "/"
-base = local + "../../"
-sys.path.append(base)
-from txt import *
 
 IFACE = "wlan0"
 
@@ -151,19 +146,11 @@ def get_associated(_iface):
                 return line.split('=')[1]
     return ""
 
-class TxtDialog(QDialog):
+class KeyDialog(TxtDialog):
     def __init__(self,title,str):
-        QDialog.__init__(self)
-        # the setFixedSize is only needed for testing on a desktop pc
-        # the centralwidget name makes sure the themes background 
-        # gradient is being used
-        self.setFixedSize(240, 320)
-        self.setObjectName("centralwidget")
+        TxtDialog.__init__(self, title)
 
-        # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(self,title))
-        self.layout.setContentsMargins(0,0,0,0)
 
         edit = QWidget()
         edit.setObjectName("empty")
@@ -219,7 +206,7 @@ class TxtDialog(QDialog):
         self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
         self.layout.addWidget(self.tab)
 
-        self.setLayout(self.layout)        
+        self.centralWidget.setLayout(self.layout)        
 
     def key_erase(self):
         self.line.setText(self.line.text()[:-1]) 
@@ -243,10 +230,8 @@ class TxtDialog(QDialog):
                 if keys[i][j] != "Aa":
                     w.setText(keys[i][j]);
 
-        # TXT windows are always fullscreen
     def exec_(self):
-        QDialog.showFullScreen(self)
-        QDialog.exec_(self)
+        TxtDialog.exec_(self)
         return self.line.text()
 
 # background thread to monitor state of interface
@@ -264,21 +249,18 @@ class MonitorThread(QThread):
             self.emit( SIGNAL('update_status(QString)'), status )   
         return
     
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
         global networks
         global connected_ssid
         global key
 
-        QApplication.__init__(self, args)
-        # load stylesheet from the same place the script was loaded from
-        with open(base + "txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
-
+        TxtApplication.__init__(self, args)
         self.w = TxtWindow("Wifi")
 
-        self.w.addStretch()
+        self.vbox = QVBoxLayout()
+
+        self.vbox.addStretch()
 
         networks = []
         networks_dup = get_networks(IFACE)
@@ -304,29 +286,29 @@ class FtcGuiApplication(QApplication):
                 self.ssids_w.addItem(network['ssid'])
         self.ssids_w.activated[str].connect(self.set_default_encryption)
         self.ssids_w.setCurrentIndex(-1)
-        self.w.addWidget(self.ssids_w)
+        self.vbox.addWidget(self.ssids_w)
 
-        self.w.addStretch()
+        self.vbox.addStretch()
 
-        self.w.addWidget(QLabel("Encryption:"))
+        self.vbox.addWidget(QLabel("Encryption:"))
         self.encr_w = QComboBox()
         self.encr_w.addItems(encr)
-        self.w.addWidget(self.encr_w)
+        self.vbox.addWidget(self.encr_w)
 
-        self.w.addStretch()
+        self.vbox.addStretch()
 
-        self.w.addWidget(QLabel("Key:"))
+        self.vbox.addWidget(QLabel("Key:"))
         if key == "": self.key = QPushButton("<unset>")
         else:         self.key = QPushButton(key)
         self.key.clicked.connect(self.do_key)
-        self.w.addWidget(self.key)
+        self.vbox.addWidget(self.key)
 
         # the connect button is by default disabled until
         # the user enters a key
         self.connect = QPushButton("Connect")
         self.connect.clicked.connect(self.do_connect)
         self.connect.setDisabled(True)
-        self.w.addWidget(self.connect)
+        self.vbox.addWidget(self.connect)
 
         # check if a network is already connected
         connected_ssid = get_associated(IFACE)
@@ -340,6 +322,7 @@ class FtcGuiApplication(QApplication):
         if networks and self.ssids_w.currentText() != "":
             self.set_default_encryption(self.ssids_w.currentText())
 
+        self.w.centralWidget.setLayout(self.vbox)
         self.w.show() 
 
         # start thread to monitor wlan0 state and connect it to
@@ -362,7 +345,7 @@ class FtcGuiApplication(QApplication):
 
     def do_key(self):
         global key
-        dialog = TxtDialog("Key",key)
+        dialog = KeyDialog("Key",key)
         key = dialog.exec_()
         # enable connect button if key was entered
         if key != "":

@@ -2,13 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 import sys, os
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
-# import TXT style
-base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
-sys.path.append(base)
-from txt import *
+from TxtStyle import *
 
 class AnalogClock(QWidget):
 
@@ -125,16 +119,13 @@ class AnalogClock(QWidget):
     # in this case, getter, setter and resetter methods.
     timeZone = pyqtProperty(int, getTimeZone, setTimeZone, resetTimeZone)
 
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
-        QApplication.__init__(self, args)
-        # load stylesheet from the same place the script was loaded from
-        with open(base + "txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
+        TxtApplication.__init__(self, args)
 
+        # create the empty main window
         self.w = TxtWindow("Clock")
-        self.w.addWidget(AnalogClock())
+        self.w.setCentralWidget(AnalogClock())
         self.w.show() 
 
         self.exec_()        

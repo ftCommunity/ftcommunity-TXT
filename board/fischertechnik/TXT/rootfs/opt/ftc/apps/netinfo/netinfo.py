@@ -3,14 +3,7 @@
 #
 
 import sys, os, socket, array, struct, fcntl, string, platform
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
-# import TXT style
-base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
-sys.path.append(base)
-from txt import *
-from ctypes import *
+from TxtStyle import *
 
 SIOCGIFCONF    = 0x8912
 SIOCGIFADDR    = 0x8915
@@ -44,50 +37,49 @@ def all_interfaces():
             lst.append((name, addr, mask))
     return lst
 
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
         global ifs
 
-        QApplication.__init__(self, args)
-        # load stylesheet from the same place the script was loaded from
-        with open(base + "txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
-
+        TxtApplication.__init__(self, args)
         self.w = TxtWindow("NetInfo")
 
         ifs = all_interfaces()
+
+        self.vbox = QVBoxLayout()
 
         self.nets_w = QComboBox()
         self.nets_w.activated[str].connect(self.set_net)
         for i in ifs:
             self.nets_w.addItem(i[0])
 
-        self.w.addWidget(self.nets_w)
+        self.vbox.addWidget(self.nets_w)
 
-        self.w.addStretch()
+        self.vbox.addStretch()
 
         self.ip_lbl = QLabel("Address:")
         self.ip_lbl.setAlignment(Qt.AlignCenter)
-        self.w.addWidget(self.ip_lbl)
+        self.vbox.addWidget(self.ip_lbl)
 
         self.ip = QLabel("")
         self.ip.setObjectName("smalllabel")
         self.ip.setAlignment(Qt.AlignCenter)
-        self.w.addWidget(self.ip)
+        self.vbox.addWidget(self.ip)
    
         self.mask_lbl = QLabel("Netmask:")
         self.mask_lbl.setAlignment(Qt.AlignCenter)
-        self.w.addWidget(self.mask_lbl)
+        self.vbox.addWidget(self.mask_lbl)
 
         self.mask = QLabel("")
         self.mask.setObjectName("smalllabel")
         self.mask.setAlignment(Qt.AlignCenter)
-        self.w.addWidget(self.mask)
+        self.vbox.addWidget(self.mask)
 
         self.set_net(ifs[0][0])
    
-        self.w.addStretch()
+        self.vbox.addStretch()
+
+        self.w.centralWidget.setLayout(self.vbox)
 
         self.w.show() 
         self.exec_()        

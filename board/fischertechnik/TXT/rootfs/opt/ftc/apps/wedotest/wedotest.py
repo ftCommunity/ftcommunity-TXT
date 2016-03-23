@@ -3,27 +3,18 @@
 #
 
 import os, sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from TxtStyle import *
 from wedo import WeDo
-
-# import TXT style
-base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
-sys.path.append(base)
-from txt import *
 from ctypes import *
 
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
         global wd
-
-        QApplication.__init__(self, args)
-        # load stylesheet from the same place the script was loaded from
-        with open(base + "txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
+        TxtApplication.__init__(self, args)
 
         self.w = TxtWindow("WeDo")
+
+        self.vbox = QVBoxLayout()
 
         try:
             wd = WeDo()
@@ -32,23 +23,23 @@ class FtcGuiApplication(QApplication):
             print "Error", e
 
         if wd == None:
-            self.w.addStretch()
+            self.vbox.addStretch()
             err = QLabel("Error")
             err.setAlignment(Qt.AlignCenter)
-            self.w.addWidget(err)
+            self.vbox.addWidget(err)
             lbl = QLabel("No WeDo hub found. Please make sure one is connected to the TXTs USB host port.")
             lbl.setObjectName("smalllabel")
             lbl.setWordWrap(True)
             lbl.setAlignment(Qt.AlignCenter)
         
-            self.w.addWidget(lbl)
-            self.w.addStretch()
+            self.vbox.addWidget(lbl)
+            self.vbox.addStretch()
         else:
             # everythings fine
             lbl = QLabel("Motor")
             lbl.setObjectName("smalllabel")
             lbl.setAlignment(Qt.AlignCenter)            
-            self.w.addWidget(lbl)
+            self.vbox.addWidget(lbl)
 
             hbox_w = QWidget()
             hbox_w.setObjectName("empty")
@@ -65,8 +56,8 @@ class FtcGuiApplication(QApplication):
             but_r.released.connect(self.on_mot_off)
             hbox.addWidget(but_r)
             
-            self.w.addWidget(hbox_w)
-            self.w.addStretch()
+            self.vbox.addWidget(hbox_w)
+            self.vbox.addStretch()
 
             timer = QTimer(self)
             timer.timeout.connect(self.update_sensors)
@@ -75,22 +66,22 @@ class FtcGuiApplication(QApplication):
             lbl = QLabel("Tilt")
             lbl.setObjectName("smalllabel")
             lbl.setAlignment(Qt.AlignCenter)            
-            self.w.addWidget(lbl)
+            self.vbox.addWidget(lbl)
             self.tilt_lbl = QLabel("")
             self.tilt_lbl.setAlignment(Qt.AlignCenter)            
-            self.w.addWidget(self.tilt_lbl)
+            self.vbox.addWidget(self.tilt_lbl)
 
-            self.w.addStretch()
+            self.vbox.addStretch()
 
             lbl = QLabel("Distance")
             lbl.setObjectName("smalllabel")
             lbl.setAlignment(Qt.AlignCenter)            
-            self.w.addWidget(lbl)
+            self.vbox.addWidget(lbl)
             self.dist_lbl = QLabel("")
             self.dist_lbl.setAlignment(Qt.AlignCenter)            
-            self.w.addWidget(self.dist_lbl)
+            self.vbox.addWidget(self.dist_lbl)
             
-            
+        self.w.centralWidget.setLayout(self.vbox)
         self.w.show() 
         self.exec_()        
 

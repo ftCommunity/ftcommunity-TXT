@@ -86,9 +86,7 @@ class FtcGuiApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
         # load stylesheet from the same place the script was loaded from
-        with open(base + "/txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
+        self.setStyleSheet( "file:///" + base + "/themes/default/style.qss")
 
         # create TCP server so other programs can request a icon list refresh
         # or launch an app

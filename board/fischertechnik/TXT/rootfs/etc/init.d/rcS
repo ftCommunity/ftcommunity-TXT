@@ -47,5 +47,6 @@ psplash-write "PROGRESS 100"
 psplash-write "QUIT"
 
 # lanuch ftc gui
+export PYTHONPATH=/opt/ftc
 export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
 /opt/ftc/ftc_gui.py -qws &

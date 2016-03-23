@@ -1,14 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 # based on http://thecodeinn.blogspot.de/2013/07/tutorial-pyqt-calculator.html
-import sys, os
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 
-# import TXT style
-base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
-sys.path.append(base)
-from txt import *
+import sys, os
+from TxtStyle import *
 
 num = 0.0
 newNum = 0.0
@@ -205,20 +200,15 @@ class CalcWidget(QWidget):
         sumAll = 0.0
         operator = ""
     
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
-        QApplication.__init__(self, args)
+        TxtApplication.__init__(self, args)
 
-        # load stylesheet
-        with open(base + "txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
-
+        # create the empty main window
         self.w = TxtWindow("Calc")
-        self.w.addWidget(CalcWidget())
+        self.w.setCentralWidget(CalcWidget())
 
         self.w.show() 
-
         self.exec_()        
  
 if __name__ == "__main__":

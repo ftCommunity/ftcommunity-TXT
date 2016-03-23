@@ -3,14 +3,8 @@
 #
 
 import os, sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 import ftrobopy
-
-# import TXT style
-base = os.path.dirname(os.path.realpath(__file__)) + "/../../"
-sys.path.append(base)
-from txt import *
+from TxtStyle import *
 
 # the output ports
 PED_GRN=0
@@ -19,7 +13,7 @@ CAR_RED=2
 CAR_YLW=3
 CAR_GRN=4
 
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
         global txt
         global state
@@ -27,21 +21,21 @@ class FtcGuiApplication(QApplication):
         if txt_ip == None: txt_ip = "localhost"
         txt = ftrobopy.ftrobopy(txt_ip, 65000)
 
-        QApplication.__init__(self, args)
-        # load stylesheet from the same place the script was loaded from
-        with open(base + "txt.qss","r") as fh:
-            self.setStyleSheet(fh.read())
-            fh.close()
-
+        TxtApplication.__init__(self, args)
         self.w = TxtWindow("Ampel")
 
-        self.w.addStretch()
+        # create a vbox layout for the content area
+        vbox = QVBoxLayout()
+
+        vbox.addStretch()
 
         but = QCheckBox("Blink!")
         but.stateChanged.connect(self.button_pressed)
-        self.w.addWidget(but)
+        vbox.addWidget(but)
 
-        self.w.addStretch()
+        vbox.addStretch()
+
+        self.w.centralWidget.setLayout(vbox)
 
         # poll button at 10 Hz
         state = "idle"
