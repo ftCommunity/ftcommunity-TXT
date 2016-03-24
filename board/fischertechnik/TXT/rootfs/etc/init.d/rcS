@@ -49,4 +49,5 @@ psplash-write "QUIT"
 # lanuch ftc gui
 export PYTHONPATH=/opt/ftc
 export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
+export QWS_KEYBOARD=LinuxInput:/dev/input/event2
 /opt/ftc/ftc_gui.py -qws &
