@@ -18,7 +18,6 @@ class CalcWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        self.setObjectName("icongrid")
         self.grid = QGridLayout()
         self.grid.setSpacing(4)
         self.grid.setContentsMargins(0,0,0,0)

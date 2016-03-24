@@ -1,0 +1,7 @@
+[app]
+name: Gallery
+cathegory: Tests
+icon: icon.png
+desc: QT Widgets gallery
+exec: widgetgallery.py
+managed: yes

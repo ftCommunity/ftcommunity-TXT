@@ -42,7 +42,6 @@ class FtcGuiApplication(TxtApplication):
             self.vbox.addWidget(lbl)
 
             hbox_w = QWidget()
-            hbox_w.setObjectName("empty")
             hbox = QHBoxLayout()
             hbox_w.setLayout(hbox)
             

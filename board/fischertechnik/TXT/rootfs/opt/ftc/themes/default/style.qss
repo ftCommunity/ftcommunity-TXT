@@ -5,6 +5,7 @@
 /* widgets by default let the background shine through and use a big white font */
 * { 
     background-color: rgba(255,255,255,40);
+    selection-background-color: none;
     font: bold 32px "sans-serif"; 
     color: white;
     outline: 0;
@@ -17,32 +18,56 @@
     spacing: 0;
 }
 
+/* the qwidget itself is transparent as its often used as the basis of */
+/* grids and layouts */
+.QWidget {
+     background: none;
+}
+
+/* the window title bar repeats the gradient of the central widget */
 #titlebar {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
     padding: 10;
 }
 
-/* the toplevel has a gradient background look the splash screen */
+/* the toplevel has a gradient background look like the splash screen */
 #centralwidget {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
 }
 
 QTabBar {
-    color: #fcce04;
+    color: white;
     font: bold 28px; 
 }
 
-QTabBar::tab:selected, QTabBar::tab:hover {
-    color: white;
+/* tabs are dark ... */
+QTabBar::tab {
+    border: 2px outset lightgrey;
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding-right: 8px;
+    padding-left: 8px;
+}
+
+/* ... unless they are selected */
+QTabBar::tab:!selected {
+    color: lightgrey;
+    border-color: grey;
+    background: rgba(0,0,0,40);
+    margin-top: 2px;
 }
 
 QTabWidget::tab-bar { alignment: center; }
 
-/*
 QTabWidget, QTabWidget::pane, QStackedWidget {
-   background: none;
+/*   background: none; */
 }
-*/
+
+QTabWidget::pane {
+/*  border-top: 2px solid lightgrey;
+  top: -2px; */
+}
 
 /* qlabel has a transparent background and is in "TXT" orange */
 QLabel {
@@ -50,11 +75,26 @@ QLabel {
     color: #fcce04;
 }
 
+/* a qlabel with smaller font */
+QLabel#smalllabel {
+    font: 24px;
+    color: white;
+}
+
+/* the label underneath a launcher icon */
+/* used by launcher */
+QLabel#iconlabel {
+    color: white;
+    font-size: 12px; 
+}
+
 /* having transparent aspects in qlineedit makes the line flash on input :-( */
 QLineEdit {
     background-color: #8EB6DC;
 }
 
+/* the close button in the top right window corner */
+/* used by launcher and txt style */
 QPushButton#closebut {
     image: url(closeicon);
     border-style: none; 
@@ -63,33 +103,16 @@ QPushButton#closebut {
     height: 40px;
 }
 
-#iconlabel {
-    color: white;
-    font-size: 12px; 
-}
-
-#iconbut {
+/* a flat button has no decoration at all */
+QPushButton:flat {
     border-style: none;  
     background: none;
 }
 
-#iconbut:pressed {
+/* A flat button gets darker when being pressed */
+QPushButton:flat:pressed {
     background-color: rgba(0, 0, 0, 64);
-}
-
-#empty {
-    background: none;
-}
-
-#icongrid {
-    background: none;
-    padding: 0;
-    border-style: inset;
-}
-
-#smalllabel {
-    font: 24px;
-    color: white;
+    border-style: none;  
 }
 
 QPushButton:!enabled {
@@ -150,4 +173,105 @@ QCheckBox::indicator:checked {
 
 QCheckBox::indicator:unchecked {
     image: url(checkbox_unchecked);
+}
+
+QLCDNumber {
+    background: none; 
+}
+
+QProgressBar {
+    border: 4px solid lightgrey;
+    border-radius: 5px;
+    background: #5c96cc;
+    text-align: center;
+    border-style: inset;
+}
+
+QProgressBar::chunk {
+    background-color: #fcce04;
+}
+
+QSpinBox {
+    color: white;
+    background-color: #8EB6DC;
+    padding-right: 96px; /* make room for the arrows */
+    border: none;
+    selection-background-color: #8EB6DC;
+}
+
+QSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: right;
+    left: -32px;
+    width: 32px;
+    height: 32px;
+    border: none;
+}
+
+QSpinBox::up-arrow {
+    image: url(spinbox_up);
+}
+
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off {
+   image: url(spinbox_up_disabled);
+}
+
+QSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: right;
+
+    height: 32px;
+    width: 32px;
+    border: none;
+}
+
+QSpinBox::down-arrow {
+    image: url(spinbox_down);
+}
+
+QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off {
+   image: url(spinbox_down_disabled);
+}
+
+QScrollBar:vertical {
+     border: none;
+     width: 32px;
+     margin: 32px 0 32px 0;
+}
+
+QScrollBar::handle:vertical {
+     background: none;
+     min-height: 32px;
+     image: url(scrollbar_handle)
+}
+
+QScrollBar::add-line:vertical {
+     border: none;
+     background: none;
+     height: 32px;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+     border: none;
+     background: none;
+     height: 32px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+     border: none;
+     width: 32px;
+     height: 32px;
+     background: none;
+}
+
+QScrollBar::up-arrow:vertical {
+     image: url(spinbox_up)
+}
+
+QScrollBar::down-arrow:vertical {
+     image: url(spinbox_down)
 }

@@ -6,28 +6,25 @@ from TxtStyle import *
 
 SCRIPT = "/opt/fischertechnik/start-txtcontrol"
 
+# subclass the txtwidget to catch the close event
+class FTGUIBaseWidget(TxtBaseWidget):
+    def __init__(self):
+        TxtBaseWidget.__init__(self)
+
+    def close(self):
+        subprocess.Popen([SCRIPT, "stop-main"])
+        time.sleep(3)
+        TxtBaseWidget.close(self)
+
 class FtcGuiApplication(TxtApplication):
     def __init__(self, args):
         TxtApplication.__init__(self, args)
 
-        self.w = QWidget()
-        self.w.setFixedSize(240, 320)
-        self.w.setObjectName("centralwidget")
-
-        # start thread to monitor power button
-        self.buttonThread = ButtonThread()
-        self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.stop )
-        self.buttonThread.start()
-        self.w.showFullScreen()
+        self.w = FTGUIBaseWidget()
+        self.w.show()
 
         subprocess.Popen([SCRIPT, "start-main"])
         self.exec_()
-
-    def stop(self):
-        subprocess.Popen([SCRIPT, "stop-main"])
-        time.sleep(3)
-        self.w.close()
-        
         
 if __name__ == "__main__":
     FtcGuiApplication(sys.argv)

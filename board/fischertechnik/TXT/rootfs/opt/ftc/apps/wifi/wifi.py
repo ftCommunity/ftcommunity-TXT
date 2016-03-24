@@ -153,7 +153,6 @@ class KeyDialog(TxtDialog):
         self.layout = QVBoxLayout()
 
         edit = QWidget()
-        edit.setObjectName("empty")
         edit.hbox = QHBoxLayout()
         edit.hbox.setContentsMargins(0,0,0,0)
 
@@ -165,7 +164,6 @@ class KeyDialog(TxtDialog):
         pix = QPixmap(local + "erase.png")
         icn = QIcon(pix)
         but.setIcon(icn)
-        but.setObjectName("iconbut")
         but.setIconSize(pix.size())
         but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding);
         but.clicked.connect(self.key_erase)
@@ -178,7 +176,6 @@ class KeyDialog(TxtDialog):
 
         for a in range(3):
             page = QWidget()
-            page.setObjectName("icongrid")
             page.grid = QGridLayout()
             page.grid.setContentsMargins(0,0,0,0)
 

@@ -2,8 +2,6 @@ import struct, os, platform
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-# TODO: set PYTHONPATH
-
 # TXT values
 INPUT_EVENT_DEVICE = "/dev/input/event1"
 INPUT_EVENT_CODE = 116
@@ -49,26 +47,35 @@ class TxtTitle(QLabel):
         self.close = QPushButton(self)
         self.close.setObjectName("closebut")
         self.close.clicked.connect(parent.close)
-        self.close.move(200,8)
-
+        self.close.move(200,6)
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
+# The TXT does not use windows. Instead we just paint custom 
+# toplevel windows fullscreen. This widget is closed when the 
+# pwoer button is being pressed
+class TxtBaseWidget(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        self.setFixedSize(240, 320)
+        self.setObjectName("centralwidget")
+    
         # on arm (TXT) start thread to monitor power button
         if platform.machine() == "armv7l":
             self.buttonThread = ButtonThread()
-            self.connect( self.buttonThread, SIGNAL("power_button_released()"), parent.close )
+            self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
             self.buttonThread.start()
 
-# The TXT does not use windows. Instead we just paint custom 
-# toplevel windows fullscreen
-class TxtWindow(QWidget):
+        # TXT windows are always fullscreen on arm (txt itself)
+        # and windowed else (e.g. on PC)
+    def show(self):
+        if platform.machine() == "armv7l":
+            QWidget.showFullScreen(self)
+        else:
+            QWidget.show(self)
+
+class TxtWindow(TxtBaseWidget):
     def __init__(self,str):
-        QWidget.__init__(self)
-        # the setFixedSize is only needed for testing on a desktop pc
-        # the centralwidget name makes sure the themes background 
-        # gradient is being used
-        self.setFixedSize(240, 320)
-        self.setObjectName("centralwidget")
+        TxtBaseWidget.__init__(self)
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
@@ -77,7 +84,6 @@ class TxtWindow(QWidget):
 
         # add an empty widget as the centralWidget
         self.centralWidget = QWidget()
-        self.centralWidget.setObjectName("empty")
         self.layout.addWidget(self.centralWidget)
 
         self.setLayout(self.layout)        
@@ -87,14 +93,6 @@ class TxtWindow(QWidget):
         self.centralWidget.deleteLater()
         self.centralWidget = w
         self.layout.addWidget(self.centralWidget)
-
-        # TXT windows are always fullscreen on arm (txt itself)
-        # and windowed else (e.g. on PC)
-    def show(self):
-        if platform.machine() == "armv7l":
-            QWidget.showFullScreen(self)
-        else:
-            QWidget.show(self)
 
 class TxtDialog(QDialog):
     def __init__(self,title):
@@ -112,7 +110,6 @@ class TxtDialog(QDialog):
 
         # add an empty widget as the centralWidget
         self.centralWidget = QWidget()
-        self.centralWidget.setObjectName("empty")
         self.layout.addWidget(self.centralWidget)
 
         self.setLayout(self.layout)        

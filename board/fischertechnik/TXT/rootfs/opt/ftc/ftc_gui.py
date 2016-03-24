@@ -198,7 +198,6 @@ class FtcGuiApplication(QApplication):
     def createIcon(self, iconfile=None, on_click=None, appname=None, executable=None):
         # the icon consists of the icon and the text below in a vbox
         vboxw = QWidget()
-        vboxw.setObjectName("icongrid")
         vbox = QVBoxLayout()
         vbox.setSpacing(0)
         vbox.setContentsMargins(0,0,0,0)
@@ -214,10 +213,10 @@ class FtcGuiApplication(QApplication):
             # set properties from manifest settings on clickable icon to
             # allow click event to launch the appropriate app
             but.setProperty("executable", executable)
+            but.setFlat(True)
         else:
             but = QWidget()
 
-        but.setObjectName("iconbut")
         but.setFixedSize(QSize(72,72))
         but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -358,7 +357,6 @@ class FtcGuiApplication(QApplication):
         self.w = TxtTopWidget(self, self.cathegories)
 
         self.gridw = QWidget()
-        self.gridw.setObjectName("icongrid")
         self.grid = QGridLayout()
         self.grid.setSpacing(0)
         self.grid.setContentsMargins(0,0,0,0)
