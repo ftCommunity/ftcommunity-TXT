@@ -1,0 +1,7 @@
+[app]
+name: Help
+cathegory: System
+icon: icon.png
+desc: Help Catalog for each APP
+exec: help.py
+managed: yes
