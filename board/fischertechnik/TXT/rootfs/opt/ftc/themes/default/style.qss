@@ -75,6 +75,11 @@ QLabel {
     color: #fcce04;
 }
 
+/* textedit has a smaller font */
+QTextEdit {
+    font: 16px;
+}
+
 /* a qlabel with smaller font */
 QLabel#smalllabel {
     font: 24px;
