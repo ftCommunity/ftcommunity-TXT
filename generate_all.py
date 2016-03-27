@@ -52,7 +52,7 @@ os.system("parted -a optimal " + sd_card + " mkpart primary fat32 1MB 33MB")
 os.system("parted -a optimal " + sd_card + " mkpart primary ext2 34MB 100%")
 os.system("parted " + sd_card + " set 1 boot on")
 os.system("mkfs.vfat -n BOOT " + sd_card + "1")
-os.system("mkfs.ext4 -n ROOT " + sd_card + "2")
+os.system("mkfs.ext4 -L ROOT " + sd_card + "2")
 
 print 'Formatting completed!'
 #creating mountpoint
