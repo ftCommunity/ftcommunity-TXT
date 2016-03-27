@@ -39,7 +39,9 @@ os.system("apt-get -y install git mercurial")
 print 'Update repository!'
 os.system("git pull")
 print 'Compile OS!'
-os.system("wget -P dl http://sources.buildroot.net/i2c-tools-3.1.2.tar.bz2")
+i2c_tools_exist = os.path.exists("dl/i2c-tools-3.1.2.tar.bz2")
+if i2c_tools_exist == False:
+	os.system("wget -P dl http://sources.buildroot.net/i2c-tools-3.1.2.tar.bz2")
 os.system("make fischertechnik_TXT_defconfig")
 os.system("BR2_JLEVEL=$(($(nproc)+1)) make")
 
