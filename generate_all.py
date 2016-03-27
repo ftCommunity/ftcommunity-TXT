@@ -45,6 +45,7 @@ os.system("BR2_JLEVEL=$(($(nproc)+1)) make")
 
 print 'Buildroot finished!'
 print 'Formatting SD-card!'
+print 'Answer all questions with Y'
 
 os.system("parted " + sd_card + " mklabel msdos")
 os.system("parted -a optimal " + sd_card + " mkpart primary fat32 1MB 33MB")
