@@ -29,8 +29,8 @@ for name in sorted(os.listdir(base + "/apps")):
             
         print '<td align="center">'
         print '<div title="' + description + '">'
-        appname_enc = appname.replace(' ','%20')
-        print '<a href="launch.py?app=' + appname_enc + '">'
+        manifestfile_enc = manifestfile.replace(' ','%20')
+        print '<a href="appinfo.py?manifest=' + manifestfile_enc + '">'
         print '<img src="' + iconname + '"><br>'
 
         print appname + '</a></div></td>'

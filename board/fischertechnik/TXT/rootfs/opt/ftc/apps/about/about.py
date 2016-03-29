@@ -5,9 +5,9 @@ import sys, os
 from TxtStyle import *
 
 class LicenseDialog(TxtDialog):
-    def __init__(self,title):
-        TxtDialog.__init__(self, title)
-
+    def __init__(self,title,parent):
+        TxtDialog.__init__(self, title, parent)
+        
         txt = QTextEdit()
         txt.setReadOnly(True)
         
@@ -44,14 +44,13 @@ class FtcGuiApplication(TxtApplication):
         self.lic.clicked.connect(self.show_license)
         self.vbox.addWidget(self.lic)
 
-#        self.w.setCentralWidget(self.txt)
         self.w.centralWidget.setLayout(self.vbox)
 
         self.w.show()
         self.exec_()        
  
     def show_license(self):
-        dialog = LicenseDialog("GPL")
+        dialog = LicenseDialog("GPL", self.w)
         dialog.exec_()
         
 if __name__ == "__main__":

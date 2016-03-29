@@ -25,6 +25,13 @@
 }
 
 /* the window title bar repeats the gradient of the central widget */
+#popup {
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
+    border: 5px outset lightgrey;
+    border-radius: 5px;
+}
+
+/* the window title bar repeats the gradient of the central widget */
 #titlebar {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
     padding: 10;
@@ -61,12 +68,12 @@ QTabBar::tab:!selected {
 QTabWidget::tab-bar { alignment: center; }
 
 QTabWidget, QTabWidget::pane, QStackedWidget {
+  background: rgba(0,0,0,0); 
 /*   background: none; */
 }
 
 QTabWidget::pane {
-/*  border-top: 2px solid lightgrey;
-  top: -2px; */
+  background: rgba(0,0,0,0); 
 }
 
 /* qlabel has a transparent background and is in "TXT" orange */
@@ -77,12 +84,19 @@ QLabel {
 
 /* textedit has a smaller font */
 QTextEdit {
+    background: rgba(0,0,0,0); 
     font: 16px;
 }
 
 /* a qlabel with smaller font */
 QLabel#smalllabel {
     font: 24px;
+    color: white;
+}
+
+/* a qlabel with an even smaller font */
+QLabel#tinylabel {
+    font-size: 12px;
     color: white;
 }
 
@@ -96,6 +110,7 @@ QLabel#iconlabel {
 /* having transparent aspects in qlineedit makes the line flash on input :-( */
 QLineEdit {
     background-color: #8EB6DC;
+/*    background-color: rgba(0,0,0,0);  */
 }
 
 /* the close button in the top right window corner */
@@ -279,4 +294,24 @@ QScrollBar::up-arrow:vertical {
 
 QScrollBar::down-arrow:vertical {
      image: url(spinbox_down)
+}
+
+QSlider {
+     background: none;
+     width: 32px;
+}
+
+QSlider::groove:vertical {
+    border: 4px inset white;
+    background: lightgrey;
+    position: absolute;
+    left: 8px; right: 8px;
+}
+
+QSlider::handle:vertical {
+    border: 4px outset lightgrey;
+    border-radius: 4px;
+    height: 16px;
+    background: #fcce04;
+    margin: 0 -8px; /* expand outside the groove */
 }

@@ -147,8 +147,8 @@ def get_associated(_iface):
     return ""
 
 class KeyDialog(TxtDialog):
-    def __init__(self,title,str):
-        TxtDialog.__init__(self, title)
+    def __init__(self,title,str,parent):
+        TxtDialog.__init__(self, title, parent)
 
         self.layout = QVBoxLayout()
 
@@ -157,7 +157,7 @@ class KeyDialog(TxtDialog):
         edit.hbox.setContentsMargins(0,0,0,0)
 
         self.line = QLineEdit(str)
-        # self.line.setReadOnly(True)
+        #        self.line.setReadOnly(True)
         self.line.setAlignment(Qt.AlignCenter)
         edit.hbox.addWidget(self.line)
         but = QPushButton()
@@ -342,7 +342,7 @@ class FtcGuiApplication(TxtApplication):
 
     def do_key(self):
         global key
-        dialog = KeyDialog("Key",key)
+        dialog = KeyDialog("Key",key,self.w)
         key = dialog.exec_()
         # enable connect button if key was entered
         if key != "":

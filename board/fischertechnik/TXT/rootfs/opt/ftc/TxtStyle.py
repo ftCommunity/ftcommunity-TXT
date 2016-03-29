@@ -81,6 +81,7 @@ class TxtWindow(TxtBaseWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(TxtTitle(self,str))
         self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(0)
 
         # add an empty widget as the centralWidget
         self.centralWidget = QWidget()
@@ -95,8 +96,8 @@ class TxtWindow(TxtBaseWidget):
         self.layout.addWidget(self.centralWidget)
 
 class TxtDialog(QDialog):
-    def __init__(self,title):
-        QDialog.__init__(self)
+    def __init__(self,title,parent):
+        QDialog.__init__(self,parent)
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
@@ -107,6 +108,7 @@ class TxtDialog(QDialog):
         self.layout = QVBoxLayout()
         self.layout.addWidget(TxtTitle(self,title))
         self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(0)
 
         # add an empty widget as the centralWidget
         self.centralWidget = QWidget()

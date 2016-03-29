@@ -124,7 +124,7 @@ else:
 print "</p>"
 print "<p>"
 
-print '<form action="index.html">'
+print '<form action="/">'
 print '<input type="submit" value="Ok">'
 print '</form>'
 

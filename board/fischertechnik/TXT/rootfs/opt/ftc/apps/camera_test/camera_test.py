@@ -9,13 +9,19 @@ WIDTH=320
 HEIGHT=(WIDTH*3/4)
 FPS=10
 
+# check if there's a camera device index supplied via
+# the environment
+CAM_DEV = os.environ.get('FTC_CAM')
+if CAM_DEV == None: CAM_DEV = 0
+else:               CAM_DEV = int(CAM_DEV)
+
 class CamWidget(QWidget):
     def __init__(self, parent=None):
 
         super(CamWidget, self).__init__(parent)
         
         # initialize camera
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(CAM_DEV)
         if self.cap.isOpened():
             self.cap.set(3,WIDTH)
             self.cap.set(4,HEIGHT)
