@@ -70,6 +70,7 @@ class RangeWidget(QToolButton):
         self.setPopupMode(QToolButton.InstantPopup)
 
     def on_range_changed(self, r_min, r_max):
+        self.range = ( r_min, r_max)
         self.emit( SIGNAL('range_changed(int,int)'),  r_min, r_max)
 
     def mouseReleaseEvent(self, QMouseEvent):
