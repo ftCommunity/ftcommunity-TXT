@@ -4,12 +4,14 @@
 # This is the fischertechnik community app launcher
 
 import ConfigParser
-import sys, os, subprocess, threading
+import sys, os, subprocess, threading, math
 import SocketServer
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
+
+THEME = "default"
 
 CTRL_PORT = 9000
 
@@ -18,6 +20,9 @@ base = os.path.dirname(os.path.realpath(__file__))
 
 current_cathegory = "All"
 current_page = 0
+
+# keep track of running app
+app = None
 
 class MessageDialog(QDialog):
     def __init__(self,str):
@@ -82,11 +87,76 @@ class TxtTopWidget(QWidget):
         else:
             QWidget.showFullScreen(self)
 
+# https://github.com/anjinkristou/Qt-busy-indicator/blob/master/busyindicator.cpp
+class BusyAnimation(QFrame):
+    def __init__(self, app, parent=None):
+        super(BusyAnimation, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup | Qt.Window)
+        self.setObjectName("popup")
+        self.resize(64, 64)
+        pos = parent.mapToGlobal(QPoint(0,0))
+        self.move(pos + QPoint(parent.width()/2-32, parent.height()/2-32))
+
+        self.step = 0
+        self.app = app
+
+        # create a timer to close this window after 10 seconds at most
+        self.etimer = QTimer(self)
+        self.etimer.setSingleShot(True)
+        self.etimer.timeout.connect(self.expired)
+        self.etimer.start(10000)
+
+        # animate at 10 frames/sec
+        self.atimer = QTimer(self)
+        self.atimer.timeout.connect(self.animate)
+        self.atimer.start(100)
+
+    def expired(self):
+        # App launch expired without callback ...
+        self.close()
+
+    def animate(self):
+        # if the app isn't running anymore then stop the
+        # animation. This typically only happens for non-txt-styled
+        # apps or with apps crashing.
+        #
+        # We might tell the user that the app ended unpexpectedly
+        if self.app.poll():
+            self.close()
+            return
+
+        # this is ugly ... we should be able to prevent
+        # it not become invisble in the first place ...
+        if not self.isVisible():
+            self.show()
+
+        self.step += 0.25
+        self.repaint()
+
+    def close(self):
+        super(BusyAnimation, self).close()
+        super(BusyAnimation, self).deleteLater()
+
+    def paintEvent(self, event):
+        radius = min(self.width(), self.height())/2.5
+        painter = QPainter()
+        painter.begin(self)
+
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.translate(self.width() / 2, self.height() / 2)
+        painter.scale(radius, radius)
+
+        painter.setPen(QPen(Qt.white))
+        painter.setBrush(QBrush(QColor("#fcce04")))
+        painter.drawEllipse(QPointF(0,0), math.cos(self.step), math.sin(self.step))
+
+        painter.end()
+
 class FtcGuiApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
         # load stylesheet from the same place the script was loaded from
-        self.setStyleSheet( "file:///" + base + "/themes/default/style.qss")
+        self.setStyleSheet( "file:///" + base + "/themes/" + THEME + "/style.qss")
 
         # create TCP server so other programs can request a icon list refresh
         # or launch an app
@@ -123,6 +193,8 @@ class FtcGuiApplication(QApplication):
                     self.launch.emit(parm)
                 elif cmd == "msg":
                     self.message.emit(parm)
+                elif cmd == "app-running":
+                    self.app_running.emit(int(parm))
                 else:
                     print "Unknown command ", cmd
 
@@ -132,14 +204,42 @@ class FtcGuiApplication(QApplication):
     def socketError(self):
         pass
 
-    def do_launch(self,clicked):
-        executable = self.sender().property("executable").toString()
+    def app_is_running(self):
+        global app
+
+        if app == None:
+            print "No app known"
+            return False
+
+        return app.poll() == None
+
+    # this signal is received when an app reports it
+    # has been launched
+    @pyqtSlot(int)
+    def on_app_running(self, pid):
+        self.popup.close()
+
+    def launch_app(self, executable):
+        global app
         print "Lauch " + executable 
-        subprocess.Popen(str(executable))
+
+        if self.app_is_running():
+            print "Still one app running!"
+            return
+
+        app = subprocess.Popen(str(executable))
+
+        # display some busy icon
+        self.popup = BusyAnimation(app, self.w)
+        self.popup.show()
+        
+    def do_launch(self,clicked):
+        self.launch_app(self.sender().property("executable").toString())
 
     rescan = pyqtSignal()
     launch = pyqtSignal(str)
     message = pyqtSignal(str)
+    app_running = pyqtSignal(int)
 
     @pyqtSlot()
     def on_rescan(self):
@@ -152,13 +252,10 @@ class FtcGuiApplication(QApplication):
             item = self.grid.itemAt(i)
             if item:
                 if item.widget().property("appname").toString() == name:
-                    executable = item.widget().property("executable").toString()
-                    print "Lauch " + executable 
-                    subprocess.Popen(str(executable))
+                    self.launch_app(item.widget().property("executable").toString())
 
     @pyqtSlot(str)
     def on_message(self, str):
-        print "Message:", str
         MessageDialog(str).exec_()
 
     # read the manifet files of all installed apps and scan them
@@ -352,6 +449,7 @@ class FtcGuiApplication(QApplication):
         self.rescan.connect(self.on_rescan)
         self.launch.connect(self.on_launch)
         self.message.connect(self.on_message)
+        self.app_running.connect(self.on_app_running)
 
         self.cathegories = self.scan_cathegories()
         self.w = TxtTopWidget(self, self.cathegories)
@@ -371,4 +469,4 @@ class FtcGuiApplication(QApplication):
 # application, but we're also able to import this program without actually running
 # any code.
 if __name__ == "__main__":
-    app = FtcGuiApplication(sys.argv)
+    FtcGuiApplication(sys.argv)

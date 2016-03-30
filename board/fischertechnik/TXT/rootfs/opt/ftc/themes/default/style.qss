@@ -27,8 +27,8 @@
 /* the window title bar repeats the gradient of the central widget */
 #popup {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
-    border: 5px outset lightgrey;
-    border-radius: 5px;
+    border: 2px outset lightgrey;
+    border-radius: 2px;
 }
 
 /* the window title bar repeats the gradient of the central widget */

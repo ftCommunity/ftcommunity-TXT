@@ -1,4 +1,10 @@
-import struct, os, platform
+# TxtStyle application
+#
+# Initially meant to implement a TXT Qt style. Now also includes
+# additional functionality to communicate with the app launcher and
+# the like
+
+import struct, os, platform, socket
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -58,13 +64,15 @@ class TxtBaseWidget(QWidget):
         QWidget.__init__(self)
         self.setFixedSize(240, 320)
         self.setObjectName("centralwidget")
-    
+        self.subdialogs = []
+
         # on arm (TXT) start thread to monitor power button
         if platform.machine() == "armv7l":
             self.buttonThread = ButtonThread()
             self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
             self.buttonThread.start()
 
+            
         # TXT windows are always fullscreen on arm (txt itself)
         # and windowed else (e.g. on PC)
     def show(self):
@@ -72,7 +80,36 @@ class TxtBaseWidget(QWidget):
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
+            
+        # send a message to the launcher once the main widget has been 
+        # drawn for the first time
+        self.notify_launcher()
 
+    def notify_launcher(self):
+        # send a signal so launcher knows that the app
+        # is up and can stop the busy animation
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            # Connect to server and send data
+            sock.connect(("localhost", 9000))
+            sock.sendall("app-running {}\n". format(os.getpid()))
+        except socket.error, msg:
+            print "Unable to connect to launcher:", msg
+        finally:
+            sock.close()
+
+    def unregister(self,child):
+        self.subdialogs.remove(child)
+
+    def register(self,child):
+        self.subdialogs.append(child)
+        
+    def close(self):
+        for i in self.subdialogs:
+            i.close()
+            
+        super(TxtBaseWidget, self).close()
+        
 class TxtWindow(TxtBaseWidget):
     def __init__(self,str):
         TxtBaseWidget.__init__(self)
@@ -98,9 +135,16 @@ class TxtWindow(TxtBaseWidget):
 class TxtDialog(QDialog):
     def __init__(self,title,parent):
         QDialog.__init__(self,parent)
+
+        # for some odd reason the childern are not registered
+        # as child windows on the txt
+        self.parent = parent
+        parent.register(self)
+        
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
+        self.setParent(parent)
         self.setFixedSize(240, 320)
         self.setObjectName("centralwidget")
 
@@ -122,13 +166,17 @@ class TxtDialog(QDialog):
         self.centralWidget = w
         self.layout.addWidget(self.centralWidget)
 
+    def close(self):
+        self.parent.unregister(self)
+        super(TxtDialog, self).close()
+        
         # TXT windows are always fullscreen
     def exec_(self):
         QDialog.showFullScreen(self)
         QDialog.exec_(self)
 
-
 class TxtApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
         TxtSetStyle(self)
+
