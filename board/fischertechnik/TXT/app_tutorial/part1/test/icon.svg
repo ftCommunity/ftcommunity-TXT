@@ -17,7 +17,7 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="icon.svg"
-   inkscape:export-filename="/home/harbaum/projekte/private_stuff/txt/apps/test2/icon.png"
+   inkscape:export-filename="/home/tharbaum/tmp/txt/ftcommunity-TXT/board/fischertechnik/TXT/app_tutorial/part1/test/icon.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -62,7 +62,7 @@
      showgrid="true"
      units="px"
      inkscape:window-width="1280"
-     inkscape:window-height="1004"
+     inkscape:window-height="969"
      inkscape:window-x="-2"
      inkscape:window-y="-3"
      inkscape:window-maximized="1"
@@ -88,7 +88,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -113,15 +113,15 @@
     <text
        xml:space="preserve"
        style="font-size:20.87651825px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;font-family:sans-serif"
-       x="9.3684063"
-       y="931.92334"
+       x="14.338489"
+       y="932.36523"
        id="text3341"
        sodipodi:linespacing="125%"
-       transform="scale(0.9066506,1.1029607)"><tspan
+       transform="scale(0.90665061,1.1029607)"><tspan
          sodipodi:role="line"
          id="tspan3343"
-         x="9.3684063"
-         y="931.92334"
-         style="stroke-width:0.5">Test3</tspan></text>
+         x="14.338489"
+         y="932.36523"
+         style="stroke-width:0.5">Test</tspan></text>
   </g>
 </svg>

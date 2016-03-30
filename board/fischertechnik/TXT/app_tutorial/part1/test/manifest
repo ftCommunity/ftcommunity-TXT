@@ -1,0 +1,9 @@
+[app]
+name: Test
+cathegory: Tests
+author: Till Harbaum
+icon: icon.png
+desc: TXT app tutorial #1
+url: https://github.com/ftCommunity/ftcommunity-TXT/wiki/FTC-FW-App-Tutorial-1
+exec: test.py
+managed: yes

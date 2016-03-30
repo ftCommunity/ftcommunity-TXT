@@ -9,7 +9,7 @@ class FtcGuiApplication(TxtApplication):
         TxtApplication.__init__(self, args)
 
         # create the empty main window
-        w = TxtWindow("Test 3")
+        w = TxtWindow("Test")
         w.show()
         self.exec_()        
  
