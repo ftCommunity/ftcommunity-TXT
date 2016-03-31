@@ -22,18 +22,18 @@ print '<h1><div class="outline"><font color="red">fischer</font><font color="#04
 
 arguments = cgi.FieldStorage()
 appname = arguments['app'].value
-executable = arguments['exec'].value
-print "<h1>Launching " + appname + " ...</h1>"
+print "<h1>Stopping " + appname + " ...</h1>"
 
 # Create a socket (SOCK_STREAM means a TCP socket)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     # Connect to server and send data
     sock.connect(("localhost", 9000))
-    sock.sendall("launch " + executable + "\n")
+    sock.sendall("stop-app\n")
 except socket.error, msg:
     print "<h2>Unable to connect to Launcher!</h2>"
-    print "<h2>" , msg, "</h2>"
+    print "<h2>" , msg, "</h1>"
+    
 finally:
     sock.close()
 

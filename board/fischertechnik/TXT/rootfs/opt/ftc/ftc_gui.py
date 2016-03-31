@@ -23,6 +23,7 @@ current_page = 0
 
 # keep track of running app
 app = None
+app_executable = ""
 
 class MessageDialog(QDialog):
     def __init__(self,str):
@@ -185,18 +186,27 @@ class FtcGuiApplication(QApplication):
         for s in self.connections:
             if s.canReadLine():
                 line = str(s.readLine()).strip()
-                cmd = line.split()[0]
-                parm = line[len(cmd):].strip()
-                if cmd == "rescan":
-                    self.rescan.emit()
-                elif cmd == "launch":
-                    self.launch.emit(parm)
-                elif cmd == "msg":
-                    self.message.emit(parm)
-                elif cmd == "app-running":
-                    self.app_running.emit(int(parm))
-                else:
-                    print "Unknown command ", cmd
+                if len(line) > 0:
+                    cmd = line.split()[0]
+                    parm = line[len(cmd):].strip()
+                    if cmd == "rescan":
+                        self.rescan.emit()
+                    elif cmd == "launch":
+                        self.launch.emit(parm)
+                    elif cmd == "msg":
+                        self.message.emit(parm)
+                    elif cmd == "quit":
+                        s.write("Bye\n")
+                        s.close()
+                    elif cmd == "get-app":
+                        self.get_app.emit(s)
+                    elif cmd == "stop-app":
+                        self.stop_app.emit()
+                    elif cmd == "app-running":
+                        self.app_running.emit(int(parm))
+                    else:
+                        s.write("Unknown command\n")
+                        print "Unknown command ", cmd
 
     def removeConnection(self):
         pass
@@ -208,7 +218,6 @@ class FtcGuiApplication(QApplication):
         global app
 
         if app == None:
-            print "No app known"
             return False
 
         return app.poll() == None
@@ -220,13 +229,14 @@ class FtcGuiApplication(QApplication):
         self.popup.close()
 
     def launch_app(self, executable):
-        global app
+        global app, app_executable
         print "Lauch " + executable 
 
         if self.app_is_running():
             print "Still one app running!"
             return
 
+        app_executable = executable
         app = subprocess.Popen(str(executable))
 
         # display some busy icon
@@ -234,25 +244,57 @@ class FtcGuiApplication(QApplication):
         self.popup.show()
         
     def do_launch(self,clicked):
-        self.launch_app(self.sender().property("executable").toString())
+        self.launch_app(str(self.sender().property("executable").toString()))
 
     rescan = pyqtSignal()
     launch = pyqtSignal(str)
     message = pyqtSignal(str)
+    get_app = pyqtSignal(QTcpSocket)
+    stop_app = pyqtSignal()
     app_running = pyqtSignal(int)
 
     @pyqtSlot()
     def on_rescan(self):
+        global current_page
+        # return to page 0 as the number of icons may have
+        # been changed and the current page may not exist anymore
+        current_page = 0
         self.addIcons(self.grid)
+
+    @pyqtSlot(QTcpSocket)
+    def on_get_app(self, s):
+        global app_executable
+        if self.app_is_running():
+            s.write(app_executable)
+        s.write("\n")
+
+    @pyqtSlot()
+    def on_stop_app(self):
+        global app
+        if self.app_is_running():
+            app.kill()
+            while app.poll() == None:
+                pass
 
     @pyqtSlot(str)
     def on_launch(self, name):
-        # check if there's an icon with that name
-        for i in range(0,self.grid.count()):
-            item = self.grid.itemAt(i)
-            if item:
-                if item.widget().property("appname").toString() == name:
-                    self.launch_app(item.widget().property("executable").toString())
+        print "Net req to launch", name
+
+        # search for an app with that name
+        # get list of all subdirectories in the application directory
+        app_dirs = sorted(os.listdir(base + "/apps"))
+
+        # extract all those that have a manifest file
+        for app_dir in app_dirs:
+            app_path = base + "/apps/" + app_dir + "/"
+            manifestfile = app_path + "manifest"
+            if os.path.isfile(manifestfile):
+                manifest = ConfigParser.RawConfigParser()
+                manifest.read(manifestfile)
+                if manifest.has_option('app', 'exec'):
+                    if app_dir + "/" + manifest.get('app', 'exec') == name:
+                        executable = app_path + manifest.get('app', 'exec')
+                        self.launch_app(executable)
 
     @pyqtSlot(str)
     def on_message(self, str):
@@ -450,6 +492,8 @@ class FtcGuiApplication(QApplication):
         self.launch.connect(self.on_launch)
         self.message.connect(self.on_message)
         self.app_running.connect(self.on_app_running)
+        self.get_app.connect(self.on_get_app)
+        self.stop_app.connect(self.on_stop_app)
 
         self.cathegories = self.scan_cathegories()
         self.w = TxtTopWidget(self, self.cathegories)

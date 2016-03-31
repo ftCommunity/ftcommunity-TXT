@@ -4,11 +4,11 @@
 
 import ConfigParser
 import cgi
-import sys, os, pwd, getpass
+import sys, os, pwd, getpass, socket
 
 print "Content-Type: text/html"
 print ""
-print '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+print '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
 print '<html xmlns="http://www.w3.org/1999/xhtml">'
 print '<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
 print '<title>fischertechnik TXT community firmware</title>'
@@ -17,6 +17,25 @@ print '<link rel="icon" href="/favicon.ico" type="image/x-icon" />'
 print '</head><body>'
 print '<h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>'
  
+# request executable name of currently running app from 
+# launcher
+current_executable = None
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    # Connect to server and send data
+    sock.connect(("localhost", 9000))
+    sock.sendall("get-app\n")
+    exe_str = sock.makefile().readline().strip()
+    exe_str_parts = exe_str.split('/')
+    # this returns the full path. Extract last two path
+    # elements only
+    if len(exe_str_parts) > 1:
+        current_executable = exe_str_parts[-2] + "/" + exe_str_parts[-1]
+except socket.error, msg:
+    print '<h2><font color="red">Launcher not responding!</font></h2>'
+finally:
+    sock.close()
+
 arguments = cgi.FieldStorage()
 manifestfile = arguments['manifest'].value
 
@@ -40,6 +59,7 @@ if os.path.isfile(manifestfile):
     iconname = "apps/" + name + "/" + manifest.get('app', 'icon')
     cathegory = manifest.get('app', 'cathegory')
     executable = manifest.get('app', 'exec')
+    is_running =  name + "/" + executable == current_executable
     author = app_get(manifest, 'author')
     url = app_get(manifest, 'url')
     html = app_get(manifest, 'html')
@@ -67,13 +87,21 @@ if os.path.isfile(manifestfile):
 
     print '</table>'
 
+    if is_running:
+        print '<h2><font color="lightgreen">This app is currently running</font></h2>'
+
     print '<h2>Actions</h2>'
     print '<table align="center">'
 
     appname_enc = appname.replace(' ','%20')
-    launch_url = "launch.py?app="+appname_enc
 
-    print '<tr><td><a href="' + launch_url + '">' + 'Launch this application on the TXT' + '</a></td></tr>'
+    # allow user to launch app if none is running
+    if not current_executable:
+        launch_url = "launch.py?app="+appname_enc+"&exec="+name+"/"+executable
+        print '<tr><td><a href="' + launch_url + '">' + 'Launch this application on the TXT' + '</a></td></tr>'
+    elif is_running:
+        stop_url = "stop.py?app="+appname_enc
+        print '<tr><td><a href="' + stop_url + '">' + 'Stop this application on the TXT' + '</a></td></tr>'
 
     if url:
         print '<tr><td><a href="'+url+'">' + 'Get more application info' + '</a></td></tr>'
