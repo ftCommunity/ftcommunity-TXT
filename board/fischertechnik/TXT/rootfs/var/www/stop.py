@@ -24,6 +24,8 @@ arguments = cgi.FieldStorage()
 appname = arguments['app'].value
 print "<h1>Stopping " + appname + " ...</h1>"
 
+print '<center><img src="brick.gif"/></center>'
+
 # Create a socket (SOCK_STREAM means a TCP socket)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:

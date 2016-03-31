@@ -25,6 +25,8 @@ appname = arguments['app'].value
 executable = arguments['exec'].value
 print "<h1>Launching " + appname + " ...</h1>"
 
+print '<center><img src="brick.gif"/></center>'
+
 # Create a socket (SOCK_STREAM means a TCP socket)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
