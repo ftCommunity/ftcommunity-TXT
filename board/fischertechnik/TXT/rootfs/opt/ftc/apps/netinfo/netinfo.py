@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 
@@ -10,7 +10,7 @@ SIOCGIFADDR    = 0x8915
 SIOCGIFNETMASK = 0x891b
 
 def _ifinfo(sock, addr, ifname):
-    iface = struct.pack('256s', ifname[:15])
+    iface = struct.pack('256s', bytes(ifname[:15], "UTF-8"))
     info  = fcntl.ioctl(sock.fileno(), addr, iface)
     return socket.inet_ntoa(info[20:24])
 
@@ -20,7 +20,7 @@ def all_interfaces():
     
     bytes = 8 * size
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    names = array.array('B', '\0' * bytes)
+    names = array.array('B', b'\x00' * bytes)
     outbytes = struct.unpack('iL', fcntl.ioctl(
         s.fileno(), SIOCGIFCONF,
         struct.pack('iL', bytes, names.buffer_info()[0])
@@ -30,7 +30,7 @@ def all_interfaces():
     # get additional info for all interfaces found
     lst = []
     for i in range(0, outbytes, size):
-        name = namestr[i:i+16].split('\0', 1)[0]
+        name = namestr[i:i+16].decode('UTF-8').split('\0', 1)[0]
         if name != "":
             addr = _ifinfo(s, SIOCGIFADDR, name)
             mask = _ifinfo(s, SIOCGIFNETMASK, name)

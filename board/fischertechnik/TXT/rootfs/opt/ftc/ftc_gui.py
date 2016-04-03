@@ -1,11 +1,11 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This is the fischertechnik community app launcher
 
-import ConfigParser
+import configparser
 import sys, os, subprocess, threading, math
-import SocketServer
+import socketserver
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -83,7 +83,7 @@ class TxtTopWidget(QWidget):
     def show(self):
         # if the FTC_GUI_MANAGED enviroment variable is set we
         # don't go fullscreen. Useful for testing in a PC
-        if os.environ.has_key('FTC_GUI_MANAGED'):
+        if 'FTC_GUI_MANAGED' in os.environ:
             QWidget.show(self)
         else:
             QWidget.showFullScreen(self)
@@ -185,7 +185,7 @@ class FtcGuiApplication(QApplication):
         # check clients for data
         for s in self.connections:
             if s.canReadLine():
-                line = str(s.readLine()).strip()
+                line = str(s.readLine(), "utf-8").strip()
                 if len(line) > 0:
                     cmd = line.split()[0]
                     parm = line[len(cmd):].strip()
@@ -206,7 +206,7 @@ class FtcGuiApplication(QApplication):
                         self.app_running.emit(int(parm))
                     else:
                         s.write("Unknown command\n")
-                        print "Unknown command ", cmd
+                        print("Unknown command ", cmd)
 
     def removeConnection(self):
         pass
@@ -230,10 +230,10 @@ class FtcGuiApplication(QApplication):
 
     def launch_app(self, executable):
         global app, app_executable
-        print "Lauch " + executable 
+        print("Lauch " + executable)
 
         if self.app_is_running():
-            print "Still one app running!"
+            print("Still one app running!")
             return
 
         app_executable = executable
@@ -244,7 +244,7 @@ class FtcGuiApplication(QApplication):
         self.popup.show()
         
     def do_launch(self,clicked):
-        self.launch_app(str(self.sender().property("executable").toString()))
+        self.launch_app(str(self.sender().property("executable")))
 
     rescan = pyqtSignal()
     launch = pyqtSignal(str)
@@ -278,7 +278,7 @@ class FtcGuiApplication(QApplication):
 
     @pyqtSlot(str)
     def on_launch(self, name):
-        print "Net req to launch", name
+        print("Net req to launch", name)
 
         # search for an app with that name
         # get list of all subdirectories in the application directory
@@ -289,7 +289,7 @@ class FtcGuiApplication(QApplication):
             app_path = base + "/apps/" + app_dir + "/"
             manifestfile = app_path + "manifest"
             if os.path.isfile(manifestfile):
-                manifest = ConfigParser.RawConfigParser()
+                manifest = configparser.RawConfigParser()
                 manifest.read(manifestfile)
                 if manifest.has_option('app', 'exec'):
                     if app_dir + "/" + manifest.get('app', 'exec') == name:
@@ -312,12 +312,12 @@ class FtcGuiApplication(QApplication):
             app_path = base + "/apps/" + app_dir + "/"
             manifestfile = app_path + "manifest"
             if os.path.isfile(manifestfile):
-                manifest = ConfigParser.RawConfigParser()
+                manifest = configparser.RawConfigParser()
                 manifest.read(manifestfile)
                 if manifest.has_option('app', 'cathegory'):
                     cathegories.add(manifest.get('app', 'cathegory'))
                 else:
-                    print "App has no cathegory:", app_dir
+                    print("App has no cathegory:", app_dir)
 
         return sorted(cathegories)
 
@@ -398,12 +398,12 @@ class FtcGuiApplication(QApplication):
                 if current_cathegory == "All":
                     app_list.append(app_dir)
                 else:
-                    manifest = ConfigParser.RawConfigParser()
+                    manifest = configparser.RawConfigParser()
                     manifest.read(manifestfile)
                     try:
                         if(manifest.get('app', 'cathegory') == current_cathegory):
                             app_list.append(app_dir)
-                    except ConfigParser.NoOptionError:
+                    except configparser.NoOptionError:
                         pass
 
         # calculate icons to be displayed on current page
@@ -434,7 +434,7 @@ class FtcGuiApplication(QApplication):
         for app_dir in app_list:
             app_path = base + "/apps/" + app_dir + "/"
             manifestfile = app_path + "manifest"
-            manifest = ConfigParser.RawConfigParser()
+            manifest = configparser.RawConfigParser()
             manifest.read(manifestfile)
 
             # get various fields from manifest
@@ -444,7 +444,7 @@ class FtcGuiApplication(QApplication):
         
             # check if this app is on the current page
             if (iconnr >= icon_1st and iconnr <= icon_last):
-                # print "Paint page", page, "iconnr", iconnr
+                # print("Paint page", page, "iconnr", iconnr)
 
                 # number of this icon in srceen
                 icon_on_screen = iconnr - icon_1st
@@ -459,9 +459,9 @@ class FtcGuiApplication(QApplication):
             iconnr = iconnr + 1
 
         # is there another page? Then display the "next" icon
-        # print "iconnr after paint", iconnr, "last", icon_last
+        # print("iconnr after paint", iconnr, "last", icon_last)
         if iconnr > icon_last+1:
-            # print "Next PAGE"
+            # print("Next PAGE")
             but = self.createIcon(base + "/next.png", self.do_next)
             # the next button is always icon 8 on screen
             self.addIcon(grid, but, 8)
@@ -471,7 +471,7 @@ class FtcGuiApplication(QApplication):
             icon_on_screen = iconnr - icon_1st
             if current_page > 0: icon_on_screen += 1
 
-            # print "Adding space for", icon_on_screen 
+            # print("Adding space for", icon_on_screen)
             empty = self.createIcon()
             self.addIcon(grid, empty, icon_on_screen)
             iconnr = iconnr + 1

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 
@@ -81,7 +81,7 @@ class FtcGuiApplication(TxtApplication):
         global txt
         global state
 
-        print "Timer in state", state
+        print(("Timer in state", state))
         
         if state == "idle":
             # button pressed
@@ -144,7 +144,7 @@ class FtcGuiApplication(TxtApplication):
             state = "blinking_on"
 
         else:
-            print "Unknown state", state
+            print(("Unknown state", state))
                 
 if __name__ == "__main__":
     FtcGuiApplication(sys.argv)

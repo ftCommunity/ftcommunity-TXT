@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 
@@ -18,9 +18,9 @@ class FtcGuiApplication(TxtApplication):
 
         try:
             wd = WeDo()
-        except OSError, e:
+        except OSError as e:
             wd = None
-            print "Error", e
+            print(("Error", e))
 
         if wd == None:
             self.vbox.addStretch()

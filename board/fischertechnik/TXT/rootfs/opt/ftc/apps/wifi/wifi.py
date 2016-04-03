@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 
@@ -43,26 +43,26 @@ def run_program(rcmd):
     executable = cmd[0]
     executable_options=cmd[1:]    
 
-    print "run: ", rcmd
+    print(("run: ", rcmd))
 
     try:
         proc  = Popen(([executable] + executable_options), stdout=PIPE, stderr=PIPE)
         response = proc.communicate()
-        response_stdout, response_stderr = response[0], response[1]
-    except OSError, e:
+        response_stdout, response_stderr = response[0].decode('UTF-8'), response[1].decode('UTF-8')
+    except OSError as e:
         if e.errno == errno.ENOENT:
-            print( "Unable to locate '%s' program. Is it in your path?" % executable )
+            print(( "Unable to locate '%s' program. Is it in your path?" % executable ))
         else:
-            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
-    except ValueError, e:
+            print(( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) ))
+    except ValueError as e:
         print( "Value error occured. Check your parameters." )
     else:
         if proc.wait() != 0:
-            print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
+            print(( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) ))
             return response
         else:
-            print( "Executable '%s' returned successfully." %(executable) )
-            print( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] ))
+            print(( "Executable '%s' returned successfully." %(executable) ))
+            print(( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] )))
             return response_stdout
 
 def get_networks(iface, retry=10):
@@ -115,7 +115,7 @@ def check4dhcp(_iface):
             cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read().split('\0')
 #            print "cmds", len(cmds), cmds
             if cmds[0] == "udhcpc" and _iface in cmds:
-                print "PID", pid, "is the dhcp for", _iface
+                print(("PID", pid, "is the dhcp for", _iface))
                 return True
 
         except IOError: # proc has already terminated
@@ -310,7 +310,7 @@ class FtcGuiApplication(TxtApplication):
         # check if a network is already connected
         connected_ssid = get_associated(IFACE)
         if connected_ssid != "":
-            print "Already associated with", connected_ssid
+            print(("Already associated with", connected_ssid))
             for i in range(len(networks)):
                 if networks[i]['ssid'] == connected_ssid:
                     self.ssids_w.setCurrentIndex(i)
@@ -332,7 +332,7 @@ class FtcGuiApplication(TxtApplication):
 
     def on_update_status(self, ssid):
         global connected_ssid
-        print "New ssid:", ssid
+        print(("New ssid:", ssid))
         if connected_ssid != ssid:
             connected_ssid = ssid
             self.update_connect_button(self.ssids_w.currentText())
@@ -358,12 +358,12 @@ class FtcGuiApplication(TxtApplication):
         ssid = self.ssids_w.currentText()
         enc_type = self.encr_w.currentText()
         enc_key = self.key.text()
-        print "Connecting to", ssid, "with", enc_type, enc_key
+        print(("Connecting to", ssid, "with", enc_type, enc_key))
         connect_to_network(IFACE, ssid, enc_type, enc_key)
 
     def set_default_encryption(self,net):
         global networks
-        print "Setting default encryption for", net
+        print(("Setting default encryption for", net))
         # search for network is list
         for i in networks: 
             if i['ssid'] == net:
