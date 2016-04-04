@@ -9,12 +9,11 @@
     font: bold 32px "sans-serif"; 
     color: white;
     outline: 0;
-    border: 0;
+    border: none;
     padding: 0;
     border-width: 0;
     border-color: grey;
     margin: 0;
-    min-height: 0;
     spacing: 0;
 }
 
@@ -82,12 +81,6 @@ QLabel {
     color: #fcce04;
 }
 
-/* textedit has a smaller font */
-QTextEdit {
-    background: rgba(0,0,0,0); 
-    font: 16px;
-}
-
 /* a qlabel with smaller font */
 QLabel#smalllabel {
     font: 24px;
@@ -105,6 +98,12 @@ QLabel#tinylabel {
 QLabel#iconlabel {
     color: white;
     font-size: 12px; 
+}
+
+/* textedit has a smaller font */
+QTextEdit {
+    background: rgba(0,0,0,0); 
+    font: 16px;
 }
 
 /* having transparent aspects in qlineedit makes the line flash on input :-( */
@@ -260,9 +259,10 @@ QScrollBar:vertical {
 }
 
 QScrollBar::handle:vertical {
-     background: none;
+     border: 4px solid lightgrey;
+     border-radius: 4px;
+     background: white;
      min-height: 32px;
-     image: url(scrollbar_handle)
 }
 
 QScrollBar::add-line:vertical {
@@ -294,6 +294,50 @@ QScrollBar::up-arrow:vertical {
 
 QScrollBar::down-arrow:vertical {
      image: url(spinbox_down)
+}
+
+QScrollBar:horizontal {
+     border: none;
+     height: 32px;
+     margin: 0 32px 0 32px;
+}
+
+QScrollBar::handle:horizontal {
+     border: 4px solid lightgrey;
+     border-radius: 4px;
+     background: white;
+     min-width: 32px;
+}
+
+QScrollBar::add-line:horizontal {
+     border: none;
+     background: none;
+     width: 32px;
+     subcontrol-position: right;
+     subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+     border: none;
+     background: none;
+     width: 32px;
+     subcontrol-position: left;
+     subcontrol-origin: margin;
+}
+
+QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+     border: none;
+     width: 32px;
+     height: 32px;
+     background: none;
+}
+
+QScrollBar::right-arrow:horizontal {
+     image: url(scrollarrow_right)
+}
+
+QScrollBar::left-arrow:horizontal {
+     image: url(scrollarrow_left)
 }
 
 QSlider {
