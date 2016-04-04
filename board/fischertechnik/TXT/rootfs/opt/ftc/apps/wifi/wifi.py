@@ -70,9 +70,9 @@ def get_networks(iface, retry=10):
     Grab a list of wireless networks within range, and return a list of dicts describing them.
     """
     while retry > 0:
-        if "OK" in run_program("wpa_cli -i %s scan" % iface):
+        if "OK" in run_program("sudo wpa_cli -i %s scan" % iface):
             networks=[]
-            r = run_program("wpa_cli -i %s scan_result" % iface).strip()
+            r = run_program("sudo wpa_cli -i %s scan_result" % iface).strip()
             if "bssid" in r and len ( r.split("\n") ) >1 :
                 for line in r.split("\n")[1:]:
                     b, fr, s, f = line.split()[:4]
@@ -91,22 +91,22 @@ def connect_to_network(_iface, _ssid, _type, _pass=None):
     """
     _disconnect_all(_iface)
     time.sleep(1)
-    if run_program("wpa_cli -i %s add_network" % _iface) == "0\n":
+    if run_program("sudo wpa_cli -i %s add_network" % _iface) == "0\n":
         if run_program('wpa_cli -i %s set_network 0 ssid \'"%s"\'' % (_iface,_ssid)) == "OK\n":
             if _type == "OPEN":
-                run_program("wpa_cli -i %s set_network 0 auth_alg OPEN" % _iface)
-                run_program("wpa_cli -i %s set_network 0 key_mgmt NONE" % _iface)
+                run_program("sudo wpa_cli -i %s set_network 0 auth_alg OPEN" % _iface)
+                run_program("sudo wpa_cli -i %s set_network 0 key_mgmt NONE" % _iface)
             elif _type == "WPA" or _type == "WPA2":
                 run_program('wpa_cli -i %s set_network 0 psk \'"%s"\'' % (_iface,_pass))
             elif _type == "WEP":
-                run_program("wpa_cli -i %s set_network 0 wep_key %s" % (_iface,_pass))
+                run_program("sudo wpa_cli -i %s set_network 0 wep_key %s" % (_iface,_pass))
             else:
                 print("Unsupported type")
             
-            run_program("wpa_cli -i %s select_network 0" % _iface)
+            run_program("sudo wpa_cli -i %s select_network 0" % _iface)
 
 def save_config(_iface):
-    run_program("wpa_cli -i %s save_config" % _iface)
+    run_program("sudo wpa_cli -i %s save_config" % _iface)
 
 def check4dhcp(_iface):
     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -124,22 +124,22 @@ def check4dhcp(_iface):
 
 def run_dhcp(_iface):
     if not check4dhcp(_iface):
-        run_program("udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
+        run_program("sudo udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
 
 def _disconnect_all(_iface):
     """
     Disconnect all wireless networks.
     """
-    lines = run_program("wpa_cli -i %s list_networks" % _iface).split("\n")
+    lines = run_program("sudo wpa_cli -i %s list_networks" % _iface).split("\n")
     if lines:
         for line in lines[1:-1]:
-            run_program("wpa_cli -i %s remove_network %s" % (_iface, line.split()[0]))  
+            run_program("sudo wpa_cli -i %s remove_network %s" % (_iface, line.split()[0]))  
 
 def get_associated(_iface):
     """
     Check if we're associated to a network and return its ssid.
     """
-    r = run_program("wpa_cli -i %s status" % _iface)
+    r = run_program("sudo wpa_cli -i %s status" % _iface)
     if "wpa_state=COMPLETED" in r:
         for line in r.split("\n")[1:]:
             if line.split('=')[0] == "ssid":

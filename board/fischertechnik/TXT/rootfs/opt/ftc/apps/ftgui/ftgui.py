@@ -12,7 +12,7 @@ class FTGUIBaseWidget(TxtBaseWidget):
         TxtBaseWidget.__init__(self)
 
     def close(self):
-        subprocess.Popen([SCRIPT, "stop-main"])
+        subprocess.Popen(["sudo", SCRIPT, "stop-main"])
         time.sleep(3)
         TxtBaseWidget.close(self)
 
@@ -23,7 +23,7 @@ class FtcGuiApplication(TxtApplication):
         self.w = FTGUIBaseWidget()
         self.w.show()
 
-        subprocess.Popen([SCRIPT, "start-main"])
+        subprocess.Popen(["sudo", SCRIPT, "start-main"])
         self.exec_()
         
 if __name__ == "__main__":
