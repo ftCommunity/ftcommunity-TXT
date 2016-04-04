@@ -98,7 +98,7 @@ if ok:
         executable = appdir + "/" + manifest.get('app', 'exec')
         
         print("Making executable: " + executable + "<br/>")
-        os.chmod(executable, 0o744)
+        os.chmod(executable, 0o755)
 
     # finally send gui a request to refresh its icons
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
