@@ -10,27 +10,39 @@
     <title>fischertechnik TXT community firmware</title>
     <link rel="stylesheet" href="txt.css" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script language="JavaScript">
+      <!--
+	  function screenshot() {
+	  var xmlHttp = new XMLHttpRequest();
+	  xmlHttp.open( "GET", "screenshot.py", false ); // false for synchronous request
+	  xmlHttp.send( null );
+	  document.getElementById("image").src="screenshot.png?random="+new Date().getTime();
+	  }
+	-->
+    </script>
   </head>
-  
+
   <body>
     <h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>
     <center><a href="https://github.com/ftCommunity/ftcommunity-TXT">community edition</a></center>
 
     <center><div>
-	<hr/>
+    <p/>
 
-	<h2>Installed apps</h2>
-	<!--#exec cmd="python3 /var/www/applist.py" -->
+    <img src="screenshot.png" id="image"/>
 
-	<hr/>
-	<h2>App upload</h2>
-	<form action="upload.py" method="post" enctype="multipart/form-data">
-	  <p>Choose a zip file containing a TXT app to upload:</p>
-	  <input name="appfile" type="file" size="30" accept="application/zip"/>
-	  <button type="submit">Upload</button>
-	</form>
-	
-    </div></center>
+    <!-- <a href="screenshot.html">Take a screenshot</a> -->
+    <!--#exec cmd="fbgrab /var/www/screenshot.png" -->
+
+    <p/>
+    <button onclick="screenshot()">Take screenshot</button> 
+
+    <p/>
+    <form action="/">
+	<input type="submit" value="Ok"/>
+    </form>
     
+    </div></center>
   </body>
 </html>
+

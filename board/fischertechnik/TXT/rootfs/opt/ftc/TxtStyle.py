@@ -44,18 +44,34 @@ def TxtSetStyle(self):
     elif os.path.isfile("/opt/ftc/" + STYLE_NAME):
         self.setStyleSheet( "file:///" + "/opt/ftc/" + STYLE_NAME)
 
+class TxtMenu(QMenu):
+    def __init__(self, parent=None):
+        super(TxtMenu, self).__init__(parent)
+
+    def on_button_clicked(self):
+        pos = self.parent().mapToGlobal(QPoint(0,0))
+        self.popup(pos)
+
 # The TXTs window title bar
 class TxtTitle(QLabel):
-    def __init__(self,parent,str):
-        QLabel.__init__(self,str)
+    def __init__(self,str,parent=None):
+        super(TxtTitle, self).__init__(str, parent)
         self.setObjectName("titlebar")
         self.setAlignment(Qt.AlignCenter)
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.close = QPushButton(self)
         self.close.setObjectName("closebut")
         self.close.clicked.connect(parent.close)
         self.close.move(200,6)
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
+    def addMenu(self):
+        self.menubut = QPushButton(self)
+        self.menubut.setObjectName("menubut")
+        self.menubut.move(8,6)
+        self.menu = TxtMenu(self.menubut)
+        self.menubut.clicked.connect(self.menu.on_button_clicked)
+        return self.menu
+        
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen. This widget is closed when the 
 # pwoer button is being pressed
@@ -105,18 +121,17 @@ class TxtBaseWidget(QWidget):
         self.subdialogs.append(child)
         
     def close(self):
-        for i in self.subdialogs:
-            i.close()
-            
+        for i in self.subdialogs: i.close()
         super(TxtBaseWidget, self).close()
-        
+
 class TxtWindow(TxtBaseWidget):
     def __init__(self,str):
         TxtBaseWidget.__init__(self)
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(self,str))
+        self.titlebar = TxtTitle(str, self)
+        self.layout.addWidget(self.titlebar)
         self.layout.setContentsMargins(0,0,0,0)
         self.layout.setSpacing(0)
 
@@ -131,6 +146,9 @@ class TxtWindow(TxtBaseWidget):
         self.centralWidget.deleteLater()
         self.centralWidget = w
         self.layout.addWidget(self.centralWidget)
+
+    def addMenu(self):
+        return self.titlebar.addMenu()
 
 class TxtDialog(QDialog):
     def __init__(self,title,parent):
@@ -150,7 +168,7 @@ class TxtDialog(QDialog):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(self,title))
+        self.layout.addWidget(TxtTitle(title, self))
         self.layout.setContentsMargins(0,0,0,0)
         self.layout.setSpacing(0)
 

@@ -74,7 +74,6 @@ class VersionsDialog(TxtDialog):
 
         # put everything inside a scroll area
         scroll = QScrollArea(self.centralWidget)
-#        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setWidget(vbox_w)
 
         self.setCentralWidget(scroll)
@@ -86,7 +85,16 @@ class FtcGuiApplication(TxtApplication):
         # create the empty main window
         self.w = TxtWindow("About")
 
+        menu = self.w.addMenu()
+        menu_ver = menu.addAction("Versions")
+        menu_ver.triggered.connect(self.show_version)
+
+        menu_lic = menu.addAction("Licenses")
+        menu_lic.triggered.connect(self.show_license)
+
         self.vbox = QVBoxLayout()
+
+        self.vbox.addStretch()
         
         # and add some text
         self.txt = QLabel("Fischertechnik TXT firmware "
@@ -96,21 +104,15 @@ class FtcGuiApplication(TxtApplication):
         self.txt.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(self.txt)
 
+        self.vbox.addStretch()
+
         self.c = QLabel("(c) 2016 the ft:community")
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)
-
         self.vbox.addWidget(self.c)
 
-        self.ver = QPushButton("Versions")
-        self.ver.clicked.connect(self.show_version)
-        self.vbox.addWidget(self.ver)
-
-        self.lic = QPushButton("License")
-        self.lic.clicked.connect(self.show_license)
-        self.vbox.addWidget(self.lic)
-
+        self.vbox.addStretch()
         self.w.centralWidget.setLayout(self.vbox)
 
         self.w.show()

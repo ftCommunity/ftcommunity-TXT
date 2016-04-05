@@ -151,8 +151,8 @@ class CamWidget(QWidget):
         self.hsv_min = (self.hsv_min[0], self.hsv_min[1], r_min)
         self.hsv_max = (self.hsv_max[0], self.hsv_max[1], r_max)
 
-    def mouseReleaseEvent(self, QMouseEvent):
-        self.show_src_img = not self.show_src_img
+    def toggle_input(self, on):
+        self.show_src_img = on
 
     def paintEvent(self, QPaintEvent):
         painter = QPainter()
@@ -175,10 +175,24 @@ class FtcGuiApplication(TxtApplication):
         self.w = TxtWindow("ColoRange")
 
         self.cw = CamWidget()
-        
+
+        group = QActionGroup(self)
+
         if False:
             self.w.setCentralWidget(self.cw)
         else:
+            edit = self.w.addMenu()
+            menu_input = edit.addAction("Input")
+            menu_input.toggled.connect(self.cw.toggle_input)
+            menu_input.setCheckable(True)
+            menu_input.setActionGroup(group)
+            
+            menu_result = edit.addAction("Result")
+            menu_result.setCheckable(True)
+            menu_result.setActionGroup(group)
+            
+            menu_result.setChecked(True)
+            
             vbox = QVBoxLayout()
             vbox.setSpacing(0)
             vbox.setContentsMargins(0,0,0,0)

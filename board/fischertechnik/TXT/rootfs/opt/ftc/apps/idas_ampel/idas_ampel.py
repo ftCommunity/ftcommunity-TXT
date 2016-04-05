@@ -19,7 +19,10 @@ class FtcGuiApplication(TxtApplication):
         global state
         txt_ip = os.environ.get('TXT_IP')
         if txt_ip == None: txt_ip = "localhost"
-        txt = ftrobopy.ftrobopy(txt_ip, 65000)
+        try:
+            txt = ftrobopy.ftrobopy(txt_ip, 65000)
+        except:
+            txt = None
 
         TxtApplication.__init__(self, args)
         self.w = TxtWindow("Ampel")
@@ -27,13 +30,24 @@ class FtcGuiApplication(TxtApplication):
         # create a vbox layout for the content area
         vbox = QVBoxLayout()
 
-        vbox.addStretch()
-
-        but = QCheckBox("Blink!")
-        but.stateChanged.connect(self.button_pressed)
+        but = QCheckBox("blinken")
+        but.stateChanged.connect(self.blink_toggle)
         vbox.addWidget(but)
 
         vbox.addStretch()
+
+        vbox.addWidget(QLabel("Grünphase:"))
+        self.dial = QDial()
+        self.dial.setNotchesVisible(True)
+        self.dial.setRange(2, 60)
+        self.green_time_lbl = QLabel()
+        self.green_time_lbl.setObjectName("smalllabel")
+        self.green_time_lbl.setAlignment(Qt.AlignCenter)   
+        self.dial.valueChanged.connect(self.green_time_changed)
+        self.dial.setValue(10)
+
+        vbox.addWidget(self.dial)
+        vbox.addWidget(self.green_time_lbl)
 
         self.w.centralWidget.setLayout(vbox)
 
@@ -43,23 +57,27 @@ class FtcGuiApplication(TxtApplication):
         self.timer.timeout.connect(self.do_ampel)
         self.timer.start(100);
 
-        # all outputs normal mode
-        M = [ txt.C_OUTPUT, txt.C_OUTPUT, txt.C_OUTPUT, txt.C_OUTPUT ]
-        I = [ (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ),
-              (txt.C_SWITCH, txt.C_DIGITAL ) ]
-        txt.setConfig(M, I)
-        txt.updateConfig()
+        if txt:
+            # all outputs normal mode
+            M = [ txt.C_OUTPUT, txt.C_OUTPUT, txt.C_OUTPUT, txt.C_OUTPUT ]
+            I = [ (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ),
+                  (txt.C_SWITCH, txt.C_DIGITAL ) ]
+            txt.setConfig(M, I)
+            txt.updateConfig()
 
         self.w.show() 
         self.exec_()        
 
-    def button_pressed(self):
+    def green_time_changed(self, val):
+        self.green_time_lbl.setText("{:d} Sekunden".format(val))
+
+    def blink_toggle(self):
         global txt
         global state
         if state != "blinking_on" and state != "blinking_off":
@@ -81,7 +99,7 @@ class FtcGuiApplication(TxtApplication):
         global txt
         global state
 
-        print(("Timer in state", state))
+        print("Timer in state", state)
         
         if state == "idle":
             # button pressed
@@ -107,7 +125,7 @@ class FtcGuiApplication(TxtApplication):
         elif state == "wait_cars_red":
             txt.setPwm(PED_RED,0)    # pedestrians: red off
             txt.setPwm(PED_GRN,512)  # pedestrians: green on
-            self.timer.start(5000)   # wait five seconds
+            self.timer.start(self.dial.value() * 1000)   # wait X seconds
             state = "wait_ped_green"
 
         elif state == "wait_ped_green":
@@ -144,7 +162,7 @@ class FtcGuiApplication(TxtApplication):
             state = "blinking_on"
 
         else:
-            print(("Unknown state", state))
+            print("Unknown state", state)
                 
 if __name__ == "__main__":
     FtcGuiApplication(sys.argv)

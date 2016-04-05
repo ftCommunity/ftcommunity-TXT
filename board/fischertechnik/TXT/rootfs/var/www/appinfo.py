@@ -115,6 +115,8 @@ if os.path.isfile(manifestfile):
         delete_url = "delete.py?app="+name_enc
         print('<tr><td><a href="' + delete_url + '" onclick="return confirm(\'Really delete this app?\')">' + 'Delete this application from the TXT' + '</a></td></tr>')
 
+    print('<tr><td><a href="screenshot.html">' + 'Take screenshot' + '</a></td></tr>')
+
     print('</table>')
 
 else:

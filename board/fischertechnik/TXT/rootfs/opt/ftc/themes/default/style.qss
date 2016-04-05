@@ -23,7 +23,7 @@
      background: none;
 }
 
-/* the window title bar repeats the gradient of the central widget */
+/* popups repeat the gradient of the central widget */
 #popup {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
     border: 2px outset lightgrey;
@@ -34,6 +34,51 @@
 #titlebar {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
     padding: 10;
+}
+
+QMenu {
+    background: #448acc; 
+    border: 2px outset lightgrey;
+    border-radius: 2px;
+}
+
+QMenu::item {
+  background: none;
+}
+
+QMenu::item:selected {
+   color: #fcce04;
+}
+
+QMenu::right-arrow {
+  image: url(scrollarrow_right)
+}
+
+QMenu::icon:checked { /* appearance of a 'checked' icon */
+    width: 34px;
+    height: 34px;
+}
+    
+QMenu::item {
+    padding: 2px 32px 2px 8px;
+}
+
+QMenu::item:non-exclusive, QMenu::item:exclusive {
+    padding-left: 48px;
+}
+
+QMenu::indicator {
+    padding-left: 8px;
+    width: 34px;
+    height: 34px;
+}
+
+QMenu::indicator:checked {
+    image: url(checkbox_checked);
+}
+
+QMenu::indicator:unchecked {
+    image: url(checkbox_unchecked);
 }
 
 /* the toplevel has a gradient background look like the splash screen */
@@ -113,9 +158,17 @@ QLineEdit {
 }
 
 /* the close button in the top right window corner */
-/* used by launcher and txt style */
 QPushButton#closebut {
     image: url(closeicon);
+    border-style: none; 
+    background: none;
+    width: 32px;
+    height: 40px;
+}
+
+/* the menu button in the top left window corner */
+QPushButton#menubut {
+    image: url(menuicon);
     border-style: none; 
     background: none;
     width: 32px;
