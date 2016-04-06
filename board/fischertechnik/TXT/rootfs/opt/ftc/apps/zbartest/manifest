@@ -1,0 +1,7 @@
+[app]
+name: ZBar
+cathegory: Tests
+icon: icon.png
+desc: Demo of ZBAR QR code decoder
+exec: zbartest.py
+managed: yes
