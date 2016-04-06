@@ -722,6 +722,7 @@ menu "External python modules"
 	source "package/python-wedo/Config.in"
 	source "package/python-werkzeug/Config.in"
 	source "package/python-ws4py/Config.in"
+	source "package/python-zbarlight/Config.in"
 	source "package/python-zope-interface/Config.in"
 endmenu
 endif
