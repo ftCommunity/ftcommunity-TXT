@@ -28,6 +28,9 @@ BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 BR2_ROOTFS_USERS_TABLES="board/fischertechnik/TXT/user.tab"
 BR2_ROOTFS_POST_BUILD_SCRIPT="board/fischertechnik/TXT/post-build.sh"
 BR2_ROOTFS_DEVICE_TABLE="system/device_table.txt board/fischertechnik/TXT/device_table.txt"
+BR2_TARGET_ROOTFS_INITRAMFS=y
+BR2_TARGET_ROOTFS_INITRAMFS_CUSTOM=y
+BR2_TARGET_ROOTFS_INITRAMFS_CUSTOM_CONTENTS="board/fischertechnik/TXT/initramfs.conf"
 
 # Linux headers same as kernel, a 4.1 series
 BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_4_1=y

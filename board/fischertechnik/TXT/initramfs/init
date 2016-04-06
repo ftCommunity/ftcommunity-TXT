@@ -1,0 +1,51 @@
+#!/bin/busybox sh
+/bin/busybox --install -s
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+# mount kernel filesystems
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+
+# populate /dev
+mdev -s
+
+# mount SD card
+mount -t vfat /dev/mmcblk0p1 /sdcard
+
+get_opt() {
+  echo "$@" | cut -d "=" -f 2
+}
+
+init=/sbin/init
+root=/dev/mmcblk0p2
+for i in $(cat /proc/cmdline); do
+  case $i in
+    root\=*)
+      root=$(get_opt $i)
+      ;;
+    init\=*)
+      init=$(get_opt $i)
+      ;;
+  esac
+done
+
+if [ -f /sdcard/rootfs.img ]; then
+  mount -t auto /sdcard/rootfs.img /newroot -o loop
+elif [ -b "$root" ]; then
+  mount -t auto "$root" /newroot
+else
+  echo "No root file system found, dropping to a shell"
+  exec /bin/sh
+fi
+
+if [ -x "/newroot/$init" ]; then
+  umount /sys /proc
+  exec switch_root /newroot "${init}"
+fi
+
+#This will only be run if the exec above failed
+echo "Failed to switch_root, dropping to a shell"
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+exec /bin/sh
