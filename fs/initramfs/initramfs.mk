@@ -5,19 +5,31 @@
 #
 ################################################################################
 
+ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS_ROOTFS),y)
 ROOTFS_INITRAMFS_DEPENDENCIES += rootfs-cpio
+endif
 
 ROOTFS_INITRAMFS_POST_TARGETS += linux-rebuild-with-initramfs
 
 
 # The generic fs infrastructure isn't very useful here.
 
-rootfs-initramfs: $(ROOTFS_INITRAMFS_DEPENDENCIES) $(ROOTFS_INITRAMFS_POST_TARGETS)
+rootfs-initramfs: $(ROOTFS_INITRAMFS_DEPENDENCIES) $(BINARIES_DIR)/initramfs.cpio $(ROOTFS_INITRAMFS_POST_TARGETS)
 
 rootfs-initramfs-show-depends:
 	@echo $(ROOTFS_INITRAMFS_DEPENDENCIES)
 
 .PHONY: rootfs-initramfs rootfs-initramfs-show-depends
+
+ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS_ROOTFS),y)
+$(BINARIES_DIR)/initramfs.cpio: $(BINARIES_DIR)/rootfs.cpio
+	ln -sf rootfs.cpio $(BINARIES_DIR)/initramfs.cpio
+endif
+
+ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS_CUSTOM),y)
+$(BINARIES_DIR)/initramfs.cpio: target-finalize $(call qstrip,$(BR2_TARGET_ROOTFS_INITRAMFS_CUSTOM_CONTENTS))
+	$(LINUX_DIR)/usr/gen_init_cpio $(BR2_TARGET_ROOTFS_INITRAMFS_CUSTOM_CONTENTS) > $(BINARIES_DIR)/initramfs.cpio
+endif
 
 ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS),y)
 TARGETS_ROOTFS += rootfs-initramfs
