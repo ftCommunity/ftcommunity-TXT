@@ -4,14 +4,12 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 # mount kernel filesystems
+mount -t devtmpfs devtmpfs /dev
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 
 # populate /dev
-mdev -s
-
-# mount SD card
-mount -t vfat /dev/mmcblk0p1 /sdcard
+#mdev -s
 
 get_opt() {
   echo "$@" | cut -d "=" -f 2
@@ -30,6 +28,8 @@ for i in $(cat /proc/cmdline); do
   esac
 done
 
+# mount SD card
+mount -t vfat /dev/mmcblk0p1 /sdcard
 if [ -f /sdcard/rootfs.img ]; then
   mount -t auto /sdcard/rootfs.img /newroot -o loop
 elif [ -b "$root" ]; then
@@ -41,6 +41,9 @@ fi
 
 if [ -x "/newroot/$init" ]; then
   umount /sys /proc
+  mount -o move /sdcard /newroot/media/sdcard
+  mount -o move /dev /newroot/dev
+  mount -t devtmpfs 
   exec switch_root /newroot "${init}"
 fi
 
