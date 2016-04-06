@@ -122,8 +122,5 @@ if os.path.isfile(manifestfile):
 else:
     print('<h1>Error: no such manifest</h1>')
     
-print('<p><center><form action="/">')
-print('<input type="submit" value="Ok"/>')
-print('</form></center>')
-
+print('<p/><center><a href="/">Home</a></center>')
 print("</body></html>")

@@ -50,8 +50,8 @@ for name in sorted(os.listdir(base + "/apps")):
         if count == 0:
             print("<tr>")
 
-        print('<td align="center"')
-        if is_running: print(' bgcolor="green"')
+        print('<td align="center"', end="")
+        if is_running: print(' bgcolor="green"', end="")
         print('>')
         print('<div title="' + description + '">')
         manifestfile_enc = manifestfile.replace(' ','%20')

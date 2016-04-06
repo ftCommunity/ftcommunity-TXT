@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 
-import sys, os, subprocess
-import cgitb
-cgitb.enable(format='text')
-
+import sys, os, subprocess, platform
 
 print("Content-Type: text/html")
 print("")
@@ -19,8 +16,12 @@ print(' </head>')
 print(' <body>')
 print('  <h1>Screenshot taken</h1>')
 
-# COMMAND = "import -display :0 -window root -geometry 320x240 screenshot.png"
-COMMAND = "fbgrab screenshot.png"
+# for PC based tests use imagemagicks import to grab the X screen. The user
+# ownign the screen needs to give access with "xhost +" beforehand
+if platform.machine() == "armv7l":
+    COMMAND = "fbgrab screenshot.png"
+else:
+    COMMAND = "import -display :0 -window root -geometry 320x240 screenshot.png"
 
 app = subprocess.Popen(COMMAND.split())
 while app.poll() == None:

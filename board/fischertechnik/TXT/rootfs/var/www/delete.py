@@ -55,9 +55,6 @@ else:
 
 
 print('<p/>')
-print('<form action="/">')
-print('<input type="submit" value="Ok">')
-print('</form>')
-
+print('<a href="/">Home</a>')
 print('</center>')
 print("</body></html>")

@@ -3,7 +3,6 @@
 #
 
 import configparser
-import getpass
 import cgi
 import zipfile
 import sys, os
@@ -23,6 +22,7 @@ print('<h1><div class="outline"><font color="red">fischer</font><font color="#04
 upload_dir = "/tmp"
 appbase = "/opt/ftc/apps"
 
+print('<div align="center">')
 print("<h1>Upload</h1>")
 
 def save_uploaded_file():
@@ -73,9 +73,6 @@ def unzip_uploaded_file(zip_name, appdir):
 
     return True, ""
 
-print("<p>Running as " + getpass.getuser() + "</p>")
-print("<p>")
-
 [ok, zip_name] = save_uploaded_file()
 if ok:
     appdir = appbase + "/" + os.path.splitext(os.path.basename(zip_name))[0]
@@ -117,9 +114,7 @@ else:
     print("<h1>Error: " + zip_name + "</h1>")
 
 print("</p>")
-
-print('<form action="/">')
-print('<input type="submit" value="Ok"/>')
-print('</form>')
+print('<a href="/">Home</a>')
+print('</div>')
 
 print("</body></html>")

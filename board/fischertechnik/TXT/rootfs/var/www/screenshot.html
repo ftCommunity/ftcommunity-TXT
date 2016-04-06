@@ -13,11 +13,18 @@
     <script language="JavaScript">
       <!--
 	  function screenshot() {
+	  document.body.style.cursor = 'wait';
 	  var xmlHttp = new XMLHttpRequest();
 	  xmlHttp.open( "GET", "screenshot.py", false ); // false for synchronous request
 	  xmlHttp.send( null );
 	  document.getElementById("image").src="screenshot.png?random="+new Date().getTime();
+	  document.body.style.cursor = 'default';
 	  }
+
+	  // take first screenshot right away
+	  document.addEventListener('DOMContentLoaded', function() {
+	  screenshot();
+	  }, false);
 	-->
     </script>
   </head>
@@ -31,17 +38,13 @@
 
     <img src="screenshot.png" id="image"/>
 
-    <!-- <a href="screenshot.html">Take a screenshot</a> -->
-    <!--#exec cmd="fbgrab /var/www/screenshot.png" -->
-
     <p/>
     <button onclick="screenshot()">Take screenshot</button> 
 
     <p/>
-    <form action="/">
-	<input type="submit" value="Ok"/>
-    </form>
     
+    <a href="/">Home</a>
+
     </div></center>
   </body>
 </html>
