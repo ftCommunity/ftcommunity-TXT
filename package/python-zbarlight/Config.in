@@ -1,6 +1,6 @@
 config BR2_PACKAGE_PYTHON_ZBARLIGHT
 	bool "python-zbarlight"
-	select BR2_PACKAGE_ZBAR
+	depends on BR2_PACKAGE_ZBAR
 	help
 	  Python3 compatible bindings for the zbar library
 
