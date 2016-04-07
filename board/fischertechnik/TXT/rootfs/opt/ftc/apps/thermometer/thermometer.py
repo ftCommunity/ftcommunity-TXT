@@ -189,6 +189,10 @@ class FtcGuiApplication(TxtApplication):
         global txt
         r = txt.getCurrentInput(0)
         t = T_N * B / (B + T_N * math.log(r / R_N)) - K2C
+        # limit values to thermometer graphic limit
+        if t < -5: t = -5
+        if t > 52: t = 52
+        
         self.the.setValue(t)
         
 if __name__ == "__main__":
