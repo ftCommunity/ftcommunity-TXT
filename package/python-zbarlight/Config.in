@@ -1,7 +1,7 @@
 config BR2_PACKAGE_PYTHON_ZBARLIGHT
 	bool "python-zbarlight"
 	depends on BR2_PACKAGE_ZBAR
-	depends on BR2_PACKAGE_PILLOW
+	depends on BR2_PACKAGE_PYTHON_PILLOW
 	help
 	  Python3 compatible bindings for the zbar library
 
