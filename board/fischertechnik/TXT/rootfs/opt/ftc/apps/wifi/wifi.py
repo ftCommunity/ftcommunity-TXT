@@ -92,12 +92,12 @@ def connect_to_network(_iface, _ssid, _type, _pass=None):
     _disconnect_all(_iface)
     time.sleep(1)
     if run_program("sudo wpa_cli -i %s add_network" % _iface) == "0\n":
-        if run_program('wpa_cli -i %s set_network 0 ssid \'"%s"\'' % (_iface,_ssid)) == "OK\n":
+        if run_program('sudo wpa_cli -i %s set_network 0 ssid \'"%s"\'' % (_iface,_ssid)) == "OK\n":
             if _type == "OPEN":
                 run_program("sudo wpa_cli -i %s set_network 0 auth_alg OPEN" % _iface)
                 run_program("sudo wpa_cli -i %s set_network 0 key_mgmt NONE" % _iface)
             elif _type == "WPA" or _type == "WPA2":
-                run_program('wpa_cli -i %s set_network 0 psk \'"%s"\'' % (_iface,_pass))
+                run_program('sudo wpa_cli -i %s set_network 0 psk \'"%s"\'' % (_iface,_pass))
             elif _type == "WEP":
                 run_program("sudo wpa_cli -i %s set_network 0 wep_key %s" % (_iface,_pass))
             else:
