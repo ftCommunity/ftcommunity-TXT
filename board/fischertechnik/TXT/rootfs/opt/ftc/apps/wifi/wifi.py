@@ -112,7 +112,7 @@ def check4dhcp(_iface):
     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
     for pid in pids:
         try:
-            cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read().split('\0')
+            cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rt').read().split('\0')
 #            print "cmds", len(cmds), cmds
             if cmds[0] == "udhcpc" and _iface in cmds:
                 print(("PID", pid, "is the dhcp for", _iface))
