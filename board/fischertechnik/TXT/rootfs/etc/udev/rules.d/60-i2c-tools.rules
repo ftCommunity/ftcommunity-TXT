@@ -1,0 +1,2 @@
+# give full rw rights to i2c devices to i2c group
+KERNEL=="i2c-*"     , GROUP="i2c", MODE="0660"
