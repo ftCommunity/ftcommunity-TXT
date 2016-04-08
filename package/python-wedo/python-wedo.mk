@@ -12,4 +12,10 @@ PYTHON_WEDO_INSTALL_STAGING = NO
 PYTHON_WEDO_SETUP_TYPE = distutils
 PYTHON_WEDO_DEPENDENCIES += libusb
 
+ifeq ($(BR2_PACKAGE_PYTHON),y)
+PYTHON_WEDO_DEPENDENCIES += python
+else ifeq ($(BR2_PACKAGE_PYTHON3),y)
+PYTHON_WEDO_DEPENDENCIES += python3
+endif
+
 $(eval $(python-package))

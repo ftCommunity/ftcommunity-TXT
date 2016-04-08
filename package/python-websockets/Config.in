@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_WEBSOCKETS
+	bool "python-websockets"
+	help
+	  Websocket support for Python
+
+	  https://pypi.python.org/pypi/websockets
