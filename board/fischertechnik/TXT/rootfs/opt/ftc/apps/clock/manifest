@@ -1,6 +1,6 @@
 [app]
 name: Clock
-cathegory: Tools
+category: Tools
 icon: icon.png
 desc: A simple clock app
 exec: clock.py

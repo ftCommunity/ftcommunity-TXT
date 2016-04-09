@@ -1,6 +1,6 @@
 [app]
 name: NetInfo
-cathegory: System
+category: System
 icon: icon.png
 desc: Network information
 exec: netinfo.py

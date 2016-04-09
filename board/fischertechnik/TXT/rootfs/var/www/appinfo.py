@@ -57,7 +57,7 @@ if os.path.isfile(manifestfile):
     appname = manifest.get('app', 'name')
     description = manifest.get('app', 'desc')
     iconname = "apps/" + name + "/" + manifest.get('app', 'icon')
-    cathegory = manifest.get('app', 'cathegory')
+    category = manifest.get('app', 'category')
     executable = manifest.get('app', 'exec')
     is_running =  name + "/" + executable == current_executable
     author = app_get(manifest, 'author')
@@ -82,7 +82,7 @@ if os.path.isfile(manifestfile):
     print('<table align="center">')
     if author:
         print('<tr><td><b>Author:</b></td><td>', author, '</td></tr>')
-    print('<tr><td><b>Cathegory:</b></td><td>', cathegory, '</td></tr>')
+    print('<tr><td><b>Category:</b></td><td>', category, '</td></tr>')
     print('<tr><td><b>Description:</b></td><td>', description, '</td></tr>')
 
     print('</table>')

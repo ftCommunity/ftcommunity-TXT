@@ -1,6 +1,6 @@
 [app]
 name: Gallery
-cathegory: Tests
+category: Tests
 icon: icon.png
 desc: QT Widgets gallery
 exec: widgetgallery.py

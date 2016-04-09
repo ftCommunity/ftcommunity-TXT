@@ -1,6 +1,6 @@
 [app]
 name: Thermo
-cathegory: Tools
+category: Tools
 author: Till Harbaum &lt;till@harbaum.org&gt;
 icon: icon.png
 desc: A simple thermometer app using the TXTs temperature sensor on I1

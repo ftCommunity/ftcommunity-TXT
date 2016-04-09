@@ -1,6 +1,6 @@
 [app]
 name: ZBar
-cathegory: Tests
+category: Tests
 icon: icon.png
 desc: Demo of ZBAR QR code decoder
 exec: zbartest.py

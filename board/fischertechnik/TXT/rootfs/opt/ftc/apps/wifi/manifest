@@ -1,6 +1,6 @@
 [app]
 name: WiFi
-cathegory: System
+category: System
 icon: icon.png
 desc: Wireless LAN configuration
 exec: wifi.py

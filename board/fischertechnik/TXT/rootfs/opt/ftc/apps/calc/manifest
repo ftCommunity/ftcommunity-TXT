@@ -1,6 +1,6 @@
 [app]
 name: Calc
-cathegory: Tools
+category: Tools
 icon: icon.png
 desc: A simple calculator
 exec: calc.py

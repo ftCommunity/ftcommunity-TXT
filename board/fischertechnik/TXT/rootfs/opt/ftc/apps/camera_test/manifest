@@ -1,6 +1,6 @@
 [app]
 name: Camera
-cathegory: System
+category: System
 icon: icon.png
 desc: Camera test
 exec: camera_test.py

@@ -18,7 +18,7 @@ CTRL_PORT = 9000
 # make sure all file access happens relative to this script
 base = os.path.dirname(os.path.realpath(__file__))
 
-current_cathegory = "All"
+current_category = "All"
 current_page = 0
 
 # keep track of running app
@@ -49,17 +49,17 @@ class MessageDialog(QDialog):
 
 # The TXTs window title bar
 class TxtTitle(QComboBox):
-    def __init__(self,cathegories):
+    def __init__(self,categories):
         QComboBox.__init__(self)
         self.setObjectName("titlebar")
         self.addItem("All")
-        for i in cathegories:
+        for i in categories:
             self.addItem(i)
  
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
 class TxtTopWidget(QWidget):
-    def __init__(self,parent,cathegories):
+    def __init__(self,parent,categories):
         QWidget.__init__(self)
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
@@ -69,9 +69,9 @@ class TxtTopWidget(QWidget):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.cathegory_w = TxtTitle(cathegories)
-        self.cathegory_w.activated[str].connect(parent.set_cathegory)
-        self.layout.addWidget(self.cathegory_w)
+        self.category_w = TxtTitle(categories)
+        self.category_w.activated[str].connect(parent.set_category)
+        self.layout.addWidget(self.category_w)
         self.layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(self.layout)        
@@ -301,25 +301,25 @@ class FtcGuiApplication(QApplication):
         MessageDialog(str).exec_()
 
     # read the manifet files of all installed apps and scan them
-    # for their cathegory. Generate a unique set of cathegories from this
-    def scan_cathegories(self):
+    # for their category. Generate a unique set of categories from this
+    def scan_categories(self):
         # get list of all subdirectories in the application directory
         app_dirs = sorted(os.listdir(base + "/apps"))
 
         # extract all those that have a manifest file
-        cathegories = set()
+        categories = set()
         for app_dir in app_dirs:
             app_path = base + "/apps/" + app_dir + "/"
             manifestfile = app_path + "manifest"
             if os.path.isfile(manifestfile):
                 manifest = configparser.RawConfigParser()
                 manifest.read(manifestfile)
-                if manifest.has_option('app', 'cathegory'):
-                    cathegories.add(manifest.get('app', 'cathegory'))
+                if manifest.has_option('app', 'category'):
+                    categories.add(manifest.get('app', 'category'))
                 else:
-                    print("App has no cathegory:", app_dir)
+                    print("App has no category:", app_dir)
 
-        return sorted(cathegories)
+        return sorted(categories)
 
     # handler of the "next" button
     def do_next(self):
@@ -382,7 +382,7 @@ class FtcGuiApplication(QApplication):
     # add all icons to the grid
     def addIcons(self, grid):
         global current_page
-        global current_cathegory
+        global current_category
 
         iconnr = 0
 
@@ -390,18 +390,18 @@ class FtcGuiApplication(QApplication):
         app_dirs = sorted(os.listdir(base + "/apps"))
 
         # extract all those that have a manifest file an check for
-        # current cathegory
+        # current category
         app_list = []
         for app_dir in app_dirs:
             manifestfile = base + "/apps/" + app_dir + "/manifest"
             if os.path.isfile(manifestfile):
-                if current_cathegory == "All":
+                if current_category == "All":
                     app_list.append(app_dir)
                 else:
                     manifest = configparser.RawConfigParser()
                     manifest.read(manifestfile)
                     try:
-                        if(manifest.get('app', 'cathegory') == current_cathegory):
+                        if(manifest.get('app', 'category') == current_category):
                             app_list.append(app_dir)
                     except configparser.NoOptionError:
                         pass
@@ -476,11 +476,11 @@ class FtcGuiApplication(QApplication):
             self.addIcon(grid, empty, icon_on_screen)
             iconnr = iconnr + 1
 
-    def set_cathegory(self, cath):
-        global current_cathegory
+    def set_category(self, cath):
+        global current_category
         global current_page
-        if current_cathegory != cath:
-            current_cathegory = cath
+        if current_category != cath:
+            current_category = cath
             current_page = 0
             self.addIcons(self.grid)
 
@@ -495,8 +495,8 @@ class FtcGuiApplication(QApplication):
         self.get_app.connect(self.on_get_app)
         self.stop_app.connect(self.on_stop_app)
 
-        self.cathegories = self.scan_cathegories()
-        self.w = TxtTopWidget(self, self.cathegories)
+        self.categories = self.scan_categories()
+        self.w = TxtTopWidget(self, self.categories)
 
         self.gridw = QWidget()
         self.grid = QGridLayout()

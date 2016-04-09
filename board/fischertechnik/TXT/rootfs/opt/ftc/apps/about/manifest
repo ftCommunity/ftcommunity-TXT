@@ -1,6 +1,6 @@
 [app]
 name: About
-cathegory: System
+category: System
 author: Till Harbaum &lt;till@harbaum.org&gt;
 url: https://github.com/ftCommunity/ftcommunity-TXT
 html: index.html

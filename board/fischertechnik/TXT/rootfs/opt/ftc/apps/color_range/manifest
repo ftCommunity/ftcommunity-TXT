@@ -1,6 +1,6 @@
 [app]
 name: ColoRange
-cathegory: Tools
+category: Tools
 author: Till Harbaum &lt;till@harbaum.org&gt;
 icon: icon.png
 desc: Tool to pick color ranges for object detection
