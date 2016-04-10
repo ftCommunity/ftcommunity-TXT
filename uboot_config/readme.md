@@ -2,7 +2,7 @@
 
 This script changes the UBoot setup of a Fischertechnik TXT to let it boot from SD card.
 
-<font color="red">This script changes some vital settings of the device. A failure may result in the device becoming unusable and requiring professional service. You have been warned!!!</font>
+**This script changes some vital settings of the device. A failure may result in the device becoming unusable and requiring professional service. You have been warned!!!**
 
 ## Prerequisites
 
