@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# hide cursor; disable screensaver; disable vesa powerdown
+echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
+
 # load ftc splash image. Use FT colors for progress bar
 psplash -n -f /etc/ftc-logo.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
 
