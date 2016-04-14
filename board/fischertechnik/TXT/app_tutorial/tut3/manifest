@@ -1,0 +1,10 @@
+[app]
+name: Tut_3
+category: Test
+author: Till Harbaum &lt;till@harbaum.org&gt;
+icon: icon.png
+desc: Tutorial No 3
+exec: tut3.py
+managed: yes
+set: 524328 ROBOTICS TXT Discovery Set
+model: Pedestrian Light

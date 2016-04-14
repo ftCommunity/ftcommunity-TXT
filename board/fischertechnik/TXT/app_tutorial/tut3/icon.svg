@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="64"
+   height="64"
+   viewBox="0 0 64 64.000002"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="icon.svg"
+   inkscape:export-filename="/home/tharbaum/tmp/private_stuff/txt/tutorials/tut3e/icon.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3785">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3787" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3789" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 32.000001 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="64 : 32.000001 : 1"
+       inkscape:persp3d-origin="32 : 21.333334 : 1"
+       id="perspective3353" />
+    <linearGradient
+       id="linearGradient4159-2"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#ababff;stop-opacity:1"
+         offset="0"
+         id="stop4219" />
+      <stop
+         id="stop4189"
+         offset="1"
+         style="stop-color:#0000b0;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4159-2"
+       id="radialGradient4165"
+       cx="9"
+       cy="1028.1622"
+       fx="9"
+       fy="1028.1622"
+       r="13"
+       gradientTransform="matrix(0.60007064,0,0,0.60390713,-0.07462054,404.55765)"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="pad" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3785"
+       id="linearGradient3791"
+       x1="-8.3528098"
+       y1="26.866682"
+       x2="63.803562"
+       y2="26.866682"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1.0625e-6,988.36213)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="11.2"
+     inkscape:cx="46.955839"
+     inkscape:cy="33.035715"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     units="px"
+     inkscape:window-width="1280"
+     inkscape:window-height="1004"
+     inkscape:window-x="-2"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3336"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       originx="-1.3173673e-09px"
+       originy="-6.654646e-05px" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-988.36213)">
+    <ellipse
+       style="fill:url(#radialGradient4165);fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.61390746;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path3357"
+       cx="15.899113"
+       cy="1036.4242"
+       rx="15.34031"
+       ry="15.376954"
+       sodipodi:cx="15.899113"
+       sodipodi:cy="1036.4242"
+       sodipodi:rx="15.34031"
+       sodipodi:ry="15.376954"
+       transform="matrix(2.0451339,0,0,2.0402602,-0.51581362,-1094.2129)"
+       d="m 31.239423,1036.4242 c 0,8.4925 -6.868091,15.3769 -15.34031,15.3769 -8.4722196,0 -15.3403104,-6.8844 -15.3403104,-15.3769 0,-8.4925 6.8680908,-15.377 15.3403104,-15.377 8.472219,0 15.34031,6.8845 15.34031,15.377 z" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="20"
+       y="1022.3622"
+       id="text3345"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="20"
+         y="1022.3622"
+         id="tspan3349" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:22px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:81.00000024000000565%;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="31.720005"
+       y="1020.0585"
+       id="text2999"
+       sodipodi:linespacing="81%"><tspan
+         sodipodi:role="line"
+         id="tspan3001"
+         x="31.720005"
+         y="1020.0585"
+         style="font-weight:bold;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;-inkscape-font-specification:Arial Bold">TuT</tspan><tspan
+         sodipodi:role="line"
+         x="31.720005"
+         y="1037.8784"
+         id="tspan3003"
+         style="font-weight:bold;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;-inkscape-font-specification:Arial Bold">3</tspan></text>
+  </g>
+</svg>
