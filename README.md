@@ -58,35 +58,14 @@ Before you can run the ftcommunity firmware, you will need to reconfigure the TX
 
 To reconfigure the TXT, start the TXT with the original Fischertechnik firmware and log into the TXT as root (see [here](http://www.fischertechnik.de/PortalData/1/Resources/downloads/documents/TXT_Security_Information.pdf) for instructions).
 
-As root, execute these commands:
+As root, execute this command:
 ```
-fw_setenv loadsduimg "fatload mmc 0 0x80200000 uImage"
-fw_setenv loadsddtb "fatload mmc 0 0x80F00000 am335x-kno_txt.dtb"
-fw_setenv setsdargs "setenv bootargs fbtft_device.name=txt_ili9341 fbtft_device.fps=10 console=ttyO0,115200 root=/dev/mmcblk0p2 rw rootwait quiet"
-fw_setenv bootboth "run reset_wl18xx; mtdparts default; nand read 0x80200000 NAND.uImage; nand read 0x80F00000 NAND.dtb; setenv bootargs fbtft_device.name=txt_ili9341 fbtft_device.fps=10 console=ttyO0,115200 ubi.mtd=10 root=ubi0:rootfs rootfstype=ubifs rootwait quiet; run loadsduimg loadsddtb setsdargs; fdt addr 0x80F00000; run opp; bootm 0x80200000 - 0x80F00000"
+fw_setenv bootcmd "run sdboot;run nandboot"
 ```
 
-Validate the settings by running
-```
-fw_printenv loadsduimg loadsddtb setsdargs bootboth
-```
+**Hinweis: Bitte überprüfen Sie das Kommando genauestens. Fehler im 'bootcmd' wird verhindern, dass der TXT booten kann. In diesem Fall muss die Korrektur über die [serielle Konsole](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) mit Hilfe eines speziellen Adapters vorgenommen werden.**
 
-The result should be
-```
-loadsduimg=fatload mmc 0 0x80200000 uImage
-loadsddtb=fatload mmc 0 0x80F00000 am335x-kno_txt.dtb
-setsdargs=setenv bootargs fbtft_device.name=txt_ili9341 fbtft_device.fps=10 console=ttyO0,115200 root=/dev/mmcblk0p2 rw rootwait quiet
-bootboth=run reset_wl18xx; mtdparts default; nand read 0x80200000 NAND.uImage; nand read 0x80F00000 NAND.dtb; setenv bootargs fbtft_device.name=txt_ili9341 fbtft_device.fps=10 console=ttyO0,115200 ubi.mtd=10 root=ubi0:rootfs rootfstype=ubifs rootwait quiet; run loadsduimg loadsddtb setsdargs; fdt addr 0x80F00000; run opp; bootm 0x80200000 - 0x80F00000
-```
-
-
-If all settings are correct, activate them by running
-
-```
-fw_setenv bootcmd "run bootboth"
-```
-
-Note: Compare the settings carefully and do **not** run this last command if any of the configuration settings are not OK. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.
+**Note: Compare this command carefully and do **not** run it if it doesn't exactly match the line shown here. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.**
 
 ## Run the ftcommunity firmware
 
