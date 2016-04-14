@@ -65,7 +65,7 @@ fw_setenv bootcmd "run sdboot;run nandboot"
 
 **Hinweis: Bitte überprüfen Sie das Kommando genauestens. Fehler im 'bootcmd' wird verhindern, dass der TXT booten kann. In diesem Fall muss die Korrektur über die [serielle Konsole](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) mit Hilfe eines speziellen Adapters vorgenommen werden.**
 
-**Note: Compare this command carefully and do **not** run it if it doesn't exactly match the line shown here. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.**
+**Note: Compare this command carefully and do not run it if it doesn't exactly match the line shown here. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.**
 
 ## Run the ftcommunity firmware
 
