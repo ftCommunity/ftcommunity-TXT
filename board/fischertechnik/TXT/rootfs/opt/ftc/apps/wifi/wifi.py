@@ -276,6 +276,10 @@ class FtcGuiApplication(TxtApplication):
 
                 if networks_dup[-1]['ssid'] != "\\x00":
                     networks.append(networks_dup[-1])
+
+            # only one ssid returned: This sure has no duplicate
+            elif len(networks_dup) > 0:
+                networks.append(networks_dup[0])
         
         self.ssids_w = QComboBox()
         if networks:
