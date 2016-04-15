@@ -4,12 +4,17 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 # mount kernel filesystems
-mount -t devtmpfs devtmpfs /dev
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mkdir -p /dev/pts
+mkdir -p /dev/shm
 
-# populate /dev
-#mdev -s
+move_kernel_mounts() {
+  for dir in proc sys dev; do
+    mount -o move $1$dir $2$dir
+  done
+}
 
 get_opt() {
   echo "$@" | cut -d "=" -f 2
@@ -40,15 +45,12 @@ else
 fi
 
 if [ -x "/newroot/$init" ]; then
-  umount /sys /proc
   mount -o move /sdcard /newroot/media/sdcard
-  mount -o move /dev /newroot/dev
-  mount -t devtmpfs 
+  move_kernel_mounts / /newroot/
   exec switch_root /newroot "${init}"
 fi
 
 #This will only be run if the exec above failed
-echo "Failed to switch_root, dropping to a shell"
-mount -t proc proc /proc
-mount -t sysfs sysfs /sys
+echo "Failed to switch_root or no init found, dropping to a shell"
+move_kernel_mounts /newroot/ /
 exec /bin/sh

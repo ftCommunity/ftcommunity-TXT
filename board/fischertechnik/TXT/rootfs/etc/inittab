@@ -14,10 +14,8 @@
 # process   == program to run
 
 # Startup the system
-::sysinit:/bin/mount -t proc proc /proc
-::sysinit:/bin/mount -o remount,rw /
-::sysinit:/bin/mkdir -p /dev/pts
-::sysinit:/bin/mkdir -p /dev/shm
+::sysinit:/usr/sbin/ubiattach -p /dev/mtd10 -d0
+::sysinit:/usr/sbin/mount.posixovl -H /media/sdcard/ -- -o allow_other
 ::sysinit:/bin/mount -a
 ::sysinit:/bin/hostname -F /etc/hostname
 # now run any rc scripts
@@ -26,10 +24,10 @@
 # Put a getty on the serial port
 ttyO0::respawn:/sbin/getty -L ttyO0 115200 linux
 
-# Stuff to do for the 3-finger salute
-#::ctrlaltdel:/sbin/reboot
-
 # Stuff to do before rebooting
 ::shutdown:/etc/init.d/rcK
-#::shutdown:/sbin/swapoff -a
-#::shutdown:/bin/umount -a -r
+::shutdown:/usr/sbin/killall5 -TERM
+::shutdown:/bin/sleep 2
+::shutdown:/usr/sbin/killall5 -KILL
+::shutdown:/bin/mount -o remount,ro /
+::shutdown:/bin/umount -a -r
