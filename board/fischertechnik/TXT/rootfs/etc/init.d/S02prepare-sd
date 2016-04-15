@@ -1,0 +1,24 @@
+#!/bin/sh
+
+SDCARD=/media/sdcard
+
+create_essential_dirs() {
+	mkdir -p $SDCARD/apps
+	chown -f ftc:ftc $SDCARD/apps
+}
+
+case "$1" in
+  start)
+	create_essential_dirs
+	;;
+  stop)
+	;;
+  restart|reload)
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+
