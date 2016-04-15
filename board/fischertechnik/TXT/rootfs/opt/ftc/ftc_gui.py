@@ -230,7 +230,6 @@ class FtcGuiApplication(QApplication):
 
     def launch_app(self, executable):
         global app, app_executable
-        print("Lauch " + executable)
 
         if self.app_is_running():
             print("Still one app running!")
@@ -265,7 +264,11 @@ class FtcGuiApplication(QApplication):
     def on_get_app(self, s):
         global app_executable
         if self.app_is_running():
-            s.write(app_executable)
+            # only return the <group>/<app>/<exec> part of the path
+            app_dir, app_exec_name = os.path.split(app_executable)
+            app_group, app_dir_name = os.path.split(app_dir)
+            app_group_name = os.path.basename(app_group)
+            s.write(os.path.join(app_group_name, app_dir_name, app_exec_name))
         s.write("\n")
 
     @pyqtSlot()
@@ -276,25 +279,53 @@ class FtcGuiApplication(QApplication):
             while app.poll() == None:
                 pass
 
+    # return a list of directories containing apps
+    # searches under /opt/ftc/apps/<group>/<app>
+    # the returned list is srted by the name of the apps
+    # as stored in the manifest file
+    def scan_app_dirs(self):
+        app_base = os.path.join(base, "apps")
+        # scan for app group dirs first
+        app_groups = os.listdir(app_base)
+        # then scan for app dirs inside
+        app_dirs = []
+        for i in app_groups:
+            app_group_dirs = os.listdir(os.path.join(app_base, i))
+            for a in app_group_dirs:
+                # build full path of the app dir
+                app_dir = os.path.join(app_base, i, a)
+                # check if there's a manifest inside that dir
+                manifestfile = os.path.join(app_dir, "manifest")
+                if os.path.isfile(manifestfile):
+                    # get app name
+                    manifest = configparser.RawConfigParser()
+                    manifest.read(manifestfile)
+                    appname = manifest.get('app', 'name')
+                    app_dirs.append((appname, os.path.join(app_base, i, a)))
+
+        # sort list by apps name
+        app_dirs.sort(key=lambda tup: tup[0])
+
+        # return a list of only the directories of the now sorted list
+        return ([x[1] for x in app_dirs])
+
     @pyqtSlot(str)
     def on_launch(self, name):
-        print("Net req to launch", name)
-
         # search for an app with that name
         # get list of all subdirectories in the application directory
-        app_dirs = sorted(os.listdir(base + "/apps"))
+        app_dirs = self.scan_app_dirs()
 
         # extract all those that have a manifest file
         for app_dir in app_dirs:
-            app_path = base + "/apps/" + app_dir + "/"
-            manifestfile = app_path + "manifest"
-            if os.path.isfile(manifestfile):
-                manifest = configparser.RawConfigParser()
-                manifest.read(manifestfile)
-                if manifest.has_option('app', 'exec'):
-                    if app_dir + "/" + manifest.get('app', 'exec') == name:
-                        executable = app_path + manifest.get('app', 'exec')
-                        self.launch_app(executable)
+            app_group, app_dir_name = os.path.split(app_dir)
+            app_group_name = os.path.basename(app_group)
+            app_local_dir = os.path.join(app_group_name, app_dir_name)
+            manifestfile = os.path.join(app_dir, "manifest")
+            manifest = configparser.RawConfigParser()
+            manifest.read(manifestfile)
+            if manifest.has_option('app', 'exec'):
+                if os.path.join(app_local_dir, manifest.get('app', 'exec')) == name:
+                    self.launch_app(os.path.join(app_dir, manifest.get('app', 'exec')))
 
     @pyqtSlot(str)
     def on_message(self, str):
@@ -304,20 +335,18 @@ class FtcGuiApplication(QApplication):
     # for their category. Generate a unique set of categories from this
     def scan_categories(self):
         # get list of all subdirectories in the application directory
-        app_dirs = sorted(os.listdir(base + "/apps"))
+        app_dirs = self.scan_app_dirs()
 
         # extract all those that have a manifest file
         categories = set()
         for app_dir in app_dirs:
-            app_path = base + "/apps/" + app_dir + "/"
-            manifestfile = app_path + "manifest"
-            if os.path.isfile(manifestfile):
-                manifest = configparser.RawConfigParser()
-                manifest.read(manifestfile)
-                if manifest.has_option('app', 'category'):
-                    categories.add(manifest.get('app', 'category'))
-                else:
-                    print("App has no category:", app_dir)
+            manifestfile = os.path.join(app_dir, "manifest")
+            manifest = configparser.RawConfigParser()
+            manifest.read(manifestfile)
+            if manifest.has_option('app', 'category'):
+                categories.add(manifest.get('app', 'category'))
+            else:
+                print("App has no category:", app_dir)
 
         return sorted(categories)
 
@@ -387,24 +416,23 @@ class FtcGuiApplication(QApplication):
         iconnr = 0
 
         # get list of all directories in the application directory
-        app_dirs = sorted(os.listdir(base + "/apps"))
+        app_dirs = self.scan_app_dirs()
 
         # extract all those that have a manifest file an check for
         # current category
         app_list = []
         for app_dir in app_dirs:
-            manifestfile = base + "/apps/" + app_dir + "/manifest"
-            if os.path.isfile(manifestfile):
-                if current_category == "All":
-                    app_list.append(app_dir)
-                else:
-                    manifest = configparser.RawConfigParser()
-                    manifest.read(manifestfile)
-                    try:
-                        if(manifest.get('app', 'category') == current_category):
-                            app_list.append(app_dir)
-                    except configparser.NoOptionError:
-                        pass
+            if current_category == "All":
+                app_list.append(app_dir)
+            else:
+                manifestfile = os.path.join(app_dir, "manifest")
+                manifest = configparser.RawConfigParser()
+                manifest.read(manifestfile)
+                try:
+                    if(manifest.get('app', 'category') == current_category):
+                        app_list.append(app_dir)
+                except configparser.NoOptionError:
+                    pass
 
         # calculate icons to be displayed on current page
         apps = len(app_list)
@@ -432,15 +460,15 @@ class FtcGuiApplication(QApplication):
 
         # scan through the list of all applications
         for app_dir in app_list:
-            app_path = base + "/apps/" + app_dir + "/"
-            manifestfile = app_path + "manifest"
+            manifestfile = os.path.join(app_dir, "manifest")
             manifest = configparser.RawConfigParser()
             manifest.read(manifestfile)
 
             # get various fields from manifest
             appname = manifest.get('app', 'name')
-            executable = app_path + manifest.get('app', 'exec')
-            iconname = app_path + manifest.get('app', 'icon')
+            # fix me
+            executable = os.path.join(app_dir, manifest.get('app', 'exec'))
+            iconname = os.path.join(app_dir, manifest.get('app', 'icon'))
         
             # check if this app is on the current page
             if (iconnr >= icon_1st and iconnr <= icon_last):

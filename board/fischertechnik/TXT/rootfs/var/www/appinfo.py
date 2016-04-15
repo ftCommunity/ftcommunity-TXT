@@ -25,12 +25,7 @@ try:
     # Connect to server and send data
     sock.connect(("localhost", 9000))
     sock.sendall(bytes("get-app\n", "UTF-8"))
-    exe_str = sock.makefile().readline().strip()
-    exe_str_parts = exe_str.split('/')
-    # this returns the full path. Extract last two path
-    # elements only
-    if len(exe_str_parts) > 1:
-        current_executable = exe_str_parts[-2] + "/" + exe_str_parts[-1]
+    current_executable = sock.makefile().readline().strip()
 except socket.error as msg:
     print('<h2><font color="red">Launcher not responding!</font></h2>')
 finally:
@@ -52,11 +47,12 @@ if os.path.isfile(manifestfile):
     manifest.read(manifestfile)
 
     # get apps directory name from manifest file path
-    name = os.path.basename(os.path.dirname(os.path.abspath(manifestfile)))
-    
+    app_dir = os.path.dirname(os.path.abspath(manifestfile))
+    group_dir = os.path.dirname(app_dir)
+    name = os.path.join(os.path.basename(group_dir), os.path.basename(app_dir))
     appname = manifest.get('app', 'name')
     description = manifest.get('app', 'desc')
-    iconname = "apps/" + name + "/" + manifest.get('app', 'icon')
+    iconname = os.path.join( "apps", name, manifest.get('app', 'icon'))
     category = manifest.get('app', 'category')
     executable = manifest.get('app', 'exec')
     is_running =  name + "/" + executable == current_executable

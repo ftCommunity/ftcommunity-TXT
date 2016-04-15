@@ -20,7 +20,9 @@ print('</head><body>')
 print('<h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>')
  
 upload_dir = "/tmp"
-appbase = "/opt/ftc/apps"
+
+# directory were the user installed apps are located
+appbase = "/opt/ftc/apps/user"
 
 print('<div align="center">')
 print("<h1>Upload</h1>")
