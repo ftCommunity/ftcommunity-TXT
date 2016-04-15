@@ -37,19 +37,22 @@ def scan_app_dirs():
     # then scan for app dirs inside
     app_dirs = []
     for i in app_groups:
-        app_group_dirs = os.listdir(os.path.join(app_base, i))
-        for a in app_group_dirs:
-            # build full path of the app dir
-            app_dir = os.path.join(app_base, i, a)
-            # check if there's a manifest inside that dir
-            manifestfile = os.path.join(app_dir, "manifest")
-            if os.path.isfile(manifestfile):
-                # get app name
-                manifest = configparser.RawConfigParser()
-                manifest.read(manifestfile)
-                appname = manifest.get('app', 'name')
-                app_dirs.append((appname, os.path.join(app_base, i, a)))
-
+        try:
+            app_group_dirs = os.listdir(os.path.join(app_base, i))
+            for a in app_group_dirs:
+                # build full path of the app dir
+                app_dir = os.path.join(app_base, i, a)
+                # check if there's a manifest inside that dir
+                manifestfile = os.path.join(app_dir, "manifest")
+                if os.path.isfile(manifestfile):
+                    # get app name
+                    manifest = configparser.RawConfigParser()
+                    manifest.read(manifestfile)
+                    appname = manifest.get('app', 'name')
+                    app_dirs.append((appname, os.path.join(app_base, i, a)))
+        except:
+            pass
+            
     # sort list by apps name
     app_dirs.sort(key=lambda tup: tup[0])
 

@@ -66,7 +66,10 @@ def unzip_uploaded_file(zip_name, appdir):
         print("Target dir exists, overwriting contents.<br/>")
     else:
         print("Target dir does not exist, creating it.<br/>")
-        os.makedirs(appdir)
+        try:
+            os.makedirs(appdir)
+        except:
+            return False, "Unable to create target dir!"
 
     for name in z.namelist():
         print("Extracting " + name + " ...<br/>")
