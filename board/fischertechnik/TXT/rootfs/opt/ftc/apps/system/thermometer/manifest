@@ -6,3 +6,4 @@ icon: icon.png
 desc: A simple thermometer app using the TXTs temperature sensor on I1
 exec: thermometer.py
 managed: yes
+uuid: d23829ea-326a-4f85-8627-169b0dc56669

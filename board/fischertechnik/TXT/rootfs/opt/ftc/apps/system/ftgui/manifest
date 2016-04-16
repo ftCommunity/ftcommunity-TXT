@@ -5,3 +5,4 @@ icon: icon.png
 desc: Start the original TXT GUI
 exec: ftgui.py
 managed: yes
+uuid: bda5dcf8-cbb4-42d7-8517-3245f15373bf

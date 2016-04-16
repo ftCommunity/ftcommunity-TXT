@@ -98,6 +98,7 @@ class FtcGuiApplication(TxtApplication):
             self.lbl = QLabel()
             self.lbl.setObjectName("smalllabel")
             self.lbl.setAlignment(Qt.AlignCenter)
+            self.lbl.setWordWrap(True)
             vbox.addWidget(self.lbl)
             vbox.addStretch()
 
@@ -106,16 +107,16 @@ class FtcGuiApplication(TxtApplication):
 
             self.w.centralWidget.setLayout(vbox)
         
-            self.hide_timer = QTimer(self)
-            self.hide_timer.timeout.connect(self.on_code_timeout)
-            self.hide_timer.setSingleShot(True)
+#            self.hide_timer = QTimer(self)
+#            self.hide_timer.timeout.connect(self.on_code_timeout)
+#            self.hide_timer.setSingleShot(True)
 
         self.w.show()
         self.exec_()        
 
     def on_code_detected(self,str):
         self.lbl.setText(str)
-        self.hide_timer.start(1000)  # hide after 1 second
+#        self.hide_timer.start(1000)  # hide after 1 second
 
     def on_code_timeout(self):
         self.lbl.setText("")

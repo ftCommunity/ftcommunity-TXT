@@ -5,3 +5,4 @@ icon: icon.png
 desc: A simple calculator
 exec: calc.py
 managed: yes
+uuid: 2093ec3e-e85f-47cb-aebc-3809b482d145

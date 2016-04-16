@@ -5,3 +5,4 @@ icon: icon.png
 desc: Demo of ZBAR QR code decoder
 exec: zbartest.py
 managed: yes
+uuid: c2258ee6-b86b-4c52-90b4-0d57d4244aaf

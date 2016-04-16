@@ -5,3 +5,4 @@ icon: icon.png
 desc: A simple clock app
 exec: clock.py
 managed: yes
+uuid: 4fdef96d-4a27-4209-85c6-7786110d9f2f
