@@ -2,14 +2,28 @@
 
 SDCARD=/media/sdcard
 
-create_essential_dirs() {
-	mkdir -p $SDCARD/apps
-	chown -f ftc:ftc $SDCARD/apps
+is_readonly_fs() {
+  egrep -q "$1 ([^ ]+) ro[ ,]" /proc/mounts
+  return $?
+}
+
+setup_dir() {
+	mkdir -p "$SDCARD/$1"
+	chown -f "$2" "$SDCARD/$1"
+	test -n "$3" && chmod -f "$3" "$SDCARD/$1"
 }
 
 case "$1" in
-  start)
-	create_essential_dirs
+  start) $SDCARD
+	chmod -f u=rw,go-rwx $SDCARD/uImage $SDCARD/am335x-kno_txt.dtb $SDCARD/rootfs.img
+	setup_dir apps ftc:ftc u=rwx,go=rx
+	setup_dir config root:root u=rwx,go=rx
+	if is_readonly_fs / ; then
+		setup_dir config/etc root:root u=rwx,go=rx
+		mkdir -p /tmp/.etc-readonly
+		mount --bind /etc /tmp/.etc-readonly
+		unionfs "$SDCARD/config/etc=RW:/tmp/.etc-readonly=RO" /etc -o cow,allow_other,nonempty,hide_meta_files
+	fi
 	;;
   stop)
 	;;
