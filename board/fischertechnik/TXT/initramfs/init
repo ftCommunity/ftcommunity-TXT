@@ -36,7 +36,7 @@ done
 # mount SD card
 mount -t vfat /dev/mmcblk0p1 /sdcard -o dmask=077,fmask=177
 if [ -f /sdcard/rootfs.img ]; then
-  mount -t auto /sdcard/rootfs.img /newroot -o loop
+  mount -t auto /sdcard/rootfs.img /newroot -o loop,ro
 elif [ -b "$root" ]; then
   mount -t auto "$root" /newroot
 else
