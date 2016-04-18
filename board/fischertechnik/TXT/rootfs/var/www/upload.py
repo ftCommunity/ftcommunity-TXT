@@ -7,6 +7,9 @@ import cgi
 import zipfile
 import sys, os
 import socket
+import io
+import cgitb
+cgitb.enable()
 
 print("Content-Type: text/html")
 print("")
@@ -45,7 +48,7 @@ def save_uploaded_file():
 
     return True,filename
 
-def unzip_uploaded_file(zip_name, appdir):
+def unzip_uploaded_file(zip_name, appbase):
     print("Unpacking " + zip_name + "<br/>")
 
     if not zipfile.is_zipfile(zip_name):
@@ -58,7 +61,17 @@ def unzip_uploaded_file(zip_name, appdir):
         z.getinfo("manifest")
     except KeyError:
         fh.close()
-        return False, "Not a TXT app!"
+        return False, "Not a TXT app!", ""
+
+    # extract only the manifest to get the uuid which in turn
+    # is used as the apps local directory
+    manifest_str = io.StringIO(z.read("manifest").decode('utf-8'))
+    manifest = configparser.RawConfigParser()
+    manifest.readfp(manifest_str)
+    if not manifest.has_option('app', 'uuid'):
+        return False, "Manifest does not contain a UUID!", ""
+
+    appdir = os.path.join(appbase, manifest.get('app', 'uuid'))
 
     print("Extracting to " + appdir + "<br/>")
 
@@ -69,19 +82,19 @@ def unzip_uploaded_file(zip_name, appdir):
         try:
             os.makedirs(appdir)
         except:
-            return False, "Unable to create target dir!"
+            return False, "Unable to create target dir!", ""
 
     for name in z.namelist():
         print("Extracting " + name + " ...<br/>")
         z.extract(name, appdir)
     fh.close()
 
-    return True, ""
+    return True, "", appdir
 
 [ok, zip_name] = save_uploaded_file()
 if ok:
-    appdir = appbase + "/" + os.path.splitext(os.path.basename(zip_name))[0]
-    [ok, result_str] = unzip_uploaded_file(zip_name, appdir)
+    #    appdir = appbase + "/" + os.path.splitext(os.path.basename(zip_name))[0]
+    [ok, result_str, appdir] = unzip_uploaded_file(zip_name, appbase)
 
     if not ok:
         print("<h1>Error: " + result_str + "</h1>")
