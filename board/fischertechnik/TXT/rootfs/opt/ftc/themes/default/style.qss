@@ -395,7 +395,14 @@ QScrollBar::left-arrow:horizontal {
 
 QSlider {
      background: none;
+}
+
+QSlider:vertical {
      width: 32px;
+}
+
+QSlider:horizontal {
+     height: 32px;
 }
 
 QSlider::groove:vertical {
@@ -411,4 +418,19 @@ QSlider::handle:vertical {
     height: 16px;
     background: #fcce04;
     margin: 0 -8px; /* expand outside the groove */
+}
+
+QSlider::groove:horizontal {
+    border: 4px inset white;
+    background: lightgrey;
+    position: absolute;
+    top: 8px; bottom: 8px;
+}
+
+QSlider::handle:horizontal {
+    border: 4px outset lightgrey;
+    border-radius: 4px;
+    width: 16px;
+    background: #fcce04;
+    margin: -8px 0; /* expand outside the groove */
 }
