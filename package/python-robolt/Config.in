@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_ROBOLT
+	bool "python-robolt"
+        select BR2_PACKAGE_PYTHON_PYUSB
+	help
+	  Python interface for the Fischertechnik RoboLT
+
+	  https://github.com/ftCommunity/python-robolt
