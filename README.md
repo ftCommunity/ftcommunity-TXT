@@ -2,6 +2,30 @@
 
 The ftcommunity firmware aims to provide enhancements that are not (or not yet) in the standard firmware, and at the same time to be fully compatible with the latest standard firmware.
 
+# What is this and why would i want this?
+
+The Fischertechnik TXT controller is a Linux driven computerized brick for the Fischertechnik construction toy.
+
+![TXT](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg)
+
+The Fischertechnik TXT comes pre-installed with a Linux based firmware. This firmware is slightly outdated
+(the base system consist of parts which are all at least two years old) and doesn't make full use of the
+hardware capabilities of the TXT. At the time of writing the original TXT firmware doesn't even allow to use
+the built-in WLAN capabilities to connect to your home WiFi.
+
+The community firmware aims to change this. It replaces the entire system with much newer components including 
+an updated Linux kernel and updates for all system components. Furthermore it provides a fresh user interface
+and focusses on connectivity in general. It connect to your home WiFi as well as e.g. via USB to your Lego WeDo
+bricks and much more.
+
+There are still limitations which are due to the fact that some vendor
+specific closed source core components have not yet been replaced by
+open components. Especially compatibility to the original RoboPro
+software used to program and control the TXT from a PC is limited. The
+firmware community aims to restore full compatibility as well as
+moving beyond the RoboPro capabilities by providing support for additional 
+programming environments like e.g. [Snap! or Scratch](https://en.wikipedia.org/wiki/Scratch_%28programming_language%29)
+
 # Usage
 
 ## Build the firmware
