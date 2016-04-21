@@ -1,10 +1,8 @@
-# This is the community edition of the standard firmware for the FT-TXT.
+# Community edition of the standard firmware for the FT-TXT.
 
-The ftcommunity firmware aims to provide enhancements that are not (or not yet) in the standard firmware, and at the same time to be fully compatible with the latest standard firmware.
+## What is this and why would i want this?
 
-# What is this and why would i want this?
-
-The Fischertechnik TXT controller is a Linux driven computerized brick for the Fischertechnik construction toy.
+The [Fischertechnik TXT controller](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-307/usetemplate-2_column_pano/) is a Linux driven computerized brick for the Fischertechnik construction toy.
 
 ![TXT](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg)
 
@@ -15,8 +13,12 @@ the built-in WLAN capabilities to connect to your home WiFi.
 
 The community firmware aims to change this. It replaces the entire system with much newer components including 
 an updated Linux kernel and updates for all system components. Furthermore it provides a fresh user interface
-and focusses on connectivity in general. It connect to your home WiFi as well as e.g. via USB to your Lego WeDo
-bricks and much more.
+and focusses on connectivity in general. It can connect to your home WiFi as well as e.g. via USB to your Lego WeDo
+bricks, other [Fischertechnik Components](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-3/usetemplate-2_column_pano/) and much more.
+
+The community firmware doesn't replace the built-in original firmware. Instead it's installed on a regular micro-SD card
+and provides a means to leave the original untouched which being used. Simply pull out the SD card containing the
+community firmware to bring your TXT back into factory state.
 
 There are still limitations which are due to the fact that some vendor
 specific closed source core components have not yet been replaced by
@@ -25,6 +27,10 @@ software used to program and control the TXT from a PC is limited. The
 firmware community aims to restore full compatibility as well as
 moving beyond the RoboPro capabilities by providing support for additional 
 programming environments like e.g. [Snap! or Scratch](https://en.wikipedia.org/wiki/Scratch_%28programming_language%29)
+
+## (German) Forum 
+
+Most discussions around the community firmware take place in the [FTCommunity forum)](http://forum.ftcommunity.de/viewforum.php?f=8). This is a german forum but english contributions are welcome.
 
 # Usage
 
