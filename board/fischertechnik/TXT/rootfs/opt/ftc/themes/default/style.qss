@@ -6,7 +6,7 @@
 * { 
     background-color: rgba(255,255,255,40);
     selection-background-color: none;
-    font: bold 32px "sans-serif"; 
+    font: 32px "sans-serif"; 
     color: white;
     outline: 0;
     border: none;
@@ -88,7 +88,7 @@ QMenu::indicator:unchecked {
 
 QTabBar {
     color: white;
-    font: bold 28px; 
+    font: 28px; 
 }
 
 /* tabs are dark ... */

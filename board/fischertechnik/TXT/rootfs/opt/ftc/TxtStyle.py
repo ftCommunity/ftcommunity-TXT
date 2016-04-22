@@ -168,7 +168,8 @@ class TxtDialog(QDialog):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.layout.addWidget(TxtTitle(title, self))
+        self.titlebar = TxtTitle(title, self)
+        self.layout.addWidget(self.titlebar)
         self.layout.setContentsMargins(0,0,0,0)
         self.layout.setSpacing(0)
 
@@ -183,6 +184,9 @@ class TxtDialog(QDialog):
         self.centralWidget.deleteLater()
         self.centralWidget = w
         self.layout.addWidget(self.centralWidget)
+
+    def addMenu(self):
+        return self.titlebar.addMenu()
 
     def close(self):
         self.parent.unregister(self)
