@@ -18,6 +18,7 @@ case "$1" in
 	chmod -f u=rw,go-rwx $SDCARD/uImage $SDCARD/am335x-kno_txt.dtb $SDCARD/rootfs.img
 	setup_dir apps ftc:ftc u=rwx,go=rx
 	setup_dir config root:root u=rwx,go=rx
+	setup_dir config/net root:root u=rwx,go=rx
 	if is_readonly_fs / ; then
 		# Setup writeable overlay of /etc with changes in $SDCARD/config/etc
 		setup_dir config/etc root:root u=rwx,go=rx
