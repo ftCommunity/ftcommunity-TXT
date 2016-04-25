@@ -23,6 +23,14 @@
      background: none;
 }
 
+QListWidget {
+     background-color: rgba(0,0,0,0);
+}
+
+QScrollArea {
+     background-color: rgba(0,0,0,0);
+}
+
 /* popups repeat the gradient of the central widget */
 #popup {
     background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 #448acc, stop:0.2 #5c96cc, stop:1 #0c6acc);
