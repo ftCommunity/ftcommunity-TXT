@@ -51,16 +51,26 @@ make
 will build the entire root file system and the kernel and place the resulting files in the `output/images` directory.
 
 ## Prepare SD Card
+You need an empty micro SD card for the ftcommunity firmware.
 
-You need an empty micro SD card for the ftcommunity firmware. Create two partitions on the SD card. The first partition should be about 20-40 MB in size and must be formatted as `FAT`, the second partition can use the rest of the available space on the SD card and must be formatted as `ext4`.
+The ftcommunity firmware supports two different SD card layouts:
+* simple layout: Everything is stored on a single FAT partition, the linux root file system is read-only and resides in an image file on the FAT partition. This is the recommended setup for most users.
+* advanced layout: The linux root file system is read-write and stored on a separate partition. This is the recommended layout for developers.
 
-The following commands will do this on a linux system where the SD card slot is named `
-/dev/mmcblk0`. *Make sure this is really the empty SD card, the following commands will destroy all data on `/dev/mmcblk0`*:
+In both layouts, user installed apps and persistent settings are stored on the FAT partition.
+
+### Simple Layout
+Make sure that the first partition on the SD card is formatted as FAT (most fresh SD cards should already have this layout). Then copy the files `output/images/uImage`, `output/images/am335x-kno_txt.dtb` and `output/images/rootfs.image` to the SD card.
+
+### Advanced Layout
+Create two partitions on the SD card. Both partitions should have a size of at least 100 MB, the recommended setup is to reserve ca. 200-500 MB for the second partition and allocate most space to the first partition. Format the first partition as `FAT` and the second partition as `ext4`.
+
+The following commands will do this on a linux system where the SD card slot is named `/dev/mmcblk0`. *Make sure this is really the empty SD card, the following commands will destroy all data on `/dev/mmcblk0`*:
 
 ```
 parted /dev/mmcblk0 mklabel msdos
-parted -a optimal /dev/mmcblk0 mkpart primary fat32 1MB 33MB
-parted -a optimal /dev/mmcblk0 mkpart primary ext2 34MB 100%
+parted -a optimal /dev/mmcblk0 -- mkpart primary fat32 1MB -300MB
+parted -a optimal /dev/mmcblk0 -- mkpart primary ext2 -300MB 100%
 parted /dev/mmcblk0 set 1 boot on
 mkfs.vfat -n BOOT /dev/mmcblk0p1
 mkfs.ext4 -L ROOT /dev/mmcblk0p2
