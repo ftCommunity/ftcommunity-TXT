@@ -1,8 +1,0 @@
-[app]
-name: Idas Ampel
-category: Tests
-icon: icon.png
-desc: Idas Schleichtierampel
-exec: idas_ampel.py
-managed: yes
-uuid: 368f15ca-9907-4096-942c-0eebd7b1695d
