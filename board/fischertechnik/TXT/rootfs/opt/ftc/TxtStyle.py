@@ -188,14 +188,38 @@ class TxtDialog(QDialog):
     def addMenu(self):
         return self.titlebar.addMenu()
 
+    def unregister(self,child):
+        self.parent.unregister(child)
+
+    def register(self,child):
+        self.parent.register(child)
+
     def close(self):
         self.parent.unregister(self)
         super(TxtDialog, self).close()
         
         # TXT windows are always fullscreen
     def exec_(self):
-        QDialog.showFullScreen(self)
+        if platform.machine() == "armv7l":
+            QWidget.showFullScreen(self)
+        else:
+            QWidget.show(self)
         QDialog.exec_(self)
+
+class TxtMessageBox(TxtDialog):
+    def __init__(self,str,parent):
+        TxtDialog.__init__(self,str,parent)
+
+    def setText(self, text):
+        vbox = QVBoxLayout()
+        vbox.addStretch()
+        msg = QLabel(text)
+        msg.setObjectName("smalllabel")
+        msg.setWordWrap(True)
+        msg.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(msg)
+        vbox.addStretch()
+        self.centralWidget.setLayout(vbox)
 
 class TxtApplication(QApplication):
     def __init__(self, args):
