@@ -586,7 +586,7 @@ class FtcGuiApplication(QApplication):
             if manifest.has_option('app', 'icon'):
                 iconname = os.path.join(app_dir, manifest.get('app', 'icon'))
             else:
-                iconname = "icon.png"
+                iconname = os.path.join(base, "icon.png")
         
             # check if this app is on the current page
             if (iconnr >= icon_1st and iconnr <= icon_last):
