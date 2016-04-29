@@ -52,7 +52,10 @@ if os.path.isfile(manifestfile):
     name = os.path.join(os.path.basename(group_dir), os.path.basename(app_dir))
     appname = manifest.get('app', 'name')
     description = manifest.get('app', 'desc')
-    iconname = os.path.join( "apps", name, manifest.get('app', 'icon'))
+    if manifest.has_option('app', 'icon'):
+        iconname = os.path.join( "apps", name, manifest.get('app', 'icon'))
+    else:
+        iconname = "icon.png"
     category = manifest.get('app', 'category')
     executable = manifest.get('app', 'exec')
     is_running =  name + "/" + executable == current_executable

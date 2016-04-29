@@ -72,7 +72,11 @@ for app_dir in scan_app_dirs():
     # relative to its document root
     group_dir, app_dir_name = os.path.split(app_dir)
     group_dir_name = os.path.basename(group_dir)
-    iconname = os.path.join( "apps", group_dir_name, app_dir_name, manifest.get('app', 'icon'))
+    if manifest.has_option('app', 'icon'):
+        iconname = os.path.join( "apps", group_dir_name, app_dir_name, manifest.get('app', 'icon'))
+    else:
+        iconname = "icon.png"
+        
     executable = os.path.join(app_dir, manifest.get('app', 'exec'))
     exec_relative = os.path.join(group_dir_name, app_dir_name, manifest.get('app', 'exec'))
     is_running = current_executable == exec_relative

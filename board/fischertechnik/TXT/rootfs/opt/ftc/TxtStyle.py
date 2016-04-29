@@ -156,8 +156,14 @@ class TxtDialog(QDialog):
 
         # for some odd reason the childern are not registered
         # as child windows on the txt
+
+        # search for a matching root parent widget
+        while parent and not (parent.inherits("TxtBaseWidget") or parent.inherits("TxtDialog")):
+            parent = parent.parent()
+
         self.parent = parent
-        parent.register(self)
+        if parent:
+            parent.register(self)
         
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
@@ -195,7 +201,9 @@ class TxtDialog(QDialog):
         self.parent.register(child)
 
     def close(self):
-        self.parent.unregister(self)
+        if self.parent:
+            self.parent.unregister(self)
+
         super(TxtDialog, self).close()
         
         # TXT windows are always fullscreen

@@ -3,10 +3,15 @@
 
 # This is the fischertechnik community app launcher
 
+# TODO: 
+# - kill text app when window is being closed
+# - Close text mode window with button
+
 import configparser
 import sys, os, subprocess, threading, math
-import socketserver
+import socketserver, select, pty
 
+from TxtStyle import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
@@ -14,6 +19,7 @@ from PyQt4.QtNetwork import *
 THEME = "default"
 
 CTRL_PORT = 9000
+BUSY_TIMEOUT = 20
 
 # make sure all file access happens relative to this script
 base = os.path.dirname(os.path.realpath(__file__))
@@ -88,12 +94,15 @@ class TxtTopWidget(QWidget):
         else:
             QWidget.showFullScreen(self)
 
-# https://github.com/anjinkristou/Qt-busy-indicator/blob/master/busyindicator.cpp
-class BusyAnimation(QFrame):
+class BusyAnimation(QWidget):
+    expired = pyqtSignal()
+
     def __init__(self, app, parent=None):
         super(BusyAnimation, self).__init__(parent)
         self.setWindowFlags(Qt.Popup | Qt.Window)
-        self.setObjectName("popup")
+        self.setStyleSheet("background:transparent;")
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
         self.resize(64, 64)
         pos = parent.mapToGlobal(QPoint(0,0))
         self.move(pos + QPoint(parent.width()/2-32, parent.height()/2-32))
@@ -104,16 +113,34 @@ class BusyAnimation(QFrame):
         # create a timer to close this window after 10 seconds at most
         self.etimer = QTimer(self)
         self.etimer.setSingleShot(True)
-        self.etimer.timeout.connect(self.expired)
-        self.etimer.start(10000)
+        self.etimer.timeout.connect(self.timer_expired)
+        self.etimer.start(BUSY_TIMEOUT * 1000)
 
-        # animate at 10 frames/sec
+        # animate at 5 frames/sec
         self.atimer = QTimer(self)
         self.atimer.timeout.connect(self.animate)
-        self.atimer.start(100)
+        self.atimer.start(200)
 
-    def expired(self):
+        # create small circle bitmaps for animation
+        self.dark = self.draw(16, QColor("#808080"))
+        self.bright = self.draw(16, QColor("#fcce04"))
+        
+    def draw(self, size, color):
+        img = QImage(size, size, QImage.Format_ARGB32)
+        img.fill(Qt.transparent)
+
+        painter = QPainter(img)
+        painter.setPen(Qt.white)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setBrush(QBrush(color))
+        painter.drawEllipse(0, 0, img.width()-1, img.height()-1)
+        painter.end()
+
+        return img
+
+    def timer_expired(self):
         # App launch expired without callback ...
+        self.expired.emit()
         self.close()
 
     def animate(self):
@@ -131,7 +158,7 @@ class BusyAnimation(QFrame):
         if not self.isVisible():
             self.show()
 
-        self.step += 0.25
+        self.step += 45
         self.repaint()
 
     def close(self):
@@ -139,19 +166,64 @@ class BusyAnimation(QFrame):
         super(BusyAnimation, self).deleteLater()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height())/2.5
+
+        radius = min(self.width(), self.height())/2 - 16
         painter = QPainter()
         painter.begin(self)
 
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.translate(self.width() / 2, self.height() / 2)
-        painter.scale(radius, radius)
 
-        painter.setPen(QPen(Qt.white))
-        painter.setBrush(QBrush(QColor("#fcce04")))
-        painter.drawEllipse(QPointF(0,0), math.cos(self.step), math.sin(self.step))
+        painter.translate(self.width()/2, self.height()/2)
+        painter.rotate(45)
+        painter.rotate(self.step)
+        painter.drawImage(0,radius, self.bright)
+        for i in range(7):
+            painter.rotate(45)
+            painter.drawImage(0,radius, self.dark)
 
         painter.end()
+
+class OutputDialog(TxtDialog):
+    def __init__(self,title,parent):
+        TxtDialog.__init__(self, title, parent)
+        
+        self.txt = QTextEdit()
+        self.txt.setReadOnly(True)
+        
+        font = QFont()
+        font.setPointSize(16)
+        self.txt.setFont(font)
+    
+        self.setCentralWidget(self.txt)
+
+        self.p = None
+
+    def update(self):
+        if self.p:
+            # select
+            if select.select([self.fd], [], [], 0)[0]:
+                output = os.read(self.fd, 100)
+                if output: self.append(str(output, "utf-8"))
+
+            if self.p.poll() != None:
+                if self.p.returncode != 0:
+                    self.txt.setTextColor(Qt.yellow)
+                    self.txt.append("[" + str(self.p.returncode) + "]")
+
+                self.p = None
+                self.timer.stop()
+
+    def poll(self, p,fd):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update)
+        self.timer.start(10)
+        
+        self.fd = fd
+        self.p = p
+
+    def append(self, str):
+        self.txt.moveCursor(QTextCursor.End)
+        self.txt.insertPlainText(str)
 
 class FtcGuiApplication(QApplication):
     def __init__(self, args):
@@ -226,24 +298,48 @@ class FtcGuiApplication(QApplication):
     # has been launched
     @pyqtSlot(int)
     def on_app_running(self, pid):
-        self.popup.close()
+        # popup may have expired in the meantime
+        if self.popup:
+            self.popup.close()
 
-    def launch_app(self, executable):
+    def launch_textmode_app(self, executable,name):
+        dialog = OutputDialog(name, self.w)
+
+        master_fd, slave_fd = pty.openpty()
+        p = subprocess.Popen(str(executable), stdout=slave_fd, stderr=slave_fd)
+        dialog.poll(p, master_fd)
+        dialog.exec_()
+        os.close(master_fd)
+        os.close(slave_fd)
+
+    def launch_app(self, executable, managed, name):
         global app, app_executable
 
         if self.app_is_running():
             print("Still one app running!")
             return
 
+        # get managed state
+        if managed.lower() == "text":
+            self.launch_textmode_app(executable, name)
+            return
+            
+        # run the executable
         app_executable = executable
         app = subprocess.Popen(str(executable))
 
         # display some busy icon
         self.popup = BusyAnimation(app, self.w)
+        self.popup.expired.connect(self.on_busyExpired)
         self.popup.show()
+
+    def on_busyExpired(self):
+        self.popup = None
         
     def do_launch(self,clicked):
-        self.launch_app(str(self.sender().property("executable")))
+        self.launch_app(str(self.sender().property("executable")),
+                        str(self.sender().property("managed")),
+                        str(self.sender().property("appname")))
 
     rescan = pyqtSignal()
     launch = pyqtSignal(str)
@@ -329,7 +425,13 @@ class FtcGuiApplication(QApplication):
             manifest.read(manifestfile)
             if manifest.has_option('app', 'exec'):
                 if os.path.join(app_local_dir, manifest.get('app', 'exec')) == name:
-                    self.launch_app(os.path.join(app_dir, manifest.get('app', 'exec')))
+                    if manifest.has_option('app', 'managed'):
+                        managed = manifest.get('app', 'managed')
+                    else:
+                        managed = "Yes"
+
+                    self.launch_app(os.path.join(app_dir, manifest.get('app', 'exec')), 
+                                    managed, manifest.get('app', 'name'))
 
     @pyqtSlot(str)
     def on_message(self, str):
@@ -367,7 +469,7 @@ class FtcGuiApplication(QApplication):
         self.addIcons(self.grid)
 
     # create an icon with label
-    def createIcon(self, iconfile=None, on_click=None, appname=None, executable=None):
+    def createIcon(self, iconfile=None, on_click=None, appname=None, executable=None, managed="Yes"):
         # the icon consists of the icon and the text below in a vbox
         vboxw = QWidget()
         vbox = QVBoxLayout()
@@ -384,7 +486,9 @@ class FtcGuiApplication(QApplication):
             but.clicked.connect(on_click)
             # set properties from manifest settings on clickable icon to
             # allow click event to launch the appropriate app
+            but.setProperty("appname", appname)
             but.setProperty("executable", executable)
+            but.setProperty("managed", managed)
             but.setFlat(True)
         else:
             but = QWidget()
@@ -403,6 +507,7 @@ class FtcGuiApplication(QApplication):
         vboxw.setLayout(vbox)
         vboxw.setProperty("appname", appname)
         vboxw.setProperty("executable", executable)
+        vboxw.setProperty("managed", managed)
         
         return vboxw
 
@@ -470,9 +575,18 @@ class FtcGuiApplication(QApplication):
 
             # get various fields from manifest
             appname = manifest.get('app', 'name')
-            # fix me
             executable = os.path.join(app_dir, manifest.get('app', 'exec'))
-            iconname = os.path.join(app_dir, manifest.get('app', 'icon'))
+
+            if manifest.has_option('app', 'managed'):
+                managed = manifest.get('app', 'managed')
+            else:
+                managed = "Yes"
+
+            # use icon file if one is mentioned in the manifest
+            if manifest.has_option('app', 'icon'):
+                iconname = os.path.join(app_dir, manifest.get('app', 'icon'))
+            else:
+                iconname = "icon.png"
         
             # check if this app is on the current page
             if (iconnr >= icon_1st and iconnr <= icon_last):
@@ -485,7 +599,7 @@ class FtcGuiApplication(QApplication):
                 # set properties on element stored in grid to 
                 # allow network launch to get the executable name
                 # from it
-                but = self.createIcon(iconname, self.do_launch, appname, executable)
+                but = self.createIcon(iconname, self.do_launch, appname, executable, managed)
                 self.addIcon(grid, but, icon_on_screen)
 
             iconnr = iconnr + 1
