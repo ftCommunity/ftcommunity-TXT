@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-TI_UIM_VERSION = c73894456df5def97111cb33d2106b684b8b7959
-TI_UIM_SITE = git://gitorious.org/uim/uim.git
+TI_UIM_VERSION = a75f45be2d5c74fc1dd913d08afc30f09a230aa9
+TI_UIM_SITE = git://git.ti.com/ti-bt/uim.git
 TI_UIM_LICENSE = GPLv2+
 
 define TI_UIM_BUILD_CMDS
