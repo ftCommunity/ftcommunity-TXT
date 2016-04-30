@@ -10,4 +10,6 @@ if [ "$FTC_TXT_CUSTOM" != "" ]; then
     echo "Adding user specific content from $FTC_TXT_CUSTOM ..."
     cp -af $FTC_TXT_CUSTOM/* $TARGET/
 fi
+# Remove obsolete PM firmware load script
+rm -f "$TARGET/etc/init.d/S93-am335x-pm-firmware-load"
 echo "done"
