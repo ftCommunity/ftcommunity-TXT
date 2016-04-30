@@ -139,13 +139,7 @@ class PackageLoader(NetworkAccessManager):
         print("done")
         return((True,""))
 
-class SmallLabel(QLabel):
-    def __init__(self, str, parent=None):
-        super(SmallLabel, self).__init__(str, parent)
-        self.setObjectName("smalllabel")
-        self.setWordWrap(True)
-
-class InfoWidget(QWidget):
+class AppDialog(TxtDialog):
     # map app key to human readable text.
     labels = { "version": "Version",
                "desc": "Description",
@@ -156,17 +150,12 @@ class InfoWidget(QWidget):
                "category": "Category"
                }
 
-    def __init__(self,title,str,parent=None):
-        super(InfoWidget,self).__init__(parent)
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel(self.labels[title]))
-        vbox.addWidget(SmallLabel(str))
-        self.setLayout(vbox)
-
     def isValid(id):
-        return id in InfoWidget.labels
+        return id in AppDialog.labels
 
-class AppDialog(TxtDialog):
+    def format(id):
+        return AppDialog.labels[id]
+
     refresh = pyqtSignal()
 
     def __init__(self,title,parms,inst_ver,parent):
@@ -197,11 +186,11 @@ class AppDialog(TxtDialog):
                     menu_update = menu.addAction("Update")
                     menu_update.triggered.connect(self.on_app_install)
 
-        vbox_w = QWidget(self.centralWidget)
-        vbox = QVBoxLayout()
-        
+        text = QTextEdit()
+        text.setReadOnly(True)
+
         for i in sorted(parms):
-            if(InfoWidget.isValid(i)):
+            if(AppDialog.isValid(i)):
                 value = parms[i]
                 # if the version is to be displayed and the installed
                 # version differs from the one in the shop then also
@@ -209,14 +198,11 @@ class AppDialog(TxtDialog):
                 if i == 'version' and inst_ver and value != inst_ver:
                     value += " (Inst. " + inst_ver + ")"
 
-                vbox.addWidget(InfoWidget(i, value))
+                text.append('<h3><font color="#fcce04">' + AppDialog.format(i) + '</font></h3>')
+                text.append(value)
 
-        # put everything inside a scroll area
-        vbox_w.setLayout(vbox)
-        scroll = QScrollArea(self.centralWidget)
-        scroll.setWidget(vbox_w)
-
-        self.setCentralWidget(scroll)
+        text.moveCursor(QTextCursor.Start)
+        self.setCentralWidget(text)
         
     def on_app_install(self):
         if self.inst_ver:

@@ -49,7 +49,7 @@ class TxtMenu(QMenu):
         super(TxtMenu, self).__init__(parent)
 
     def on_button_clicked(self):
-        pos = self.parent().mapToGlobal(QPoint(0,0))
+        pos = self.parent().mapToGlobal(QPoint(0,40))
         self.popup(pos)
 
 # The TXTs window title bar
