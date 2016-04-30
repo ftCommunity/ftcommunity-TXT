@@ -60,7 +60,7 @@ The ftcommunity firmware supports two different SD card layouts:
 In both layouts, user installed apps and persistent settings are stored on the FAT partition.
 
 ### Simple Layout
-Make sure that the first partition on the SD card is formatted as FAT (most fresh SD cards should already have this layout). Then copy the files `output/images/uImage`, `output/images/am335x-kno_txt.dtb` and `output/images/rootfs.image` to the SD card.
+Make sure that the first partition on the SD card is formatted as FAT (most fresh SD cards should already have this layout). Then copy the files `output/images/uImage`, `output/images/am335x-kno_txt.dtb` and `output/images/rootfs.img` to the SD card.
 
 ### Advanced Layout
 Create two partitions on the SD card. Both partitions should have a size of at least 100 MB, the recommended setup is to reserve ca. 200-500 MB for the second partition and allocate most space to the first partition. Format the first partition as `FAT` and the second partition as `ext4`.

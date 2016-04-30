@@ -75,7 +75,14 @@ class FtcGuiApplication(TxtApplication):
         self.mask.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(self.mask)
 
-        self.set_net(ifs[0][0])
+        # select wlan0 if in list
+        ifn = [i[0] for i in ifs]
+        select = "wlan0"
+        if select in ifn:
+            self.nets_w.setCurrentIndex(ifn.index(select))
+            self.set_net(select)
+        else:
+            self.set_net(ifn[0])
    
         self.vbox.addStretch()
 
