@@ -6,7 +6,7 @@
 * { 
     background-color: rgba(255,255,255,40);
     selection-background-color: none;
-    font: 32px "sans-serif"; 
+    font: bold 32px "sans-serif"; 
     color: white;
     outline: 0;
     border: none;
