@@ -9,7 +9,7 @@ from PyQt4.QtNetwork import *
 from TxtStyle import *
 
 # url of the "app store"
-URL = "https://raw.githubusercontent.comx/ftCommunity/ftcommunity-apps/master/packages/"
+URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/"
 PACKAGEFILE = "00packages"
 
 # directory were the user installed apps are located
