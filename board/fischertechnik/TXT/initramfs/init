@@ -34,7 +34,7 @@ for i in $(cat /proc/cmdline); do
 done
 
 # mount SD card
-mount -t vfat /dev/mmcblk0p1 /sdcard -o dmask=077,fmask=177
+mount -t vfat /dev/mmcblk0p1 /sdcard -o dmask=077,fmask=177,sync
 if [ -f /sdcard/rootfs.img ]; then
   mount -t auto /sdcard/rootfs.img /newroot -o loop,ro
 elif [ -b "$root" ]; then
