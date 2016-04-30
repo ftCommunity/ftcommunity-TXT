@@ -54,14 +54,30 @@ class MessageDialog(QDialog):
         QDialog.exec_(self)
 
 # The TXTs window title bar
-class TxtTitle(QComboBox):
+class CategoryWidget(QComboBox):
     def __init__(self,categories):
         QComboBox.__init__(self)
         self.setObjectName("titlebar")
+        self.setCategories(categories)
+        
+    def setCategories(self, categories):
+        prev = self.currentText()
+        
+        self.clear()
         self.addItem("All")
-        for i in categories:
-            self.addItem(i)
- 
+        sel_idx = 0  # default category = 0 (All)
+        for i in range(len(categories)):
+            self.addItem(categories[i])
+            if categories[i] == prev: sel_idx = i+1
+
+        # if possible reselect the same category as before
+        # "All" otherwise
+        self.setCurrentIndex(sel_idx)
+
+        # check if category has changed and emit activated signal
+        if prev != "" and self.itemText(sel_idx) != prev:
+            self.activated[str].emit(self.itemText(sel_idx))
+       
 # The TXT does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
 class TxtTopWidget(QWidget):
@@ -75,13 +91,16 @@ class TxtTopWidget(QWidget):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.category_w = TxtTitle(categories)
+        self.category_w = CategoryWidget(categories)
         self.category_w.activated[str].connect(parent.set_category)
         self.layout.addWidget(self.category_w)
         self.layout.setContentsMargins(0,0,0,0)
 
-        self.setLayout(self.layout)        
+        self.setLayout(self.layout)
 
+    def setCategories(self, categories):
+        self.category_w.setCategories(categories)
+        
     def addWidget(self,w):
         self.layout.addWidget(w)
 
@@ -353,6 +372,8 @@ class FtcGuiApplication(QApplication):
         global current_page
         # return to page 0 as the number of icons may have
         # been changed and the current page may not exist anymore
+        self.categories = self.scan_categories()
+        self.w.setCategories(self.categories)
         current_page = 0
         self.addIcons(self.grid)
 
@@ -622,11 +643,11 @@ class FtcGuiApplication(QApplication):
             self.addIcon(grid, empty, icon_on_screen)
             iconnr = iconnr + 1
 
-    def set_category(self, cath):
+    def set_category(self, cat):
         global current_category
         global current_page
-        if current_category != cath:
-            current_category = cath
+        if current_category != cat:
+            current_category = cat
             current_page = 0
             self.addIcons(self.grid)
 
