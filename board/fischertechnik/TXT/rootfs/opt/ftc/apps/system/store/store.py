@@ -9,12 +9,23 @@ from PyQt4.QtNetwork import *
 from TxtStyle import *
 
 # url of the "app store"
-URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/"
+URL = "https://raw.githubusercontent.comx/ftCommunity/ftcommunity-apps/master/packages/"
 PACKAGEFILE = "00packages"
 
 # directory were the user installed apps are located
 APPBASE = "/opt/ftc/apps/user"
 
+NET_ERROR_MSG = {
+    QNetworkReply.NoError: "No error",
+    QNetworkReply.ConnectionRefusedError: "Connection Refused",
+    QNetworkReply.RemoteHostClosedError: "Server closed connection",
+    QNetworkReply.HostNotFoundError: "Host not found",
+    QNetworkReply.TimeoutError: "Connection timed out",
+    QNetworkReply.OperationCanceledError: "Connection cancelled",
+    QNetworkReply.SslHandshakeFailedError: "SSL handshake failed",
+    QNetworkReply.TemporaryNetworkFailureError: "Network Failure"
+    }
+    
 # read an option from a config file and append it to a list if it exists
 def append_parameter(package, app, id, parms):
     if package.has_option(app, id):
@@ -32,7 +43,10 @@ class NetworkAccessManager(QNetworkAccessManager):
                     QNetworkRequest.HttpReasonPhraseAttribute)
                 self.networkResult.emit((False, httpStatusMessage + " [" + str(httpStatus) + "]"))
             else:
-                self.networkResult.emit((False, "Unknown error: " +  str(reply.error())))
+                if reply.error() in NET_ERROR_MSG:
+                    self.networkResult.emit((False, "Network error: " + NET_ERROR_MSG[reply.error()]))
+                else:
+                    self.networkResult.emit((False, "Unknown network error"))
         else:
             self.networkResult.emit((True, self.messageBuffer.data()))
 
