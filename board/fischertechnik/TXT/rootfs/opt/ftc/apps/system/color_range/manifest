@@ -1,9 +1,0 @@
-[app]
-name: ColoRange
-category: Tools
-author: Till Harbaum &lt;till@harbaum.org&gt;
-icon: icon.png
-desc: Tool to pick color ranges for object detection
-exec: color_range.py
-managed: yes
-uuid: eb075835-cb00-4686-9332-ec902a1ed0c0
