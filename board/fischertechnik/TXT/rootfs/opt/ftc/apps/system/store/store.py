@@ -46,7 +46,7 @@ class NetworkAccessManager(QNetworkAccessManager):
                 if reply.error() in NET_ERROR_MSG:
                     self.networkResult.emit((False, "Network error: " + NET_ERROR_MSG[reply.error()]))
                 else:
-                    self.networkResult.emit((False, "Unknown network error"))
+                    self.networkResult.emit((False, "Unknown network error (" + str(reply.error()) + ")"))
         else:
             self.networkResult.emit((True, self.messageBuffer.data()))
 
@@ -211,7 +211,7 @@ class AppDialog(TxtDialog):
             if not os.path.isfile(manifestfile):
                 msgBox = TxtMessageBox("Error", self)
                 msgBox.setText("Update app path mismatch.")
-                msgBox.exec()
+                msgBox.exec_()
                 return
 
         self.package_loader = PackageLoader(self.package_name)
@@ -239,7 +239,7 @@ class AppDialog(TxtDialog):
         if not ok:
             msgBox = TxtMessageBox("Error", self)
             msgBox.setText(msg)
-            msgBox.exec()
+            msgBox.exec_()
         else:
             self.refresh.emit()
 
@@ -255,7 +255,7 @@ class AppDialog(TxtDialog):
         else:
             msgBox = TxtMessageBox("Error", self)
             msgBox.setText(result[1])
-            msgBox.exec()
+            msgBox.exec_()
 
 class PackageListLoader(NetworkAccessManager):
     result = pyqtSignal(tuple)
@@ -378,7 +378,7 @@ class AppListWidget(QListWidget):
         if not result[0]:
             msgBox = TxtMessageBox("Error", self.parent())
             msgBox.setText(result[1])
-            msgBox.exec()
+            msgBox.exec_()
             return
             
         self.apps = result[1]
