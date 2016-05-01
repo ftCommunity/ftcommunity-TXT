@@ -413,7 +413,9 @@ class AppListWidget(QListWidget):
 
         installed_version = None
         x = self.get_installed_app_info(app_parms, self.installed_apps)
-        if x: installed_version = x['version']
+        if x:
+            if 'version' in x: installed_version = x['version']
+            else:              installed_version = "no version info"
 
         # set TxtWindow as parent
         dialog = AppDialog(item.text(), app_parms, installed_version, self.parent())
