@@ -31,6 +31,74 @@ def append_parameter(package, app, id, parms):
     if package.has_option(app, id):
         parms[id] = package.get(app, id);
 
+# a rotating "i am busy" widget to be shown during network io
+class BusyAnimation(QWidget):
+    expired = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super(BusyAnimation, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup | Qt.Window)
+        self.setStyleSheet("background:transparent;")
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        self.resize(64, 64)
+        pos = parent.mapToGlobal(QPoint(0,0))
+        self.move(pos + QPoint(parent.width()/2-32, parent.height()/2-32))
+
+        self.step = 0
+
+        # animate at 5 frames/sec
+        self.atimer = QTimer(self)
+        self.atimer.timeout.connect(self.animate)
+        self.atimer.start(200)
+
+        # create small circle bitmaps for animation
+        self.dark = self.draw(16, QColor("#808080"))
+        self.bright = self.draw(16, QColor("#fcce04"))
+        
+    def draw(self, size, color):
+        img = QImage(size, size, QImage.Format_ARGB32)
+        img.fill(Qt.transparent)
+
+        painter = QPainter(img)
+        painter.setPen(Qt.white)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setBrush(QBrush(color))
+        painter.drawEllipse(0, 0, img.width()-1, img.height()-1)
+        painter.end()
+
+        return img
+
+    def animate(self):
+        # this is ugly ... we should be able to prevent
+        # it not become invisble in the first place ...
+        if not self.isVisible():
+            self.show()
+
+        self.step += 45
+        self.repaint()
+
+    def close(self):
+        self.atimer.stop()
+        super(BusyAnimation, self).close()
+
+    def paintEvent(self, event):
+        radius = min(self.width(), self.height())/2 - 16
+        painter = QPainter()
+        painter.begin(self)
+
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        painter.translate(self.width()/2, self.height()/2)
+        painter.rotate(45)
+        painter.rotate(self.step)
+        painter.drawImage(0,radius, self.bright)
+        for i in range(7):
+            painter.rotate(45)
+            painter.drawImage(0,radius, self.dark)
+
+        painter.end()
+
 class NetworkAccessManager(QNetworkAccessManager):
     networkResult = pyqtSignal(tuple)
 
@@ -216,6 +284,7 @@ class AppDialog(TxtDialog):
 
         self.package_loader = PackageLoader(self.package_name)
         self.package_loader.result.connect(self.onResult)
+        self.busy = BusyAnimation(self)
 
     def uninstall(self, name):
 
@@ -247,6 +316,8 @@ class AppDialog(TxtDialog):
         self.close()
 
     def onResult(self, result):
+        self.busy.close()
+        
         if result[0]:
             self.refresh.emit()
             
@@ -314,6 +385,7 @@ class AppListWidget(QListWidget):
         self.apps = []
         self.package_list_loader = PackageListLoader()
         self.package_list_loader.result.connect(self.onResult)
+        self.busy = BusyAnimation(parent)
 
         # react on clicks
         self.itemClicked.connect(self.onItemClicked)
@@ -375,6 +447,8 @@ class AppListWidget(QListWidget):
 
     # store server reply
     def onResult(self, result):
+        self.busy.close()
+
         if not result[0]:
             msgBox = TxtMessageBox("Error", self.parent())
             msgBox.setText(result[1])
