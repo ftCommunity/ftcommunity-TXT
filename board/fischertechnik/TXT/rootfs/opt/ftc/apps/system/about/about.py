@@ -7,7 +7,7 @@ from TxtStyle import *
 VERSION_FILE = "/etc/fw-ver.txt"
 
 class LicenseDialog(TxtDialog):
-    def __init__(self,title,parent):
+    def __init__(self,title,lic,parent):
         TxtDialog.__init__(self, title, parent)
         
         txt = QTextEdit()
@@ -18,7 +18,7 @@ class LicenseDialog(TxtDialog):
         txt.setFont(font)
     
         # load gpl from disk
-        name = os.path.dirname(os.path.realpath(__file__)) + "/gpl.txt"
+        name = os.path.join(os.path.dirname(os.path.realpath(__file__)), lic)
         text=open(name).read()
         txt.setPlainText(text)
 
@@ -89,8 +89,14 @@ class FtcGuiApplication(TxtApplication):
         menu_ver = menu.addAction("Versions")
         menu_ver.triggered.connect(self.show_version)
 
-        menu_lic = menu.addAction("Licenses")
-        menu_lic.triggered.connect(self.show_license)
+        menu.addSeparator()
+        
+        menu_lic_gpl = menu.addAction("GPL license")
+        menu_lic_gpl.triggered.connect(self.show_license_gpl)
+        menu_lic_lgpl = menu.addAction("LGPL license")
+        menu_lic_lgpl.triggered.connect(self.show_license_lgpl)
+        menu_lic_mit = menu.addAction("MIT license")
+        menu_lic_mit.triggered.connect(self.show_license_mit)
 
         self.vbox = QVBoxLayout()
 
@@ -118,8 +124,16 @@ class FtcGuiApplication(TxtApplication):
         self.w.show()
         self.exec_()        
  
-    def show_license(self):
-        dialog = LicenseDialog("GPL", self.w)
+    def show_license_gpl(self):
+        dialog = LicenseDialog("GPL", "gpl.txt", self.w)
+        dialog.exec_()
+
+    def show_license_lgpl(self):
+        dialog = LicenseDialog("LGPL", "lgpl.txt", self.w)
+        dialog.exec_()
+
+    def show_license_mit(self):
+        dialog = LicenseDialog("MIT", "mit.txt", self.w)
         dialog.exec_()
 
     def show_version(self):
