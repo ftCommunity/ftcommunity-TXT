@@ -31,6 +31,8 @@ current_page = 0
 app = None
 app_executable = ""
 
+# A fullscreen message dialog. Currently only used to show the
+# "shutting down" message
 class MessageDialog(QDialog):
     def __init__(self,str):
         QDialog.__init__(self)
@@ -181,6 +183,8 @@ class BusyAnimation(QWidget):
         self.repaint()
 
     def close(self):
+        self.etimer.stop()
+        self.atimer.stop()
         super(BusyAnimation, self).close()
         super(BusyAnimation, self).deleteLater()
 
@@ -202,17 +206,12 @@ class BusyAnimation(QWidget):
 
         painter.end()
 
-class OutputDialog(TxtDialog):
+class TextmodeDialog(TxtDialog):
     def __init__(self,title,parent):
         TxtDialog.__init__(self, title, parent)
         
         self.txt = QTextEdit()
         self.txt.setReadOnly(True)
-        
-        font = QFont()
-        font.setPointSize(16)
-        self.txt.setFont(font)
-    
         self.setCentralWidget(self.txt)
 
         self.p = None
@@ -244,6 +243,10 @@ class OutputDialog(TxtDialog):
         self.txt.moveCursor(QTextCursor.End)
         self.txt.insertPlainText(str)
 
+    def close(self):
+        self.timer.stop()
+        TxtDialog.close(self)
+        
 class FtcGuiApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
@@ -321,12 +324,14 @@ class FtcGuiApplication(QApplication):
         if self.popup:
             self.popup.close()
 
-    def launch_textmode_app(self, executable,name):
-        dialog = OutputDialog(name, self.w)
+    def launch_textmode_app(self, executable, name):
+        global app, app_executable
+        dialog = TextmodeDialog(name, self.w)
 
+        app_executable = executable
         master_fd, slave_fd = pty.openpty()
-        p = subprocess.Popen(str(executable), stdout=slave_fd, stderr=slave_fd)
-        dialog.poll(p, master_fd)
+        app = subprocess.Popen(str(executable), stdout=slave_fd, stderr=slave_fd)
+        dialog.poll(app, master_fd)
         dialog.exec_()
         os.close(master_fd)
         os.close(slave_fd)
@@ -342,7 +347,7 @@ class FtcGuiApplication(QApplication):
         if managed.lower() == "text":
             self.launch_textmode_app(executable, name)
             return
-            
+     
         # run the executable
         app_executable = executable
         app = subprocess.Popen(str(executable))
