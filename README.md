@@ -34,6 +34,14 @@ Most discussions around the community firmware take place in the [FTCommunity fo
 
 # Usage
 
+## Use pre-built images
+
+Pre-built images for a hassle free quick start have been [released](https://github.com/ftCommunity/ftcommunity-TXT/releases).
+
+For beginners it's recommended to use the pre-built releases.
+
+For the latest bleading-edge versions you might want to build the firmware yourself as explained below.
+
 ## Build the firmware
 
 Load the configuration for the TXT by typing:
