@@ -19,9 +19,9 @@ print('  <h1>Screenshot taken</h1>')
 # for PC based tests use imagemagicks import to grab the X screen. The user
 # ownign the screen needs to give access with "xhost +" beforehand
 if platform.machine() == "armv7l":
-    COMMAND = "fbgrab screenshot.png"
+    COMMAND = "fbgrab /tmp/screenshot.png"
 else:
-    COMMAND = "import -display :0 -window root -geometry 320x240 screenshot.png"
+    COMMAND = "import -display :0 -window root -geometry 320x240 /tmp/screenshot.png"
 
 app = subprocess.Popen(COMMAND.split())
 while app.poll() == None:
