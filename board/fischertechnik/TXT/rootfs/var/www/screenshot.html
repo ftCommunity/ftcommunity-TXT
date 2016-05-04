@@ -21,18 +21,6 @@
 	  document.body.style.cursor = 'default';
 	  }
 
-	  function check_for_image(image_url){
-	  var http = new XMLHttpRequest();
-	  http.open('HEAD', "screenshot.png", false);
-	  http.send();
-
-	  // use default screenshot of the real one doesn't exist (yet)
-	  if(http.status == 404) {
-	    document.getElementById("image").src="default_screenshot.png";
-	  }
-
-	  }
-
 	  // take first screenshot right away
 	  document.addEventListener('DOMContentLoaded', function() {
 	  screenshot();
@@ -41,16 +29,18 @@
     </script>
   </head>
 
-  <body onload="check_for_image()">
+  <body>
     <h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>
     <center><a href="https://github.com/ftCommunity/ftcommunity-TXT">community edition</a></center>
 
     <center><div>
     <p/>
 
-    <img src="screenshot.png" id="image"/>
-
+    <img src="default_screenshot.png" id="image"/>
     <p/>
+
+    <noscript>The screenshot feature requires Javascript. Please enable it!</p></noscript>
+    
     <button onclick="screenshot()">Take screenshot</button> 
 
     <p/>
