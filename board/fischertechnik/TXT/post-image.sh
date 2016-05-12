@@ -1,2 +1,2 @@
 #!/bin/sh
-ln -sf rootfs.squashfs "$1/rootfs.img"
+mv -f "$1/rootfs.squashfs" "$1/rootfs.img"
