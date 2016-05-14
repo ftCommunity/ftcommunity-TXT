@@ -19,6 +19,9 @@ case "$1" in
 	setup_dir apps ftc:ftc u=rwx,go=rx
 	setup_dir config root:root u=rwx,go=rx
 	setup_dir config/net root:root u=rwx,go=rx
+	# Setup writable /rom/opt/knobloch/ROBOProFiles with changes in $SDCARD/robopro
+	setup_dir robopro ROBOPro:ROBOPro u=rwx,go=rx
+	mount --bind "$SDCARD/robopro" /rom/opt/knobloch/ROBOProFiles
 	if is_readonly_fs / ; then
 		# Setup writeable overlay of /etc with changes in $SDCARD/config/etc
 		setup_dir config/etc root:root u=rwx,go=rx

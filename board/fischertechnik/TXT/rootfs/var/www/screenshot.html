@@ -13,32 +13,45 @@
     <script language="JavaScript">
       <!--
 	  function screenshot() {
-	  document.body.style.cursor = 'wait';
-	  var xmlHttp = new XMLHttpRequest();
-	  xmlHttp.open( "GET", "screenshot.py", false ); // false for synchronous request
-	  xmlHttp.send( null );
-	  document.getElementById("image").src="screenshot.png?random="+new Date().getTime();
-	  document.body.style.cursor = 'default';
+	    document.body.style.cursor = 'wait';
+	    var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", "screenshot.py", false ); // false for synchronous request
+	    xmlHttp.send( null );
+	    document.getElementById("image").src="screenshot.png?random="+new Date().getTime();
+	    document.body.style.cursor = 'default';
+	  }
+
+	  function check_for_screenshot() {
+	    var http = new XMLHttpRequest();
+	    http.open('HEAD', "screenshot.png", false);
+	    http.send();
+
+	    // use screenshot if present
+	    if(http.status == 200) {
+	      document.getElementById("image").src="screenshot.png";
+	    }
 	  }
 
 	  // take first screenshot right away
 	  document.addEventListener('DOMContentLoaded', function() {
-	  screenshot();
+	    screenshot();
 	  }, false);
 	-->
     </script>
   </head>
 
-  <body>
+  <body onload="check_for_screenshot()">
     <h1><div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div></h1>
     <center><a href="https://github.com/ftCommunity/ftcommunity-TXT">community edition</a></center>
 
     <center><div>
     <p/>
 
-    <img src="screenshot.png" id="image"/>
-
+    <img src="default_screenshot.png" id="image"/>
     <p/>
+
+    <noscript>The screenshot feature requires Javascript. Please enable it!</p></noscript>
+    
     <button onclick="screenshot()">Take screenshot</button> 
 
     <p/>

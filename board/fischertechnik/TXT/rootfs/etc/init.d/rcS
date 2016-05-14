@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# disable ASLR. Needed for online some modes of libROBOPRo
+echo 0 > /proc/sys/kernel/randomize_va_space
+
 # hide cursor; disable screensaver; disable vesa powerdown
 echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
 
