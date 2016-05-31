@@ -257,8 +257,6 @@ class FtcGuiApplication(TxtApplication):
 
         self.vbox = QVBoxLayout()
 
-        self.vbox.addStretch()
-
         networks = []
         networks_dup = get_networks(IFACE)
         if networks_dup:
@@ -298,11 +296,21 @@ class FtcGuiApplication(TxtApplication):
 
         self.vbox.addStretch()
 
-        self.vbox.addWidget(QLabel("Key:"))
-        if key == "": self.key = QPushButton("<unset>")
-        else:         self.key = QPushButton(key)
-        self.key.clicked.connect(self.do_key)
-        self.vbox.addWidget(self.key)
+        self.edit_hbox_w = QWidget()
+        self.edit_hbox = QHBoxLayout()
+        self.key = QLineEdit(key)
+        self.key.setPlaceholderText("key")
+        self.key.editingFinished.connect(self.do_edit_done)
+        self.edit_hbox.addWidget(self.key)
+        self.edit_but = QPushButton()
+        pix = QPixmap(local + "edit.png")
+        icn = QIcon(pix)
+        self.edit_but.setIcon(icn)
+        self.edit_but.setIconSize(pix.size())
+        self.edit_but.clicked.connect(self.do_key)
+        self.edit_hbox.addWidget(self.edit_but)
+        self.edit_hbox_w.setLayout(self.edit_hbox)
+        self.vbox.addWidget(self.edit_hbox_w)
 
         # the connect button is by default disabled until
         # the user enters a key
@@ -344,18 +352,28 @@ class FtcGuiApplication(TxtApplication):
                 save_config(IFACE)
                 run_dhcp(IFACE)
 
+    def set_key(self, k):
+        global key
+        key = k
+
+        # enable connect button if key was entered
+        if k != "":
+            # but only if the current network isn't already connected
+            self.connect.setDisabled(connected_ssid == self.ssids_w.currentText())
+        else:
+            self.connect.setDisabled(True)
+
+        self.key.setText(k)
+
+        # user entered a key using a keyboard
+    def do_edit_done(self):
+        self.set_key(self.sender().text())
+
+        # user hit the "key edit button"
     def do_key(self):
         global key
         dialog = KeyDialog("Key",key,self.w)
-        key = dialog.exec_()
-        # enable connect button if key was entered
-        if key != "":
-            # but only if the current network isn't already connected
-            self.connect.setDisabled(connected_ssid == self.ssids_w.currentText())
-            self.key.setText(key)
-        else:
-            self.connect.setDisabled(True)
-            self.key.setText("<unset>")
+        self.set_key( dialog.exec_() )
  
     def do_connect(self):
         global networks

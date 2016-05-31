@@ -6,3 +6,5 @@ desc: Wireless LAN configuration
 exec: wifi.py
 managed: yes
 uuid: b91b7e56-345b-4704-85aa-1486e4fcc522
+version: 1.1
+firmware: 0.9
