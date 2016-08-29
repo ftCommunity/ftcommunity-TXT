@@ -401,6 +401,10 @@ class FtcGuiApplication(QApplication):
             while app.poll() == None:
                 pass
 
+            # give app a second to terminate
+            # fix for https://github.com/ftCommunity/ftcommunity-TXT/issues/50
+            time.sleep(1)
+
     # return a list of directories containing apps
     # searches under /opt/ftc/apps/<group>/<app>
     # the returned list is srted by the name of the apps
