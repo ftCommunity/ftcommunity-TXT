@@ -56,4 +56,4 @@ psplash-write "QUIT"
 export PYTHONPATH=/opt/ftc
 export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
 export QWS_KEYBOARD=""
-su ftc -c "/opt/ftc/ftc_gui.py -qws" &
+su ftc -c "/opt/ftc/launcher.py -qws" &
