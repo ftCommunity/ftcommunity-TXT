@@ -28,35 +28,17 @@ After building, you should get a tree like this:
   ├── am335x-bone.dtb
   ├── MLO
   ├── rootfs.ext2
+  ├── sdcard.img
   ├── u-boot.img
   ├── uEnv.txt
   └── zImage
 
+How to write the microSD card
+=============================
 
-Prepare your SDCard
-===================
+Once the build process is finished you will have an image called "sdcard.img"
+in the output/images/ directory.
 
-You need to prepare first partition in fat32 and marked as bootable,
-and second where you will write rootfs.
+Copy the bootable "sdcard.img" onto an SD card with "dd":
 
-Copy the files to boot partition
-
-  $ cp MLO u-boot.img zImage uEnv.txt *.dtb /media/zzzzz
-
-where /media/zzzzz is the mount point.
-Then you need to write the rootfs image onto SDCard:
-
-  # dd if=rootfs.ext2 of=/dev/xxxxx
-
-where /dev/xxxxx is the second partition. Use:
-
-  # fdisk -l
-
-to check for correct one.
-
-Finish
-======
-
-Unmount all mounted SDCard partitions and insert the card to BeagleBone.
-Hold the "BOOT" button and apply power. Then release the "BOOT" button.
-The output is available on the serial console.
+  $ sudo dd if=output/images/sdcard.img of=/dev/sdX

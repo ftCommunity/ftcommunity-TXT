@@ -15,12 +15,15 @@ QT_VERSION_MAJOR = 4.8
 QT_VERSION = $(QT_VERSION_MAJOR).7
 QT_SOURCE = qt-everywhere-opensource-src-$(QT_VERSION).tar.gz
 QT_SITE = http://download.qt-project.org/official_releases/qt/$(QT_VERSION_MAJOR)/$(QT_VERSION)
+# Patch fixing ALSA detection. Taken from Qt5, but applies fine to
+# Qt4.
+QT_PATCH = https://github.com/qtproject/qtbase/commit/b8f98d956501dfa4ce03a137f15d404930a56066.patch
 QT_DEPENDENCIES = host-pkgconf
 QT_INSTALL_STAGING = YES
 
-QT_LICENSE = LGPLv2.1 with exceptions or GPLv3
+QT_LICENSE := LGPLv2.1 with exceptions or GPLv3
 ifneq ($(BR2_PACKAGE_QT_LICENSE_APPROVED),y)
-QT_LICENSE += or Digia Qt Commercial license
+QT_LICENSE := $(QT_LICENSE) or Digia Qt Commercial license
 endif
 QT_LICENSE_FILES = LICENSE.LGPL LGPL_EXCEPTION.txt LICENSE.GPL3
 
@@ -37,6 +40,11 @@ endif
 QT_CFLAGS = $(TARGET_CFLAGS)
 QT_CXXFLAGS = $(TARGET_CXXFLAGS)
 QT_LDFLAGS = $(TARGET_LDFLAGS)
+
+# Qt WebKit build fails when gcc-6 is used for build, because
+# 'std::auto_ptr' is deprecated starting from gcc 6.x. So, we have to
+# use an older c++ standard to prevent build failure
+QT_CXXFLAGS += -std=gnu++98
 
 # Qt has some assembly function that are not present in thumb1 mode:
 # Error: selected processor does not support Thumb mode `swp r3,r7,[r4]'
@@ -258,6 +266,12 @@ else
 QT_CONFIGURE_OPTS += -no-libmng
 endif
 
+ifeq ($(BR2_PACKAGE_QT_ACCESSIBILITY),y)
+QT_CONFIGURE_OPTS += -accessibility
+else
+QT_CONFIGURE_OPTS += -no-accessibility
+endif
+
 ifeq ($(BR2_PACKAGE_QT_QTZLIB),y)
 QT_CONFIGURE_OPTS += -qt-zlib
 else
@@ -336,6 +350,9 @@ QT_DEPENDENCIES += libgles libegl
 QT_CFLAGS += `$(PKG_CONFIG_HOST_BINARY) --cflags egl`
 QT_CXXFLAGS += `$(PKG_CONFIG_HOST_BINARY) --cflags egl`
 QT_LDFLAGS += `$(PKG_CONFIG_HOST_BINARY) --libs egl`
+else ifeq ($(BR2_PACKAGE_QT_OPENGL_GL_DESKTOP),y)
+QT_CONFIGURE_OPTS += -opengl desktop
+QT_DEPENDENCIES += libgl
 else
 QT_CONFIGURE_OPTS += -no-opengl
 endif
@@ -417,6 +434,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_QT_WEBKIT),y)
 QT_CONFIGURE_OPTS += -webkit
+QT_DEPENDENCIES += gstreamer gst-plugins-base
 else
 QT_CONFIGURE_OPTS += -no-webkit
 endif
@@ -517,7 +535,6 @@ define QT_CONFIGURE_CMDS
 		-no-xinerama \
 		-no-cups \
 		-no-nis \
-		-no-accessibility \
 		-no-separate-debug-info \
 		-prefix /usr \
 		-plugindir /usr/lib/qt/plugins \
@@ -663,14 +680,14 @@ endef
 ifneq ($(BR2_PACKAGE_QT_FONT_MICRO)$(BR2_PACKAGE_QT_FONT_FIXED),)
 # as stated in the font source src/3rdparty/fonts/micro.bdf
 # source src/3rdparty/fonts/5x7.bdf and source src/3rdparty/fonts/6x13.bdf
-QT_LICENSE += , Public Domain (Micro/Fixed font)
+QT_LICENSE := $(QT_LICENSE), Public Domain (Micro/Fixed font)
 endif
 ifneq ($(BR2_PACKAGE_QT_FONT_HELVETICA)$(BR2_PACKAGE_QT_FONT_JAPANESE),)
-QT_LICENSE += , Adobe Helvetica license (Helvetica/Japanese fonts)
+QT_LICENSE := $(QT_LICENSE), Adobe Helvetica license (Helvetica/Japanese fonts)
 QT_LICENSE_FILES += src/3rdparty/fonts/COPYING.Helvetica
 endif
 ifeq ($(BR2_PACKAGE_QT_FONT_UNIFONT),y)
-QT_LICENSE += , Freeware (Unifont font)
+QT_LICENSE := $(QT_LICENSE), Freeware (Unifont font)
 QT_LICENSE_FILES += src/3rdparty/fonts/COPYRIGHT.Unifont
 endif
 endif # QT_FONTS
@@ -680,7 +697,7 @@ define QT_INSTALL_TARGET_FONTS_TTF
 	mkdir -p $(TARGET_DIR)/usr/lib/fonts
 	cp -dpf $(STAGING_DIR)/usr/lib/fonts/*.ttf $(TARGET_DIR)/usr/lib/fonts
 endef
-QT_LICENSE += , Bitstream license (DejaVu/Vera TrueType fonts)
+QT_LICENSE := $(QT_LICENSE), Bitstream license (DejaVu/Vera TrueType fonts)
 QT_LICENSE_FILES += src/3rdparty/fonts/COPYRIGHT.DejaVu \
 	src/3rdparty/fonts/README.DejaVu \
 	src/3rdparty/fonts/COPYRIGHT.Vera

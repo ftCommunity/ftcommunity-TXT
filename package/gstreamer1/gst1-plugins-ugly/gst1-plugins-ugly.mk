@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-GST1_PLUGINS_UGLY_VERSION = 1.6.3
+GST1_PLUGINS_UGLY_VERSION = 1.8.2
 GST1_PLUGINS_UGLY_SOURCE = gst-plugins-ugly-$(GST1_PLUGINS_UGLY_VERSION).tar.xz
 GST1_PLUGINS_UGLY_SITE = http://gstreamer.freedesktop.org/src/gst-plugins-ugly
 GST1_PLUGINS_UGLY_LICENSE_FILES = COPYING
@@ -59,6 +59,10 @@ GST1_PLUGINS_UGLY_CONF_OPTS += --disable-realmedia
 endif
 
 ifeq ($(BR2_PACKAGE_GST1_PLUGINS_UGLY_PLUGIN_DVDREAD),y)
+# configure does not use pkg-config to detect libdvdread
+ifeq ($(BR2_PACKAGE_LIBDVDCSS)$(BR2_STATIC_LIBS),yy)
+GST1_PLUGINS_UGLY_CONF_ENV += LIBS="-ldvdcss"
+endif
 GST1_PLUGINS_UGLY_CONF_OPTS += --enable-dvdread
 GST1_PLUGINS_UGLY_DEPENDENCIES += libdvdread
 GST1_PLUGINS_UGLY_HAS_GPL_LICENSE = y
@@ -79,6 +83,13 @@ GST1_PLUGINS_UGLY_DEPENDENCIES += libid3tag libmad
 GST1_PLUGINS_UGLY_HAS_GPL_LICENSE = y
 else
 GST1_PLUGINS_UGLY_CONF_OPTS += --disable-mad
+endif
+
+ifeq ($(BR2_PACKAGE_GST1_PLUGINS_UGLY_PLUGIN_MPG123),y)
+GST1_PLUGINS_UGLY_CONF_OPTS += --enable-mpg123
+GST1_PLUGINS_UGLY_DEPENDENCIES += mpg123
+else
+GST1_PLUGINS_UGLY_CONF_OPTS += --disable-mpg123
 endif
 
 ifeq ($(BR2_PACKAGE_GST1_PLUGINS_UGLY_PLUGIN_MPEG2DEC),y)

@@ -1,2 +1,2 @@
-# From https://ftp.postgresql.org/pub/source/v9.4.6/postgresql-9.4.6.tar.bz2.sha256
-sha256	cbce1f4d01a6142c5d8bebe125623c5198ec04f363da7dd3d3b3a4100b4140a6  postgresql-9.4.6.tar.bz2
+# From https://ftp.postgresql.org/pub/source/v9.5.3/postgresql-9.5.3.tar.bz2.sha256
+sha256 7385c01dc58acba8d7ac4e6ad42782bd7c0b59272862a3a3d5fe378d4503a0b4  postgresql-9.5.3.tar.bz2

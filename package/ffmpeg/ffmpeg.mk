@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-FFMPEG_VERSION = 2.8.6
+FFMPEG_VERSION = 2.8.7
 FFMPEG_SOURCE = ffmpeg-$(FFMPEG_VERSION).tar.xz
 FFMPEG_SITE = http://ffmpeg.org/releases
 FFMPEG_INSTALL_STAGING = YES
@@ -36,7 +36,6 @@ FFMPEG_CONF_OPTS = \
 	--enable-mdct \
 	--enable-rdft \
 	--disable-crystalhd \
-	--disable-vdpau \
 	--disable-dxva2 \
 	--enable-runtime-cpudetect \
 	--disable-hardcoded-tables \
@@ -225,6 +224,10 @@ else
 FFMPEG_CONF_OPTS += --disable-libdcadec
 endif
 
+ifeq ($(BR2_PACKAGE_FFMPEG_GPL)$(BR2_PACKAGE_LIBEBUR128),yy)
+FFMPEG_DEPENDENCIES += libebur128
+endif
+
 ifeq ($(BR2_PACKAGE_LIBOPENH264),y)
 FFMPEG_CONF_OPTS += --enable-libopenh264
 FFMPEG_DEPENDENCIES += libopenh264
@@ -245,6 +248,13 @@ FFMPEG_CONF_OPTS += --enable-vaapi
 FFMPEG_DEPENDENCIES += libva
 else
 FFMPEG_CONF_OPTS += --disable-vaapi
+endif
+
+ifeq ($(BR2_PACKAGE_LIBVDPAU),y)
+FFMPEG_CONF_OPTS += --enable-vdpau
+FFMPEG_DEPENDENCIES += libvdpau
+else
+FFMPEG_CONF_OPTS += --disable-vdpau
 endif
 
 ifeq ($(BR2_PACKAGE_OPUS),y)
@@ -427,14 +437,15 @@ FFMPEG_CONF_OPTS += --disable-vfp
 endif
 ifeq ($(BR2_ARM_CPU_HAS_NEON),y)
 FFMPEG_CONF_OPTS += --enable-neon
+else
+FFMPEG_CONF_OPTS += --disable-neon
 endif
 
+ifeq ($(BR2_mips)$(BR2_mipsel)$(BR2_mips64)$(BR2_mips64el),y)
 ifeq ($(BR2_MIPS_SOFT_FLOAT),y)
-FFMPEG_CONF_OPTS += \
-	--disable-mipsfpu
+FFMPEG_CONF_OPTS += --disable-mipsfpu
 else
-FFMPEG_CONF_OPTS += \
-	--enable-mipsfpu
+FFMPEG_CONF_OPTS += --enable-mipsfpu
 endif
 
 ifeq ($(BR2_mips_32r2),y)
@@ -444,6 +455,7 @@ else
 FFMPEG_CONF_OPTS += \
 	--disable-mips32r2
 endif
+endif # MIPS
 
 ifeq ($(BR2_POWERPC_CPU_HAS_ALTIVEC),y)
 FFMPEG_CONF_OPTS += --enable-altivec

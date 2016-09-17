@@ -13,19 +13,49 @@ HOST_NODEJS_DEPENDENCIES = host-python host-zlib
 NODEJS_LICENSE = MIT (core code); MIT, Apache and BSD family licenses (Bundled components)
 NODEJS_LICENSE_FILES = LICENSE
 
+NODEJS_CONF_OPTS = \
+	--without-snapshot \
+	--shared-zlib \
+	--without-dtrace \
+	--without-etw \
+	--dest-os=linux
+
 ifeq ($(BR2_PACKAGE_OPENSSL),y)
 NODEJS_DEPENDENCIES += openssl
+NODEJS_CONF_OPTS += --shared-openssl
+else
+NODEJS_CONF_OPTS += --without-ssl
+endif
+
+# 0.10.x does not have icu support
+ifeq ($(findstring 0.10.,$(NODEJS_VERSION)),)
+ifeq ($(BR2_PACKAGE_ICU),y)
+NODEJS_DEPENDENCIES += icu
+NODEJS_CONF_OPTS += --with-intl=system-icu
+else
+NODEJS_CONF_OPTS += --with-intl=none
+endif
+endif
+
+ifneq ($(BR2_PACKAGE_NODEJS_NPM),y)
+NODEJS_CONF_OPTS += --without-npm
 endif
 
 # nodejs build system is based on python, but only support python-2.6 or
 # python-2.7. So, we have to enforce PYTHON interpreter to be python2.
 define HOST_NODEJS_CONFIGURE_CMDS
+	# The build system directly calls python. Work around this by forcing python2
+	# into PATH. See https://github.com/nodejs/node/issues/2735
+	mkdir -p $(@D)/bin
+	ln -sf $(HOST_DIR)/usr/bin/python2 $(@D)/bin/python
+
 	# Build with the static, built-in OpenSSL which is supplied as part of
 	# the nodejs source distribution.  This is needed on the host because
 	# NPM is non-functional without it, and host-openssl isn't part of
 	# buildroot.
 	(cd $(@D); \
 		$(HOST_CONFIGURE_OPTS) \
+		PATH=$(@D)/bin:$(BR_PATH) \
 		PYTHON=$(HOST_DIR)/usr/bin/python2 \
 		$(HOST_DIR)/usr/bin/python2 ./configure \
 		--prefix=$(HOST_DIR)/usr \
@@ -39,13 +69,15 @@ endef
 define HOST_NODEJS_BUILD_CMDS
 	$(HOST_MAKE_ENV) PYTHON=$(HOST_DIR)/usr/bin/python2 \
 		$(MAKE) -C $(@D) \
-		$(HOST_CONFIGURE_OPTS)
+		$(HOST_CONFIGURE_OPTS) \
+		PATH=$(@D)/bin:$(BR_PATH)
 endef
 
 define HOST_NODEJS_INSTALL_CMDS
 	$(HOST_MAKE_ENV) PYTHON=$(HOST_DIR)/usr/bin/python2 \
 		$(MAKE) -C $(@D) install \
-		$(HOST_CONFIGURE_OPTS)
+		$(HOST_CONFIGURE_OPTS) \
+		PATH=$(@D)/bin:$(BR_PATH)
 endef
 
 ifeq ($(BR2_i386),y)
@@ -75,23 +107,21 @@ endif
 endif
 
 define NODEJS_CONFIGURE_CMDS
+	mkdir -p $(@D)/bin
+	ln -sf $(HOST_DIR)/usr/bin/python2 $(@D)/bin/python
+
 	(cd $(@D); \
 		$(TARGET_CONFIGURE_OPTS) \
+		PATH=$(@D)/bin:$(BR_PATH) \
 		LD="$(TARGET_CXX)" \
 		PYTHON=$(HOST_DIR)/usr/bin/python2 \
 		$(HOST_DIR)/usr/bin/python2 ./configure \
 		--prefix=/usr \
-		--without-snapshot \
-		--shared-zlib \
-		$(if $(BR2_PACKAGE_OPENSSL),--shared-openssl,--without-ssl) \
-		$(if $(BR2_PACKAGE_NODEJS_NPM),,--without-npm) \
-		--without-dtrace \
-		--without-etw \
 		--dest-cpu=$(NODEJS_CPU) \
 		$(if $(NODEJS_ARM_FP),--with-arm-float-abi=$(NODEJS_ARM_FP)) \
 		$(if $(NODEJS_MIPS_ARCH_VARIANT),--with-mips-arch-variant=$(NODEJS_MIPS_ARCH_VARIANT)) \
 		$(if $(NODEJS_MIPS_FPU_MODE),--with-mips-fpu-mode=$(NODEJS_MIPS_FPU_MODE)) \
-		--dest-os=linux \
+		$(NODEJS_CONF_OPTS) \
 	)
 endef
 
@@ -99,6 +129,7 @@ define NODEJS_BUILD_CMDS
 	$(TARGET_MAKE_ENV) PYTHON=$(HOST_DIR)/usr/bin/python2 \
 		$(MAKE) -C $(@D) \
 		$(TARGET_CONFIGURE_OPTS) \
+		PATH=$(@D)/bin:$(BR_PATH) \
 		LD="$(TARGET_CXX)"
 endef
 
@@ -138,6 +169,7 @@ define NODEJS_INSTALL_TARGET_CMDS
 		$(MAKE) -C $(@D) install \
 		DESTDIR=$(TARGET_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
+		PATH=$(@D)/bin:$(BR_PATH) \
 		LD="$(TARGET_CXX)"
 	$(NODEJS_INSTALL_MODULES)
 endef

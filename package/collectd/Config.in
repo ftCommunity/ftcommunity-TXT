@@ -1,4 +1,4 @@
-config BR2_PACKAGE_COLLECTD
+menuconfig BR2_PACKAGE_COLLECTD
 	bool "collectd"
 	# Uses fork()
 	depends on BR2_USE_MMU
@@ -39,6 +39,7 @@ config BR2_PACKAGE_COLLECTD_VALUE
 	bool "value"
 	help
 	  Select values by their data sources' values.
+
 endmenu
 
 menu "misc plugins"
@@ -333,7 +334,7 @@ config BR2_PACKAGE_COLLECTD_OPENLDAP
 	  Read monitoring information from OpenLDAP's cn=Monitor subtree.
 
 comment "openldap support needs a toolchain w/ wchar"
-        depends on !BR2_USE_WCHAR
+	depends on !BR2_USE_WCHAR
 
 config BR2_PACKAGE_COLLECTD_OPENVPN
 	bool "openvpn"
@@ -385,7 +386,7 @@ config BR2_PACKAGE_COLLECTD_SMART
 	  and bad sectors.
 
 comment "SMART requires udev to be enabled"
-        depends on !BR2_PACKAGE_HAS_UDEV
+	depends on !BR2_PACKAGE_HAS_UDEV
 
 config BR2_PACKAGE_COLLECTD_STATSD
 	bool "StatsD"

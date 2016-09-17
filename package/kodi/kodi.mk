@@ -4,19 +4,60 @@
 #
 ################################################################################
 
-KODI_VERSION = 15.2-Isengard
+KODI_VERSION = 16.1-Jarvis
 KODI_SITE = $(call github,xbmc,xbmc,$(KODI_VERSION))
 KODI_LICENSE = GPLv2
 KODI_LICENSE_FILES = LICENSE.GPL
 # needed for binary addons
 KODI_INSTALL_STAGING = YES
-KODI_DEPENDENCIES = host-gawk host-gettext host-gperf host-zip host-giflib \
-	host-libjpeg host-lzo host-nasm host-libpng host-swig
-KODI_DEPENDENCIES += boost bzip2 expat ffmpeg fontconfig freetype jasper jpeg \
-	libass libcdio libcurl libfribidi libgcrypt libmpeg2 \
-	libogg libplist libpng libsamplerate libsquish libvorbis libxml2 \
-	libxslt lzo ncurses openssl pcre python readline sqlite taglib tiff \
-	tinyxml yajl zlib
+KODI_DEPENDENCIES = \
+	boost \
+	bzip2 \
+	expat \
+	ffmpeg \
+	fontconfig \
+	freetype \
+	giflib \
+	host-gawk \
+	host-gettext \
+	host-giflib \
+	host-gperf \
+	host-libjpeg \
+	host-libpng \
+	host-lzo \
+	host-nasm \
+	host-swig \
+	host-zip \
+	jasper \
+	jpeg \
+	libass \
+	libcdio \
+	libcrossguid \
+	libcurl \
+	libdcadec \
+	libfribidi \
+	libgcrypt \
+	libmpeg2 \
+	libogg \
+	libplist \
+	libpng \
+	libsamplerate \
+	libsquish \
+	libvorbis \
+	libxml2 \
+	libxslt \
+	lzo \
+	ncurses \
+	openssl \
+	pcre \
+	python \
+	readline \
+	sqlite \
+	taglib \
+	tiff \
+	tinyxml \
+	yajl \
+	zlib
 
 KODI_CONF_ENV = \
 	PYTHON_VERSION="$(PYTHON_VERSION_MAJOR)" \
@@ -32,18 +73,24 @@ KODI_CONF_OPTS +=  \
 	--with-ffmpeg=shared \
 	--disable-joystick \
 	--disable-openmax \
-	--disable-projectm \
 	--disable-pulse \
-	--disable-vdpau \
 	--disable-vtbdecoder \
 	--enable-optimizations
 
-ifeq ($(BR2_PACKAGE_MYSQL),y)
+ifeq ($(BR2_PACKAGE_KODI_MYSQL),y)
 KODI_CONF_OPTS += --enable-mysql
 KODI_CONF_ENV += ac_cv_path_MYSQL_CONFIG="$(STAGING_DIR)/usr/bin/mysql_config"
 KODI_DEPENDENCIES += mysql
 else
 KODI_CONF_OPTS += --disable-mysql
+endif
+
+ifeq ($(BR2_PACKAGE_KODI_NONFREE),y)
+KODI_CONF_OPTS += --enable-non-free
+KODI_LICENSE := $(KODI_LICENSE), unrar
+KODI_LICENSE_FILES += lib/UnrarXLib/license.txt
+else
+KODI_CONF_OPTS += --disable-non-free
 endif
 
 ifeq ($(BR2_PACKAGE_RPI_USERLAND),y)
@@ -54,8 +101,15 @@ KODI_CONF_ENV += INCLUDES="-I$(STAGING_DIR)/usr/include/interface/vcos/pthreads 
 	LIBS="-lvcos -lvchostif"
 endif
 
-ifeq ($(BR2_PACKAGE_LIBFSLVPUWRAP),y)
-KODI_DEPENDENCIES += libfslvpuwrap
+ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
+KODI_DEPENDENCIES += udev
+KODI_CONF_OPTS += --enable-udev
+else
+KODI_CONF_OPTS += --disable-udev
+endif
+
+ifeq ($(BR2_PACKAGE_IMX_VPUWRAP),y)
+KODI_DEPENDENCIES += imx-vpuwrap
 KODI_CONF_OPTS += --enable-codec=imxvpu
 endif
 
@@ -88,24 +142,8 @@ ifeq ($(BR2_PACKAGE_KODI_GL),y)
 KODI_DEPENDENCIES += libglew libglu libgl xlib_libX11 xlib_libXext \
 	xlib_libXmu xlib_libXrandr xlib_libXt libdrm
 KODI_CONF_OPTS += --enable-gl --enable-x11 --disable-gles
-ifeq ($(BR2_PACKAGE_KODI_RSXS),y)
-# fix rsxs compile
-# gcc5: http://trac.kodi.tv/ticket/16006#comment:6
-# make sure target libpng-config is used, options taken from rsxs-0.9/acinclude.m4
-KODI_CONF_ENV += \
-	ac_cv_type__Bool=yes \
-	jm_cv_func_gettimeofday_clobber=no \
-	mac_cv_pkg_png=$(STAGING_DIR)/usr/bin/libpng-config \
-	mac_cv_pkg_cppflags="`$(STAGING_DIR)/usr/bin/libpng-config --I_opts --cppflags`" \
-	mac_cv_pkg_cxxflags="`$(STAGING_DIR)/usr/bin/libpng-config --ccopts`" \
-	mac_cv_pkg_ldflags="`$(STAGING_DIR)/usr/bin/libpng-config --L_opts --R_opts`" \
-	mac_cv_pkg_libs="`$(STAGING_DIR)/usr/bin/libpng-config --libs`"
-KODI_CONF_OPTS += --enable-rsxs
 else
-KODI_CONF_OPTS += --disable-rsxs
-endif
-else
-KODI_CONF_OPTS += --disable-gl --disable-rsxs --disable-x11
+KODI_CONF_OPTS += --disable-gl --disable-x11
 ifeq ($(BR2_PACKAGE_KODI_EGL_GLES),y)
 KODI_DEPENDENCIES += libegl libgles
 KODI_CONF_ENV += CXXFLAGS="$(TARGET_CXXFLAGS) `$(PKG_CONFIG_HOST_BINARY) --cflags --libs egl`"
@@ -114,12 +152,6 @@ KODI_CONF_OPTS += --enable-gles
 else
 KODI_CONF_OPTS += --disable-gles
 endif
-endif
-
-ifeq ($(BR2_PACKAGE_KODI_GOOM),y)
-KODI_CONF_OPTS += --enable-goom
-else
-KODI_CONF_OPTS += --disable-goom
 endif
 
 ifeq ($(BR2_PACKAGE_KODI_LIBUSB),y)
@@ -198,10 +230,6 @@ else
 KODI_CONF_OPTS += --disable-lirc
 endif
 
-ifeq ($(BR2_PACKAGE_KODI_WAVPACK),y)
-KODI_DEPENDENCIES += wavpack
-endif
-
 ifeq ($(BR2_PACKAGE_KODI_LIBTHEORA),y)
 KODI_DEPENDENCIES += libtheora
 endif
@@ -212,6 +240,19 @@ KODI_DEPENDENCIES += mesa3d libva
 KODI_CONF_OPTS += --enable-vaapi
 else
 KODI_CONF_OPTS += --disable-vaapi
+endif
+
+ifeq ($(BR2_PACKAGE_KODI_LIBVDPAU),y)
+KODI_DEPENDENCIES += libvdpau
+KODI_CONF_OPTS += --enable-vdpau
+else
+KODI_CONF_OPTS += --disable-vdpau
+endif
+
+ifeq ($(BR2_PACKAGE_KODI_UPNP),y)
+KODI_CONF_OPTS += --enable-upnp
+else
+KODI_CONF_OPTS += --disable-upnp
 endif
 
 ifeq ($(BR2_PACKAGE_KODI_OPTICALDRIVE),y)
@@ -229,7 +270,6 @@ endef
 KODI_PRE_CONFIGURE_HOOKS += KODI_BOOTSTRAP
 
 define KODI_CLEAN_UNUSED_ADDONS
-	rm -Rf $(TARGET_DIR)/usr/share/kodi/addons/screensaver.rsxs.plasma
 	rm -Rf $(TARGET_DIR)/usr/share/kodi/addons/visualization.milkdrop
 	rm -Rf $(TARGET_DIR)/usr/share/kodi/addons/visualization.projectm
 	rm -Rf $(TARGET_DIR)/usr/share/kodi/addons/visualization.itunes

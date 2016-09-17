@@ -4,14 +4,14 @@
 #
 ################################################################################
 
-WIRESHARK_VERSION = 2.0.2
+WIRESHARK_VERSION = 2.0.5
 WIRESHARK_SOURCE = wireshark-$(WIRESHARK_VERSION).tar.bz2
 WIRESHARK_SITE = http://www.wireshark.org/download/src/all-versions
 WIRESHARK_LICENSE = wireshark license
 WIRESHARK_LICENSE_FILES = COPYING
 WIRESHARK_DEPENDENCIES = host-pkgconf libpcap libglib2
 WIRESHARK_CONF_ENV = \
-	ac_cv_path_PCAP_CONFIG=$(STAGING_DIR)/usr/bin/pcap-config
+	PCAP_CONFIG=$(STAGING_DIR)/usr/bin/pcap-config
 
 # patch touching configure.ac
 WIRESHARK_AUTORECONF = YES
@@ -60,7 +60,7 @@ ifeq ($(BR2_PACKAGE_C_ARES),y)
 WIRESHARK_CONF_OPTS += --with-c-ares=$(STAGING_DIR)/usr
 WIRESHARK_DEPENDENCIES += c-ares
 else
-WIREHARK_CONF_OPTS += --without-c-ares
+WIRESHARK_CONF_OPTS += --without-c-ares
 endif
 
 ifeq ($(BR2_PACKAGE_GEOIP),y)
@@ -98,5 +98,12 @@ WIRESHARK_DEPENDENCIES += sbc
 else
 WIRESHARK_CONF_OPTS += --with-sbc=no
 endif
+
+define WIRESHARK_REMOVE_DOCS
+	find $(TARGET_DIR)/usr/share/wireshark -name '*.txt' -print0 \
+		-o -name '*.html' -print0 | xargs -0 rm -f
+endef
+
+WIRESHARK_POST_INSTALL_TARGET_HOOKS += WIRESHARK_REMOVE_DOCS
 
 $(eval $(autotools-package))

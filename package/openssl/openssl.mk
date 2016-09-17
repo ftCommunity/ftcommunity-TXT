@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-OPENSSL_VERSION = 1.0.2g
+OPENSSL_VERSION = 1.0.2h
 OPENSSL_SITE = http://www.openssl.org/source
 OPENSSL_LICENSE = OpenSSL or SSLeay
 OPENSSL_LICENSE_FILES = LICENSE
@@ -18,6 +18,11 @@ OPENSSL_PATCH = \
 	https://gitweb.gentoo.org/repo/gentoo.git/plain/dev-libs/openssl/files/openssl-1.0.2a-parallel-obj-headers.patch?id=c8abcbe8de5d3b6cdd68c162f398c011ff6e2d9d \
 	https://gitweb.gentoo.org/repo/gentoo.git/plain/dev-libs/openssl/files/openssl-1.0.2a-parallel-install-dirs.patch?id=c8abcbe8de5d3b6cdd68c162f398c011ff6e2d9d \
 	https://gitweb.gentoo.org/repo/gentoo.git/plain/dev-libs/openssl/files/openssl-1.0.2a-parallel-symlinking.patch?id=c8abcbe8de5d3b6cdd68c162f398c011ff6e2d9d
+
+# relocation truncated to fit: R_68K_GOT16O
+ifeq ($(BR2_m68k_cf),y)
+OPENSSL_CFLAGS += -mxgot
+endif
 
 ifeq ($(BR2_USE_MMU),)
 OPENSSL_CFLAGS += -DHAVE_FORK=0
@@ -34,8 +39,12 @@ OPENSSL_DEPENDENCIES += ocf-linux
 endif
 
 # Some architectures are optimized in OpenSSL
-ifeq ($(ARCH),arm)
+# Doesn't work for thumb-only (Cortex-M?)
+ifeq ($(BR2_ARM_CPU_HAS_ARM),y)
 OPENSSL_TARGET_ARCH = armv4
+endif
+ifeq ($(ARCH),aarch64)
+OPENSSL_TARGET_ARCH = aarch64
 endif
 ifeq ($(ARCH),powerpc)
 # 4xx cores seem to have trouble with openssl's ASM optimizations
@@ -51,11 +60,6 @@ OPENSSL_TARGET_ARCH = ppc64le
 endif
 ifeq ($(ARCH),x86_64)
 OPENSSL_TARGET_ARCH = x86_64
-endif
-
-# Workaround for bug #3445
-ifeq ($(BR2_x86_i386),y)
-OPENSSL_TARGET_ARCH = generic32 386
 endif
 
 define HOST_OPENSSL_CONFIGURE_CMDS

@@ -20,7 +20,6 @@ QT5BASE_INSTALL_STAGING = YES
 #    want to use the one packaged in Buildroot
 QT5BASE_CONFIGURE_OPTS += \
 	-optimized-qmake \
-	-no-kms \
 	-no-cups \
 	-no-nis \
 	-no-iconv \
@@ -28,6 +27,14 @@ QT5BASE_CONFIGURE_OPTS += \
 	-system-pcre \
 	-no-pch \
 	-shared
+
+# Uses libgbm from mesa3d
+ifeq ($(BR2_PACKAGE_MESA3D_OPENGL_EGL),y)
+QT5BASE_CONFIGURE_OPTS += -kms -gbm
+QT5BASE_DEPENDENCIES += mesa3d
+else
+QT5BASE_CONFIGURE_OPTS += -no-kms
+endif
 
 ifeq ($(BR2_ENABLE_DEBUG),y)
 QT5BASE_CONFIGURE_OPTS += -debug
@@ -39,8 +46,8 @@ QT5BASE_CONFIGURE_OPTS += -largefile
 
 ifeq ($(BR2_PACKAGE_QT5BASE_LICENSE_APPROVED),y)
 QT5BASE_CONFIGURE_OPTS += -opensource -confirm-license
-QT5BASE_LICENSE = LGPLv2.1 with exception or LGPLv3
-QT5BASE_LICENSE_FILES = LICENSE.LGPLv21 LGPL_EXCEPTION.txt LICENSE.LGPLv3
+QT5BASE_LICENSE = GPLv3 or LGPLv2.1 with exception or LGPLv3, GFDLv1.3 (docs)
+QT5BASE_LICENSE_FILES = LICENSE.GPLv3 LICENSE.LGPLv21 LGPL_EXCEPTION.txt LICENSE.LGPLv3 LICENSE.FDL
 else
 QT5BASE_LICENSE = Commercial license
 QT5BASE_REDISTRIBUTE = NO
@@ -50,6 +57,10 @@ QT5BASE_CONFIG_FILE = $(call qstrip,$(BR2_PACKAGE_QT5BASE_CONFIG_FILE))
 
 ifneq ($(QT5BASE_CONFIG_FILE),)
 QT5BASE_CONFIGURE_OPTS += -qconfig buildroot
+endif
+
+ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
+QT5BASE_DEPENDENCIES += udev
 endif
 
 # Qt5 SQL Plugins
@@ -110,10 +121,6 @@ endif
 
 QT5BASE_DEFAULT_QPA = $(call qstrip,$(BR2_PACKAGE_QT5BASE_DEFAULT_QPA))
 QT5BASE_CONFIGURE_OPTS += $(if $(QT5BASE_DEFAULT_QPA),-qpa $(QT5BASE_DEFAULT_QPA))
-
-ifeq ($(BR2_PACKAGE_IMX_GPU_VIV),y)
-QT5BASE_EXTRA_CFLAGS = -DENABLE_MX6_WORKAROUND
-endif
 
 ifeq ($(BR2_PACKAGE_QT5BASE_EGLFS),y)
 QT5BASE_CONFIGURE_OPTS += -eglfs

@@ -4,13 +4,16 @@
 #
 ################################################################################
 
-PCRE_VERSION = 8.38
+PCRE_VERSION = 8.39
 PCRE_SITE = ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre
 PCRE_SOURCE = pcre-$(PCRE_VERSION).tar.bz2
 PCRE_LICENSE = BSD-3c
 PCRE_LICENSE_FILES = LICENCE
 PCRE_INSTALL_STAGING = YES
 PCRE_CONFIG_SCRIPTS = pcre-config
+
+# They're required for host-libglib2
+HOST_PCRE_CONF_OPTS = --enable-unicode-properties
 
 ifneq ($(BR2_INSTALL_LIBSTDCPP),y)
 # pcre will use the host g++ if a cross version isn't available

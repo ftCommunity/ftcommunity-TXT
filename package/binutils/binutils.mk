@@ -9,9 +9,9 @@
 BINUTILS_VERSION = $(call qstrip,$(BR2_BINUTILS_VERSION))
 ifeq ($(BINUTILS_VERSION),)
 ifeq ($(BR2_arc),y)
-BINUTILS_VERSION = arc-2015.12
+BINUTILS_VERSION = arc-2016.09-eng010
 else
-BINUTILS_VERSION = 2.24
+BINUTILS_VERSION = 2.25.1
 endif
 endif # BINUTILS_VERSION
 
@@ -25,13 +25,23 @@ BINUTILS_SOURCE ?= binutils-$(BINUTILS_VERSION).tar.bz2
 BINUTILS_EXTRA_CONFIG_OPTIONS = $(call qstrip,$(BR2_BINUTILS_EXTRA_CONFIG_OPTIONS))
 BINUTILS_INSTALL_STAGING = YES
 BINUTILS_DEPENDENCIES = $(if $(BR2_NEEDS_GETTEXT_IF_LOCALE),gettext)
-HOST_BINUTILS_DEPENDENCIES =
 BINUTILS_LICENSE = GPLv3+, libiberty LGPLv2.1+
 BINUTILS_LICENSE_FILES = COPYING3 COPYING.LIB
 
 ifeq ($(BINUTILS_FROM_GIT),y)
-BINUTILS_DEPENDENCIES += host-flex host-bison
-HOST_BINUTILS_DEPENDENCIES += host-flex host-bison
+BINUTILS_DEPENDENCIES += host-flex host-bison host-texinfo
+HOST_BINUTILS_DEPENDENCIES += host-flex host-bison host-texinfo
+endif
+
+# The .info files in the 2.26 tarball have an incorrect timestamp, so
+# binutils tries to re-generate them. In order to avoid the dependency
+# on host-texinfo, we simply update the timestamps.
+ifeq ($(BR2_BINUTILS_VERSION_2_26_X),y)
+define BINUTILS_FIXUP_INFO_TIMESTAMPS
+	find $(@D) -name '*.info' -exec touch {} \;
+endef
+BINUTILS_POST_PATCH_HOOKS += BINUTILS_FIXUP_INFO_TIMESTAMPS
+HOST_BINUTILS_POST_PATCH_HOOKS += BINUTILS_FIXUP_INFO_TIMESTAMPS
 endif
 
 # When binutils sources are fetched from the binutils-gdb repository,
@@ -48,13 +58,24 @@ BINUTILS_CONF_OPTS = \
 	--host=$(GNU_TARGET_NAME) \
 	--target=$(GNU_TARGET_NAME) \
 	--enable-install-libiberty \
+	--enable-build-warnings=no \
 	$(BINUTILS_DISABLE_GDB_CONF_OPTS) \
 	$(BINUTILS_EXTRA_CONFIG_OPTIONS)
+
+ifeq ($(BR2_STATIC_LIBS),y)
+BINUTILS_CONF_OPTS += --disable-plugins
+endif
 
 # Don't build documentation. It takes up extra space / build time,
 # and sometimes needs specific makeinfo versions to work
 BINUTILS_CONF_ENV += ac_cv_prog_MAKEINFO=missing
 HOST_BINUTILS_CONF_ENV += ac_cv_prog_MAKEINFO=missing
+
+# gcc bug with Os/O2/O3, PR77311
+# error: unable to find a register to spill in class 'CCREGS'
+ifeq ($(BR2_bfin),y)
+BINUTILS_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -O1"
+endif
 
 # Install binutils after busybox to prefer full-blown utilities
 ifeq ($(BR2_PACKAGE_BUSYBOX),y)

@@ -4,10 +4,11 @@
 #
 ################################################################################
 
-ZEROMQ_VERSION = 4.1.3
-ZEROMQ_SITE = http://download.zeromq.org
+ZEROMQ_VERSION = 4.1.5
+ZEROMQ_SITE = https://github.com/zeromq/zeromq4-1/releases/download/v$(ZEROMQ_VERSION)
 ZEROMQ_INSTALL_STAGING = YES
 ZEROMQ_DEPENDENCIES = util-linux
+ZEROMQ_CONF_OPTS = --without-documentation
 ZEROMQ_LICENSE = LGPLv3+ with exceptions
 ZEROMQ_LICENSE_FILES = COPYING COPYING.LESSER
 # For 0001-acinclude.m4-make-kernel-specific-flags-cacheable.patch
@@ -28,9 +29,18 @@ ifeq ($(BR2_STATIC_LIBS),y)
 ZEROMQ_CONF_OPTS += LIBS=-lstdc++
 endif
 
+ifeq ($(BR2_PACKAGE_ZEROMQ_NORM),y)
+ZEROMQ_CONF_OPTS += --with-norm
+ZEROMQ_DEPENDENCIES += norm
+else
+ZEROMQ_CONF_OPTS += --without-norm
+endif
+
 ifeq ($(BR2_PACKAGE_ZEROMQ_PGM),y)
 ZEROMQ_DEPENDENCIES += host-pkgconf openpgm
-ZEROMQ_CONF_OPTS += --with-system-pgm
+ZEROMQ_CONF_OPTS += --with-pgm
+else
+ZEROMQ_CONF_OPTS += --without-pgm
 endif
 
 # ZeroMQ uses libsodium if it's available.

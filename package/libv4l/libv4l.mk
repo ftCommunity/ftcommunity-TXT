@@ -4,16 +4,12 @@
 #
 ################################################################################
 
-LIBV4L_VERSION = 1.8.1
+LIBV4L_VERSION = 1.10.1
 LIBV4L_SOURCE = v4l-utils-$(LIBV4L_VERSION).tar.bz2
 LIBV4L_SITE = http://linuxtv.org/downloads/v4l-utils
 LIBV4L_INSTALL_STAGING = YES
 LIBV4L_DEPENDENCIES = host-pkgconf
 LIBV4L_CONF_OPTS = --disable-doxygen-doc
-
-# patch touches Makefile.am (and needs host-gettext for autoreconf)
-LIBV4L_AUTORECONF= YES
-LIBV4L_DEPENDENCIES += host-gettext
 
 # fix uclibc-ng configure/compile
 LIBV4L_CONF_ENV = ac_cv_prog_cc_c99='-std=gnu99'
@@ -21,6 +17,10 @@ LIBV4L_CONF_ENV = ac_cv_prog_cc_c99='-std=gnu99'
 # v4l-utils components have different licences, see v4l-utils.spec for details
 LIBV4L_LICENSE = GPLv2+ (utilities), LGPLv2.1+ (libraries)
 LIBV4L_LICENSE_FILES = COPYING COPYING.libv4l lib/libv4l1/libv4l1-kernelcode-license.txt
+
+ifeq ($(BR2_PACKAGE_ALSA_LIB),y)
+LIBV4L_DEPENDENCIES += alsa-lib
+endif
 
 ifeq ($(BR2_PACKAGE_ARGP_STANDALONE),y)
 LIBV4L_DEPENDENCIES += argp-standalone
@@ -36,11 +36,19 @@ else
 LIBV4L_CONF_OPTS += --without-jpeg
 endif
 
+ifeq ($(BR2_PACKAGE_HAS_LIBGL),y)
+LIBV4L_DEPENDENCIES += libgl
+endif
+
 ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 LIBV4L_CONF_OPTS += --with-libudev
 LIBV4L_DEPENDENCIES += udev
 else
 LIBV4L_CONF_OPTS += --without-libudev
+endif
+
+ifeq ($(BR2_PACKAGE_LIBGLU),y)
+LIBV4L_DEPENDENCIES += libglu
 endif
 
 ifeq ($(BR2_PACKAGE_LIBV4L_UTILS),y)
@@ -58,7 +66,7 @@ LIBV4L_CONF_ENV += \
 	ac_cv_prog_MOC=$(HOST_DIR)/usr/bin/moc \
 	ac_cv_prog_RCC=$(HOST_DIR)/usr/bin/rcc \
 	ac_cv_prog_UIC=$(HOST_DIR)/usr/bin/uic
-else ifeq ($(BR2_PACKAGE_QT_GUI_MODULE),y)
+else ifeq ($(BR2_PACKAGE_QT_OPENGL_GL_DESKTOP),y)
 LIBV4L_CONF_OPTS += --enable-qv4l2
 LIBV4L_DEPENDENCIES += qt
 else

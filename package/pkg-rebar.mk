@@ -158,7 +158,9 @@ ifndef $(2)_BUILD_CMDS
 define $(2)_BUILD_CMDS
 	(cd $$(@D); \
 		CC="$$(TARGET_CC)" \
+		CXX="$$(TARGET_CXX)" \
 		CFLAGS="$$(TARGET_CFLAGS)" \
+		CXXFLAGS="$$(TARGET_CXXFLAGS)" \
 		LDFLAGS="$$(TARGET_LDFLAGS)" \
 		$$(REBAR_TARGET_DEPS_ENV) \
 		$$(TARGET_MAKE_ENV) \
@@ -185,20 +187,6 @@ endef
 endif
 
 else # !target
-
-ifeq ($$($(2)_USE_AUTOCONF),YES)
-# This must be repeated from inner-autotools-package, otherwise we get
-# an empty _DEPENDENCIES if _AUTORECONF is YES or _USE_BUNDLED_REBAR
-# is NO.  Also filter the result of _AUTORECONF and _GETTEXTIZE away
-# from the non-host rule
-$(2)_DEPENDENCIES ?= $$(filter-out host-automake host-autoconf host-libtool \
-				host-gettext host-skeleton host-toolchain host-erlang-rebar $(1),\
-    $$(patsubst host-host-%,host-%,$$(addprefix host-,$$($(3)_DEPENDENCIES))))
-else
-# Same deal, if _USE_BUNDLED_REBAR is NO.
-$(2)_DEPENDENCIES ?= $$(filter-out  host-skeleton host-toolchain host-erlang-rebar $(1),\
-	$$(patsubst host-host-%,host-%,$$(addprefix host-,$$($(3)_DEPENDENCIES))))
-endif
 
 # Host packages need the erlang interpreter on the host
 $(2)_DEPENDENCIES += host-erlang

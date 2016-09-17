@@ -5,6 +5,10 @@
 # so put it here instead
 source "package/gdb/Config.in.host"
 
+# https://sourceware.org/bugzilla/show_bug.cgi?id=19405
+config BR2_TOOLCHAIN_HAS_BINUTILS_BUG_19405
+	bool
+
 config BR2_TOOLCHAIN_HAS_NATIVE_RPC
 	bool
 
@@ -15,6 +19,9 @@ config BR2_ENABLE_LOCALE
 	bool
 
 config BR2_INSTALL_LIBSTDCPP
+	bool
+
+config BR2_TOOLCHAIN_HAS_FORTRAN
 	bool
 
 config BR2_TOOLCHAIN_HAS_THREADS
@@ -32,38 +39,8 @@ config BR2_TOOLCHAIN_HAS_SHADOW_PASSWORDS
 config BR2_TOOLCHAIN_HAS_SSP
 	bool
 
-config BR2_ENABLE_LOCALE_PURGE
-	bool "Purge unwanted locales"
-	help
-	  Explicitly specify what locales to install on target. If N
-	  then all locales supported by packages are installed.
-
-config BR2_ENABLE_LOCALE_WHITELIST
-	string "Locales to keep"
-	default "C en_US de fr"
-	depends on BR2_ENABLE_LOCALE_PURGE
-	help
-	  Whitespace seperated list of locales to allow on target.
-	  Locales not listed here will be removed from the target.
-	  See 'locale -a' on your host for a list of locales available
-	  on your build host, or have a look in /usr/share/locale in
-	  the target file system for available locales.
-
-	  Notice that listing a locale here doesn't guarantee that it
-	  will be available on the target - That purely depends on the
-	  support for that locale in the selected packages.
-
-config BR2_GENERATE_LOCALE
-	string "Generate locale data"
-	default ""
-	depends on \
-		(BR2_TOOLCHAIN_BUILDROOT_UCLIBC && BR2_ENABLE_LOCALE) || \
-		BR2_TOOLCHAIN_USES_GLIBC
-	help
-	  Generate support for a list of locales. Locales can be
-	  specified with or without encoding, when no encoding is
-	  specified, UTF-8 is assumed. Examples of locales: en_US,
-	  fr_FR.UTF-8.
+config BR2_TOOLCHAIN_SUPPORTS_PIE
+	bool
 
 config BR2_TOOLCHAIN_GLIBC_GCONV_LIBS_COPY
 	bool "Copy gconv libraries"
@@ -233,10 +210,25 @@ config BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_4
 	bool
 	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_3
 
+config BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_5
+	bool
+	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_4
+
+config BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_6
+	bool
+	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_5
+
+config BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_7
+	bool
+	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_6
+
 # This order guarantees that the highest version is set, as kconfig
 # stops affecting a value on the first matching default.
 config BR2_TOOLCHAIN_HEADERS_AT_LEAST
 	string
+	default "4.7"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_7
+	default "4.6"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_6
+	default "4.5"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_5
 	default "4.4"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_4
 	default "4.3"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_3
 	default "4.2"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_2
@@ -295,10 +287,15 @@ config BR2_TOOLCHAIN_GCC_AT_LEAST_5
 	bool
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_4_9
 
+config BR2_TOOLCHAIN_GCC_AT_LEAST_6
+	bool
+	select BR2_TOOLCHAIN_GCC_AT_LEAST_5
+
 # This order guarantees that the highest version is set, as kconfig
 # stops affecting a value on the first matching default.
 config BR2_TOOLCHAIN_GCC_AT_LEAST
 	string
+	default "6"	if BR2_TOOLCHAIN_GCC_AT_LEAST_6
 	default "5"	if BR2_TOOLCHAIN_GCC_AT_LEAST_5
 	default "4.9"	if BR2_TOOLCHAIN_GCC_AT_LEAST_4_9
 	default "4.8"	if BR2_TOOLCHAIN_GCC_AT_LEAST_4_8
@@ -311,8 +308,8 @@ config BR2_TOOLCHAIN_GCC_AT_LEAST
 config BR2_TOOLCHAIN_HAS_SYNC_1
 	bool
 	default y
-	depends on !BR2_x86_i386
 	depends on !BR2_bfin
+	depends on !BR2_m68k_cf
 	depends on !BR2_microblaze
 	depends on !BR2_sparc
 	depends on !(BR2_arc && !BR2_ARC_ATOMIC_EXT)
@@ -324,8 +321,8 @@ config BR2_TOOLCHAIN_HAS_SYNC_2
 config BR2_TOOLCHAIN_HAS_SYNC_4
 	bool
 	default y
+	depends on !BR2_m68k_cf
 	depends on !BR2_sparc
-	depends on !BR2_x86_i386
 	depends on !(BR2_arc && !BR2_ARC_ATOMIC_EXT)
 
 # The availability of __sync for 8-byte types on ARM is somewhat
@@ -357,7 +354,6 @@ config BR2_TOOLCHAIN_X86_HAS_SYNC_8
 	bool
 	default y
 	depends on BR2_i386
-	depends on !BR2_x86_i386
 	depends on !BR2_x86_i486
 	depends on !BR2_x86_c3
 	depends on !BR2_x86_winchip_c6
@@ -373,16 +369,44 @@ config BR2_TOOLCHAIN_HAS_SYNC_8
 	default y if BR2_TOOLCHAIN_ARM_HAS_SYNC_8
 	default y if BR2_TOOLCHAIN_X86_HAS_SYNC_8
 
+# libatomic is available since gcc 4.8, when thread support is
+# enabled. Also, libatomic doesn't recognize "uclinux" as a valid OS
+# part of the tuple, and is therefore not build on uclinux targets,
+# which is why BR2_BINFMT_FLAT configurations are excluded.
+config BR2_TOOLCHAIN_HAS_LIBATOMIC
+	bool
+	default y if BR2_TOOLCHAIN_GCC_AT_LEAST_4_8 && \
+		BR2_TOOLCHAIN_HAS_THREADS && \
+		!BR2_BINFMT_FLAT
+
 # __atomic intrinsics are available:
 # - with gcc 4.8, either through built-ins or libatomic, on all
-#   architectures
+#   architectures. Since we don't want to separate the cases where
+#   libatomic is needed vs. not needed, we simplify thing and only
+#   support situations where libatomic is available, even if on some
+#   architectures libatomic is not strictly needed as all __atomic
+#   intrinsics might be built-in. The only case where libatomic is
+#   missing entirely is when the toolchain does not have support for
+#   threads. However, a package that does not need threads but still
+#   uses atomics is quite a corner case, which does not warrant the
+#   added complexity.
 # - with gcc 4.7, libatomic did not exist, so only built-ins are
 #   available. This means that __atomic can only be used in a subset
 #   of the architectures
 config BR2_TOOLCHAIN_HAS_ATOMIC
 	bool
-	default y if BR2_TOOLCHAIN_GCC_AT_LEAST_4_8
+	default y if BR2_TOOLCHAIN_HAS_LIBATOMIC
 	default y if BR2_TOOLCHAIN_GCC_AT_LEAST_4_7 && BR2_arm
 	default y if BR2_TOOLCHAIN_GCC_AT_LEAST_4_7 && BR2_armeb
 	default y if BR2_TOOLCHAIN_GCC_AT_LEAST_4_7 && BR2_xtensa
 	default y if BR2_TOOLCHAIN_GCC_AT_LEAST_4_7 && BR2_ARCH_IS_64
+
+# - libquadmath is not needed/available on all architectures (but gcc
+#   correctly handles this already).
+# - At least, libquadmath is available on:
+#   - i*86
+#   - x86_64
+# - When available, libquadmath requires wchar support.
+config BR2_TOOLCHAIN_HAS_LIBQUADMATH
+	bool
+	default y if BR2_i386 || BR2_x86_64
