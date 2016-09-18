@@ -317,6 +317,7 @@ OPENCV3_CONF_OPTS += \
 	-DBUILD_opencv_python2=ON \
 	-DBUILD_opencv_python3=OFF \
 	-DPYTHON2_EXECUTABLE=$(HOST_DIR)/usr/bin/python2 \
+	-DPYTHON_DEFAULT_EXECUTABLE=$(HOST_DIR)/usr/bin/python2 \
 	-DPYTHON2_INCLUDE_PATH=$(STAGING_DIR)/usr/include/python$(PYTHON_VERSION_MAJOR) \
 	-DPYTHON2_LIBRARIES=$(STAGING_DIR)/usr/lib/libpython$(PYTHON_VERSION_MAJOR).so \
 	-DPYTHON2_NUMPY_INCLUDE_DIRS=$(STAGING_DIR)/usr/lib/python$(PYTHON_VERSION_MAJOR)/site-packages/numpy/core/include \
@@ -328,6 +329,7 @@ OPENCV3_CONF_OPTS += \
 	-DBUILD_opencv_python2=OFF \
 	-DBUILD_opencv_python3=ON \
 	-DPYTHON3_EXECUTABLE=$(HOST_DIR)/usr/bin/python3 \
+	-DPYTHON_DEFAULT_EXECUTABLE=$(HOST_DIR)/usr/bin/python3 \
 	-DPYTHON3_INCLUDE_PATH=$(STAGING_DIR)/usr/include/python$(PYTHON3_VERSION_MAJOR)m \
 	-DPYTHON3_LIBRARIES=$(STAGING_DIR)/usr/lib/libpython$(PYTHON3_VERSION_MAJOR)m.so \
 	-DPYTHON3_NUMPY_INCLUDE_DIRS=$(STAGING_DIR)/usr/lib/python$(PYTHON3_VERSION_MAJOR)/site-packages/numpy/core/include \
@@ -336,6 +338,7 @@ OPENCV3_CONF_OPTS += \
 OPENCV3_DEPENDENCIES += python3
 endif
 OPENCV3_DEPENDENCIES += python-numpy
+OPENCV3_CONF_ENV += PYTHONPATH="$(if $(BR2_PACKAGE_PYTHON3),$(PYTHON3_PATH),$(PYTHON_PATH))"
 else
 OPENCV3_CONF_OPTS += \
 	-DBUILD_opencv_python2=OFF \
