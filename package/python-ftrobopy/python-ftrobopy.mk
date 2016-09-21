@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-PYTHON_FTROBOPY_VERSION = caf5f38ea37b22a1f49d15d050a0242b67919ae4
-PYTHON_FTROBOPY_SITE = $(call github,ftcommunity,ftrobopy,$(PYTHON_FTROBOPY_VERSION))
+PYTHON_FTROBOPY_VERSION = v0.98
+PYTHON_FTROBOPY_SITE = $(call github,ftrobopy,ftrobopy,$(PYTHON_FTROBOPY_VERSION))
 PYTHON_FTROBOPY_LICENSE = MIT
 PYTHON_FTROBOPY_LICENSE_FILES = LICENSE
 PYTHON_FTROBOPY_INSTALL_STAGING = NO
