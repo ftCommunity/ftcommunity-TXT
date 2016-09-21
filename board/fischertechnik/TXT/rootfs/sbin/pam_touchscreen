@@ -1,0 +1,8 @@
+#!/bin/sh
+export PATH=/bin:/usr/bin
+answer=$(eval echo "confirm $*" | nc localhost 9000)
+if [ "$answer" = "Ok" ] ; then
+  exit 0
+fi
+exit 7
+

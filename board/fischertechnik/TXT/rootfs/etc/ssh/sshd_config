@@ -73,8 +73,7 @@ AuthorizedKeysFile	.ssh/authorized_keys
 PermitEmptyPasswords yes
 
 # Change to no to disable s/key passwords
-#ChallengeResponseAuthentication yes
-
+ChallengeResponseAuthentication no
 # Kerberos options
 #KerberosAuthentication no
 #KerberosOrLocalPasswd yes
@@ -94,7 +93,7 @@ PermitEmptyPasswords yes
 # If you just want the PAM account and session checks to run without
 # PAM authentication, then enable this but set PasswordAuthentication
 # and ChallengeResponseAuthentication to 'no'.
-#UsePAM no
+UsePAM yes
 
 #AllowAgentForwarding yes
 #AllowTcpForwarding yes

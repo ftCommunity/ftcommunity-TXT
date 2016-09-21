@@ -1,0 +1,5 @@
+#!/bin/sh
+if [ "$PAM_USER" = "" ] ; then 
+  exit 10;
+fi
+/sbin/unix_chkpwd "$PAM_USER" nullok < /dev/zero

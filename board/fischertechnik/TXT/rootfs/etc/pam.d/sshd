@@ -1,5 +1,7 @@
-#%PAM-1.0
-auth       required     /lib/security/pam_unix.so shadow nullok nodelay
+auth       [success=ok default=2] /lib/security/pam_exec.so quiet /sbin/pam_null_passwd
+auth       sufficient   /lib/security/pam_exec.so quiet /sbin/pam_touchscreen Allow SSH login as $PAM_USER?
+auth       requisite    /lib/security/pam_deny.so
+auth       required     /lib/security/pam_unix.so shadow nodelay
 account    required     /lib/security/pam_nologin.so
 account    required     /lib/security/pam_unix.so
 password   required     /lib/security/pam_unix.so shadow nullok use_authtok

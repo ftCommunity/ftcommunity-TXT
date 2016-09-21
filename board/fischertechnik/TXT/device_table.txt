@@ -12,3 +12,4 @@
 /rom                                    d       755     0       0       -       -       -       -       -
 /opt/fischertechnik                     r       755     1000    1000    -       -       -       -       -
 /media/sdcard                           d       755     0       0       -       -       -       -       -
+/sbin/unix_chkpwd                       r      4755     0       0       -       -       -       -       -
