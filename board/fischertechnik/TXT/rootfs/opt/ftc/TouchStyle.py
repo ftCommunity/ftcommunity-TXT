@@ -194,7 +194,8 @@ class TouchDialog(QDialog):
             while parent and not (parent.inherits("TouchBaseWidget") or parent.inherits("TouchDialog")):
                 parent = parent.parent()
 
-                self.parent = parent
+            self.parent = parent
+
             if parent:
                 parent.register(self)
         
