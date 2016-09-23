@@ -115,7 +115,16 @@ class ConfirmationDialog(PlainDialog):
     def on_button_clicked(self):
         # send button label back to tcp client
         self.sock.write(self.sender().text() + "\n")
+
+        # close dialog after 1 second
+        close_timer = QTimer(self)
+        close_timer.setSingleShot(True)
+        close_timer.timeout.connect(self.on_close_timer)
+        close_timer.start(1000)
+
         self.sock.close()    # close tcp connection
+
+    def on_close_timer(self):
         self.close()         # close dialog
 
 # The TXTs window title bar
