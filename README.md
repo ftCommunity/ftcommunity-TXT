@@ -113,7 +113,7 @@ Note: On most linux systems, you will need to run all of these commands as root.
 
 # Step 2: Configure the TXT to boot from SD card
 
-Make sure you are running at least version [4.2.4 of the official firmware}(http://www.fischertechnik.de/home/downloads/Computing.aspx). You then only need to follow the [instructions provided by Fischertechnik](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278).
+Make sure you are running at least version [4.2.4 of the official firmware](http://www.fischertechnik.de/home/downloads/Computing.aspx). You then only need to follow the [instructions provided by Fischertechnik](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278).
 
 More details and a brief set of english instructions can be found in our [Wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Preparing-the-TXT-controller).
 
