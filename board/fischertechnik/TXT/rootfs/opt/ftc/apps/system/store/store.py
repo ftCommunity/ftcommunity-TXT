@@ -2,18 +2,19 @@
 # -*- coding: utf-8 -*-
 #
 
-import sys, os, io
+import sys, os, io, time
 import configparser, zipfile, shutil
 from PyQt4.QtNetwork import *
 
-from TxtStyle import *
+from TouchStyle import *
 
 # url of the "app store"
 URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/"
 PACKAGEFILE = "00packages"
 
 # directory were the user installed apps are located
-APPBASE = "/opt/ftc/apps/user"
+APPBASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+USERAPPBASE = os.path.join(APPBASE, "user")
 
 NET_ERROR_MSG = {
     QNetworkReply.NoError: "No error",
@@ -37,15 +38,12 @@ class BusyAnimation(QWidget):
 
     def __init__(self, parent=None):
         super(BusyAnimation, self).__init__(parent)
-        self.setWindowFlags(Qt.Popup | Qt.Window)
-        self.setStyleSheet("background:transparent;")
-        self.setAttribute(Qt.WA_TranslucentBackground)
 
         self.resize(64, 64)
-        pos = parent.mapToGlobal(QPoint(0,0))
-        self.move(pos + QPoint(parent.width()/2-32, parent.height()/2-32))
+        self.move(QPoint(parent.width()/2-32, parent.height()/2-32))
 
         self.step = 0
+        self.percent = -1
 
         # animate at 5 frames/sec
         self.atimer = QTimer(self)
@@ -56,6 +54,10 @@ class BusyAnimation(QWidget):
         self.dark = self.draw(16, QColor("#808080"))
         self.bright = self.draw(16, QColor("#fcce04"))
         
+    def progress(self, perc):
+        self.percent = perc
+        self.repaint()
+    
     def draw(self, size, color):
         img = QImage(size, size, QImage.Format_ARGB32)
         img.fill(Qt.transparent)
@@ -70,11 +72,6 @@ class BusyAnimation(QWidget):
         return img
 
     def animate(self):
-        # this is ugly ... we should be able to prevent
-        # it not become invisble in the first place ...
-        if not self.isVisible():
-            self.show()
-
         self.step += 45
         self.repaint()
 
@@ -86,6 +83,19 @@ class BusyAnimation(QWidget):
         radius = min(self.width(), self.height())/2 - 16
         painter = QPainter()
         painter.begin(self)
+
+        if self.percent >= 0:
+            font = painter.font()
+            # half the size than the current font size 
+            if font.pointSize() < 0:
+                font.setPixelSize(font.pixelSize() / 3)
+            else:
+                font.setPointSize(font.pointSize() / 3)
+            # set the modified font to the painter */
+            painter.setFont(font)
+
+            # draw text in center
+            painter.drawText(QRect(0, 0, self.width(), self.height()), Qt.AlignCenter, str(self.percent)+"%" )
 
         painter.setRenderHint(QPainter.Antialiasing)
 
@@ -101,6 +111,7 @@ class BusyAnimation(QWidget):
 
 class NetworkAccessManager(QNetworkAccessManager):
     networkResult = pyqtSignal(tuple)
+    progress = pyqtSignal(int)
 
     def slotFinished(self):
         reply = self.sender()
@@ -116,7 +127,7 @@ class NetworkAccessManager(QNetworkAccessManager):
                 else:
                     self.networkResult.emit((False, "Unknown network error (" + str(reply.error()) + ")"))
         else:
-            self.networkResult.emit((True, self.messageBuffer.data()))
+            self.networkResult.emit((True, b"".join(self.messageBuffer)))
 
     def slotError(self, code):
         print("Error:", code)
@@ -125,19 +136,30 @@ class NetworkAccessManager(QNetworkAccessManager):
         for e in errors:
             print("SSL Error: ", e.errorString())
 
+    def slotProgress(self, a, b):
+        # download makes 50% of progress (zip decrunch will do the rest)
+        percent = int(50*a/b)
+        if self.progress_percent != percent:
+            self.progress.emit(percent)
+            self.progress_percent = percent
+
     #Append current data to the buffer every time readyRead() signal is emitted
     def slotReadData(self):
-        self.messageBuffer += self.reply.readAll()
+        # += for byte array has a horrible performance
+        # self.messageBuffer += self.reply.readAll()
+        self.messageBuffer.append(self.reply.readAll())
     
     def __init__(self, filename):
         QNetworkAccessManager.__init__(self)
-        self.messageBuffer = QByteArray()
+        self.messageBuffer = []
         url   = QUrl(URL + filename)
         req   = QNetworkRequest(url)
         self.reply = self.get(req)
         self.reply.ignoreSslErrors()
+        self.progress_percent = -1
 
         self.reply.readyRead.connect(self.slotReadData)
+        self.reply.downloadProgress.connect(self.slotProgress)
         self.reply.finished.connect(self.slotFinished)
         self.reply.error.connect(self.slotError)
         self.reply.sslErrors.connect(self.slotSslErrors)
@@ -181,7 +203,7 @@ class PackageLoader(NetworkAccessManager):
         if not manifest.has_option('app', 'uuid'):
             return((False, "Manifest does not contain a UUID!"))
 
-        appdir = os.path.join(APPBASE, manifest.get('app', 'uuid'))
+        appdir = os.path.join(USERAPPBASE, manifest.get('app', 'uuid'))
 
         print("Extracting to " + appdir)
 
@@ -194,20 +216,25 @@ class PackageLoader(NetworkAccessManager):
             except:
                 return((False, "Unable to create target dir!"))
 
+        # unzip with progress update
+        cnt = 0
         for name in z.namelist():
-            print("Extracting " + name + " ...")
+            # print("Extracting " + name + " ...")
+            cnt += 1
             z.extract(name, appdir)
-
+            self.progress.emit(50+int(50*cnt/len(z.namelist())))
+            QCoreApplication.processEvents()
+            
         # get various fields from manifest
         executable = os.path.join(appdir, manifest.get('app', 'exec'))
         
-        print("Making executable: " + executable + "<br/>")
+        print("Making executable: " + executable)
         os.chmod(executable, 0o744)
 
         print("done")
         return((True,""))
 
-class AppDialog(TxtDialog):
+class AppDialog(TouchDialog):
     # map app key to human readable text.
     labels = { "version": "Version",
                "desc": "Description",
@@ -227,7 +254,7 @@ class AppDialog(TxtDialog):
     refresh = pyqtSignal()
 
     def __init__(self,title,parms,inst_ver,parent):
-        TxtDialog.__init__(self, title, parent)
+        TouchDialog.__init__(self, title, parent)
 
         self.package_name = parms['package']
         if 'uuid' in parms:
@@ -275,9 +302,9 @@ class AppDialog(TxtDialog):
     def on_app_install(self):
         if self.inst_ver:
             # check if app resides in the correct directory
-            manifestfile = os.path.join(APPBASE, self.package_uuid, "manifest" )
+            manifestfile = os.path.join(USERAPPBASE, self.package_uuid, "manifest" )
             if not os.path.isfile(manifestfile):
-                msgBox = TxtMessageBox("Error", self)
+                msgBox = TouchMessageBox("Error", self)
                 msgBox.setText("Update app path mismatch.")
                 msgBox.exec_()
                 return
@@ -285,17 +312,19 @@ class AppDialog(TxtDialog):
         self.package_loader = PackageLoader(self.package_name)
         self.package_loader.result.connect(self.onResult)
         self.busy = BusyAnimation(self)
+        self.package_loader.progress.connect(self.busy.progress)
+        self.busy.show()
 
     def uninstall(self, name):
 
         # make sure there's a manifest file
-        manifestfile = os.path.join(APPBASE, self.package_uuid, "manifest" )
+        manifestfile = os.path.join(USERAPPBASE, self.package_uuid, "manifest" )
         if not os.path.isfile(manifestfile):
             return((False, "Delete app path not found!"))
 
         # remove the whole app dir
         try:
-            shutil.rmtree(os.path.join(APPBASE, self.package_uuid))
+            shutil.rmtree(os.path.join(USERAPPBASE, self.package_uuid))
         except:
             return((False, "Unable to remove app"))
 
@@ -306,7 +335,7 @@ class AppDialog(TxtDialog):
         print("Uninstall", self.package_name)
         (ok, msg) = self.uninstall(self.package_name)
         if not ok:
-            msgBox = TxtMessageBox("Error", self)
+            msgBox = TouchMessageBox("Error", self)
             msgBox.setText(msg)
             msgBox.exec_()
         else:
@@ -324,7 +353,7 @@ class AppDialog(TxtDialog):
             # close the app dialog
             self.close()
         else:
-            msgBox = TxtMessageBox("Error", self)
+            msgBox = TouchMessageBox("Error", self)
             msgBox.setText(result[1])
             msgBox.exec_()
 
@@ -386,6 +415,7 @@ class AppListWidget(QListWidget):
         self.package_list_loader = PackageListLoader()
         self.package_list_loader.result.connect(self.onResult)
         self.busy = BusyAnimation(parent)
+        self.busy.show()
 
         # react on clicks
         self.itemClicked.connect(self.onItemClicked)
@@ -396,18 +426,17 @@ class AppListWidget(QListWidget):
     # the returned list is srted by the name of the apps
     # as stored in the manifest file
     def scan_installed_app_dirs(self):
-        app_base = "/opt/ftc/apps"
         # scan for app group dirs first
-        app_groups = os.listdir(app_base)
+        app_groups = os.listdir(APPBASE)
         # then scan for app dirs inside
         app_dirs = []
         for i in app_groups:
             try:
-                app_group_dirs = os.listdir(os.path.join(app_base, i))
+                app_group_dirs = os.listdir(os.path.join(APPBASE, i))
                 for a in app_group_dirs:
                     appparms = {}
                     # build full path of the app dir
-                    app_dir = os.path.join(app_base, i, a)
+                    app_dir = os.path.join(APPBASE, i, a)
                     # check if there's a manifest inside that dir
                     manifestfile = os.path.join(app_dir, "manifest")
                     if os.path.isfile(manifestfile):
@@ -450,7 +479,7 @@ class AppListWidget(QListWidget):
         self.busy.close()
 
         if not result[0]:
-            msgBox = TxtMessageBox("Error", self.parent())
+            msgBox = TouchMessageBox("Error", self.parent())
             msgBox.setText(result[1])
             msgBox.exec_()
             return
@@ -491,7 +520,7 @@ class AppListWidget(QListWidget):
             if 'version' in x: installed_version = x['version']
             else:              installed_version = "no version info"
 
-        # set TxtWindow as parent
+        # set TouchWindow as parent
         dialog = AppDialog(item.text(), app_parms, installed_version, self.parent())
         dialog.refresh.connect(self.on_refresh)
         dialog.exec_()
@@ -522,12 +551,12 @@ class AppListWidget(QListWidget):
         # request launcher refresh
         self.notify_launcher()
 
-class FtcGuiApplication(TxtApplication):
+class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
-        TxtApplication.__init__(self, args)
+        TouchApplication.__init__(self, args)
 
         # create the empty main window
-        self.w = TxtWindow("Store")
+        self.w = TouchWindow("Store")
 
         self.vbox = QVBoxLayout()
 
