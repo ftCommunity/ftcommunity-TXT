@@ -34,6 +34,17 @@ Most discussions around the community firmware take place in the [FTCommunity fo
 
 # Usage
 
+Two simple steps are needed to run the community firmware on your TXT:
+
+ 1. A correctly prepared micro SD card
+ 2. Configure the TXT to boot from SD card
+
+Both steps are simple and risk-free as removing the SD card will always give you the original firmware back. 
+
+# Step 1: Preparing the SD card
+
+You'll need a micro SD card. A size of 2 or 4 GB is recommended.
+
 ## Use pre-built images
 
 Pre-built images for a hassle free quick start have been [released](https://github.com/ftCommunity/ftcommunity-TXT/releases).
@@ -100,22 +111,13 @@ umount /mnt
 
 Note: On most linux systems, you will need to run all of these commands as root.
 
-## Reconfigure the TXT to allow booting from SD Card
+# Step 2: Configure the TXT to boot from SD card
 
-Before you can run the ftcommunity firmware, you will need to reconfigure the TXT to allow starting a firmware from the SD card. This needs only to be done once.
+Make sure you are running at least version [4.2.4 of the official firmware](http://www.fischertechnik.de/home/downloads/Computing.aspx). You then only need to follow the [instructions provided by Fischertechnik](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278).
 
-To reconfigure the TXT, start the TXT with the original Fischertechnik firmware and log into the TXT as root (see [here](http://www.fischertechnik.de/PortalData/1/Resources/downloads/documents/TXT_Security_Information.pdf) for instructions).
+More details and a brief set of english instructions can be found in our [Wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Preparing-the-TXT-controller).
 
-As root, execute this command:
-```
-fw_setenv bootcmd "run sdboot;run nandboot"
-```
-
-**Hinweis: Bitte überprüfen Sie das Kommando genauestens. Fehler im 'bootcmd' wird verhindern, dass der TXT booten kann. In diesem Fall muss die Korrektur über die [serielle Konsole](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) mit Hilfe eines speziellen Adapters vorgenommen werden.**
-
-**Note: Compare this command carefully and do not run it if it doesn't exactly match the line shown here. Changing 'bootcmd' with defective settings will brick your TXT and you will need to set up [serial console access](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Serial-Console) to the TXT to fix the boot loader configuration and make the TXT usable again.**
-
-## Run the ftcommunity firmware
+# Run the ftcommunity firmware
 
 Switch off the TXT, insert the SD card with the ftcommunity firmware in the SD card slot and restart the TXT. If you see the note "community edition" on the bootup splash screen, the ftcommunity firmware is running.
 
@@ -127,6 +129,6 @@ In both cases, the user name is "ftc". By default, the *ftc* user can log in wit
 
 After setting a password, the *ftc* user may use `sudo` to execute commands as root.
 
-## Switch back to original firmware
+# Switch back to original firmware
 
 Shut down the TXT and remove the SD card with the ftcommunity firmware. On the next start, the TXT will boot the original Fischertechnik firmware.
