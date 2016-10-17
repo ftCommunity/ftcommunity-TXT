@@ -3,7 +3,6 @@
 # This device table is used to assign proper ownership and permissions
 # on various files.
 #
-# It gives the whole www tree to the ftc user which the web server runs under.
 # ftc/apps is also given to ftc to allow it to upload apps. The pre-installed
 # apps still belong to root and thus cannot be touched by ftc
 #
@@ -13,3 +12,4 @@
 /opt/fischertechnik                     r       755     1000    1000    -       -       -       -       -
 /media/sdcard                           d       755     0       0       -       -       -       -       -
 /sbin/unix_chkpwd                       r      4755     0       0       -       -       -       -       -
+/etc/network/interfaces                 f       666     0       0       -       -       -       -       -
