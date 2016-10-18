@@ -311,9 +311,15 @@ class AppDialog(TouchDialog):
 
         self.package_loader = PackageLoader(self.package_name)
         self.package_loader.result.connect(self.onResult)
+
         self.busy = BusyAnimation(self)
         self.package_loader.progress.connect(self.busy.progress)
         self.busy.show()
+
+        # make dialog unusable whilte downloading/installing
+        self.setDisabled(True)
+        self.centralWidget.setGraphicsEffect(QGraphicsBlurEffect(self))
+        self.titlebar.setGraphicsEffect(QGraphicsBlurEffect(self))
 
     def uninstall(self, name):
 
@@ -346,6 +352,13 @@ class AppDialog(TouchDialog):
 
     def onResult(self, result):
         self.busy.close()
+
+        # Make dialog unusable again. Actually we don't need to
+        # do this as we'll close the dialog immediately, anyway.
+        # But it doesn't hurt ...
+        self.setEnabled(True)
+        self.centralWidget.setGraphicsEffect(None)
+        self.titlebar.setGraphicsEffect(None)
         
         if result[0]:
             self.refresh.emit()
