@@ -1,5 +1,14 @@
 # Community edition of the standard firmware for the FT-TXT.
 
+## Quick start
+
+Please use the following links for a quick start:
+
+  * [English quick start quide](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BEN%5D-Tutorial%3A-Setting-up-the-ftcommunity-TXT-Firmware)
+  * [Deutsche Kurzanleitung](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BDE%5D-Anleitung%3A-Einrichtung-der-ftcommunity-TXT-Firmware)
+
+More infos can be found in the [Wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki).
+
 ## What is this and why would i want this?
 
 The [Fischertechnik TXT controller](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-307/usetemplate-2_column_pano/) is a Linux driven computerized brick for the Fischertechnik construction toy.
