@@ -6,7 +6,7 @@ Please use the [English quick start quide](https://github.com/ftCommunity/ftcomm
 
 ## What is this and why would i want this?
 
-The [Fischertechnik TXT controller](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-307/usetemplate-2_column_pano/) is a Linux driven computerized brick for the Fischertechnik construction toy.
+The [Fischertechnik TXT controller](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/) is a Linux driven computerized brick for the Fischertechnik construction toy.
 
 ![TXT](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg)
 
