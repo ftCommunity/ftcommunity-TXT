@@ -2,7 +2,7 @@
 
 ## Quick start
 
-Please use [English quick start quide](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BEN%5D-Tutorial%3A-Setting-up-the-ftcommunity-TXT-Firmware) or the [Deutsche Kurzanleitung (quick start guide in german)](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BDE%5D-Anleitung%3A-Einrichtung-der-ftcommunity-TXT-Firmware) for a quick start. More infos can be found in the [Wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki).
+Please use the [English quick start quide](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BEN%5D-Tutorial%3A-Setting-up-the-ftcommunity-TXT-Firmware) or the [Deutsche Kurzanleitung (quick start guide in german)](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BDE%5D-Anleitung%3A-Einrichtung-der-ftcommunity-TXT-Firmware) for a quick start. More infos can be found in the [Wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki).
 
 ## What is this and why would i want this?
 
