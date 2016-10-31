@@ -77,16 +77,30 @@ class ConfirmationDialog(PlainDialog):
     def __init__(self,sock,str):
         self.sock = sock
 
+        strings = str.split("\\n")
+        print("Str array", strings)
+        
         PlainDialog.__init__(self)
 
         self.layout = QVBoxLayout()
         self.layout.addStretch()
 
         # display the message itself
-        lbl = QLabel(str)
-        lbl.setWordWrap(True);
-        lbl.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(lbl)
+        for s in strings:
+            # a small label 
+            if s.startswith("\\s"):
+                lbl = QLabel(s[2:])
+                lbl.setObjectName("smalllabel")
+            elif s.startswith("\\t"):
+                lbl = QLabel(s[2:])
+                lbl.setObjectName("tinylabel")
+            else:
+                lbl = QLabel(s)
+            
+            lbl.setWordWrap(True);
+            lbl.setAlignment(Qt.AlignCenter)
+            self.layout.addWidget(lbl)
+            self.layout.addStretch()
 
         # display a the "ok" + "cancel" buttons
         button_box = QWidget()
@@ -95,24 +109,28 @@ class ConfirmationDialog(PlainDialog):
 
         button_layout.addStretch()
 
-        ok_but = QPushButton("Ok")
-        ok_but.clicked.connect(self.on_button_clicked)
-        button_layout.addWidget(ok_but)
+        self.ok_but = QPushButton("Ok")
+        self.ok_but.clicked.connect(self.on_button_clicked)
+        button_layout.addWidget(self.ok_but)
 
         button_layout.addStretch()
 
-        cancel_but = QPushButton("Cancel")
-        cancel_but.clicked.connect(self.on_button_clicked)
-        button_layout.addWidget(cancel_but)
+        self.cancel_but = QPushButton("Cancel")
+        self.cancel_but.clicked.connect(self.on_button_clicked)
+        button_layout.addWidget(self.cancel_but)
 
         button_layout.addStretch()
 
-        self.layout.addStretch()
         self.layout.addWidget(button_box)
         self.layout.addStretch()
         self.setLayout(self.layout)        
 
     def on_button_clicked(self):
+        # disable buttons so user doesn't click them again
+        # before the dialog is close by the timer
+        self.ok_but.setDisabled(True)
+        self.cancel_but.setDisabled(True)
+        
         # send button label back to tcp client
         self.sock.write(self.sender().text() + "\n")
 
