@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# launcher.py
+# TouchUI launcher application.
+# (c) 2016 by Till Harbaum
+
 import configparser
 import sys, os, subprocess, threading
 import socketserver, select
@@ -32,10 +36,10 @@ else:
     WIN_WIDTH = 240
     WIN_HEIGHT = 320
 
-# A fullscreen message dialog. Currently only used to show the
-# "shutting down" message
-class MessageDialog(QDialog):
-    def __init__(self,str):
+# a simple dialog without any decorations (and this without
+# the user being able to get rid of it by himself)
+class PlainDialog(QDialog):
+    def __init__(self):
         QDialog.__init__(self)
         if platform.machine() == "armv7l":
             size = QApplication.desktop().screenGeometry()
@@ -44,10 +48,18 @@ class MessageDialog(QDialog):
             self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
 
         self.setObjectName("centralwidget")
+
+    def exec_(self):
+        QDialog.showFullScreen(self)
+        QDialog.exec_(self)
+
+# A fullscreen message dialog. Currently only used to show the
+# "shutting down" message
+class MessageDialog(PlainDialog):
+    def __init__(self,str):
+        PlainDialog.__init__(self)
+
         self.layout = QVBoxLayout()
-
-        self.setLayout(self.layout)        
-
         self.layout.addStretch()
 
         lbl = QLabel(str)
@@ -56,10 +68,64 @@ class MessageDialog(QDialog):
         self.layout.addWidget(lbl)
 
         self.layout.addStretch()
+        self.setLayout(self.layout)        
 
-    def exec_(self):
-        QDialog.showFullScreen(self)
-        QDialog.exec_(self)
+# A fullscreen confirmation dialog. This can be called by an external
+# application via the built-in tcp server to e.g. get some user
+# feedback.
+class ConfirmationDialog(PlainDialog):
+    def __init__(self,sock,str):
+        self.sock = sock
+
+        PlainDialog.__init__(self)
+
+        self.layout = QVBoxLayout()
+        self.layout.addStretch()
+
+        # display the message itself
+        lbl = QLabel(str)
+        lbl.setWordWrap(True);
+        lbl.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(lbl)
+
+        # display a the "ok" + "cancel" buttons
+        button_box = QWidget()
+        button_layout = QHBoxLayout()
+        button_box.setLayout(button_layout)
+
+        button_layout.addStretch()
+
+        ok_but = QPushButton("Ok")
+        ok_but.clicked.connect(self.on_button_clicked)
+        button_layout.addWidget(ok_but)
+
+        button_layout.addStretch()
+
+        cancel_but = QPushButton("Cancel")
+        cancel_but.clicked.connect(self.on_button_clicked)
+        button_layout.addWidget(cancel_but)
+
+        button_layout.addStretch()
+
+        self.layout.addStretch()
+        self.layout.addWidget(button_box)
+        self.layout.addStretch()
+        self.setLayout(self.layout)        
+
+    def on_button_clicked(self):
+        # send button label back to tcp client
+        self.sock.write(self.sender().text() + "\n")
+
+        # close dialog after 1 second
+        close_timer = QTimer(self)
+        close_timer.setSingleShot(True)
+        close_timer.timeout.connect(self.on_close_timer)
+        close_timer.start(1000)
+
+        self.sock.close()    # close tcp connection
+
+    def on_close_timer(self):
+        self.close()         # close dialog
 
 # The TXTs window title bar
 class CategoryWidget(QComboBox):
@@ -529,6 +595,7 @@ class TcpServer(QTcpServer):
     rescan = pyqtSignal()
     launch = pyqtSignal(str)
     message = pyqtSignal(str)
+    confirm = pyqtSignal(QTcpSocket,str)
     get_app = pyqtSignal(QTcpSocket)
     stop_app = pyqtSignal()
     app_running = pyqtSignal(int)
@@ -566,6 +633,8 @@ class TcpServer(QTcpServer):
                         self.launch.emit(parm)
                     elif cmd == "msg":
                         self.message.emit(parm)
+                    elif cmd == "confirm":
+                        self.confirm.emit(s,parm)
                     elif cmd == "quit":
                         s.write("Bye\n")
                         s.close()
@@ -586,9 +655,9 @@ class TcpServer(QTcpServer):
         pass
         
 
-class FtcGuiApplication(QApplication):
+class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
-        QApplication.__init__(self, args)
+        TouchApplication.__init__(self, args)
         # load stylesheet from the same place the script was loaded from
         self.setStyleSheet( "file:///" + BASE + "/themes/" + THEME + "/style.qss")
 
@@ -602,6 +671,7 @@ class FtcGuiApplication(QApplication):
         self.tcpServer.rescan.connect(self.on_rescan)
         self.tcpServer.launch.connect(self.on_launch)
         self.tcpServer.message.connect(self.on_message)
+        self.tcpServer.confirm.connect(self.on_confirm)
         self.tcpServer.app_running.connect(self.on_app_running)
         self.tcpServer.get_app.connect(self.on_get_app)
         self.tcpServer.stop_app.connect(self.on_stop_app)
@@ -781,9 +851,11 @@ class FtcGuiApplication(QApplication):
         else:
             print("Unable to launch", name)
 
-    @pyqtSlot(str)
     def on_message(self, str):
         MessageDialog(str).exec_()
+
+    def on_confirm(self,sock,str):
+        ConfirmationDialog(sock,str).exec_()
 
     # read the manifet files of all installed apps and scan them
     # for their category. Generate a unique set of categories from this
