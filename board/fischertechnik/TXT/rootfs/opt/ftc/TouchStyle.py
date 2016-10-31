@@ -9,7 +9,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 # enable special features for the FT-TXT
-TXT = True
+TXT = os.path.isfile("/etc/fw-ver.txt")
 
 if TXT:
     # TXT values
