@@ -610,7 +610,7 @@ class UpdateCheckDialog(TouchDialog):
 
     def checkupdate(self):
         _rel_ver = self.get_release_version()
-        _cur_ver = 1  # self.get_current_version()
+        _cur_ver = self.get_current_version()
         if _rel_ver == None or _cur_ver == None:
             self.but_update.setDisabled(True)
             self.status.setText('<html>' + translation.get_string('w_update_search_error') + '<br><img src="' + LOCAL_PATH + '/update/error.png"></html>')
