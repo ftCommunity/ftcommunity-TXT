@@ -21,7 +21,7 @@ from _thread import start_new_thread
 CONFIG_FILE = '/media/sdcard/data/config.conf'
 avaible_languages = ['EN', 'DE']
 LOCAL_PATH = os.path.dirname(os.path.realpath(__file__))
-translation = Language(os.path.dirname(__file__) + '/translation', 'EN')
+
 
 class Language():
 
@@ -55,6 +55,9 @@ class Language():
             except:
                 pass
         return('missingno')
+
+translation = Language(os.path.dirname(__file__) + '/translation', 'EN')
+
 
 class LanguageDialog(TouchDialog):
 
