@@ -5,7 +5,7 @@
 # TouchUI launcher application.
 # (c) 2016 by Till Harbaum
 
-import configparser
+import configparser, datetime
 import sys, os, subprocess, threading
 import socketserver, select
 
@@ -617,6 +617,7 @@ class TcpServer(QTcpServer):
     get_app = pyqtSignal(QTcpSocket)
     stop_app = pyqtSignal()
     app_running = pyqtSignal(int)
+    enable_logging = pyqtSignal(bool)
 
     def __init__(self):
         QTcpServer.__init__(self)
@@ -662,6 +663,10 @@ class TcpServer(QTcpServer):
                         self.stop_app.emit()
                     elif cmd == "app-running":
                         self.app_running.emit(int(parm))
+                    elif cmd == "logging-start":
+                        self.enable_logging.emit(True)
+                    elif cmd == "logging-stop":
+                        self.enable_logging.emit(False)
                     else:
                         s.write("Unknown command\n")
                         print("Unknown command ", cmd)
@@ -691,8 +696,11 @@ class FtcGuiApplication(TouchApplication):
         self.tcpServer.message.connect(self.on_message)
         self.tcpServer.confirm.connect(self.on_confirm)
         self.tcpServer.app_running.connect(self.on_app_running)
+        self.tcpServer.enable_logging.connect(self.on_enable_logging)
         self.tcpServer.get_app.connect(self.on_get_app)
         self.tcpServer.stop_app.connect(self.on_stop_app)
+
+        self.log_file = None
 
         self.addWidgets()
         self.exec_()        
@@ -710,6 +718,20 @@ class FtcGuiApplication(TouchApplication):
         # popup may have expired in the meantime
         if self.popup:
             self.popup.close()
+
+    # this signal is received when app logging is to be 
+    # enabled
+    @pyqtSlot(bool)
+    def on_enable_logging(self, on):
+        if self.log_file:
+            self.log_file.write("Logging stopped at: " + datetime.datetime.now().isoformat() + "\n")
+            self.log_file.close()
+            self.log_file = None
+
+        if on:
+            self.log_file = open("/tmp/app.log", 'w')
+            self.log_file.write("Logging started at: " + datetime.datetime.now().isoformat() + "\n")
+            self.log_file.flush()
 
     def launch_textmode_app(self, executable, name):
         dialog = TextmodeDialog(name, self.w)
@@ -737,7 +759,19 @@ class FtcGuiApplication(TouchApplication):
 
         # assume that we can just launch enything under non-windows
         if platform.system() != 'Windows':
-            self.app_process = subprocess.Popen(str(executable))
+            if self.log_file:
+                self.log_file.write("Application: " + executable + "\n")
+                self.log_file.write("Application started at: " + datetime.datetime.now().isoformat() + "\n")
+                self.log_file.flush()
+                self.log_master_fd, self.log_slave_fd = pty.openpty()
+                self.app_process = subprocess.Popen(str(executable), stdout=self.log_slave_fd, stderr=self.log_slave_fd)
+
+                # start a timer to monitor the ptys
+                self.log_timer = QTimer()
+                self.log_timer.timeout.connect(self.on_log_timer)
+                self.log_timer.start(100)
+            else:
+                self.app_process = subprocess.Popen(str(executable))
         else:
             # under windows assume it's a python script that is
             # to be launched and run that with pythonw (without console)
@@ -748,6 +782,26 @@ class FtcGuiApplication(TouchApplication):
         self.popup = BusyAnimation(self.app_process, self.w)
         self.popup.expired.connect(self.on_busyExpired)
         self.popup.show()
+
+    def on_log_timer(self):
+        # check if process is still alive
+        if self.app_is_running():
+            if select.select([self.log_master_fd], [], [], 0)[0]:
+                output = os.read(self.log_master_fd, 100)
+                if output: 
+                    self.log_file.write(str(output, "utf-8"))
+                    self.log_file.flush()
+        else:
+            # write good-byte to log
+            self.log_file.write("Application ended with return value " + str(self.app_process.returncode) + "\n")
+            self.log_file.flush()
+
+            # close any open ptys
+            os.close(self.log_master_fd)
+            os.close(self.log_slave_fd)
+
+            # remove timer
+            self.log_timer = None
 
     def on_busyExpired(self):
         self.popup = None
