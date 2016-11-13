@@ -1,0 +1,16 @@
+diff -ruN linux-ti-linux-4.1.y.unpatched/drivers/rtc/rtc-tps65910.c linux-ti-linux-4.1.y/drivers/rtc/rtc-tps65910.c
+--- linux-ti-linux-4.1.y.unpatched/drivers/rtc/rtc-tps65910.c	2016-09-18 10:22:58.000000000 +0200
++++ linux-ti-linux-4.1.y/drivers/rtc/rtc-tps65910.c	2016-11-13 15:19:31.691623304 +0100
+@@ -241,6 +241,12 @@
+ 	if (ret < 0)
+ 		return ret;
+ 
++	if (rtc_reg & TPS65910_RTC_STATUS_ALARM) {
++		ret = regmap_write(tps65910->regmap, TPS65910_INT_STS, TPS65910_INT_STS_RTC_ALARM_IT_MASK);
++		if (ret < 0)
++			return ret;
++	}
++
+ 	ret = regmap_write(tps65910->regmap, TPS65910_RTC_STATUS, rtc_reg);
+ 	if (ret < 0)
+ 		return ret;
