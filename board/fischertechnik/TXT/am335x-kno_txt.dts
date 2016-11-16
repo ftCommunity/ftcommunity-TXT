@@ -483,16 +483,9 @@
 #include "tps65910.dtsi"
 
 &tps {
-	compatible = "ti,tps65910";
+	interrupt-parent = <&gpio0>;
+	interrupts = <6 IRQ_TYPE_LEVEL_HIGH>;
 
-	interrupt-parent = <&intc>;
-	interrupts = < 0 6 0x04 >;
-
-	#gpio-cells = <2>;
-	gpio-controller;
-
-	#interrupt-cells = <2>;
-	interrupt-controller;
 	ti,en-ck32k-xtal;
 
 
