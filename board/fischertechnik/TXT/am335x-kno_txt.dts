@@ -182,7 +182,7 @@
 
 	io_pins: pinmux_io_pins {
 		pinctrl-single,pins = <
-			0x160 (PIN_INPUT | MUX_MODE0)	/* <TP1> spi0_cs1.gpio0_6 */
+			0x160 (PIN_INPUT | MUX_MODE7)	/* <TP1> spi0_cs1.gpio0_6 */
 			0x1a0 (PIN_OUTPUT | MUX_MODE7)	/* <!M3-RESET> mcasp0_aclkr.gpio3_18 */
 			0x1a4 (PIN_OUTPUT | MUX_MODE7)	/* <M3-BOOT0> mcasp0_fsr.gpio3_19 */
 			0x040 (PIN_INPUT | MUX_MODE7)	/* <ON-INT> gpmc_a0.gpio1_16 */
