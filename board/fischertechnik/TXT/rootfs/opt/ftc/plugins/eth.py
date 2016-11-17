@@ -74,5 +74,5 @@ def status():
         else:
             return "No link"
     else:
-        return "Not available"
+        return None
 
