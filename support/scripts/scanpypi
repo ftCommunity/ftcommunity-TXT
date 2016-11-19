@@ -22,6 +22,7 @@ import re
 import textwrap
 import tempfile
 import imp
+import runpy
 from functools import wraps
 
 def setup_decorator(func, method):
@@ -247,16 +248,8 @@ class BuildrootPackage():
         os.chdir(self.tmp_extract)
         sys.path.append(self.tmp_extract)
         s_file, s_path, s_desc = imp.find_module('setup', [self.tmp_extract])
-        setup = imp.load_module('setup', s_file, s_path, s_desc)
-        try:
-            self.setup_metadata = self.setup_args[self.metadata_name]
-        except KeyError:
-            # This means setup was not called which most likely mean that it is
-            # called through the if __name__ == '__main__' directive.
-            # In this case, we can only pray that it is called through a
-            # function called main() in setup.py.
-            setup.main([]) # Will raise AttributeError if not found
-            self.setup_metadata = self.setup_args[self.metadata_name]
+        setup = runpy.run_path(s_path, run_name = '__main__')
+        self.setup_metadata = self.setup_args[self.metadata_name]
         # Here we must remove the module the hard way.
         # We must do this because of a very sepcific case: if a package calls
         # setup from the __main__ but does not come with a 'main()' function,
@@ -611,6 +604,7 @@ def main():
             except AttributeError:
                 print('Error: Could not install package {pkg}'.format(
                     pkg=package.real_name))
+                raise
                 continue
 
             # Package requirement are an argument of the setup function
