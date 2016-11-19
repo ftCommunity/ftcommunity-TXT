@@ -1,0 +1,15 @@
+config BR2_PACKAGE_PYTHON_NOTEBOOK
+	bool "python-notebook"
+	select BR2_PACKAGE_PYTHON_JINJA2 # runtime
+	select BR2_PACKAGE_PYTHON_TORNADO # runtime
+	select BR2_PACKAGE_PYTHON_IPYTHON_GENUTILS # runtime
+	select BR2_PACKAGE_PYTHON_TRAITLETS # runtime
+	select BR2_PACKAGE_PYTHON_JUPYTER_CORE # runtime
+	select BR2_PACKAGE_PYTHON_JUPYTER_CLIENT # runtime
+	select BR2_PACKAGE_PYTHON_NBFORMAT # runtime
+	#select BR2_PACKAGE_PYTHON_NBCONVERT # runtime
+	select BR2_PACKAGE_PYTHON_IPYKERNEL # runtime
+	help
+	  A web-based notebook environment for interactive computing.
+
+	  http://jupyter.org

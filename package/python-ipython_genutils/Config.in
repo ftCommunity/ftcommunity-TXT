@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_IPYTHON_GENUTILS
+	bool "python-ipython_genutils"
+	help
+	  Vestigial utilities from IPython.
+
+	  http://ipython.org

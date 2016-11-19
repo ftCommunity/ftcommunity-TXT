@@ -1,0 +1,14 @@
+config BR2_PACKAGE_PYTHON_NBCONVERT
+	bool "python-nbconvert"
+	select BR2_PACKAGE_PYTHON_MISTUNE # runtime
+	select BR2_PACKAGE_PYTHON_JINJA2 # runtime
+	select BR2_PACKAGE_PYTHON_PYGMENTS # runtime
+	select BR2_PACKAGE_PYTHON_TRAITLETS # runtime
+	select BR2_PACKAGE_PYTHON_JUPYTER_CORE # runtime
+	select BR2_PACKAGE_PYTHON_NBFORMAT # runtime
+	select BR2_PACKAGE_PYTHON_ENTRYPOINTS # runtime
+	select BR2_PACKAGE_PYTHON_BLEACH # runtime
+	help
+	  Converting Jupyter Notebooks.
+
+	  http://jupyter.org

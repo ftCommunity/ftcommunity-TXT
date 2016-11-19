@@ -13,31 +13,27 @@ dynamically, return the version of the buildroot environment.
 
 Signed-off-by: Michael Rommel <rommel@layer-7.net>
 
---- pyzmq-13.0.2/buildutils/detect.py.orig	2013-08-10 00:49:28.242557978 +0200
-+++ pyzmq-13.0.2/buildutils/detect.py	2013-08-10 00:44:35.197572704 +0200
-@@ -119,15 +119,17 @@ def detect_zmq(basedir, compiler=None, *
-             
-     efile = test_compilation(cfile, compiler=compiler, **compiler_attrs)
+Refreshed patch for pyzmq-16.0.1
+
+Signed-off-by: Richard Kunze <richard.kunze@web.de>
+--- python-pyzmq-16.0.1/buildutils/detect.py.orig	2016-11-19 23:19:18.712699849 +0100
++++ python-pyzmq-16.0.1/buildutils/detect.py	2016-11-19 23:29:30.711734588 +0100
+@@ -119,12 +119,13 @@
+     efile = test_compilation(cfile, compiler=cc)
+     patch_lib_paths(efile, cc.library_dirs)
      
--    result = Popen(efile, stdout=PIPE, stderr=PIPE)
--    so, se = result.communicate()
-+    # result = Popen(efile, stdout=PIPE, stderr=PIPE)
-+    # so, se = result.communicate()
-     # for py3k:
--    so = so.decode()
--    se = se.decode()
--    if result.returncode:
+-    rc, so, se = get_output_error([efile])
+-    if rc:
 -        msg = "Error running version detection script:\n%s\n%s" % (so,se)
 -        logging.error(msg)
 -        raise IOError(msg)
-+    #so = so.decode()
-+    #se = se.decode()
-+    #if result.returncode:
++    #rc, so, se = get_output_error([efile])
++    #if rc:
 +    #    msg = "Error running version detection script:\n%s\n%s" % (so,se)
 +    #    logging.error(msg)
 +    #    raise IOError(msg)
-+
-+    so = "vers: ##ZEROMQ_VERSION##"
  
++    so = "vers: ##ZEROMQ_VERSION##"
      handlers = {'vers':  lambda val: tuple(int(v) for v in val.split('.'))}
  
+     props = {}

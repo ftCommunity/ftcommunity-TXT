@@ -1,0 +1,9 @@
+config BR2_PACKAGE_PYTHON_JUPYTER_CLIENT
+	bool "python-jupyter_client"
+	select BR2_PACKAGE_PYTHON_TRAITLETS # runtime
+	select BR2_PACKAGE_PYTHON_JUPYTER_CORE # runtime
+	select BR2_PACKAGE_PYTHON_PYZMQ # runtime
+	help
+	  Jupyter protocol implementation and client libraries.
+
+	  http://jupyter.org

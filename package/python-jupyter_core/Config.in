@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_JUPYTER_CORE
+	bool "python-jupyter_core"
+	select BR2_PACKAGE_PYTHON_TRAITLETS # runtime
+	help
+	  Jupyter core package. A base package on which Jupyter projects
+	  rely.
+
+	  http://jupyter.org
