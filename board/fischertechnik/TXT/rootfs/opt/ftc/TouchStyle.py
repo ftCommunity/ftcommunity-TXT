@@ -43,7 +43,6 @@ class ButtonThread(QThread):
         event = in_file.read(INPUT_EVENT_SIZE)
         while event:
             (tv_sec, tv_usec, type, code, value) = struct.unpack(INPUT_EVENT_FORMAT, event)
-            print((type, code, value))
             if type == 1 and code == INPUT_EVENT_CODE and value == 0:
                 self.emit( SIGNAL('power_button_released()'))   
             event = in_file.read(INPUT_EVENT_SIZE)
@@ -138,7 +137,7 @@ class TouchBaseWidget(QWidget):
             sock.connect(("localhost", 9000))
             sock.sendall(bytes("app-running {}\n".format(os.getpid()), "UTF-8"))
         except socket.error as msg:
-            print(("Unable to connect to launcher:", msg))
+            pass
         finally:
             sock.close()
 
