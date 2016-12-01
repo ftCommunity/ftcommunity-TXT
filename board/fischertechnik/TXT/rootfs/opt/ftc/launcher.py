@@ -7,7 +7,7 @@
 
 import configparser, datetime
 import sys, os, subprocess, threading
-import socketserver, select
+import socketserver, select, time
 
 from TouchStyle import *
 from PyQt4.QtCore import *
