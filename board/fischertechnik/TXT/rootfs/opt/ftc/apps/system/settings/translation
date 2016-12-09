@@ -1,13 +1,42 @@
 [EN]
 app_name: Settings
 menu_language: Language
+menu_network: Network
 w_language_name: Language
 w_language_lang_select: Language:
 w_language_save: Save
+w_network_name: Network:
+w_network_adress: Adress:
+w_network_netmask: Netmask:
+w_network_password: W-LAN
+w_network_probing: Probing...
+w_network_up: Internet is up
+w_network_down: Internet is down
+w_wlan_name: W-LAN
+w_wlan_network: Network
+w_wlan_encryption: Encryption:
+w_wlan_prekey: Key
+w_wlan_connect: connect
+w_wlan_connected: connected
 
 [DE]
 app_name: Einstellungen
 menu_language: Sprache
+menu_network: Netzwerk
 w_language_name: Sprache
 w_language_lang_select: Sprache:
 w_language_save: Speichern
+w_network_name: Netzwerk
+w_network_adress: Adresse:
+w_network_netmask: Netzmaske:
+w_network_password: W-LAN
+w_network_probing: Testen...
+w_network_up: Internet verbunden
+w_network_down: Internet getrennt
+w_wlan_name: W-LAN
+w_wlan_network: Netzwerk:
+;UL
+w_wlan_encryption: Verschl&uuml;sselung:
+w_wlan_prekey: Schl&uuml;ssel
+w_wlan_connect: Verbinden
+w_wlan_connected: Verbunden
