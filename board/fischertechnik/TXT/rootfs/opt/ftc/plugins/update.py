@@ -9,7 +9,7 @@ import configparser
 
 name = 'Update'
 cachefile = '/tmp/update_plugin.cache'
-get_interval = 900.0  # sec
+get_interval = 86400.0  # one day
 
 
 def get_release_version():
@@ -27,7 +27,9 @@ def get_release_version():
 
 def get_current_version():
     try:
-        current_version = os.popen('cat /etc/fw-ver.txt').read().strip().split('-')[0]
+        fw_file = open('/etc/fw-ver.txt', 'r')
+        current_version = fw_file.read().strip().split('-')[0]
+        fw_file.close()
         return(current_version)
     except:
         return(None)
