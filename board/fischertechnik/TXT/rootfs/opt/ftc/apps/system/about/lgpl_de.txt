@@ -1,0 +1,217 @@
+GNU Lesser General Public License
+
+Deutsche Übersetzung der Version 3, 29. Juni 2007
+
+Den offiziellen englischen Originaltext finden Sie unter http://www.gnu.org/
+licenses/lgpl-3.0.html.
+
+    Deutsche Übersetzung: Peter Gerwinski, 31.7.2007
+
+    Dies ist eine inoffizielle deutsche Übersetzung der GNU Lesser General
+    Public License, die nicht von der Free Software Foundation herausgegeben
+    wurde. Es handelt sich hierbei nicht um eine rechtsgültige Festlegung der
+    Bedingungen für die Weitergabe von Software, die der GNU LGPL unterliegt;
+    dies leistet nur der englische Originaltext. Wir hoffen jedoch, daß diese
+    Übersetzung deutschsprachigen Lesern helfen wird, die GNU LGPL besser zu
+    verstehen.
+
+    This is an unofficial translation of the GNU Lesser General Public License
+    into German. It was not published by the Free Software Foundation, and does
+    not legally state the distribution terms for software that uses the GNU
+    LGPL—only the original English text of the GNU LGPL does that. However, we
+    hope that this translation will help German speakers understand the GNU
+    LGPL better.
+
+                       GNU Lesser General Public License
+
+               Deutsche Übersetzung der Version 3, 29. Juni 2007
+
+ Copyright © 2007 Free Software Foundation, Inc. (http://fsf.org/) 51 Franklin
+                Street, Fifth Floor, Boston, MA 02110-1301, USA
+
+Es ist jedermann gestattet, diese Lizenzurkunde zu vervielfältigen und
+unveränderte Kopien zu verbreiten; Änderungen sind jedoch nicht erlaubt.
+
+Diese Übersetzung ist kein rechtskräftiger Ersatz für die englischsprachige
+Originalversion!
+
+Diese Version der GNU Lesser General Public License umfaßt die Bedingungen von
+Version 3 der GNU General Public License, ergänzt um die unten aufgelisteten
+zusätzlichen Genehmigungen.
+
+0. Zusätzliche Definitionen.
+
+Nachstehend bezeichnet „diese Lizenz“ die GNU Lesser General Public License,
+Version 3, und „GNU GPL“ die GNU General Public License, Version 3.
+
+„Die Bibliothek“ steht für ein betroffenes Werk unter dieser Lizenz, bei dem es
+nicht um eine Anwendung oder um ein kombiniertes Werk im Sinne der
+untenstehenden Definitionen handelt.
+
+Eine „Anwendung“ ist irgendein Werk, das eine von der Bibliothek
+bereitgestellte Schnittstelle nutzt, ansonsten aber nicht auf der Bibliothek
+basiert. Die Definition einer abgeleiteten Klasse einer von der Bibliothek
+bereitgestellten Klasse wird als eine Weise betrachtet, eine von der Bibliothek
+bereitgestellte Schnittstelle zu nutzen.
+
+Ein „kombiniertes Werk“ ist ein Werk, das durch das Kombinieren oder Linken
+einer Anwendung mit der Bibliothek erzeugt wurde. Die spezifische Version der
+Bibliothek, mit der zusammen das kombinierte Werk erzeugt wurde, wird auch
+„gelinkte Version“ genannt.
+
+Der „Minimalquelltext“ eines kombinierten Werks bezeichnet den
+korrespondierenden Quelltext des kombinierten Werks, ausgenommen den Quelltext
+von Teilen des kombinierten Werks, die, einzeln betrachtet, auf der Anwendung
+basieren und nicht auf der gelinkten Version.
+
+Der „korrespondierende Anwendungs-Code“ eines kombinierten Werks bezeichnet den
+Objekt-Code und/oder Quelltext der Anwendung einschließlich aller Daten und
+Hilfsprogramme, die benötigt werden, um das kombinierte Werk anhand der
+Anwendung zu reproduzieren, mit Ausnahme der Systembibliotheken des
+kombinierten Werks.
+
+1. Ausnahmen von §3 der GNU GPL
+
+Sie dürfen ein betroffenes Werk gemäß §§3 und 4 dieser Lizenz übertragen, ohne
+an §3 der GNU GPL gebunden zu sein.
+
+2. Übertragung modifizierter Versionen
+
+Wenn Sie ein Exemplar der Bibliothek modifizieren und sich eine Routine
+(“facility”) innerhalb dieser Modifikationen auf eine Funktion oder auf Daten
+bezieht, die von einer Anwendung bereitgestellt werden, die die Bibliothek
+nutzt (auf eine andere Weise als in Gestalt eines Arguments, das beim Aufruf
+der Routine übergeben wird), dann dürfen Sie eine Kopie der modifizierten
+Version folgendermaßen übertragen:
+
+a) gemäß dieser Lizenz, sofern Sie sich in gutem Glauben darum bemühen,
+   sicherzustellen, daß die Routine weiterhin funktioniert, wenn die Anwendung
+   die Funktion oder Daten nicht bereitstellt und denjenigen Teil ihres
+   Zweckes, der sinnvoll bleibt, weiterhin ausführt, oder
+
+b) gemäß der GNU GPL, wobei keine der zusätzlichen Genehmigungen dieser Lizenz
+   bei dieser Kopie greifen.
+
+3. Objekt-Code, der Material aus Bibliotheks-Header-Dateien enthält
+
+Die Objekt-Code-Form einer Anwendung darf Material aus einer Header-Datei
+enthalten, die Teil der Bibliothek ist. Sie dürfen derartigen Objekt-Code gemäß
+Bedingungen Ihrer Wahl übertragen, vorausgesetzt – sofern das enthaltene
+Material nicht auf numerische Parameter, Datenstrukturanordnungen und
+-zugriffsfunktionen oder kleine Makros, Inline-Funktionen und Templates (zehn
+oder weniger Zeilen lang) beschränkt ist –, Sie führen die beiden folgenden
+Handlungen aus:
+
+a) Versehen Sie jedes Exemplar des Objekt-Codes mit einem prominenten Hinweis,
+   daß die Bibliothek darin verwendet wird und daß die Bibliothek und ihre
+   Benutzung durch diese Lizenz abgedeckt werden.
+
+b) Legen Sie dem Objekt-Code ein Exemplar der GNU GPL und dieses
+   Lizenzdokuments bei.
+
+4. Kombinierte Werke
+
+Sie dürfen ein betroffenes Werk unter Bedingungen Ihrer Wahl übertragen, die
+insgesamt die Modifikation der in dem kombinierten Werk enthaltenen Teile der
+Bibliothek und das Zurückbilden (“reverse engineering”), um derartige
+Modifikationen von Fehlern zu bereinigen, nicht wirksam einschränken, wenn Sie
+außerdem alle folgenden Handlungen ausführen:
+
+a) Versehen Sie jedes Exemplar des kombinierten Werks mit einem prominenten
+   Hinweis, daß die Bibliothek darin verwendet wird und daß die Bibliothek und
+   ihre Benutzung durch diese Lizenz abgedeckt werden.
+
+b) Legen Sie dem kombinierten Werk ein Exemplar der GNU GPL und dieses
+   Lizenzdokuments bei.
+
+c) Für ein kombiniertes Werk, das bei Ausführung Copyright-Hinweise anzeigt,
+   fügen Sie den Copyright-Hinweis für die Bibliothek diesen Hinweisen hinzu
+   sowie einen Verweis, der den Anwender zu den Exemplaren der GNU GPL und
+   dieses Lizenzdokuments führt.
+
+d) Führen Sie eine der folgenden Handlungen aus:
+
+   0. Übertragen Sie den korrespondierenden Minimalquelltext gemäß den
+      Bedingungen dieser Lizenz und den korrespondierenden Anwendungs-Code in
+      einer Form und gemäß Bedingungen, die den Anwender erlauben, die
+      Anwendung mit einer modifizierten Version der gelinkten Version neu zu
+      kombinieren oder zu linken, um ein modifiziertes korrespondierendes Werk
+      zu erzeugen, auf eine Weise, wie sie in §6 der GNU GPL spezifiziert ist,
+      um korrespondierenden Quelltext zu übertragen.
+
+   1. Verwenden Sie einen geeigneten Shared-Library-Mechanismus, um mit der
+      Bibliothek zu linken. Ein geeigneter Mechanismus ist ein Mechanismus, der
+      (a) zur Laufzeit ein Exemplar der Bibliothek verwendet, das sich bereits
+      auf dem Computer des Anwenders befindet, und (b) mit einer modifizierten
+      Version der Bibliothek, die mit der gelinkten Version
+      schnittstellenkompatibel ist, korrekt arbeiten wird.
+
+e) Stellen Sie Installationsinformationen zur Verfügung – allerdings nur dann,
+   wenn Sie dazu ansonsten gemäß §6 der GNU GPL verpflichtet wären, und nur in
+   dem Maße, in dem derartige Informationen benötigt werden, um eine
+   modifizierte Version des kombinierten Werks installieren und ausführen zu
+   können, die durch erneutes Kombinieren oder Linken der Anwendung mit einer
+   modifizierten Version der gelinkten Version erzeugt wurde. (Wenn Sie Option
+   4d0 verwenden, müssen die Installationsinformationen dem korrespondierenden
+   Minimalquelltext und Anwendungs-Code beiliegen. Wenn Sie Option 4d1
+   verwenden, müssen Sie die Installationsinformationen in einer Form zur
+   Verfügung stellen, die in §6 der GNU GPL für das Übertragen des
+   korrespondierenden Quelltextes spezifiziert wurde.)
+
+5. Kombinierte Bibliotheken
+
+Sie dürfen Routinen aus der Bibliothek, die ein auf der Bibliothek basierendes
+Werk darstellen, mit anderen Bibliotheks-Routinen, die keine Anwendungen sind
+und die nicht unter dieser Lizenz stehen, in einer einzelnen Bibliothek
+nebeneinanderstellen und eine derartige kombinierte Bibliothek unter
+Bedingungen Ihrer Wahl übertragen, wenn Sie die beiden folgenden Handlungen
+ausführen:
+
+a) Legen Sie der kombinierten Bibliothek ein Exemplar desselben auf der
+   Bibliothek basierenden Werks bei, das von jedweden anderen
+   Bibliotheks-Routinen entbündelt wurde und unter den Bedingungen dieser
+   Lizenz übertragen wird.
+
+b) Versehen Sie die kombinierte Bibliothek mit einem prominenten Hinweis, daß
+   Teile davon ein auf der Bibliothek basierendes Werk darstellen, und erklären
+   Sie, wo die beiliegende entbündelte Form desselben Werks zu finden ist.
+
+6. Überarbeitungen der GNU Lesser General Public License
+
+Die Free Software Foundation kann von Zeit zu Zeit überarbeitete und/oder neue
+Versionen der GNU Lesser General Public License veröffentlichen. Solche neuen
+Versionen werden vom Grundprinzip her der gegenwärtigen entsprechen, können
+aber im Detail abweichen, um neuen Problemen und Anforderungen gerecht zu
+werden.
+
+Jede Version hat eine eindeutige Versionsnummer. Wenn eine Bibliothek, wie Sie
+sie erhalten haben, angibt, daß eine bestimmte Versionsnummer der GNU Lesser
+General Public License „oder irgendeine spätere Version“ (“or any later
+version”) darauf anwendbar ist, so haben Sie die Wahl, entweder den
+Bestimmungen der genannten Version zu folgen oder denen jeder beliebigen
+späteren Version, die von der Free Software Foundation veröffentlicht wurde.
+Wenn die Bibliothek, wie Sie sie erhalten haben, keine Versionsnummer angibt,
+können Sie irgendeine Version der GNU Lesser General Public License wählen, die
+je von der Free Software Foundation veröffentlicht wurde.
+
+Wenn die Bibliothek, wie Sie sie erhalten haben, bestimmt, daß ein
+Bevollmächtigter entscheiden kann, ob zukünftige Versionen der GNU Lesser
+General Public License anwendbar sein sollen, dann ist eine öffentliche
+Stellungnahme der Akzeptanz einer beliebigen Version für Sie eine permanente
+Erlaubnis, diese Version für die Bibliothek auszuwählen.
+
+                                     * * *
+
+Copyright-Notiz des englischsprachigen Orignals:
+Copyright notice above.
+51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
+Verbatim copying and distribution of this entire article is permitted in any
+medium without royalty provided this notice is preserved.
+
+Übersetzung:
+Copyright-Notiz siehe oben.
+51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
+Es ist gebührenfrei gestattet, diesen Artikel als Ganzes und unverändert in
+beliebigen Medien zu kopieren und weiterzugeben, sofern dieser Hinweis erhalten
+bleiben.
+
