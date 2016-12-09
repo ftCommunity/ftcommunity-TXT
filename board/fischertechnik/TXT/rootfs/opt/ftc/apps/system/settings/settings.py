@@ -459,7 +459,87 @@ class WLanDialog(TouchDialog):
                     self.encr_w.setCurrentIndex(0)
 
 
+class UpdateCheckDialog(TouchDialog):
 
+    def __init__(self, parent):
+        TouchDialog.__init__(self, translation.get_string('w_update_name'), parent)
+        self.vbox = QVBoxLayout()
+        self.vbox.addStretch()
+        self.status = QLabel('<html>' + translation.get_string('w_update_search_search') + '<br><img src="' + LOCAL_PATH + '/update/search.png"></html>')
+        self.status.setAlignment(Qt.AlignCenter)
+        self.vbox.addWidget(self.status)
+        self.vbox.addStretch()
+        self.but_update = QPushButton(translation.get_string('w_update_search_button'))
+        self.but_update.clicked.connect(self.do_update)
+        self.but_update.setDisabled(True)
+        self.vbox.addWidget(self.but_update)
+        self.vbox.addStretch()
+        self.centralWidget.setLayout(self.vbox)
+        start_new_thread(self.checkupdate, ())
+
+    def do_update(self):
+        dialog = UpdateInitiateDialog(self)
+        dialog.exec_()
+        self.but_update.setDisabled(True)
+
+    def get_release_version(self):
+        try:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            raw_data = urllib.request.urlopen('https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases/latest', context=ctx).read().decode()
+            latest_release = json.loads(raw_data)
+            release_version = latest_release['tag_name'].replace('v', '')
+            return release_version
+        except:
+            None
+
+    def get_current_version(self):
+        try:
+            current_version = os.popen('cat /etc/fw-ver.txt').read().strip().split('-')[0]
+            return current_version
+        except:
+            return None
+
+    def checkupdate(self):
+        _rel_ver = self.get_release_version()
+        _cur_ver = self.get_current_version()
+        if _rel_ver == None or _cur_ver == None:
+            self.but_update.setDisabled(True)
+            self.status.setText('<html>' + translation.get_string('w_update_search_error') + '<br><img src="' + LOCAL_PATH + '/update/error.png"></html>')
+            return
+        if _rel_ver == _cur_ver:
+            self.but_update.setDisabled(True)
+            self.status.setText(translation.get_string('w_update_search_utd'))
+        else:
+            self.but_update.setDisabled(False)
+            self.status.setText('<html>' + translation.get_string('w_update_search_update') + _rel_ver + '<br><img src="' + LOCAL_PATH + '/update/avaiable.png"></html>')
+
+
+class UpdateInitiateDialog(TouchDialog):
+
+    def __init__(self, parent):
+        TouchDialog.__init__(self, translation.get_string('w_update_name'), parent)
+        self.vbox = QVBoxLayout()
+        self.vbox.addStretch()
+        self.main_widget = QLabel(translation.get_string('w_update_initiate_prestart'))
+        self.main_widget.setObjectName('smalllabel')
+        self.main_widget.setWordWrap(True)
+        self.vbox.addWidget(self.main_widget)
+        self.vbox.addStretch()
+        self.start_but = QPushButton(translation.get_string('w_update_process_start'))
+        self.start_but.clicked.connect(self.do_update)
+        self.vbox.addWidget(self.start_but)
+        self.vbox.addStretch()
+        self.centralWidget.setLayout(self.vbox)
+
+    def do_update(self):
+        dialog = UpdateProcessDialog(self)
+        dialog.exec_()
+        self.close()
+
+
+class UpdateProcessDialog(TouchDialog):
 
     def __init__(self, parent):
         TouchDialog.__init__(self, translation.get_string('w_update_name'), parent)
@@ -707,7 +787,8 @@ class FtcGuiApplication(TouchApplication):
         self.w = TouchWindow(translation.get_string('app_name'))
         self.icons = IconGrid({
             translation.get_string('menu_language'): [LanguageDialog, 'icons/language.png'],
-            translation.get_string('menu_network'): [NetworkDialog, 'icons/network.png']})
+            translation.get_string('menu_network'): [NetworkDialog, 'icons/network.png'],
+            translation.get_string('menu_update'): [UpdateCheckDialog, 'icons/update.png']})
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(self.icons)
         self.w.centralWidget.setLayout(self.vbox)
