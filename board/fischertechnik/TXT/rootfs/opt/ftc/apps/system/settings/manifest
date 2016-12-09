@@ -1,0 +1,11 @@
+[app]
+name: Settings
+category: System
+author: Raphael Jacob &lt;r.jacob2002@gmail.com&gt;
+icon: icon.png
+desc: Settings app
+exec: settings.py
+managed: yes
+uuid: 9266b49a-f7ec-4e52-9810-121b5784105f
+version: 1.0
+firmware: 0.9

@@ -1,0 +1,13 @@
+[EN]
+app_name: Settings
+menu_language: Language
+w_language_name: Language
+w_language_lang_select: Language:
+w_language_save: Save
+
+[DE]
+app_name: Einstellungen
+menu_language: Sprache
+w_language_name: Sprache
+w_language_lang_select: Sprache:
+w_language_save: Speichern
