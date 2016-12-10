@@ -47,7 +47,7 @@ def scan_app_dirs():
                 if os.path.isfile(manifestfile):
                     # get app name
                     manifest = configparser.RawConfigParser()
-                    manifest.read(manifestfile)
+                    manifest.read_file(open(manifestfile, "r", encoding="utf8"))
                     appname = manifest.get('app', 'name')
                     app_dirs.append((appname, os.path.join(app_base, i, a)))
         except:

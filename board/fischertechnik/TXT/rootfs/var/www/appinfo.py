@@ -44,7 +44,7 @@ def app_get(manifest, name):
 
 if os.path.isfile(manifestfile):
     manifest = configparser.RawConfigParser()
-    manifest.read(manifestfile)
+    manifest.read_file(open(manifestfile, "r", encoding="utf8"))
 
     # get apps directory name from manifest file path
     app_dir = os.path.dirname(os.path.abspath(manifestfile))

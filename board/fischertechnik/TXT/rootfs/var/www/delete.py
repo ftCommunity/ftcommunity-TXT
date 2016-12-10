@@ -31,7 +31,7 @@ name = arguments['app'].value
 manifestfile = appbase + "/" + name + "/manifest" 
 if os.path.isfile(manifestfile):
     manifest = configparser.RawConfigParser()
-    manifest.read(manifestfile)
+    manifest.read_file(open(manifestfile, "r", encoding="utf8"))
     appname = manifest.get('app', 'name')
 
     print('<h1>Deleting "' + appname + '" app ...</h1/>')
