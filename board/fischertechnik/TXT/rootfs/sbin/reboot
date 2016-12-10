@@ -1,0 +1,3 @@
+#!/bin/sh
+echo +15 > /sys/class/rtc/rtc1/wakealarm
+exec /bin/busybox poweroff
