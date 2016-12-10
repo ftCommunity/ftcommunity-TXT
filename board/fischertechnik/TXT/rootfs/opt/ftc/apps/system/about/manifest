@@ -9,3 +9,6 @@ desc: About the community firmware
 exec: about.py
 managed: yes
 uuid: 3550e4e0-330c-42a9-810a-ca0ff1e42fd4
+
+[de]
+name: Über
