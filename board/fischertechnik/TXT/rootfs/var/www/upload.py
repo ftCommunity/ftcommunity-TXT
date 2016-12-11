@@ -67,7 +67,7 @@ def unzip_uploaded_file(zip_name, appbase):
     # is used as the apps local directory
     manifest_str = io.StringIO(z.read("manifest").decode('utf-8'))
     manifest = configparser.RawConfigParser()
-    manifest.readfp(manifest_str)
+    manifest.read_file(manifest_str)
     if not manifest.has_option('app', 'uuid'):
         return False, "Manifest does not contain a UUID!", ""
 

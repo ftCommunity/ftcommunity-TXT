@@ -887,18 +887,14 @@ class FtcGuiApplication(TouchApplication):
                     if os.path.isfile(manifestfile):
                         # get app name
                         manifest = configparser.RawConfigParser()
-                        manifest.read(manifestfile)
+                        manifest.read_file(open(manifestfile, "r", encoding="utf8"))
                         appname = manifest.get('app', 'name')
 
                         appinfo = self.manifest_import(manifest) 
                         appinfo["dir"] = os.path.join(app_base, i, a)
 
-                        # app_dirs.append((appname, os.path.join(app_base, i, a)))
                         app_dirs.append((appname, appinfo))
-                        # print(appname, appinfo)
-                        
             except:
-                print("Failed: ", i)
                 pass
                 
         # sort list by apps name
