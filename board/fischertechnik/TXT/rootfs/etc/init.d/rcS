@@ -9,6 +9,12 @@ echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
 # load ftc splash image. Use FT colors for progress bar
 psplash -n -f /etc/ftc-logo.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
 
+# load locale if present
+if [ -r /etc/locale ]; then
+    . /etc/locale
+    export LANG LANGUAGE LC_ALL
+fi
+
 # count scripts to be executed
 SPLASH_MAX=0
 for i in /etc/init.d/S??* ;do
