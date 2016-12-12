@@ -1,0 +1,79 @@
+[EN]
+app_name: Settings
+home_text: Select a page from the menu in the top left corner
+menu_language: Language
+menu_netinfo: Netinfo
+menu_wlan: W-LAN
+menu_update: Update
+w_language_name: Language
+w_language_lang_select: Language:
+w_language_save: Save
+w_netinfo_name: Netinfo
+w_netinfo_adress: Adress:
+w_netinfo_netmask: Netmask:
+w_wlan_name: W-LAN
+w_wlan_encryption: Encryption:
+w_update_name: Update
+w_update_search_search: Searching
+w_update_search_button: Update
+w_update_search_successful: Update successful<br>Please reboot<br>the TXT now
+w_update_search_error: Error
+w_update_search_utd: No updates<br>avaiable
+w_update_search_update: Update avaiable<br>to V
+w_update_initiate_prestart: Please make sure "ftc"-user has no password, press "Start" and accept all dialogues. After the update the TXT shuts down.
+w_update_initiate_start: Start
+w_update_process_start: Start
+w_update_process_0: <html><table><tr><td>Download</td><td>Pending</td></tr><tr><td>Backup</td><td>Pending</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_1: <html><table><tr><td>Download</td><td>1/3</td></tr><tr><td>Backup</td><td>Pending</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_2: <html><table><tr><td>Download</td><td>2/3</td></tr><tr><td>Backup</td><td>Pending</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_3: <html><table><tr><td>Download</td><td>3/3</td></tr><tr><td>Backup</td><td>Pending</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_4: <html><table><tr><td>Download</td><td>Finished</td></tr><tr><td>Backup</td><td>Pending</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_5: <html><table><tr><td>Download</td><td>Finished</td></tr><tr><td>Backup</td><td>1/2</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_6: <html><table><tr><td>Download</td><td>Finished</td></tr><tr><td>Backup</td><td>2/2</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_7: <html><table><tr><td>Download</td><td>Finished</td></tr><tr><td>Backup</td><td>Finished</td></tr><tr><td>Extract</td><td>Pending</td></tr></table></html>
+w_update_process_8: <html><table><tr><td>Download</td><td>Finished</td></tr><tr><td>Backup</td><td>Finished</td></tr><tr><td>Extract</td><td>...</td></tr></table></html>
+w_update_process_9: <html><table><tr><td>Download</td><td>Finished</td></tr><tr><td>Backup</td><td>Finished</td></tr><tr><td>Extract</td><td>Finished</td></tr></table></html>
+w_update_process_10: <html>The TXT will<br>shutdown soon<br>After boot you<br>can set a new<br>"ftc"-password</html>
+
+
+[DE]
+app_name: Einstellungen
+;UL
+home_text: Waehle eine Seite im Menu in der oberen linken Ecke
+menu_language: Sprache
+menu_netinfo: Netzwerkinfo
+menu_wlan: W-LAN
+menu_update: Aktualisierung
+w_language_name: Sprache
+w_language_lang_select: Sprache:
+w_language_save: Speichern
+w_netinfo_name: Netzwerkinfo
+w_netinfo_adress: Adresse:
+w_netinfo_netmask: Netzmaske:
+w_wlan_name: W-LAN
+;UL
+w_wlan_encryption: Verschluesselung:
+w_update_name: Aktualisierung
+w_update_search_search: Suchen
+w_update_search_button: Update
+w_update_search_error: Fehler
+;UL
+w_update_search_utd: Keine Updates<br>verfuegbar
+;UL
+w_update_search_update: Update verfuegbar<br>zu V
+;UL
+w_update_initiate_prestart: Bitte stelle sicher, dass der Nutzer "ftc" kein Passwort hat und druecke auf "Start". Nach dem Update faehrt der TXT herunter.
+w_update_initiate_start: Start
+w_update_process_start: Start
+w_update_process_0: <html><table><tr><td>Download</td><td>Warten</td></tr><tr><td>Backup</td><td>Warten</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_1: <html><table><tr><td>Download</td><td>1/3</td></tr><tr><td>Backup</td><td>Warten</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_2: <html><table><tr><td>Download</td><td>2/3</td></tr><tr><td>Backup</td><td>Warten</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_3: <html><table><tr><td>Download</td><td>3/3</td></tr><tr><td>Backup</td><td>Warten</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_4: <html><table><tr><td>Download</td><td>Fertig</td></tr><tr><td>Backup</td><td>Warten</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_5: <html><table><tr><td>Download</td><td>Fertig</td></tr><tr><td>Backup</td><td>1/2</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_6: <html><table><tr><td>Download</td><td>Fertig</td></tr><tr><td>Backup</td><td>2/2</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_7: <html><table><tr><td>Download</td><td>Fertig</td></tr><tr><td>Backup</td><td>Fertig</td></tr><tr><td>Extrahieren</td><td>Warten</td></tr></table></html>
+w_update_process_8: <html><table><tr><td>Download</td><td>Fertig</td></tr><tr><td>Backup</td><td>Fertig</td></tr><tr><td>Extrahieren</td><td>...</td></tr></table></html>
+w_update_process_9: <html><table><tr><td>Download</td><td>Fertig</td></tr><tr><td>Backup</td><td>Fertig</td></tr><tr><td>Extrahieren</td><td>Fertig</td></tr></table></html>
+;UL
+w_update_process_10: <html>Der TXT faehrt<br>jetzt herunter<br>Nach dem Start<br>setze ein neues<br>"ftc"-Passwort</html>
