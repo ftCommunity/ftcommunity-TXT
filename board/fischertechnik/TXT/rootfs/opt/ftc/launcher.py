@@ -78,7 +78,6 @@ class ConfirmationDialog(PlainDialog):
         self.sock = sock
 
         strings = str.split("\\n")
-        print("Str array", strings)
         
         PlainDialog.__init__(self)
 
@@ -109,13 +108,13 @@ class ConfirmationDialog(PlainDialog):
 
         button_layout.addStretch()
 
-        self.ok_but = QPushButton("Ok")
+        self.ok_but = QPushButton(QCoreApplication.translate("Dialog", "Ok"))
         self.ok_but.clicked.connect(self.on_button_clicked)
         button_layout.addWidget(self.ok_but)
 
         button_layout.addStretch()
 
-        self.cancel_but = QPushButton("Cancel")
+        self.cancel_but = QPushButton(QCoreApplication.translate("Dialog", "Cancel"))
         self.cancel_but.clicked.connect(self.on_button_clicked)
         button_layout.addWidget(self.cancel_but)
 
@@ -157,7 +156,7 @@ class CategoryWidget(QComboBox):
         prev = self.currentText()
         
         self.clear()
-        self.addItem("All")
+        self.addItem(QCoreApplication.translate("Category", "All"))
         sel_idx = 0  # default category = 0 (All)
         for i in range(len(categories)):
             self.addItem(categories[i])
@@ -583,7 +582,7 @@ class IconGrid(QStackedWidget):
 
         # filter all apps for the given category
     def filterCategory(self, apps, cat):
-        if cat == "All":
+        if cat == QCoreApplication.translate("Category", "All"):
             return apps
 
         # extract all those that have a manifest file an check for
@@ -681,6 +680,28 @@ class TcpServer(QTcpServer):
 class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
+
+        # enable i18n
+        translator = QTranslator()
+        path = os.path.dirname(os.path.realpath(__file__))
+        translator.load(QLocale.system(), os.path.join(path, "launcher_"))
+        self.installTranslator(translator)
+
+        # populate category map now that the i18n is in place. Everything not
+        # covered will only show up in the "all" category
+        self.category_map = {
+            "system":   QCoreApplication.translate("Category", "System"),
+            "settings": QCoreApplication.translate("Category", "System"), # deprecated settings category
+            "models":   QCoreApplication.translate("Category", "Models"),
+            "model":    QCoreApplication.translate("Category", "Models"),
+            "tools":    QCoreApplication.translate("Category", "Tools"),
+            "tool":     QCoreApplication.translate("Category", "Tools"),
+            "demos":    QCoreApplication.translate("Category", "Demos"),
+            "demo":     QCoreApplication.translate("Category", "Demos"),
+            "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
+            "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
+        };
+
         # load stylesheet from the same place the script was loaded from
         self.setStyleSheet( "file:///" + BASE + "/themes/" + THEME + "/style.qss")
 
@@ -746,7 +767,6 @@ class FtcGuiApplication(TouchApplication):
 
     def launch_app(self, executable, managed, name):
         if self.app_is_running():
-            print("Still one app running!")
             return
 
         # get managed state
@@ -823,7 +843,6 @@ class FtcGuiApplication(TouchApplication):
 
             # set new categories
             if not self.w.setCategories(self.categories):
-                print("Force list update")
                 # cathegory hasn't changed. So we need to redraw the icon 
                 # since the apps listed in the current category may have changed
                 # a refresh can be forced by setting the current category again
@@ -856,11 +875,24 @@ class FtcGuiApplication(TouchApplication):
     # read a number of entries from the manifest and return them 
     # as a dictionary
     def manifest_import(self, manifest):
-        entries = ( "managed", "exec", "name", "category", "icon" );
+        entries = ( "managed", "exec", "name", "icon" );
         appinfo = { }
         for i in entries:
             if manifest.has_option('app', i):
                 appinfo[i] = manifest.get('app', i)
+
+        # overwrite with locale specific values
+        loc = QLocale.system().name().split('_')[0].strip().lower()
+        for i in entries:
+            if manifest.has_option(loc, i):
+                appinfo[i] = manifest.get(loc, i)
+
+        # the category needs special treatment as it maps 
+        # onto a limited set of pre-defined categories
+        if manifest.has_option('app', "category"):
+            c = manifest.get('app', "category").lower()
+            if c in self.category_map:
+                appinfo['category'] = self.category_map[c];
 
         return appinfo
 
@@ -869,8 +901,6 @@ class FtcGuiApplication(TouchApplication):
     # the returned list is srted by the name of the apps
     # as stored in the manifest file
     def scan_app_dirs(self):
-        # print("SCANNING FOR APPS")
-
         app_base = os.path.join(BASE, "apps")
         # scan for app group dirs first
         app_groups = os.listdir(app_base)
@@ -916,8 +946,6 @@ class FtcGuiApplication(TouchApplication):
             else:                managed = "Yes"
                 
             self.launch_app(os.path.join(app_dir, app['exec']), managed, app['name'])
-        else:
-            print("Unable to launch", name)
 
     def on_message(self, str):
         MessageDialog(str).exec_()
@@ -945,7 +973,7 @@ class FtcGuiApplication(TouchApplication):
         self.apps = self.scan_app_dirs()
 
         # extract category information
-        self.current_category = "All"
+        self.current_category = QCoreApplication.translate("Category", "All")
         self.categories = self.get_categories(self.apps)
         self.w = TouchTopWidget(self, self.categories)
 

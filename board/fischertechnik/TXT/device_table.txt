@@ -13,3 +13,4 @@
 /media/sdcard                           d       755     0       0       -       -       -       -       -
 /sbin/unix_chkpwd                       r      4755     0       0       -       -       -       -       -
 /etc/network/interfaces                 f       666     0       0       -       -       -       -       -
+/etc/locale                             f       666     0       0       -       -       -       -       -
