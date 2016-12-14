@@ -17,7 +17,6 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="icon.svg"
-   inkscape:export-filename="/home/tharbaum/tmp/private_stuff/txt/apps/system/language/icon.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -110,6 +109,13 @@
        sodipodi:rx="15.34031"
        sodipodi:ry="15.376954"
        transform="matrix(2.0451339,0,0,2.0402602,-0.51581362,-1094.2129)" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="rect3781"
+       width="46.894035"
+       height="31.464466"
+       x="9.1161156"
+       y="1004.635" />
     <g
        transform="matrix(0.23246968,0,0,0.23246968,-24.477036,865.41718)"
        id="layer1-6"
