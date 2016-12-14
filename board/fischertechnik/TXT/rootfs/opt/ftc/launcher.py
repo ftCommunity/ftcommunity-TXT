@@ -154,7 +154,7 @@ class CategoryWidget(QComboBox):
 
     def setCategories(self, categories):
         prev = self.currentText()
-        
+
         self.clear()
         self.addItem(QCoreApplication.translate("Category", "All"))
         sel_idx = 0  # default category = 0 (All)
@@ -549,11 +549,12 @@ class IconGrid(QStackedWidget):
                 page = None
                    
         # fill last page with empty icons
-        while index < icons_per_page:
-            self.addWidget(page)
-            empty = self.createIcon()
-            grid.addWidget(empty, index/self.columns, index%self.columns, Qt.AlignCenter)
-            index += 1
+        if page:
+            while index < icons_per_page:
+                self.addWidget(page)
+                empty = self.createIcon()
+                grid.addWidget(empty, index/self.columns, index%self.columns, Qt.AlignCenter)
+                index += 1
 
     # handler of the "next" button
     def do_next(self):
@@ -676,31 +677,12 @@ class TcpServer(QTcpServer):
     def socketError(self):
         pass
         
-
 class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
-        # enable i18n
-        translator = QTranslator()
-        path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "launcher_"))
-        self.installTranslator(translator)
-
-        # populate category map now that the i18n is in place. Everything not
-        # covered will only show up in the "all" category
-        self.category_map = {
-            "system":   QCoreApplication.translate("Category", "System"),
-            "settings": QCoreApplication.translate("Category", "System"), # deprecated settings category
-            "models":   QCoreApplication.translate("Category", "Models"),
-            "model":    QCoreApplication.translate("Category", "Models"),
-            "tools":    QCoreApplication.translate("Category", "Tools"),
-            "tool":     QCoreApplication.translate("Category", "Tools"),
-            "demos":    QCoreApplication.translate("Category", "Demos"),
-            "demo":     QCoreApplication.translate("Category", "Demos"),
-            "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
-            "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
-        };
+        # category setup also loads the locale
+        self.category_setup()
 
         # load stylesheet from the same place the script was loaded from
         self.setStyleSheet( "file:///" + BASE + "/themes/" + THEME + "/style.qss")
@@ -726,6 +708,24 @@ class FtcGuiApplication(TouchApplication):
         self.addWidgets()
         self.exec_()        
 
+    # read locale from /etc/locale
+    def locale_read(self):
+        loc = None
+        with open("/etc/locale", "r") as f:
+            for line in f:
+                # ignore everything behind hash
+                line = line.split('#')[0].strip()
+                if "=" in line:
+                    parts = line.split('=')
+                    var, val = parts[0].strip(), parts[1].strip()
+                    if var == "LC_ALL":
+                        # remove quotation marks if present
+                        if (val[0] == val[-1]) and val.startswith(("'", '"')):
+                            val = parts[1][1:-1]
+                        # remove encoding if present
+                        loc = val.split('.')[0]
+        return loc
+                        
     def app_is_running(self):
         if self.app_process == None:
             return False
@@ -779,19 +779,27 @@ class FtcGuiApplication(TouchApplication):
 
         # assume that we can just launch enything under non-windows
         if platform.system() != 'Windows':
+
+            # give app the current locale
+            locale = self.locale.name()
+            env = os.environ.copy()
+            env["LANGUAGE"] = locale
+            env["LANG"] = locale
+            env["LC_ALL"] = locale
+
             if self.log_file:
                 self.log_file.write("Application: " + executable + "\n")
                 self.log_file.write("Application started at: " + datetime.datetime.now().isoformat() + "\n")
                 self.log_file.flush()
                 self.log_master_fd, self.log_slave_fd = pty.openpty()
-                self.app_process = subprocess.Popen(str(executable), stdout=self.log_slave_fd, stderr=self.log_slave_fd)
+                self.app_process = subprocess.Popen(str(executable), env=env, stdout=self.log_slave_fd, stderr=self.log_slave_fd)
 
                 # start a timer to monitor the ptys
                 self.log_timer = QTimer()
                 self.log_timer.timeout.connect(self.on_log_timer)
                 self.log_timer.start(100)
             else:
-                self.app_process = subprocess.Popen(str(executable))
+                self.app_process = subprocess.Popen(str(executable), env=env)
         else:
             # under windows assume it's a python script that is
             # to be launched and run that with pythonw (without console)
@@ -825,9 +833,37 @@ class FtcGuiApplication(TouchApplication):
 
     def on_busyExpired(self):
         self.popup = None
- 
+
+    def category_setup(self):
+        # reload locale
+        locale_str = self.locale_read()
+        if locale_str != None: self.locale = QLocale(locale_str)
+        else:                  self.locale = QLocale.system()
+        path = os.path.dirname(os.path.realpath(__file__))
+        self.translator = QTranslator()
+        self.translator.load(self.locale, os.path.join(path, "launcher_"))
+        self.installTranslator(self.translator)
+
+        # populate category map now that the i18n is in place. Everything not
+        # covered will only show up in the "all" category
+        self.category_map = {
+            "system":   QCoreApplication.translate("Category", "System"),
+            "settings": QCoreApplication.translate("Category", "System"), # deprecated settings category
+            "models":   QCoreApplication.translate("Category", "Models"),
+            "model":    QCoreApplication.translate("Category", "Models"),
+            "tools":    QCoreApplication.translate("Category", "Tools"),
+            "tool":     QCoreApplication.translate("Category", "Tools"),
+             "demos":    QCoreApplication.translate("Category", "Demos"),
+            "demo":     QCoreApplication.translate("Category", "Demos"),
+            "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
+            "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
+        };
+
     @pyqtSlot()
     def on_rescan(self):
+        # re-translate categories
+        self.category_setup()
+
         # rescan all apps
         self.apps = self.scan_app_dirs()
 
@@ -836,19 +872,12 @@ class FtcGuiApplication(TouchApplication):
         # are updated
         self.icons.setApps(self.apps)
 
-        # extract categories
-        categories = self.get_categories(self.apps)
-        if categories != self.categories:
-            self.categories = categories
-
-            # set new categories
-            if not self.w.setCategories(self.categories):
-                # cathegory hasn't changed. So we need to redraw the icon 
-                # since the apps listed in the current category may have changed
-                # a refresh can be forced by setting the current category again
-                self.icons.setCategory(self.current_category)
-        else:
-            # the same when the list of categories hasn't changed at all
+        self.categories = self.get_categories(self.apps)
+        # set new categories
+        if not self.w.setCategories(self.categories):
+            # cathegory hasn't changed. So we need to redraw the icon 
+            # since the apps listed in the current category may have changed
+            # a refresh can be forced by setting the current category again
             self.icons.setCategory(self.current_category)
 
     @pyqtSlot(QTcpSocket)
@@ -882,7 +911,7 @@ class FtcGuiApplication(TouchApplication):
                 appinfo[i] = manifest.get('app', i)
 
         # overwrite with locale specific values
-        loc = QLocale.system().name().split('_')[0].strip().lower()
+        loc = self.locale.name().split('_')[0].strip().lower()
         for i in entries:
             if manifest.has_option(loc, i):
                 appinfo[i] = manifest.get(loc, i)
