@@ -779,19 +779,27 @@ class FtcGuiApplication(TouchApplication):
 
         # assume that we can just launch enything under non-windows
         if platform.system() != 'Windows':
+
+            # give app the current locale
+            locale = self.locale.name()
+            env = os.environ.copy()
+            env["LANGUAGE"] = locale
+            env["LANG"] = locale
+            env["LC_ALL"] = locale
+
             if self.log_file:
                 self.log_file.write("Application: " + executable + "\n")
                 self.log_file.write("Application started at: " + datetime.datetime.now().isoformat() + "\n")
                 self.log_file.flush()
                 self.log_master_fd, self.log_slave_fd = pty.openpty()
-                self.app_process = subprocess.Popen(str(executable), stdout=self.log_slave_fd, stderr=self.log_slave_fd)
+                self.app_process = subprocess.Popen(str(executable), env=env, stdout=self.log_slave_fd, stderr=self.log_slave_fd)
 
                 # start a timer to monitor the ptys
                 self.log_timer = QTimer()
                 self.log_timer.timeout.connect(self.on_log_timer)
                 self.log_timer.start(100)
             else:
-                self.app_process = subprocess.Popen(str(executable))
+                self.app_process = subprocess.Popen(str(executable), env=env)
         else:
             # under windows assume it's a python script that is
             # to be launched and run that with pythonw (without console)
