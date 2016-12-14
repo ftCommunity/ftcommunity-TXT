@@ -154,7 +154,7 @@ class CategoryWidget(QComboBox):
 
     def setCategories(self, categories):
         prev = self.currentText()
-        
+
         self.clear()
         self.addItem(QCoreApplication.translate("Category", "All"))
         sel_idx = 0  # default category = 0 (All)
@@ -549,11 +549,12 @@ class IconGrid(QStackedWidget):
                 page = None
                    
         # fill last page with empty icons
-        while index < icons_per_page:
-            self.addWidget(page)
-            empty = self.createIcon()
-            grid.addWidget(empty, index/self.columns, index%self.columns, Qt.AlignCenter)
-            index += 1
+        if page:
+            while index < icons_per_page:
+                self.addWidget(page)
+                empty = self.createIcon()
+                grid.addWidget(empty, index/self.columns, index%self.columns, Qt.AlignCenter)
+                index += 1
 
     # handler of the "next" button
     def do_next(self):
@@ -849,7 +850,7 @@ class FtcGuiApplication(TouchApplication):
             "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
             "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
         };
-        
+
     @pyqtSlot()
     def on_rescan(self):
         # re-translate categories
@@ -863,19 +864,12 @@ class FtcGuiApplication(TouchApplication):
         # are updated
         self.icons.setApps(self.apps)
 
-        # extract categories
-        categories = self.get_categories(self.apps)
-        if categories != self.categories:
-            self.categories = categories
-
-            # set new categories
-            if not self.w.setCategories(self.categories):
-                # cathegory hasn't changed. So we need to redraw the icon 
-                # since the apps listed in the current category may have changed
-                # a refresh can be forced by setting the current category again
-                self.icons.setCategory(self.current_category)
-        else:
-            # the same when the list of categories hasn't changed at all
+        self.categories = self.get_categories(self.apps)
+        # set new categories
+        if not self.w.setCategories(self.categories):
+            # cathegory hasn't changed. So we need to redraw the icon 
+            # since the apps listed in the current category may have changed
+            # a refresh can be forced by setting the current category again
             self.icons.setCategory(self.current_category)
 
     @pyqtSlot(QTcpSocket)
