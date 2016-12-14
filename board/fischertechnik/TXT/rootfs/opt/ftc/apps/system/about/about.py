@@ -148,8 +148,7 @@ class FtcGuiApplication(TxtApplication):
         dialog.exec_()
 
     def show_version(self):
-        dialog = VersionsDialog(QCoreApplication.translate("FtcGuiApplication"),
-                                QCoreApplication.translate("FtcGuiApplication", "Versions"), self.w)
+        dialog = VersionsDialog(QCoreApplication.translate("FtcGuiApplication", "Versions"), self.w)
         dialog.exec_()
         
 if __name__ == "__main__":
