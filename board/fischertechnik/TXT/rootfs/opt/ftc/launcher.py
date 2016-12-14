@@ -676,31 +676,12 @@ class TcpServer(QTcpServer):
     def socketError(self):
         pass
         
-
 class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
-        # enable i18n
-        translator = QTranslator()
-        path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "launcher_"))
-        self.installTranslator(translator)
-
-        # populate category map now that the i18n is in place. Everything not
-        # covered will only show up in the "all" category
-        self.category_map = {
-            "system":   QCoreApplication.translate("Category", "System"),
-            "settings": QCoreApplication.translate("Category", "System"), # deprecated settings category
-            "models":   QCoreApplication.translate("Category", "Models"),
-            "model":    QCoreApplication.translate("Category", "Models"),
-            "tools":    QCoreApplication.translate("Category", "Tools"),
-            "tool":     QCoreApplication.translate("Category", "Tools"),
-            "demos":    QCoreApplication.translate("Category", "Demos"),
-            "demo":     QCoreApplication.translate("Category", "Demos"),
-            "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
-            "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
-        };
+        # category setup also loads the locale
+        self.category_setup()
 
         # load stylesheet from the same place the script was loaded from
         self.setStyleSheet( "file:///" + BASE + "/themes/" + THEME + "/style.qss")
@@ -726,6 +707,24 @@ class FtcGuiApplication(TouchApplication):
         self.addWidgets()
         self.exec_()        
 
+    # read locale from /etc/locale
+    def locale_read(self):
+        loc = None
+        with open("/etc/locale", "r") as f:
+            for line in f:
+                # ignore everything behind hash
+                line = line.split('#')[0].strip()
+                if "=" in line:
+                    parts = line.split('=')
+                    var, val = parts[0].strip(), parts[1].strip()
+                    if var == "LC_ALL":
+                        # remove quotation marks if present
+                        if (val[0] == val[-1]) and val.startswith(("'", '"')):
+                            val = parts[1][1:-1]
+                        # remove encoding if present
+                        loc = val.split('.')[0]
+        return loc
+                        
     def app_is_running(self):
         if self.app_process == None:
             return False
@@ -825,9 +824,37 @@ class FtcGuiApplication(TouchApplication):
 
     def on_busyExpired(self):
         self.popup = None
- 
+
+    def category_setup(self):
+        # reload locale
+        locale_str = self.locale_read()
+        if locale_str != None: self.locale = QLocale(locale_str)
+        else:                  self.locale = QLocale.system()
+        path = os.path.dirname(os.path.realpath(__file__))
+        self.translator = QTranslator()
+        self.translator.load(self.locale, os.path.join(path, "launcher_"))
+        self.installTranslator(self.translator)
+
+        # populate category map now that the i18n is in place. Everything not
+        # covered will only show up in the "all" category
+        self.category_map = {
+            "system":   QCoreApplication.translate("Category", "System"),
+            "settings": QCoreApplication.translate("Category", "System"), # deprecated settings category
+            "models":   QCoreApplication.translate("Category", "Models"),
+            "model":    QCoreApplication.translate("Category", "Models"),
+            "tools":    QCoreApplication.translate("Category", "Tools"),
+            "tool":     QCoreApplication.translate("Category", "Tools"),
+             "demos":    QCoreApplication.translate("Category", "Demos"),
+            "demo":     QCoreApplication.translate("Category", "Demos"),
+            "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
+            "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
+        };
+        
     @pyqtSlot()
     def on_rescan(self):
+        # re-translate categories
+        self.category_setup()
+
         # rescan all apps
         self.apps = self.scan_app_dirs()
 
@@ -882,7 +909,7 @@ class FtcGuiApplication(TouchApplication):
                 appinfo[i] = manifest.get('app', i)
 
         # overwrite with locale specific values
-        loc = QLocale.system().name().split('_')[0].strip().lower()
+        loc = self.locale.name().split('_')[0].strip().lower()
         for i in entries:
             if manifest.has_option(loc, i):
                 appinfo[i] = manifest.get(loc, i)
