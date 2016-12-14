@@ -19,7 +19,7 @@ class LicenseDialog(TxtDialog):
     
         # load gpl from disk
         name = os.path.join(os.path.dirname(os.path.realpath(__file__)), lic)
-        text=open(name).read()
+        text=open(name, encoding="utf-8").read()
         txt.setPlainText(text)
 
         self.setCentralWidget(txt)
