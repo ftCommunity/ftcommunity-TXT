@@ -711,19 +711,23 @@ class FtcGuiApplication(TouchApplication):
     # read locale from /etc/locale
     def locale_read(self):
         loc = None
-        with open("/etc/locale", "r") as f:
-            for line in f:
-                # ignore everything behind hash
-                line = line.split('#')[0].strip()
-                if "=" in line:
-                    parts = line.split('=')
-                    var, val = parts[0].strip(), parts[1].strip()
-                    if var == "LC_ALL":
-                        # remove quotation marks if present
-                        if (val[0] == val[-1]) and val.startswith(("'", '"')):
-                            val = parts[1][1:-1]
-                        # remove encoding if present
-                        loc = val.split('.')[0]
+        try:
+            with open("/etc/locale", "r") as f:
+                for line in f:
+                    # ignore everything behind hash
+                    line = line.split('#')[0].strip()
+                    if "=" in line:
+                        parts = line.split('=')
+                        var, val = parts[0].strip(), parts[1].strip()
+                        if var == "LC_ALL":
+                            # remove quotation marks if present
+                            if (val[0] == val[-1]) and val.startswith(("'", '"')):
+                                val = parts[1][1:-1]
+                            # remove encoding if present
+                            loc = val.split('.')[0]
+        except:
+            pass
+
         return loc
                         
     def app_is_running(self):
