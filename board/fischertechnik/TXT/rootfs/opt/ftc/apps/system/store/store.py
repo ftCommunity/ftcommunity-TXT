@@ -16,21 +16,55 @@ PACKAGEFILE = "00packages"
 APPBASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 USERAPPBASE = os.path.join(APPBASE, "user")
 
-NET_ERROR_MSG = {
-    QNetworkReply.NoError: "No error",
-    QNetworkReply.ConnectionRefusedError: "Connection Refused",
-    QNetworkReply.RemoteHostClosedError: "Server closed connection",
-    QNetworkReply.HostNotFoundError: "Host not found",
-    QNetworkReply.TimeoutError: "Connection timed out",
-    QNetworkReply.OperationCanceledError: "Connection cancelled",
-    QNetworkReply.SslHandshakeFailedError: "SSL handshake failed",
-    QNetworkReply.TemporaryNetworkFailureError: "Network Failure"
-    }
+
+def get_category_name(code):
+    category_map = {
+        "system":   QCoreApplication.translate("Category", "System"),
+        "settings": QCoreApplication.translate("Category", "System"), # deprecated settings category
+        "models":   QCoreApplication.translate("Category", "Models"),
+        "model":    QCoreApplication.translate("Category", "Models"),
+        "tools":    QCoreApplication.translate("Category", "Tools"),
+        "tool":     QCoreApplication.translate("Category", "Tools"),
+        "demos":    QCoreApplication.translate("Category", "Demos"),
+        "demo":     QCoreApplication.translate("Category", "Demos"),
+        "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
+        "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
+    };
     
+    if code in category_map:
+        return category_map[code]
+        
+    return QCoreApplication.translate("Category", "<unknown>")
+
 # read an option from a config file and append it to a list if it exists
-def append_parameter(package, app, id, parms):
-    if package.has_option(app, id):
-        parms[id] = package.get(app, id);
+def append_parameter(package, app, id, lkey, parms):
+    val = None
+
+    # is there a language key to try?
+    if lkey:
+        # no app name given: we are parsing a manifest and the languages
+        # have seperate sections
+        if not app:
+            if package.has_option(lkey, id):
+                val = package.get(lkey, id);
+
+        # app name was given. we are parsing the 00packages and language 
+        # specific entries have the form key_kley: ...
+        else:
+            if package.has_option(app, id+'_'+lkey):
+                val = package.get(app, id+'_'+lkey);
+
+    # nothing language specifg found, try "normal"
+    if not app: app = 'app'
+    if not val and package.has_option(app, id):
+        val = package.get(app, id);
+
+    # category entries need special treatment
+    if val and id == 'category':
+        val = get_category_name(val.lower())
+
+    if val:
+        parms[id] = val
 
 # a rotating "i am busy" widget to be shown during network io
 class BusyAnimation(QWidget):
@@ -110,8 +144,26 @@ class BusyAnimation(QWidget):
         painter.end()
 
 class NetworkAccessManager(QNetworkAccessManager):
+    
     networkResult = pyqtSignal(tuple)
     progress = pyqtSignal(int)
+
+    def get_error(self, code):
+        NET_ERROR_MSG = {
+            QNetworkReply.NoError: QCoreApplication.translate("NetError", "No error"),
+            QNetworkReply.ConnectionRefusedError: QCoreApplication.translate("NetError", "Connection Refused"),
+            QNetworkReply.RemoteHostClosedError: QCoreApplication.translate("NetError", "Server closed connection"),
+            QNetworkReply.HostNotFoundError: QCoreApplication.translate("NetError", "Host not found"),
+            QNetworkReply.TimeoutError: QCoreApplication.translate("NetError", "Connection timed out"),
+            QNetworkReply.OperationCanceledError: QCoreApplication.translate("NetError", "Connection cancelled"),
+            QNetworkReply.SslHandshakeFailedError: QCoreApplication.translate("NetError", "SSL handshake failed"),
+            QNetworkReply.TemporaryNetworkFailureError: QCoreApplication.translate("NetError", "Network Failure")
+        }
+
+        if code in NET_ERROR_MSG:
+            return NET_ERROR_MSG[code]
+
+        return "(" + str(code) + ")"
 
     def slotFinished(self):
         reply = self.sender()
@@ -122,10 +174,7 @@ class NetworkAccessManager(QNetworkAccessManager):
                     QNetworkRequest.HttpReasonPhraseAttribute)
                 self.networkResult.emit((False, httpStatusMessage + " [" + str(httpStatus) + "]"))
             else:
-                if reply.error() in NET_ERROR_MSG:
-                    self.networkResult.emit((False, "Network error: " + NET_ERROR_MSG[reply.error()]))
-                else:
-                    self.networkResult.emit((False, "Unknown network error (" + str(reply.error()) + ")"))
+                self.networkResult.emit((False, QCoreApplication.translate("NetError", "Network error:") + " " + self.get_error(reply.error())))
         else:
             self.networkResult.emit((True, b"".join(self.messageBuffer)))
 
@@ -138,7 +187,8 @@ class NetworkAccessManager(QNetworkAccessManager):
 
     def slotProgress(self, a, b):
         # download makes 50% of progress (zip decrunch will do the rest)
-        percent = int(50*a/b)
+        if b > 0: percent = int(50*a/b)
+        else:     percent = 0
         if self.progress_percent != percent:
             self.progress.emit(percent)
             self.progress_percent = percent
@@ -182,7 +232,7 @@ class PackageLoader(NetworkAccessManager):
         # check if we really received a zip file
         f = io.BytesIO(result[1])
         if not zipfile.is_zipfile(f):
-            self.result.emit((False, "Not a valid zip file"))
+            self.result.emit((False, QCoreApplication.translate("Error", "Not a valid zip file")))
 
         unzip_result = self.install_zip(f)
         f.close()
@@ -201,7 +251,7 @@ class PackageLoader(NetworkAccessManager):
         manifest = configparser.RawConfigParser()
         manifest.readfp(manifest_str)
         if not manifest.has_option('app', 'uuid'):
-            return((False, "Manifest does not contain a UUID!"))
+            return((False, QCoreApplication.translate("Error", "Manifest does not contain a UUID!")))
 
         appdir = os.path.join(USERAPPBASE, manifest.get('app', 'uuid'))
 
@@ -214,7 +264,7 @@ class PackageLoader(NetworkAccessManager):
             try:
                 os.makedirs(appdir)
             except:
-                return((False, "Unable to create target dir!"))
+                return((False, QCoreApplication.translate("Error", "Unable to create target dir!")))
 
         # unzip with progress update
         cnt = 0
@@ -235,21 +285,20 @@ class PackageLoader(NetworkAccessManager):
         return((True,""))
 
 class AppDialog(TouchDialog):
-    # map app key to human readable text.
-    labels = { "version": "Version",
-               "desc": "Description",
-               "author": "Author",
-               "firmware": "Firmware",
-               "set": "Set",
-               "model": "Model",
-               "category": "Category"
-               }
-
-    def isValid(id):
-        return id in AppDialog.labels
-
     def format(id):
-        return AppDialog.labels[id]
+        # map app key to human readable text.
+        labels = { "version":  QCoreApplication.translate("AppInfo", "Version"),
+                   "desc":     QCoreApplication.translate("AppInfo", "Description"),
+                   "author":   QCoreApplication.translate("AppInfo", "Author"),
+                   "firmware": QCoreApplication.translate("AppInfo", "Firmware"),
+                   "set":      QCoreApplication.translate("AppInfo", "Set"),
+                   "model":    QCoreApplication.translate("AppInfo", "Model"),
+                   "category": QCoreApplication.translate("AppInfo", "Category")
+               }
+        if id in labels:
+            return labels[id]
+        else:
+            return None
 
     refresh = pyqtSignal()
 
@@ -266,32 +315,32 @@ class AppDialog(TouchDialog):
 
         self.inst_ver = inst_ver
         if not inst_ver:
-            menu_inst = menu.addAction("Install")
+            menu_inst = menu.addAction(QCoreApplication.translate("Menu", "Install"))
             menu_inst.triggered.connect(self.on_app_install)
         else:
             # only packages with a valid uuid can be deleted as the
             # uuid is their path name
             if self.package_uuid:
-                menu_uninst = menu.addAction("Uninstall")
+                menu_uninst = menu.addAction(QCoreApplication.translate("Menu", "Uninstall"))
                 menu_uninst.triggered.connect(self.on_app_uninstall)
 
             if 'version' in parms:
                 if inst_ver != parms['version']:
                     # update and installation is actually the same ...
-                    menu_update = menu.addAction("Update")
+                    menu_update = menu.addAction(QCoreApplication.translate("Menu", "Update"))
                     menu_update.triggered.connect(self.on_app_install)
 
         text = QTextEdit()
         text.setReadOnly(True)
 
         for i in sorted(parms):
-            if(AppDialog.isValid(i)):
+            if(AppDialog.format(i)):
                 value = parms[i]
                 # if the version is to be displayed and the installed
                 # version differs from the one in the shop then also
                 # display the installed version
                 if i == 'version' and inst_ver and value != inst_ver:
-                    value += " (Inst. " + inst_ver + ")"
+                    value += " ("+QCoreApplication.translate("AppInfo", "Inst.")+" " + inst_ver + ")"
 
                 text.append('<h3><font color="#fcce04">' + AppDialog.format(i) + '</font></h3>')
                 text.append(value)
@@ -304,8 +353,8 @@ class AppDialog(TouchDialog):
             # check if app resides in the correct directory
             manifestfile = os.path.join(USERAPPBASE, self.package_uuid, "manifest" )
             if not os.path.isfile(manifestfile):
-                msgBox = TouchMessageBox("Error", self)
-                msgBox.setText("Update app path mismatch.")
+                msgBox = TouchMessageBox(QCoreApplication.translate("Error", "Error"), self)
+                msgBox.setText(QCoreApplication.translate("Error", "Update app path mismatch."))
                 msgBox.exec_()
                 return
 
@@ -326,13 +375,13 @@ class AppDialog(TouchDialog):
         # make sure there's a manifest file
         manifestfile = os.path.join(USERAPPBASE, self.package_uuid, "manifest" )
         if not os.path.isfile(manifestfile):
-            return((False, "Delete app path not found!"))
+            return((False, QCoreApplication.translate("Error", "Delete app path not found!")))
 
         # remove the whole app dir
         try:
             shutil.rmtree(os.path.join(USERAPPBASE, self.package_uuid))
         except:
-            return((False, "Unable to remove app"))
+            return((False, QCoreApplication.translate("Error", "Unable to remove app")))
 
         return((True, ""))
 
@@ -341,7 +390,7 @@ class AppDialog(TouchDialog):
         print("Uninstall", self.package_name)
         (ok, msg) = self.uninstall(self.package_name)
         if not ok:
-            msgBox = TouchMessageBox("Error", self)
+            msgBox = TouchMessageBox(QCoreApplication.translate("Error", "Error"), self)
             msgBox.setText(msg)
             msgBox.exec_()
         else:
@@ -366,7 +415,7 @@ class AppDialog(TouchDialog):
             # close the app dialog
             self.close()
         else:
-            msgBox = TouchMessageBox("Error", self)
+            msgBox = TouchMessageBox(QCoreApplication.translate("Error", "Error"), self)
             msgBox.setText(result[1])
             msgBox.exec_()
 
@@ -383,6 +432,9 @@ class PackageListLoader(NetworkAccessManager):
             self.result.emit(result)
             return
 
+        # get current language key (en,de,...)
+        lkey = QLocale.system().name().split('_')[0].lower()
+
         # parse result
         packages_str = io.StringIO(result[1].decode('utf-8'))
         packages = configparser.RawConfigParser()
@@ -395,18 +447,24 @@ class PackageListLoader(NetworkAccessManager):
             if packages.has_option(app, 'name') and packages.has_option(app, 'uuid'):
                 # add everything the gui needs
                 appparms['package'] = app
-                append_parameter(packages, app, 'name', appparms)
-                append_parameter(packages, app, 'uuid', appparms)
-                append_parameter(packages, app, 'desc', appparms)
-                append_parameter(packages, app, 'category', appparms)
-                append_parameter(packages, app, 'model', appparms)
-                append_parameter(packages, app, 'set', appparms)
-                append_parameter(packages, app, 'author', appparms)
-                append_parameter(packages, app, 'version', appparms)
-                append_parameter(packages, app, 'firmware', appparms)
+                # name and description may have translations
+                append_parameter(packages, app, 'name', lkey, appparms)
+                append_parameter(packages, app, 'uuid', None, appparms)
+                append_parameter(packages, app, 'desc', lkey, appparms)
+                append_parameter(packages, app, 'category', None, appparms)
+                append_parameter(packages, app, 'model', None, appparms)
+                append_parameter(packages, app, 'set', None, appparms)
+                append_parameter(packages, app, 'author', None, appparms)
+                append_parameter(packages, app, 'version', None, appparms)
+                append_parameter(packages, app, 'firmware', None, appparms)
 
                 # create a tuple of app name and its parameters
-                applist.append((packages.get(app, 'name'), appparms))
+                
+                # check for language specific name first
+                if packages.has_option(app, 'name_'+lkey):
+                    applist.append((packages.get(app, 'name_'+lkey), appparms))
+                else:
+                    applist.append((packages.get(app, 'name'), appparms))
 
         applist.sort(key=lambda tup: tup[0])
         self.result.emit((True, applist))
@@ -439,6 +497,9 @@ class AppListWidget(QListWidget):
     # the returned list is srted by the name of the apps
     # as stored in the manifest file
     def scan_installed_app_dirs(self):
+        # get current language key (en,de,...)
+        lkey = QLocale.system().name().split('_')[0].lower()
+
         # scan for app group dirs first
         app_groups = os.listdir(APPBASE)
         # then scan for app dirs inside
@@ -455,18 +516,18 @@ class AppListWidget(QListWidget):
                     if os.path.isfile(manifestfile):
                         # get app name
                         manifest = configparser.RawConfigParser()
-                        manifest.read(manifestfile)
+                        manifest.read_file(open(manifestfile, "r", encoding="utf8"))
 
                         # add everything the gui needs
-                        append_parameter(manifest, 'app', 'name', appparms)
-                        append_parameter(manifest, 'app', 'uuid', appparms)
-                        append_parameter(manifest, 'app', 'desc', appparms)
-                        append_parameter(manifest, 'app', 'category', appparms)
-                        append_parameter(manifest, 'app', 'model', appparms)
-                        append_parameter(manifest, 'app', 'set', appparms)
-                        append_parameter(manifest, 'app', 'author', appparms)
-                        append_parameter(manifest, 'app', 'version', appparms)
-                        append_parameter(manifest, 'app', 'firmware', appparms)
+                        append_parameter(manifest, None, 'name', lkey, appparms)
+                        append_parameter(manifest, None, 'uuid', None, appparms)
+                        append_parameter(manifest, None, 'desc', lkey, appparms)
+                        append_parameter(manifest, None, 'category', None, appparms)
+                        append_parameter(manifest, None, 'model', None, appparms)
+                        append_parameter(manifest, None, 'set', None, appparms)
+                        append_parameter(manifest, None, 'author', None, appparms)
+                        append_parameter(manifest, None, 'version', None, appparms)
+                        append_parameter(manifest, None, 'firmware', None, appparms)
 
                         # create a tuple of app name and its parameters
                         app_dirs.append(appparms)
@@ -492,7 +553,7 @@ class AppListWidget(QListWidget):
         self.busy.close()
 
         if not result[0]:
-            msgBox = TouchMessageBox("Error", self.parent())
+            msgBox = TouchMessageBox(QCoreApplication.translate("Error", "Error"), self.parent())
             msgBox.setText(result[1])
             msgBox.exec_()
             return
@@ -531,7 +592,7 @@ class AppListWidget(QListWidget):
         x = self.get_installed_app_info(app_parms, self.installed_apps)
         if x:
             if 'version' in x: installed_version = x['version']
-            else:              installed_version = "no version info"
+            else:              installed_version = QCoreApplication.translate("Error", "no version info")
 
         # set TouchWindow as parent
         dialog = AppDialog(item.text(), app_parms, installed_version, self.parent())
@@ -568,8 +629,13 @@ class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
+        translator = QTranslator()
+        path = os.path.dirname(os.path.realpath(__file__))
+        translator.load(QLocale.system(), os.path.join(path, "store_"))
+        self.installTranslator(translator)
+
         # create the empty main window
-        self.w = TouchWindow("Store")
+        self.w = TouchWindow(QCoreApplication.translate("Main", "Store"))
 
         self.vbox = QVBoxLayout()
 
