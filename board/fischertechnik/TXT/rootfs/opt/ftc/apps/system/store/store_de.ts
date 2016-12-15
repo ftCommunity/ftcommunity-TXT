@@ -133,7 +133,7 @@
     <message>
         <location filename="store.py" line="324"/>
         <source>Uninstall</source>
-        <translation>Deinstall.</translation>
+        <translation>Deinstallieren</translation>
     </message>
     <message>
         <location filename="store.py" line="330"/>
