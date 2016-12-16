@@ -1,8 +1,0 @@
-[app]
-name: Camera
-category: System
-icon: icon.png
-desc: Camera test
-exec: camera_test.py
-managed: yes
-uuid: e07d1f56-811d-4101-b6f9-9143319b14e2
