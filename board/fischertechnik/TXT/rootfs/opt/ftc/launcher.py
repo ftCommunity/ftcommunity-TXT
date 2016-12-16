@@ -192,7 +192,7 @@ class StatusPopup(QFrame):
         # get status messages from widgets
         for name in sorted(plugins):
             status = plugins[name].status()
-            if status: self.messages.append(plugins[name].name + ": " + status)
+            if status: self.messages.append(plugins[name].name() + ": " + status)
 
         self.setMinimumSize(parent.width(), bar.height())
         self.setMaximumSize(parent.width(), parent.height())
@@ -844,10 +844,19 @@ class FtcGuiApplication(TouchApplication):
         if locale_str != None: self.locale = QLocale(locale_str)
         else:                  self.locale = QLocale.system()
         locale.setlocale(locale.LC_ALL, self.locale.name()+".UTF-8")
-        path = os.path.dirname(os.path.realpath(__file__))
+
         self.translator = QTranslator()
-        self.translator.load(self.locale, os.path.join(path, "launcher_"))
+        self.translator.load(self.locale, os.path.join(BASE, "launcher_"))
         self.installTranslator(self.translator)
+
+        # try to load translations for all plugins
+        self.plugin_translator = {}
+        for file in os.listdir(os.path.join(BASE, PLUGINS_DIR)):
+            if file.endswith(".py"):
+                fname = os.path.splitext(os.path.basename(file))[0]
+                self.plugin_translator[fname] = QTranslator()
+                self.plugin_translator[fname].load(self.locale, os.path.join(BASE, PLUGINS_DIR, fname+"_"))
+                self.installTranslator(self.plugin_translator[fname])
 
         # populate category map now that the i18n is in place. Everything not
         # covered will only show up in the "all" category

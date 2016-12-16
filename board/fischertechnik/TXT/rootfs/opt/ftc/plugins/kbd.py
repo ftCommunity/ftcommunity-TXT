@@ -4,7 +4,10 @@
 
 import os
 
-name = "Keyboard"
+from PyQt4.QtCore import QCoreApplication
+
+def name():
+    return QCoreApplication.translate("PluginKbd", "Keyboard")
 
 def keyboard_present():
     try:
@@ -43,6 +46,6 @@ def icon():
 
 def status():
     if keyboard_present():
-        return "Available"
+        return QCoreApplication.translate("PluginKbd","Available")
     else:
-        return "Not available"
+        return QCoreApplication.translate("PluginKbd","Not available")
