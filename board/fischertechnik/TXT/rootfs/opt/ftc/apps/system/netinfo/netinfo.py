@@ -3,7 +3,7 @@
 #
 
 import sys, os, socket, array, struct, fcntl, string, platform
-from TxtStyle import *
+from TouchStyle import *
 
 SIOCGIFCONF    = 0x8912
 SIOCGIFADDR    = 0x8915
@@ -37,12 +37,17 @@ def all_interfaces():
             lst.append((name, addr, mask))
     return lst
 
-class FtcGuiApplication(TxtApplication):
+class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         global ifs
 
-        TxtApplication.__init__(self, args)
-        self.w = TxtWindow("NetInfo")
+        TouchApplication.__init__(self, args)
+        translator = QTranslator()
+        path = os.path.dirname(os.path.realpath(__file__))
+        translator.load(QLocale.system(), os.path.join(path, "netinfo_"))
+        self.installTranslator(translator)
+
+        self.w = TouchWindow(QCoreApplication.translate("Main", "NetInfo"))
 
         ifs = all_interfaces()
 
@@ -57,7 +62,7 @@ class FtcGuiApplication(TxtApplication):
 
         self.vbox.addStretch()
 
-        self.ip_lbl = QLabel("Address:")
+        self.ip_lbl = QLabel(QCoreApplication.translate("Main", "Address:"))
         self.ip_lbl.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(self.ip_lbl)
 
@@ -66,7 +71,7 @@ class FtcGuiApplication(TxtApplication):
         self.ip.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(self.ip)
    
-        self.mask_lbl = QLabel("Netmask:")
+        self.mask_lbl = QLabel(QCoreApplication.translate("Main", "Netmask:"))
         self.mask_lbl.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(self.mask_lbl)
 
