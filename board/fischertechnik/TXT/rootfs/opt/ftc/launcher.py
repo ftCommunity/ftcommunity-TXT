@@ -7,7 +7,7 @@
 
 import configparser, datetime
 import sys, os, subprocess, threading
-import socketserver, select, time
+import socketserver, select, time, locale
 
 from TouchStyle import *
 from PyQt4.QtCore import *
@@ -843,6 +843,7 @@ class FtcGuiApplication(TouchApplication):
         locale_str = self.locale_read()
         if locale_str != None: self.locale = QLocale(locale_str)
         else:                  self.locale = QLocale.system()
+        locale.setlocale(locale.LC_ALL, self.locale.name()+".UTF-8")
         path = os.path.dirname(os.path.realpath(__file__))
         self.translator = QTranslator()
         self.translator.load(self.locale, os.path.join(path, "launcher_"))
@@ -934,6 +935,7 @@ class FtcGuiApplication(TouchApplication):
     # the returned list is srted by the name of the apps
     # as stored in the manifest file
     def scan_app_dirs(self):
+        loc = self.locale.name().split('_')[0].strip().lower()
         app_base = os.path.join(BASE, "apps")
         # scan for app group dirs first
         app_groups = os.listdir(app_base)
@@ -953,6 +955,10 @@ class FtcGuiApplication(TouchApplication):
                         manifest.read_file(open(manifestfile, "r", encoding="utf8"))
                         appname = manifest.get('app', 'name')
 
+                        # get translated name if possible
+                        if manifest.has_option(loc, 'name'):
+                            appname = manifest.get(loc, 'name')
+
                         appinfo = self.manifest_import(manifest) 
                         appinfo["dir"] = os.path.join(app_base, i, a)
 
@@ -961,10 +967,17 @@ class FtcGuiApplication(TouchApplication):
                 pass
                 
         # sort list by apps name
-        app_dirs.sort(key=lambda tup: tup[0])
+        #app_dirs.sort(key=lambda tup: tup[0])
+
+        # This is actually rather tricky. Locale is being set after locading
+        # the locale file
+        app_dirs.sort(key=self.key_name_sort)
 
         # return a list of only the appinfo of the now sorted list
         return ([x[1] for x in app_dirs])
+
+    def key_name_sort(self,value):
+        return locale.strxfrm(value[0])
 
     @pyqtSlot(str)
     def on_launch(self, name):
