@@ -1,10 +1,14 @@
 [app]
-name: WiFi
+name: WLAN
 category: System
 icon: icon.png
 desc: Wireless LAN configuration
-exec: wifi.py
+exec: wlan.py
 managed: yes
 uuid: b91b7e56-345b-4704-85aa-1486e4fcc522
 version: 1.1
 firmware: 0.9
+
+[de]
+name: WLAN
+desc: Konfiguration des drahtlosen LAN (WLAN)
