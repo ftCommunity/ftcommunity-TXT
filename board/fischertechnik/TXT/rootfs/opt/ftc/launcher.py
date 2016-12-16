@@ -843,7 +843,12 @@ class FtcGuiApplication(TouchApplication):
         locale_str = self.locale_read()
         if locale_str != None: self.locale = QLocale(locale_str)
         else:                  self.locale = QLocale.system()
-        locale.setlocale(locale.LC_ALL, self.locale.name()+".UTF-8")
+
+        # this is needed for proper sorting but may fail ...
+        try:
+            locale.setlocale(locale.LC_ALL, self.locale.name()+".UTF-8")
+        except:
+            pass
 
         self.translator = QTranslator()
         self.translator.load(self.locale, os.path.join(BASE, "launcher_"))
