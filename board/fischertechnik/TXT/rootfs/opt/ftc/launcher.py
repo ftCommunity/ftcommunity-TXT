@@ -14,8 +14,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
 
-# PTYs are not available on windows. Running text mode
-# apps thus won't work there
+# PTYs are not available on windows.
 if platform.system() != 'Windows':
     import pty
 
@@ -404,47 +403,6 @@ class BusyAnimation(QWidget):
 
         painter.end()
 
-class TextmodeDialog(TouchDialog):
-    def __init__(self,title,parent):
-        TouchDialog.__init__(self, title, parent)
-        
-        self.txt = QTextEdit()
-        self.txt.setReadOnly(True)
-        self.setCentralWidget(self.txt)
-
-        self.p = None
-
-    def update(self):
-        if self.p:
-            # select
-            if select.select([self.fd], [], [], 0)[0]:
-                output = os.read(self.fd, 100)
-                if output: self.append(str(output, "utf-8"))
-
-            if self.p.poll() != None:
-                if self.p.returncode != 0:
-                    self.txt.setTextColor(Qt.yellow)
-                    self.txt.append("[" + str(self.p.returncode) + "]")
-
-                self.p = None
-                self.timer.stop()
-
-    def poll(self, p,fd):
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update)
-        self.timer.start(10)
-        
-        self.fd = fd
-        self.p = p
-
-    def append(self, str):
-        self.txt.moveCursor(QTextCursor.End)
-        self.txt.insertPlainText(str)
-
-    def close(self):
-        self.timer.stop()
-        TouchDialog.close(self)
-
         # a toolbutton with drop shadow
 class AppButton(QToolButton):
     def __init__(self):
@@ -758,24 +716,13 @@ class FtcGuiApplication(TouchApplication):
             self.log_file.write("Logging started at: " + datetime.datetime.now().isoformat() + "\n")
             self.log_file.flush()
 
-    def launch_textmode_app(self, executable, name):
-        dialog = TextmodeDialog(name, self.w)
-
-        self.app_executable = executable
-        master_fd, slave_fd = pty.openpty()
-        self.app_process = subprocess.Popen(str(executable), stdout=slave_fd, stderr=slave_fd)
-        dialog.poll(self.app_process, master_fd)
-        dialog.exec_()
-        os.close(master_fd)
-        os.close(slave_fd)
-
     def launch_app(self, executable, managed, name):
         if self.app_is_running():
             return
 
         # get managed state
         if managed.lower() == "text":
-            self.launch_textmode_app(executable, name)
+            # text mode apps will be handled by Raphaels new external system
             return
      
         # run the executable
