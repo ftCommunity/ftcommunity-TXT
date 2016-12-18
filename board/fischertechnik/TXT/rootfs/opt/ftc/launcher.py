@@ -186,7 +186,7 @@ class StatusPopup(QFrame):
         # open popup centered on top of parent
         self.move(parent.mapToGlobal(QPoint(0,bar.height())))
 
-        self.messages = [ QDate.currentDate().toString() ]
+        self.messages = [ QLocale().toString(QDate.currentDate()) ]
 
         # get status messages from widgets
         for name in sorted(plugins):
@@ -791,8 +791,10 @@ class FtcGuiApplication(TouchApplication):
         if locale_str != None: self.locale = QLocale(locale_str)
         else:                  self.locale = QLocale.system()
 
-        # this is needed for proper sorting but may fail ...
+        # this is needed for proper icon sorting, date display ...
+        # but may fail if the requested locale isn't present
         try:
+            QLocale.setDefault(self.locale)
             locale.setlocale(locale.LC_ALL, self.locale.name()+".UTF-8")
         except:
             pass
