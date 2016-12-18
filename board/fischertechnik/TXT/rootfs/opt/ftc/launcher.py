@@ -249,7 +249,7 @@ class StatusBar(QWidget):
 
         # draw the time at the very right
         painter.drawText(QRect(QPoint(0,0), self.size()),
-              Qt.AlignRight, QTime.currentTime().toString("h:mm"));
+              Qt.AlignRight, QLocale().toString(QTime.currentTime(), QLocale.ShortFormat))
 
         # draw all plugin icons fromt he left
         x = 0
