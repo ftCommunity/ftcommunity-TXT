@@ -956,7 +956,12 @@ class FtcGuiApplication(TouchApplication):
                 
             self.launch_app(os.path.join(app_dir, app['exec']), managed, app['name'])
 
+    def translations(self):
+        # the pylupdate4 program will find these ...
+        QCoreApplication.translate("Messages", "Shutting down...")
+
     def on_message(self, str):
+        str = QCoreApplication.translate("Messages", str)
         MessageDialog(str).exec_()
 
     def on_confirm(self,sock,str):

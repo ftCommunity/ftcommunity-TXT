@@ -4,27 +4,27 @@
 <context>
     <name>Category</name>
     <message>
-        <location filename="launcher.py" line="43"/>
+        <location filename="launcher.py" line="819"/>
         <source>System</source>
         <translation>System</translation>
     </message>
     <message>
-        <location filename="launcher.py" line="45"/>
+        <location filename="launcher.py" line="821"/>
         <source>Models</source>
         <translation>Modelle</translation>
     </message>
     <message>
-        <location filename="launcher.py" line="47"/>
+        <location filename="launcher.py" line="823"/>
         <source>Tools</source>
         <translation>Werzeuge</translation>
     </message>
     <message>
-        <location filename="launcher.py" line="51"/>
+        <location filename="launcher.py" line="827"/>
         <source>Demos</source>
         <translation>Demos</translation>
     </message>
     <message>
-        <location filename="launcher.py" line="970"/>
+        <location filename="launcher.py" line="990"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
@@ -32,14 +32,22 @@
 <context>
     <name>Dialog</name>
     <message>
-        <location filename="launcher.py" line="126"/>
+        <location filename="launcher.py" line="110"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="launcher.py" line="132"/>
+        <location filename="launcher.py" line="116"/>
         <source>Cancel</source>
         <translation>Abbruch</translation>
+    </message>
+</context>
+<context>
+    <name>Messages</name>
+    <message>
+        <location filename="launcher.py" line="961"/>
+        <source>Shutting down...</source>
+        <translation>Herunterfahren...</translation>
     </message>
 </context>
 </TS>
