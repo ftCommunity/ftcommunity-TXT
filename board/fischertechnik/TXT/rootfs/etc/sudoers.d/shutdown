@@ -1,0 +1,2 @@
+## Allow ftc to halt/reboot the system
+ftc ALL = NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff
