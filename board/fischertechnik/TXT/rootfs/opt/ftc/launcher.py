@@ -959,6 +959,7 @@ class FtcGuiApplication(TouchApplication):
     def translations(self):
         # the pylupdate4 program will find these ...
         QCoreApplication.translate("Messages", "Shutting down...")
+        QCoreApplication.translate("Messages", "Rebooting...")
 
     def on_message(self, str):
         str = QCoreApplication.translate("Messages", str)

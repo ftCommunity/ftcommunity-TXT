@@ -24,7 +24,7 @@
         <translation>Demos</translation>
     </message>
     <message>
-        <location filename="launcher.py" line="990"/>
+        <location filename="launcher.py" line="991"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
@@ -48,6 +48,11 @@
         <location filename="launcher.py" line="961"/>
         <source>Shutting down...</source>
         <translation>Herunterfahren...</translation>
+    </message>
+    <message>
+        <location filename="launcher.py" line="962"/>
+        <source>Rebooting...</source>
+        <translation>Neustart...</translation>
     </message>
 </context>
 </TS>
