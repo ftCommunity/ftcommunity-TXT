@@ -1,0 +1,70 @@
+#!/bin/sh
+export PATH=/bin/:/usr/bin:/sbin:/usr/sbin
+BASE_URL="https://github.com/ftCommunity/ftcommunity-TXT/releases/download"
+TARGET_VERSION="$1"
+CURRENT_VERSION="$(cat /etc/fw-ver.txt)"
+ARCHIVE="ftcommunity-txt-${TARGET_VERSION}.zip"
+BOOTDIR="/media/sdcard"
+TEMPDIR="/tmp/update-${TARGET_VERSION}"
+BACKUPDIR="${BOOTDIR}/system-old"
+
+if [ "$(whoami)" != "root" ]; then
+  echo "$0 must be run as root" >&2;
+  exit 1
+fi
+
+if [ -z "${TARGET_VERSION}" ]; then
+  echo "usage: $0 <version>" >&2;
+  echo "example: $0 1.0" >&2;
+  exit 2
+fi
+
+if [ "${CURRENT_VERSION}" = "${TARGET_VERSION}" ]; then
+  echo "Already running ${CURRENT_VERSION}"
+  exit 3
+fi
+
+if ! [ -f "${BOOTDIR}/uImage" -a "${BOOTDIR}/am335x-kno_txt.dtb" -a -f "${BOOTDIR}/rootfs.img" ]; then
+  if [ -f "${BOOTDIR}/uImage" -a "${BOOTDIR}/am335x-kno_txt.dtb" ] ; then
+    echo "cannot update a system with advanced layout, please update manually" >&2;
+    exit 4
+  else
+    echo "system files not found, aborting" >&2;
+    exit 5
+  fi
+fi
+
+if ! mkdir -p "${TEMPDIR}" && chmod u=rwx,go=rx "${TEMPDIR}"; then
+  echo "prepare update failed" >&2
+  exit 4
+fi
+
+echo "fetching archive from github..."
+MESSAGE=$(wget -nv "${BASE_URL}/v${TARGET_VERSION}/${ARCHIVE}" -O "${TEMPDIR}/${ARCHIVE}" 2>&1)
+if [ $? != 0 ] ; then
+  echo "download failed\n$MESSAGE" >&2
+  exit 10
+fi
+
+echo "validating update..."
+# TODO: real check of update files against a known developer signature
+if ! [ -f "${TEMPDIR}/${ARCHIVE}" ] ; then
+  echo "validate update failed" >&2
+  exit 20
+fi
+
+echo "backing up current system..."
+if ! mkdir -p "${BACKUPDIR}" || \
+   ! mv "${BOOTDIR}/uImage" "${BOOTDIR}/am335x-kno_txt.dtb" "${BOOTDIR}/rootfs.img" "${BACKUPDIR}" 1>&2; \
+then
+  echo "back up current system failed" >&2
+  exit 30
+fi
+
+echo "installing update..."
+cd "${BOOTDIR}"
+if ! unzip -qq "${TEMPDIR}/${ARCHIVE}" ; then
+  echo "install update failed" >&2
+  mv "${BACKUPDIR}/uImage" "${BACKUPDIR}/am335x-kno_txt.dtb" "${BACKUPDIR}/rootfs.img" "${BASE_DIR}"
+  exit 40
+fi

@@ -1,3 +1,4 @@
 #!/bin/sh
+/bin/launcher-msg "Rebooting..."
 echo +15 > /sys/class/rtc/rtc1/wakealarm
 exec /bin/busybox poweroff

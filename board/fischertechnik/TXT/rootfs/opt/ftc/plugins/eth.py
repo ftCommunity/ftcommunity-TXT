@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 # ethernet link monitoring plugin
 
+from PyQt4.QtCore import QCoreApplication
 import fcntl, socket, struct
 
-name = "Ethernet"
+def name():
+    return QCoreApplication.translate("PluginEth", "Ethernet")
 
 DEV = "eth0"
 SYS_PATH = "/sys/class/net/"+DEV+"/"
@@ -68,11 +70,11 @@ def status():
         if carrier == 1:
             ip = get_ip()
             if ip:
-                return "Up, " + ip
+                return QCoreApplication.translate("PluginEth", "Up, ") + ip
             else:
-                return "Up, no IP"
+                return QCoreApplication.translate("PluginEth", "Up, no IP address")
         else:
-            return "No link"
+            return QCoreApplication.translate("PluginEth", "No link")
     else:
-        return None
+        return QCoreApplication.translate("PluginEth", "Not available")
 

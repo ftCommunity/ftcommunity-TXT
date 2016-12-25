@@ -1,9 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from PyQt4.QtCore import QCoreApplication
 import fcntl, socket, struct
 
-name = "WiFi"
+def name():
+    return QCoreApplication.translate("PluginWlan", "WLAN")
 
 DEV = "wlan0"
 SYS_PATH = "/sys/class/net/"+DEV+"/"
@@ -73,11 +75,11 @@ def status():
         if operstate == "up":
             ip = get_ip()
             if ip:
-                return "Up, " + ip
+                return QCoreApplication.translate("PluginWlan", "Up, ") + ip
             else:
-                return "Up, no IP"
+                return QCoreApplication.translate("PluginWlan", "Up, no IP address")
 
         else:
             return operstate
     else:
-        return "Not available"
+        return QCoreApplication.translate("PluginWlan", "Not available")

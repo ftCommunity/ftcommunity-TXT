@@ -3,9 +3,13 @@ name: Store
 category: System
 author: Till Harbaum &lt;till@harbaum.org&gt;
 icon: icon.png
-desc: App store
+desc: Download of new applications
 exec: store.py
 managed: yes
 uuid: 7b7f98ce-1d37-4884-bfa1-44f06f1ba991
 version: 0.1
 firmware: 0.9
+
+[de]
+name: Laden
+desc: Herunterladen neuer Applikationen, "App-Store"

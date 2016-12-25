@@ -7,15 +7,14 @@
 
 import configparser, datetime
 import sys, os, subprocess, threading
-import socketserver, select, time
+import socketserver, select, time, locale
 
 from TouchStyle import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
 
-# PTYs are not available on windows. Running text mode
-# apps thus won't work there
+# PTYs are not available on windows.
 if platform.system() != 'Windows':
     import pty
 
@@ -187,12 +186,12 @@ class StatusPopup(QFrame):
         # open popup centered on top of parent
         self.move(parent.mapToGlobal(QPoint(0,bar.height())))
 
-        self.messages = [ QDate.currentDate().toString() ]
+        self.messages = [ QLocale().toString(QDate.currentDate()) ]
 
         # get status messages from widgets
         for name in sorted(plugins):
             status = plugins[name].status()
-            if status: self.messages.append(plugins[name].name + ": " + status)
+            if status: self.messages.append(plugins[name].name() + ": " + status)
 
         self.setMinimumSize(parent.width(), bar.height())
         self.setMaximumSize(parent.width(), parent.height())
@@ -250,7 +249,7 @@ class StatusBar(QWidget):
 
         # draw the time at the very right
         painter.drawText(QRect(QPoint(0,0), self.size()),
-              Qt.AlignRight, QTime.currentTime().toString("h:mm"));
+              Qt.AlignRight, QLocale().toString(QTime.currentTime(), QLocale.ShortFormat))
 
         # draw all plugin icons fromt he left
         x = 0
@@ -403,47 +402,6 @@ class BusyAnimation(QWidget):
             painter.drawImage(0,radius, self.dark)
 
         painter.end()
-
-class TextmodeDialog(TouchDialog):
-    def __init__(self,title,parent):
-        TouchDialog.__init__(self, title, parent)
-        
-        self.txt = QTextEdit()
-        self.txt.setReadOnly(True)
-        self.setCentralWidget(self.txt)
-
-        self.p = None
-
-    def update(self):
-        if self.p:
-            # select
-            if select.select([self.fd], [], [], 0)[0]:
-                output = os.read(self.fd, 100)
-                if output: self.append(str(output, "utf-8"))
-
-            if self.p.poll() != None:
-                if self.p.returncode != 0:
-                    self.txt.setTextColor(Qt.yellow)
-                    self.txt.append("[" + str(self.p.returncode) + "]")
-
-                self.p = None
-                self.timer.stop()
-
-    def poll(self, p,fd):
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update)
-        self.timer.start(10)
-        
-        self.fd = fd
-        self.p = p
-
-    def append(self, str):
-        self.txt.moveCursor(QTextCursor.End)
-        self.txt.insertPlainText(str)
-
-    def close(self):
-        self.timer.stop()
-        TouchDialog.close(self)
 
         # a toolbutton with drop shadow
 class AppButton(QToolButton):
@@ -758,24 +716,13 @@ class FtcGuiApplication(TouchApplication):
             self.log_file.write("Logging started at: " + datetime.datetime.now().isoformat() + "\n")
             self.log_file.flush()
 
-    def launch_textmode_app(self, executable, name):
-        dialog = TextmodeDialog(name, self.w)
-
-        self.app_executable = executable
-        master_fd, slave_fd = pty.openpty()
-        self.app_process = subprocess.Popen(str(executable), stdout=slave_fd, stderr=slave_fd)
-        dialog.poll(self.app_process, master_fd)
-        dialog.exec_()
-        os.close(master_fd)
-        os.close(slave_fd)
-
     def launch_app(self, executable, managed, name):
         if self.app_is_running():
             return
 
         # get managed state
         if managed.lower() == "text":
-            self.launch_textmode_app(executable, name)
+            # text mode apps will be handled by Raphaels new external system
             return
      
         # run the executable
@@ -843,10 +790,27 @@ class FtcGuiApplication(TouchApplication):
         locale_str = self.locale_read()
         if locale_str != None: self.locale = QLocale(locale_str)
         else:                  self.locale = QLocale.system()
-        path = os.path.dirname(os.path.realpath(__file__))
+
+        # this is needed for proper icon sorting, date display ...
+        # but may fail if the requested locale isn't present
+        try:
+            QLocale.setDefault(self.locale)
+            locale.setlocale(locale.LC_ALL, self.locale.name()+".UTF-8")
+        except:
+            pass
+
         self.translator = QTranslator()
-        self.translator.load(self.locale, os.path.join(path, "launcher_"))
+        self.translator.load(self.locale, os.path.join(BASE, "launcher_"))
         self.installTranslator(self.translator)
+
+        # try to load translations for all plugins
+        self.plugin_translator = {}
+        for file in os.listdir(os.path.join(BASE, PLUGINS_DIR)):
+            if file.endswith(".py"):
+                fname = os.path.splitext(os.path.basename(file))[0]
+                self.plugin_translator[fname] = QTranslator()
+                self.plugin_translator[fname].load(self.locale, os.path.join(BASE, PLUGINS_DIR, fname+"_"))
+                self.installTranslator(self.plugin_translator[fname])
 
         # populate category map now that the i18n is in place. Everything not
         # covered will only show up in the "all" category
@@ -934,6 +898,7 @@ class FtcGuiApplication(TouchApplication):
     # the returned list is srted by the name of the apps
     # as stored in the manifest file
     def scan_app_dirs(self):
+        loc = self.locale.name().split('_')[0].strip().lower()
         app_base = os.path.join(BASE, "apps")
         # scan for app group dirs first
         app_groups = os.listdir(app_base)
@@ -953,6 +918,10 @@ class FtcGuiApplication(TouchApplication):
                         manifest.read_file(open(manifestfile, "r", encoding="utf8"))
                         appname = manifest.get('app', 'name')
 
+                        # get translated name if possible
+                        if manifest.has_option(loc, 'name'):
+                            appname = manifest.get(loc, 'name')
+
                         appinfo = self.manifest_import(manifest) 
                         appinfo["dir"] = os.path.join(app_base, i, a)
 
@@ -961,10 +930,17 @@ class FtcGuiApplication(TouchApplication):
                 pass
                 
         # sort list by apps name
-        app_dirs.sort(key=lambda tup: tup[0])
+        #app_dirs.sort(key=lambda tup: tup[0])
+
+        # This is actually rather tricky. Locale is being set after locading
+        # the locale file
+        app_dirs.sort(key=self.key_name_sort)
 
         # return a list of only the appinfo of the now sorted list
         return ([x[1] for x in app_dirs])
+
+    def key_name_sort(self,value):
+        return locale.strxfrm(value[0])
 
     @pyqtSlot(str)
     def on_launch(self, name):
@@ -980,7 +956,13 @@ class FtcGuiApplication(TouchApplication):
                 
             self.launch_app(os.path.join(app_dir, app['exec']), managed, app['name'])
 
+    def translations(self):
+        # the pylupdate4 program will find these ...
+        QCoreApplication.translate("Messages", "Shutting down...")
+        QCoreApplication.translate("Messages", "Rebooting...")
+
     def on_message(self, str):
+        str = QCoreApplication.translate("Messages", str)
         MessageDialog(str).exec_()
 
     def on_confirm(self,sock,str):

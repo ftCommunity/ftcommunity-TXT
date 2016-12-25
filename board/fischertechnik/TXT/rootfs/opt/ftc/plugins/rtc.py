@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 # plugin checking for RTC interrupts. Keep quiet if there were none
 
+from PyQt4.QtCore import QCoreApplication
 import os
 
 IRQ_SRC = "tps65910-rtc"
 
-name = "RTC"
+def name():
+    return QCoreApplication.translate("PluginRtc", "RTC")
 
 # check for the number of rtc interrupts
 # the interesting line in /proc/interrupts looks like this
@@ -50,6 +52,6 @@ def icon():
 
 def status():
     if rtc_interrupts() > 0:
-        return str(rtc_interrupts())+" events"
+        return str(rtc_interrupts())+" "+QCoreApplication.translate("PluginRtc", "events")
     else:
         return None

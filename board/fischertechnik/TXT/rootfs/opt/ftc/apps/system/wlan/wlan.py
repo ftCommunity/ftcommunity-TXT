@@ -7,7 +7,7 @@
 
 import sys, os, shlex, time
 from subprocess import Popen, call, PIPE
-from TxtStyle import *
+from TouchStyle import *
 
 local = os.path.dirname(os.path.realpath(__file__)) + "/"
 
@@ -43,26 +43,24 @@ def run_program(rcmd):
     executable = cmd[0]
     executable_options=cmd[1:]    
 
-    print(("run: ", rcmd))
-
     try:
         proc  = Popen(([executable] + executable_options), stdout=PIPE, stderr=PIPE)
         response = proc.communicate()
         response_stdout, response_stderr = response[0].decode('UTF-8'), response[1].decode('UTF-8')
     except OSError as e:
         if e.errno == errno.ENOENT:
-            print(( "Unable to locate '%s' program. Is it in your path?" % executable ))
+            print( "Unable to locate '%s' program. Is it in your path?" % executable )
         else:
-            print(( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) ))
+            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
     except ValueError as e:
         print( "Value error occured. Check your parameters." )
     else:
         if proc.wait() != 0:
-            print(( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) ))
+            print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
             return response
         else:
-            print(( "Executable '%s' returned successfully." %(executable) ))
-            print(( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] )))
+            print( "Executable '%s' returned successfully." %(executable) )
+            print( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] ))
             return response_stdout
 
 def get_networks(iface, retry=10):
@@ -80,9 +78,7 @@ def get_networks(iface, retry=10):
                     networks.append( {"bssid":b, "freq":fr, "sig":s, "ssid":ss, "flag":f} )
                 return networks
         retry-=1
-        print("Couldn't retrieve networks, retrying")
         time.sleep(0.5)
-    print("Failed to list networks")
 
 def connect_to_network(_iface, _ssid, _type, _pass=None):
     """
@@ -100,8 +96,6 @@ def connect_to_network(_iface, _ssid, _type, _pass=None):
                 run_program('sudo wpa_cli -i %s set_network 0 psk \'"%s"\'' % (_iface,_pass))
             elif _type == "WEP":
                 run_program("sudo wpa_cli -i %s set_network 0 wep_key %s" % (_iface,_pass))
-            else:
-                print("Unsupported type")
             
             run_program("sudo wpa_cli -i %s select_network 0" % _iface)
 
@@ -113,9 +107,7 @@ def check4dhcp(_iface):
     for pid in pids:
         try:
             cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rt').read().split('\0')
-#            print "cmds", len(cmds), cmds
             if cmds[0] == "udhcpc" and _iface in cmds:
-                print(("PID", pid, "is the dhcp for", _iface))
                 return True
 
         except IOError: # proc has already terminated
@@ -146,9 +138,9 @@ def get_associated(_iface):
                 return line.split('=')[1]
     return ""
 
-class KeyDialog(TxtDialog):
+class KeyDialog(TouchDialog):
     def __init__(self,title,str,parent):
-        TxtDialog.__init__(self, title, parent)
+        TouchDialog.__init__(self, title, parent)
 
         self.layout = QVBoxLayout()
 
@@ -228,7 +220,7 @@ class KeyDialog(TxtDialog):
                     w.setText(keys[i][j]);
 
     def exec_(self):
-        TxtDialog.exec_(self)
+        TouchDialog.exec_(self)
         return self.line.text()
 
 # background thread to monitor state of interface
@@ -246,14 +238,20 @@ class MonitorThread(QThread):
             self.emit( SIGNAL('update_status(QString)'), status )   
         return
     
-class FtcGuiApplication(TxtApplication):
+class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         global networks
         global connected_ssid
         global key
 
-        TxtApplication.__init__(self, args)
-        self.w = TxtWindow("Wifi")
+        TouchApplication.__init__(self, args)
+
+        translator = QTranslator()
+        path = os.path.dirname(os.path.realpath(__file__))
+        translator.load(QLocale.system(), os.path.join(path, "wlan_"))
+        self.installTranslator(translator)
+
+        self.w = TouchWindow(QCoreApplication.translate("Main", "WLAN"))
 
         self.vbox = QVBoxLayout()
 
@@ -289,7 +287,7 @@ class FtcGuiApplication(TxtApplication):
 
         self.vbox.addStretch()
 
-        self.vbox.addWidget(QLabel("Encryption:"))
+        self.vbox.addWidget(QLabel(QCoreApplication.translate("Main", "Encryption:")))
         self.encr_w = QComboBox()
         self.encr_w.addItems(encr)
         self.vbox.addWidget(self.encr_w)
@@ -299,7 +297,7 @@ class FtcGuiApplication(TxtApplication):
         self.edit_hbox_w = QWidget()
         self.edit_hbox = QHBoxLayout()
         self.key = QLineEdit(key)
-        self.key.setPlaceholderText("key")
+        self.key.setPlaceholderText(QCoreApplication.translate("placeholder", "key"))
         self.key.editingFinished.connect(self.do_edit_done)
         self.edit_hbox.addWidget(self.key)
         self.edit_but = QPushButton()
@@ -314,7 +312,7 @@ class FtcGuiApplication(TxtApplication):
 
         # the connect button is by default disabled until
         # the user enters a key
-        self.connect = QPushButton("Connect")
+        self.connect = QPushButton(QCoreApplication.translate("Main", "Connect"))
         self.connect.clicked.connect(self.do_connect)
         self.connect.setDisabled(True)
         self.vbox.addWidget(self.connect)
@@ -322,7 +320,6 @@ class FtcGuiApplication(TxtApplication):
         # check if a network is already connected
         connected_ssid = get_associated(IFACE)
         if connected_ssid != "":
-            print(("Already associated with", connected_ssid))
             for i in range(len(networks)):
                 if networks[i]['ssid'] == connected_ssid:
                     self.ssids_w.setCurrentIndex(i)
@@ -344,7 +341,6 @@ class FtcGuiApplication(TxtApplication):
 
     def on_update_status(self, ssid):
         global connected_ssid
-        print(("New ssid:", ssid))
         if connected_ssid != ssid:
             connected_ssid = ssid
             self.update_connect_button(self.ssids_w.currentText())
@@ -372,7 +368,7 @@ class FtcGuiApplication(TxtApplication):
         # user hit the "key edit button"
     def do_key(self):
         global key
-        dialog = KeyDialog("Key",key,self.w)
+        dialog = KeyDialog(QCoreApplication.translate("Main", "Key"),key,self.w)
         self.set_key( dialog.exec_() )
  
     def do_connect(self):
@@ -380,12 +376,10 @@ class FtcGuiApplication(TxtApplication):
         ssid = self.ssids_w.currentText()
         enc_type = self.encr_w.currentText()
         enc_key = self.key.text()
-        print(("Connecting to", ssid, "with", enc_type, enc_key))
         connect_to_network(IFACE, ssid, enc_type, enc_key)
 
     def set_default_encryption(self,net):
         global networks
-        print(("Setting default encryption for", net))
         # search for network is list
         for i in networks: 
             if i['ssid'] == net:
@@ -402,10 +396,10 @@ class FtcGuiApplication(TxtApplication):
     def update_connect_button(self,net):
         global key
         if net == connected_ssid:
-            self.connect.setText("connected")
+            self.connect.setText(QCoreApplication.translate("Main", "connected"))
             self.connect.setDisabled(True)
         else:
-            self.connect.setText("Connect")
+            self.connect.setText(QCoreApplication.translate("Main", "Connect"))
             self.connect.setDisabled(key == "")
 
 if __name__ == "__main__":
