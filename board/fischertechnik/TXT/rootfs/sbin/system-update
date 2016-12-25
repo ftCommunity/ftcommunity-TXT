@@ -2,7 +2,7 @@
 export PATH=/bin/:/usr/bin:/sbin:/usr/sbin
 BASE_URL="https://github.com/ftCommunity/ftcommunity-TXT/releases/download"
 TARGET_VERSION="$1"
-CURRENT_VERSION="$(cat /etc/fw-ver.txt)"
+CURRENT_VERSION="$(cat /etc/fw-ver.txt | cut -f1 -d"-")"
 ARCHIVE="ftcommunity-txt-${TARGET_VERSION}.zip"
 BOOTDIR="/media/sdcard"
 TEMPDIR="/tmp/update-${TARGET_VERSION}"
