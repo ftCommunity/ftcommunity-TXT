@@ -103,6 +103,10 @@ progress 50 "repartition sd card"
 
 # Create the new file systems
 mkfs.fat -n CFW-BOOT /dev/mmcblk0p1 || fail
+fdisk -u /dev/mmcblk0 << EOF || fail
+c
+1
+EOF
 progress 55 "create FAT fs on partition 1"
 echo y | mke2fs -q -t ext4 -L CFW-DATA /dev/mmcblk0p2 || fail
 progress 60 "create ext4 fs on partition 2"
