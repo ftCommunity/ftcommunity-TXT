@@ -13,8 +13,8 @@ iface usb0 inet static
 	netmask 255.255.255.252
 
 iface wlan0 inet dhcp
-	pre-up test -f /media/sdcard/config/net/wpa.wlan0.conf || touch /media/sdcard/config/net/wpa.wlan0.conf
-	pre-up wpa_supplicant -B -Dnl80211 -iwlan0 -I/etc/wpa_supplicant.conf -c/media/sdcard/config/net/wpa.wlan0.conf
+	pre-up test -f /etc/network/wpa.wlan0.conf || touch /etc/network/wpa.wlan0.conf
+	pre-up wpa_supplicant -B -Dnl80211 -iwlan0 -I/etc/wpa_supplicant.conf -c/etc/network/wpa.wlan0.conf
 	post-down killall -q wpa_supplicant
 
 iface eth0 inet dhcp

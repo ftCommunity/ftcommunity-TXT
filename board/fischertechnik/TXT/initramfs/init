@@ -3,6 +3,12 @@
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
+move_kernel_mounts() {
+  for dir in proc sys dev; do
+    mount -o move $1$dir $2$dir
+  done
+}
+
 # mount kernel filesystems
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
@@ -10,47 +16,49 @@ mount -t devtmpfs devtmpfs /dev
 mkdir -p /dev/pts
 mkdir -p /dev/shm
 
-move_kernel_mounts() {
-  for dir in proc sys dev; do
-    mount -o move $1$dir $2$dir
-  done
-}
+if ! [ -b /dev/mmcblk0p2 ] ; then
+  if ! /repartition-sd-card ; then
+     echo "failed to repartition the SD card. Dropping to a shell"
+     exec /bin/sh
+  fi
+fi
 
-get_opt() {
-  echo "$@" | cut -d "=" -f 2
-}
+# mount SD card partitions.
+mount -t vfat /dev/mmcblk0p1 /media/sdcard/boot -o dmask=022,fmask=133,flush
+mount -t ext4 /dev/mmcblk0p2 /media/sdcard/data
+mount -t squashfs /media/sdcard/boot/rootfs.img /media/sdcard/root -o loop,ro
 
-init=/sbin/init
-root=/dev/mmcblk0p2
-for i in $(cat /proc/cmdline); do
-  case $i in
-    root\=*)
-      root=$(get_opt $i)
-      ;;
-    init\=*)
-      init=$(get_opt $i)
-      ;;
-  esac
-done
+ROM_VERSION=$(cat /media/sdcard/root/etc/fw-ver.txt)
+ROOT_TYPE=ro
+if [ -r /media/sdcard/boot/rootfs.conf ]; then
+  ROOT_TYPE=$(cat /media/sdcard/boot/rootfs.conf)
+fi
 
-# mount SD card
-mount -t vfat /dev/mmcblk0p1 /sdcard -o dmask=077,fmask=177,sync
-if [ -f /sdcard/rootfs.img ]; then
-  mount -t auto /sdcard/rootfs.img /newroot -o loop,ro
-elif [ -b "$root" ]; then
-  mount -t auto "$root" /newroot
+if [ "${ROOT_TYPE}" = "rw" ] ; then
+  mkdir -p /media/sdcard/data/overlay/rootfs
+  mkdir -p /media/sdcard/data/overlay/.workdir/rootfs
+  if [ -r /media/sdcard/data/overlay/rootfs/.version ]; then
+    OVL_VERSION=$(cat /media/sdcard/data/overlay/rootfs/.version)
+    if [ "${OVL_VERSION}" != "${ROM_VERSION}" ] ; then
+      mv /media/sdcard/data/overlay/rootfs /media/sdcard/data/rootfs-overlay-old
+      mkdir -p /media/sdcard/data/overlay/rootfs
+      echo "${ROM_VERSION}" > /media/sdcard/data/overlay/rootfs/.version
+    fi
+  else
+    echo "${ROM_VERSION}" > /media/sdcard/data/overlay/rootfs/.version
+  fi
+  mount -t overlay overlay -o lowerdir=/media/sdcard/root,upperdir=/media/sdcard/data/overlay/rootfs,workdir=/media/sdcard/data/overlay/.workdir/rootfs /newroot
 else
-  echo "No root file system found, dropping to a shell"
-  exec /bin/sh
+  mount -o bind /media/sdcard/root /newroot
 fi
 
-if [ -x "/newroot/$init" ]; then
-  mount -o move /sdcard /newroot/media/sdcard
-  move_kernel_mounts / /newroot/
-  exec switch_root /newroot "${init}"
-fi
+mount -o move /media/sdcard/boot /newroot/media/sdcard/boot
+mount -o move /media/sdcard/root /newroot/media/sdcard/root
+mount -o move /media/sdcard/data /newroot/media/sdcard/data
+move_kernel_mounts / /newroot/
+exec switch_root /newroot /sbin/init
 
 #This will only be run if the exec above failed
-echo "Failed to switch_root or no init found, dropping to a shell"
+echo "Failed to switch_root. Dropping to a shell"
 move_kernel_mounts /newroot/ /
 exec /bin/sh

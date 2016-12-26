@@ -4,7 +4,7 @@ BASE_URL="https://github.com/ftCommunity/ftcommunity-TXT/releases/download"
 TARGET_VERSION="$1"
 CURRENT_VERSION="$(cat /etc/fw-ver.txt)"
 ARCHIVE="ftcommunity-txt-${TARGET_VERSION}.zip"
-BOOTDIR="/media/sdcard"
+BOOTDIR="/media/sdcard/boot"
 TEMPDIR="/tmp/update-${TARGET_VERSION}"
 BACKUPDIR="${BOOTDIR}/system-old"
 
