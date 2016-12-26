@@ -23,6 +23,8 @@ if [ -n "$GIT_VERSION" ] ; then
   BASE_VERSION=$(cat board/fischertechnik/TXT/rootfs/etc/fw-ver.txt)
   if [ "v$BASE_VERSION" = "${GIT_VERSION%%-*}" ] ; then
     echo "${BASE_VERSION}+${GIT_VERSION#*-}" > $TARGET/etc/fw-ver.txt
+  elif [ "${BASE_VERSION#*-}" = "rc" ]; then
+    echo "${BASE_VERSION}+${GIT_VERSION}" > $TARGET/etc/fw-ver.txt
   else
     echo "Version number $GIT_VERSION from 'git describe' does not match the base version $BASE_VERSION"
     echo "Please fix the base version in board/fischertechnik/TXT/rootfs/etc/fw-ver.txt"
