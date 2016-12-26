@@ -419,6 +419,7 @@ class TextmodeDialog(TouchDialog):
             self.buttonThread = ButtonThread()
             self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
             self.buttonThread.start()
+
     def update(self):
         if self.p:
             # select
@@ -448,6 +449,7 @@ class TextmodeDialog(TouchDialog):
 
     def close(self):
         self.timer.stop()
+        self.buttonThread.terminate()
         TouchDialog.close(self)
 
         # a toolbutton with drop shadow
