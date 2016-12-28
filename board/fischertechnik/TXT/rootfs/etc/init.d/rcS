@@ -63,5 +63,5 @@ export PYTHONPATH=/opt/ftc
 export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
 export QWS_KEYBOARD=""
 export QWS_DISPLAY="multi: LinuxFb:/dev/fb0:0 VNC:0"
-+export QWS_SIZE=240x320
+export QWS_SIZE=240x320
 su ftc -c "/opt/ftc/launcher.py -qws" &
