@@ -1,12 +1,15 @@
-# <file system>	<mount pt>	<type>	<options>	<dump>	<pass>
-devpts		/dev/pts	devpts	defaults,gid=5,mode=620	0	0
-tmpfs		/dev/shm	tmpfs	mode=0777	0	0
-tmpfs		/tmp		tmpfs	mode=1777	0	0
-tmpfs		/run		tmpfs	mode=0755,nosuid,nodev	0	0
-/dev/ubi0_0	/rom		ubifs	ro		0	0
-/proc		/rom/proc	bind	bind		0	0
-/dev		/rom/dev	bind	bind		0	0
-/dev/pts	/rom/dev/pts	bind	bind		0	0
-/dev/shm	/rom/dev/shm	bind	bind		0	0
-/tmp		/rom/tmp	bind	bind		0	0
-/sys		/rom/sys	bind	bind		0	0
+# <file system>	<mount pt>		<type>	<options>	<dump>	<pass>
+tmpfs			/run			tmpfs	mode=0755,nosuid,nodev	0	0
+tmpfs			/tmp			tmpfs	mode=1777	0	0
+devpts			/dev/pts		devpts	defaults,gid=5,mode=620	0	0
+tmpfs			/dev/shm		tmpfs	mode=0777	0	0
+overlay			/etc			overlay	lowerdir=/media/sdcard/root/etc,upperdir=/media/sdcard/data/overlay/etc,workdir=/media/sdcard/data/overlay/.workdir/etc	0	0
+/media/sdcard/data/home	/home	bind	bind		0	0
+/dev/ubi0_0		/rom			ubifs	ro			0	0
+/proc			/rom/proc		bind	bind		0	0
+/dev			/rom/dev		bind	bind		0	0
+/dev/pts		/rom/dev/pts	bind	bind		0	0
+/dev/shm		/rom/dev/shm	bind	bind		0	0
+/tmp			/rom/tmp		bind	bind		0	0
+/sys			/rom/sys		bind	bind		0	0
+/home/ROBOPro/ROBOProFiles	/rom/opt/knobloch/ROBOProFiles	bind	bind		0	0

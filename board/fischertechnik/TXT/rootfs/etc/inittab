@@ -15,7 +15,6 @@
 
 # Startup the system
 ::sysinit:/usr/sbin/ubiattach -p /dev/mtd10 -d0
-::sysinit:/usr/sbin/mount.posixovl -H /media/sdcard/ -- -o allow_other
 ::sysinit:/bin/mount -a
 ::sysinit:/bin/hostname -F /etc/hostname
 # now run any rc scripts
