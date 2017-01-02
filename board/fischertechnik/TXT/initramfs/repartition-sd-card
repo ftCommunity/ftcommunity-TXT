@@ -1,0 +1,156 @@
+#!/bin/busybox sh
+mount -t vfat /dev/mmcblk0p1 /media/sdcard/boot -o dmask=077,fmask=177,sync
+
+# Copy the necessary tools from rootfs.img
+mount -t auto /media/sdcard/boot/rootfs.img /newroot -o loop,ro
+cp /newroot/usr/lib/libfuse.so.2 \
+   /newroot/lib/libudev.so.1 \
+   /newroot/lib/librt.so.1 \
+   /newroot/lib/libpthread.so.0 \
+   /newroot/usr/lib/libext2fs.so.2 \
+   /newroot/usr/lib/libcom_err.so.2 \
+   /newroot/lib/libblkid.so.1 \
+   /newroot/lib/libuuid.so.1 \
+   /newroot/usr/lib/libe2p.so.2 \
+   /newroot/usr/lib/libpng16.so.16 \
+   /newroot/usr/lib/libjpeg.so.8 \
+   /newroot/usr/lib/libgif.so.7 \
+   /newroot/usr/lib/libz.so.1 \
+   /newroot/lib/libm.so.6 \
+   /lib
+cp /newroot/usr/sbin/mount.posixovl \
+   /newroot/sbin/mkfs.fat \
+   /newroot/usr/sbin/mke2fs \
+   /newroot/usr/bin/psplash \
+   /newroot/usr/bin/psplash-write \
+   /newroot/usr/bin/fbv \
+   /bin
+umount /newroot
+
+# Hide cursor and show splash screen
+echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
+psplash -n -f /ftc-firstboot.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
+
+fail() {
+  psplash-write "QUIT"
+  psplash -n -f /ftc-firstboot-failed.png -y 212 --BarCol FF0000 --BarBkCol 347ECC --BkCol 000000 &
+  psplash-write "PROGRESS 100"
+  psplash-write "QUIT"
+  exit 1
+}
+
+progress() {
+  psplash-write "PROGRESS $1"
+  echo $2
+}
+
+# back up files from old simple layout if there are any
+mkdir /backup || fail
+mount.posixovl -H /media/sdcard/boot -- -o allow_other || fail
+if [ -d /media/sdcard/boot/config/etc ]; then
+  tar cf - -C /media/sdcard/boot/config/etc . | gzip > /backup/etc.tar.gz || fail
+fi
+progress 5 "backup etc"
+if [ -f /media/sdcard/boot/config/net/wpa.wlan0.conf ]; then
+  cp /media/sdcard/boot/config/net/wpa.wlan0.conf /backup || fail
+fi
+progress 10 "backup wpa.wlan0.conf"
+if [ -d /media/sdcard/boot/apps ]; then 
+  tar cf - -C /media/sdcard/boot/apps . | gzip > /backup/user-apps.tar.gz || fail
+fi
+progress 15 "backup user apps"
+if [ -d /media/sdcard/boot/data ]; then
+  tar cf - -C /media/sdcard/boot/data . | gzip > /backup/home-ftc.tar.gz || fail
+fi
+progress 20 "backup /home/ftc"
+if [ -d /media/sdcard/boot/robopro ]; then
+  tar cf - -C /media/sdcard/boot/robopro . | gzip > /backup/robopro-apps.tar.gz || fail
+fi
+progress 25 "backup robopro apps"
+if [ -d /media/sdcard/boot/rootfs.conf ]; then 
+  cp /media/sdcard/boot/rootfs.conf /backup || fail
+fi
+progress 30 "backup rootfs.conf"
+# back up system files
+cp /media/sdcard/boot/uImage /backup || fail
+progress 35 "backup uImage"
+cp /media/sdcard/boot/am335x-kno_txt.dtb /backup || fail
+progress 40 "backup am335x-kno_txt.dtb"
+cp /media/sdcard/boot/rootfs.img /backup || fail
+progress 45 "backup rootfs.img"
+# umount posix-overlay and underlying FAT FS
+umount /media/sdcard/boot || fail
+umount /media/sdcard/boot || fail
+
+# repartition the SD card
+fdisk -u /dev/mmcblk0 << EOF || fail
+d
+n
+p
+1
+2048
+1000000
+t
+c
+n
+p
+2
+1000001
+
+w
+EOF
+progress 50 "repartition sd card"
+
+# Create the new file systems
+mkfs.fat -n CFW-BOOT -F 32 /dev/mmcblk0p1 || fail
+progress 55 "create FAT fs on partition 1"
+echo y | mke2fs -q -t ext4 -L CFW-DATA /dev/mmcblk0p2 || fail
+progress 60 "create ext4 fs on partition 2"
+# restore backed up files
+mount -t vfat /dev/mmcblk0p1 /media/sdcard/boot -o dmask=077,fmask=177 || fail
+cp /backup/uImage  /media/sdcard/boot || fail
+progress 65 "restore uImage"
+cp /backup/am335x-kno_txt.dtb  /media/sdcard/boot || fail
+progress 70 "restore am335x-kno_txt.dtb"
+cp /backup/rootfs.img /media/sdcard/boot || fail
+progress 75 "restore rootfs.img"
+if [ -f /backup/rootfs.conf ]; then 
+  cp /backup/rootfs.conf /media/sdcard/boot || fail
+fi
+umount /media/sdcard/boot || fail
+progress 80 "restore partition 1 complete"
+
+mount -t ext4 /dev/mmcblk0p2 /media/sdcard/data || fail
+mkdir -p /media/sdcard/data/overlay/etc/ || fail
+mkdir -p /media/sdcard/data/overlay/.workdir/etc || fail
+chmod go-rwx /media/sdcard/data/overlay/ || fail 
+if [ -f /backup/etc.tar.gz ] ; then
+  gzip -cd /backup/etc.tar.gz | tar xf - -C /media/sdcard/data/overlay/etc/ || fail
+fi
+if [ -f /backup/wpa.wlan0.conf ] ; then
+  mkdir -p /media/sdcard/data/overlay/etc/network || fail
+  cp /backup/wpa.wlan0.conf /media/sdcard/data/overlay/etc/network || fail
+fi
+progress 85 "restore /etc"
+
+mkdir -p /media/sdcard/data/home/ftc/apps || fail
+chown -R 1001:1001 /media/sdcard/data/home/ftc || fail
+if [ -f /backup/home-ftc.tar.gz ]; then
+  gzip -cd /backup/home-ftc.tar.gz | tar xf - -C /media/sdcard/data/home/ftc || fail
+fi
+if [ -f /backup/user-apps.tar.gz ]; then
+  gzip -cd /backup/user-apps.tar.gz | tar xf - -C /media/sdcard/data/home/ftc/apps || fail
+fi
+progress 90 "restore /home/ftc and user apps"
+
+mkdir -p /media/sdcard/data/home/ROBOPro/ROBOProFiles || fail
+chown -R 1000:1000 /media/sdcard/data/home/ROBOPro || fail
+if [ -f /backup/robopro-apps.tar.gz ]; then
+  gzip -cd /backup/robopro-apps.tar.gz | tar xf - -C /media/sdcard/data/home/ROBOPro/ROBOProFiles || fail
+fi
+progress 95 "restore ROBOPro apps"
+
+umount /media/sdcard/data || fail
+
+progress 100 "restore complete"
+psplash-write "QUIT"
