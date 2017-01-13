@@ -38,7 +38,7 @@ def run_program(rcmd):
     Runs a program, and it's paramters (e.g. rcmd="ls -lh /var/www")
     Returns output if successful, or None and logs error if not.
     """
-
+    
     cmd = shlex.split(rcmd)
     executable = cmd[0]
     executable_options=cmd[1:]    
@@ -108,16 +108,20 @@ def check4dhcp(_iface):
         try:
             cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rt').read().split('\0')
             if cmds[0] == "udhcpc" and _iface in cmds:
-                return True
+                return int(pid)
 
         except IOError: # proc has already terminated
             continue
-    return False
+    return 0
 
 def run_dhcp(_iface):
-    if not check4dhcp(_iface):
+    # always kill an restart udhcpd
+    pid = check4dhcp(_iface)
+    if(pid):
+        run_program("sudo kill -SIGUSR1 %d" % pid)
+    else:
         run_program("sudo udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
-
+    
 def _disconnect_all(_iface):
     """
     Disconnect all wireless networks.
