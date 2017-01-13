@@ -4,18 +4,23 @@
 
 import sys, os, io, time
 import configparser, zipfile, shutil
+import semantic_version
+from pathlib import Path
 from PyQt4.QtNetwork import *
 
 from TouchStyle import *
 
+FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').read_text())
+
 # url of the "app store"
-URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/"
+URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/packages/"
+MAIN_BRANCH = "master"
+ALTERNATE_BRANCH = "v%d.%d.%d" % (FW_VERSION.major, FW_VERSION.minor, FW_VERSION.patch)
 PACKAGEFILE = "00packages"
 
 # directory were the user installed apps are located
 APPBASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 USERAPPBASE = os.path.join(APPBASE, "user")
-
 
 def get_category_name(code):
     category_map = {
@@ -62,6 +67,27 @@ def append_parameter(package, app, id, lkey, parms):
     # category entries need special treatment
     if val and id == 'category':
         val = get_category_name(val.lower())
+
+    # version entries are parsed into semantic versions
+    # missing or invalid version entries are interpreted
+    # as '0.0.0-missing' or '0.0.0-invalid+...', 
+    # i.e. a "version" that is guaranteed to be lower than
+    # any real version
+    if id == 'version':
+        if val:
+            try:
+                val = semantic_version.Version.coerce(val)
+            except ValueError:
+                val = semantic_version.Version("0.0.0-invalid+" + val)
+        else:
+            val = semantic_version.Version("0.0.0-missing")
+
+    # ... and 'firmware' entries into semantic version specs
+    if val and id == 'firmware':
+        try:
+            val = semantic_version.Spec(val)
+        except ValueError:
+            val = None
 
     if val:
         parms[id] = val
@@ -169,10 +195,13 @@ class NetworkAccessManager(QNetworkAccessManager):
         reply = self.sender()
         if reply.error() != 0:
             if reply.error() == QNetworkReply.ContentNotFoundError:
-                httpStatus = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
-                httpStatusMessage = reply.attribute(
-                    QNetworkRequest.HttpReasonPhraseAttribute)
-                self.networkResult.emit((False, httpStatusMessage + " [" + str(httpStatus) + "]"))
+                if self.ignoreNotFound:
+                    self.networkResult.emit((True, b""))
+                else:
+                    httpStatus = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+                    httpStatusMessage = reply.attribute(
+                        QNetworkRequest.HttpReasonPhraseAttribute)
+                    self.networkResult.emit((False, httpStatusMessage + " [" + str(httpStatus) + "]"))
             else:
                 self.networkResult.emit((False, QCoreApplication.translate("NetError", "Network error:") + " " + self.get_error(reply.error())))
         else:
@@ -199,14 +228,15 @@ class NetworkAccessManager(QNetworkAccessManager):
         # self.messageBuffer += self.reply.readAll()
         self.messageBuffer.append(self.reply.readAll())
     
-    def __init__(self, filename):
+    def __init__(self, filename, branch=MAIN_BRANCH, ignoreNotFound=False):
         QNetworkAccessManager.__init__(self)
         self.messageBuffer = []
-        url   = QUrl(URL + filename)
+        url   = QUrl((URL % branch) + filename)
         req   = QNetworkRequest(url)
         self.reply = self.get(req)
         self.reply.ignoreSslErrors()
         self.progress_percent = -1
+        self.ignoreNotFound = ignoreNotFound
 
         self.reply.readyRead.connect(self.slotReadData)
         self.reply.downloadProgress.connect(self.slotProgress)
@@ -217,8 +247,8 @@ class NetworkAccessManager(QNetworkAccessManager):
 class PackageLoader(NetworkAccessManager):
     result = pyqtSignal(tuple)
 
-    def __init__(self, str):
-        NetworkAccessManager.__init__(self, str + ".zip")
+    def __init__(self, str, branch=MAIN_BRANCH):
+        NetworkAccessManager.__init__(self, str + ".zip", branch)
         self.networkResult.connect(self.onNetworkResult)
 
     def onNetworkResult(self, result):
@@ -310,6 +340,10 @@ class AppDialog(TouchDialog):
             self.package_uuid = parms['uuid']
         else:
             self.package_uuid = None
+        if 'branch' in parms:
+            self.package_branch = parms['branch']
+        else:
+            self.package_branch = MAIN_BRANCH
 
         menu = self.addMenu()
 
@@ -335,12 +369,12 @@ class AppDialog(TouchDialog):
 
         for i in sorted(parms):
             if(AppDialog.format(i)):
-                value = parms[i]
+                value = str(parms[i])
                 # if the version is to be displayed and the installed
                 # version differs from the one in the shop then also
                 # display the installed version
                 if i == 'version' and inst_ver and value != inst_ver:
-                    value += " ("+QCoreApplication.translate("AppInfo", "Inst.")+" " + inst_ver + ")"
+                    value += " ("+QCoreApplication.translate("AppInfo", "Inst.")+" " + str(inst_ver) + ")"
 
                 text.append('<h3><font color="#fcce04">' + AppDialog.format(i) + '</font></h3>')
                 text.append(value)
@@ -358,7 +392,7 @@ class AppDialog(TouchDialog):
                 msgBox.exec_()
                 return
 
-        self.package_loader = PackageLoader(self.package_name)
+        self.package_loader = PackageLoader(self.package_name, self.package_branch)
         self.package_loader.result.connect(self.onResult)
 
         self.busy = BusyAnimation(self)
@@ -422,14 +456,15 @@ class AppDialog(TouchDialog):
 class PackageListLoader(NetworkAccessManager):
     result = pyqtSignal(tuple)
 
-    def __init__(self):
-        NetworkAccessManager.__init__(self, PACKAGEFILE)
+    def __init__(self, branch=MAIN_BRANCH):
+        NetworkAccessManager.__init__(self, PACKAGEFILE, branch, branch!=MAIN_BRANCH)
+        self.branch = branch
         self.networkResult.connect(self.onNetworkResult)
 
     def onNetworkResult(self, result):
         # forward error message directly
         if not result[0]:
-            self.result.emit(result)
+            self.result.emit((result[0], result[1], self))
             return
 
         # get current language key (en,de,...)
@@ -443,10 +478,11 @@ class PackageListLoader(NetworkAccessManager):
         applist = []
         for app in apps:
             appparms = {}
-            # name entry is mandatory
+            # name and uuid entries are mandatory
             if packages.has_option(app, 'name') and packages.has_option(app, 'uuid'):
                 # add everything the gui needs
                 appparms['package'] = app
+                appparms['branch'] = self.branch
                 # name and description may have translations
                 append_parameter(packages, app, 'name', lkey, appparms)
                 append_parameter(packages, app, 'uuid', None, appparms)
@@ -458,16 +494,18 @@ class PackageListLoader(NetworkAccessManager):
                 append_parameter(packages, app, 'version', None, appparms)
                 append_parameter(packages, app, 'firmware', None, appparms)
 
-                # create a tuple of app name and its parameters
-                
-                # check for language specific name first
-                if packages.has_option(app, 'name_'+lkey):
-                    applist.append((packages.get(app, 'name_'+lkey), appparms))
-                else:
-                    applist.append((packages.get(app, 'name'), appparms))
+                # if the app has a firmware spec, check if it matches the
+                # current firmware and only append the app if it does
+                if (not 'firmware' in appparms) or FW_VERSION in appparms['firmware']:
 
-        applist.sort(key=lambda tup: tup[0])
-        self.result.emit((True, applist))
+                    # create a tuple of app name and its parameters
+                    # check for language specific name first
+                    if packages.has_option(app, 'name_'+lkey):
+                        applist.append((packages.get(app, 'name_'+lkey), appparms))
+                    else:
+                        applist.append((packages.get(app, 'name'), appparms))
+
+        self.result.emit((True, applist, self))
 
 class AppListWidget(QListWidget):
     def __init__(self, parent=None):
@@ -483,14 +521,53 @@ class AppListWidget(QListWidget):
 
         # start package list download
         self.apps = []
-        self.package_list_loader = PackageListLoader()
-        self.package_list_loader.result.connect(self.onResult)
+        self.apps_by_uuid = {}
+        self.active_loaders = {}
+        for branch in (MAIN_BRANCH, ALTERNATE_BRANCH):
+            loader = PackageListLoader(branch)
+            self.active_loaders[branch] = loader;
+            loader.result.connect(self.onLoadPackageList)
         self.busy = BusyAnimation(parent)
         self.busy.show()
 
         # react on clicks
         self.itemClicked.connect(self.onItemClicked)
         self.setIconSize(QSize(32, 32))
+
+    # collect results from a package list loader
+    # and pass those results to onResult when the 
+    # last loader has finished
+    def onLoadPackageList(self, result):
+        success = result[0]
+        data = result[1]
+        loader = result[2]
+        if not self.active_loaders.get(loader.branch):
+            return
+
+        if not success:
+            # ignore results from all other loaders and
+            # pass the error to onResult
+            self.active_loaders.clear()
+            self.onResult((False, data))
+            return
+
+        del self.active_loaders[loader.branch]
+        for tup in data:
+            app = tup[1]
+            existing_app = self.apps_by_uuid.get(app['uuid'], (None, None))[1]
+            if existing_app:
+                existing_ver = existing_app['version']
+                new_ver = app['version']
+                if new_ver > existing_ver or (new_ver == existing_ver and loader.branch == MAIN_BRANCH):
+                    self.apps_by_uuid[app['uuid']] = tup
+            else:
+                self.apps_by_uuid[app['uuid']] = tup
+
+        if not self.active_loaders:
+            # last loader finished - pass on the results
+            self.apps = sorted(self.apps_by_uuid.values(), key=lambda tup: tup[0])
+            self.onResult((True, self.apps))
+
 
     # return a list of directories containing apps
     # searches under /opt/ftc/apps/<group>/<app>
@@ -566,15 +643,10 @@ class AppListWidget(QListWidget):
             if x:
                 icn = "installed.png"
 
-                # compare versions and inducate that the
-                # installed version is nor the one available
-                # in the store. This will also trigger if the
-                # installed version is newer than the one in 
-                # the store. But that should only happen to
-                # developers and they should be able to deal 
-                # with that
+                # compare versions and indicate if a newer
+                # version is available in the store.
                 if 'version' in x and 'version' in i[1]:
-                    if x['version'] != i[1]['version']:
+                    if x['version'] < i[1]['version']:
                         icn = "update_available.png"
 
             if icn:

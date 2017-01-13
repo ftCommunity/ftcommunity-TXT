@@ -63,7 +63,7 @@ def scan_app_dirs():
 for app_dir in scan_app_dirs():
     manifestfile = os.path.join(app_dir, "manifest")
     manifest = configparser.RawConfigParser()
-    manifest.read(manifestfile)
+    manifest.read_file(open(manifestfile, "r", encoding="utf8"))
 
     # get various fields from manifest
     appname = manifest.get('app', 'name')
