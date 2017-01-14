@@ -118,7 +118,7 @@ def run_dhcp(_iface):
     # always kill an restart udhcpd
     pid = check4dhcp(_iface)
     if(pid):
-        run_program("sudo kill -SIGUSR1 %d" % pid)
+        run_program("sudo killall -SIGUSR1 udhcpc")
     else:
         run_program("sudo udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
     
