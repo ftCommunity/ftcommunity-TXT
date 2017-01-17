@@ -87,6 +87,10 @@ QMenu::item:selected {
    color: #fcce04;
 }
 
+QMenu::item:disabled {
+   color: lightgrey;
+}
+
 QMenu::right-arrow {
   image: url(scrollarrow_right)
 }
