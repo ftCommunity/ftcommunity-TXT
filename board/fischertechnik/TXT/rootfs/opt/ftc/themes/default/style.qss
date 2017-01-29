@@ -87,10 +87,6 @@ QMenu::item:selected {
    color: #fcce04;
 }
 
-QMenu::item:disabled {
-   color: lightgrey;
-}
-
 QMenu::right-arrow {
   image: url(scrollarrow_right)
 }
@@ -162,15 +158,35 @@ QTabWidget::pane {
   background: rgba(0,0,0,0); 
 }
 
+/* small font for qlistwidget */
+
+QListWidget#smalllabel {
+    font: 24px;
+    color: white;
+}
+
+
 /* qlabel has a transparent background and is in "TXT" orange */
 QLabel {
     background: none; 
     color: #fcce04;
 }
 
+/* a qlabel with big font */
+QLabel#biglabel {
+    font: 32px;
+    color: white;
+}
+
 /* a qlabel with smaller font */
 QLabel#smalllabel {
     font: 24px;
+    color: white;
+}
+
+/* a qlabel with even smaller font */
+QLabel#smallerlabel {
+    font: 18px;
     color: white;
 }
 
@@ -182,14 +198,44 @@ QLabel#tinylabel {
 
 /* textedit has a smaller font */
 QTextEdit {
-    background: rgba(0,0,0,0); 
+    background: rgba(0,0,0,0);
     font: 16px;
+}
+
+/* qtextedit with big font */
+QTextEdit#biglabel {
+    font: 32px;
+    color: white;
+}
+
+/* qtextedit with smaller font */
+QTextEdit#smalllabel {
+    font: 24px;
+    color: white;
+}
+
+/* qtextedit with even smaller font */
+QTextEdit#smallerlabel {
+    font: 18px;
+    color: white;
+}
+
+/* qtextedit with an even smaller font */
+QTextEdit#tinylabel {
+    font-size: 12px;
+    color: white;
 }
 
 /* having transparent aspects in qlineedit makes the line flash on input :-( */
 QLineEdit {
     background-color: #8EB6DC;
 /*    background-color: rgba(0,0,0,0);  */
+}
+
+/* qlineedit with smaller font */
+QLineEdit#smalllabel {
+    font: 24px;
+    color: white;
 }
 
 /* the close button in the top right window corner */
@@ -208,6 +254,47 @@ QPushButton#menubut {
     background: none;
     width: 32px;
     height: 40px;
+}
+
+/* the alternate check button in the top right or left window corner */
+QPushButton#checkbut {
+    image: url(checkicon);
+    border-style: none; 
+    background: none;
+    width: 32px;
+    height: 40px;
+}
+
+/* the optional confirm button in the top left window corner */
+QPushButton#confirmbut {
+    image: url(confirmicon);
+    border-style: none; 
+    background: none;
+    width: 32px;
+    height: 40px;
+}
+
+/* the alternate cancel button in the top left window corner */
+QPushButton#cancelbut {
+    image: url(cancelicon);
+    border-style: none; 
+    background: none;
+    width: 32px;
+    height: 40px;
+}
+
+/* the erase button of the on-screen-keyboard */
+QPushButton#osk_erase {
+    image: url(osk_erase);
+    width: 32px;
+    height: 32px;
+}
+
+/* the caps button of the on-screen-keyboard */
+QPushButton#osk_caps {
+    image: url(osk_caps);
+    width: 32px;
+    height: 32px;
 }
 
 /* a flat button has no decoration at all */
@@ -236,6 +323,30 @@ QPushButton:pressed {
     background-color: rgba(255, 255, 255, 40);
     border-style: inset;
     color: lightgrey;
+}
+
+/* a qpushbutton with big font */
+QPushButton#biglabel {
+    font: 32px;
+    color: white;
+}
+
+/* a qpushbutton with smaller font */
+QPushButton#smalllabel {
+    font: 24px;
+    color: white;
+}
+
+/* a qpushbutton with even smaller font */
+QPushButton#smallerlabel {
+    font: 18px;
+    color: white;
+}
+
+/* a qpushbutton with an even smaller font */
+QPushButton#tinylabel {
+    font-size: 12px;
+    color: white;
 }
 
 QToolButton {
