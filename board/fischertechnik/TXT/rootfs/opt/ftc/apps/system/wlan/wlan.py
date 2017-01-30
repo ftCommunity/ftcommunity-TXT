@@ -161,7 +161,7 @@ class KeyDialog(TouchDialog):
         edit.hbox.setContentsMargins(0,0,0,0)
 
         self.line = QLineEdit(strg)
-        #        self.line.setReadOnly(True)
+        self.line.setReadOnly(True)
         self.line.setAlignment(Qt.AlignCenter)
         edit.hbox.addWidget(self.line)
         but = QPushButton()
