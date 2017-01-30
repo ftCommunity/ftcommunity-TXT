@@ -9,11 +9,11 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="32"
-   height="32"
+   width="34.133335"
+   height="34.133335"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
+   inkscape:version="0.92.0 r"
    sodipodi:docname="caps.svg"
    inkscape:export-filename="/home/tharbaum/tmp/private_stuff/txt/apps/wifi/caps.png"
    inkscape:export-xdpi="90"
@@ -33,18 +33,22 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="823"
-     inkscape:window-height="716"
-     inkscape:window-x="1448"
-     inkscape:window-y="202"
-     inkscape:window-maximized="0">
+     inkscape:window-width="1920"
+     inkscape:window-height="1005"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
        id="grid2985"
        empspacing="5"
        visible="true"
        enabled="true"
-       snapvisiblegridlinesonly="true" />
+       snapvisiblegridlinesonly="true"
+       originx="0"
+       originy="0"
+       spacingx="1.0666667"
+       spacingy="1.0666667" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -62,13 +66,12 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-1020.3622)">
+     transform="translate(0,-1088.3863)">
     <path
-       style="fill:none;stroke:#fcce04;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
-       d="M 11,2 11,17 2,17 16,30 30,17 21,17 21,2 z"
+       style="fill:none;fill-opacity:1;stroke:#fcce04;stroke-width:4.26666689;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 11.733333,1120.3862 v -16 H 2.1333333 L 17.066667,1090.5196 32,1104.3862 h -9.6 v 16 z"
        id="path2984"
        inkscape:connector-curvature="0"
-       transform="translate(0,1020.3622)"
        sodipodi:nodetypes="cccccccc" />
   </g>
 </svg>
