@@ -52,7 +52,7 @@ def unzip_uploaded_file(zip_name, appbase):
     print("Unpacking " + zip_name + "<br/>")
 
     if not zipfile.is_zipfile(zip_name):
-        return False, "Not a valid zip file"
+        return False, "Not a valid zip file", ""
 
     fh = open(zip_name, 'rb')
     z = zipfile.ZipFile(fh)
