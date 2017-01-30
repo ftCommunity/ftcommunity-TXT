@@ -236,8 +236,10 @@ class KeyDialog(TouchDialog):
     def exec_(self):
         TouchDialog.exec_(self)
         if self.confbutpressed: return self.line.text()
-        else:                   return self.strg
-      
+        else:
+            if TouchStyle_version>1.3: return self.strg 
+            else: return self.line.text()
+          
 # background thread to monitor state of interface
 class MonitorThread(QThread):
     def __init__(self):
