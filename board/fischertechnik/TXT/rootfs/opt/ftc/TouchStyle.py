@@ -4,7 +4,7 @@
 # additional functionality to communicate with the app launcher and
 # the like
 
-TouchStyle_version = 1.3
+TouchStyle_version = 1.31
 
 import struct, os, platform, socket
 from PyQt4.QtCore import *
@@ -281,7 +281,7 @@ class TouchDialog(QDialog):
             self.parent.unregister(self)
 
         super(TouchDialog, self).close()
-        if self.sender().objectName()=="confirmbut": self.confbutclicked=True
+        #if self.sender().objectName()=="confirmbut": self.confbutclicked=True
         
         # TXT windows are always fullscreen
     def exec_(self):
@@ -343,8 +343,14 @@ class TouchMessageBox(TouchDialog):
         self.text_deny=None
         self.parent=parent
         
-        self.result = ""
+        
         self.confbutclicked=False
+        self.confirm=None
+        self.result = ""
+        
+    def addConfirm(self):
+        self.confirm = self.titlebar.addConfirm()
+        self.confirm.clicked.connect(self.on_confirm)
         
     def addPixmap(self, pmap: QPixmap):
         self.pixmap=pmap
@@ -381,6 +387,10 @@ class TouchMessageBox(TouchDialog):
         self.align=2
     def alignBottom(self):
         self.align=3
+        
+    def on_confirm(self):
+        self.confbutclicked=True
+        self.close()
         
     def on_select(self):
         self.result = self.sender().text()
@@ -491,9 +501,9 @@ class TouchMessageBox(TouchDialog):
         
         TouchDialog.exec_(self)
         if self.confbutclicked==True: return True, None
-        if self.text_okay==None and self.text_deny==None: return None,None
-        elif self.result=="": return False,None
-        else: return True,self.result
+        if self.result: return True, self.result
+        if self.confirm!=None: return False, None
+        return None,None
       
         
 # simple on-screen-keyboard to be used on devices without physical
@@ -577,7 +587,8 @@ class TouchKeyboard(TouchDialog):
     def __init__(self,parent = None):
         TouchDialog.__init__(self, "Input", parent)
 
-        self.addConfirm()
+        conf=self.addConfirm()
+      
         self.setCancelButton()
         
         edit = QWidget()
@@ -630,7 +641,7 @@ class TouchKeyboard(TouchDialog):
         self.tab.tabBar().setExpanding(True);
         self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
         self.layout.addWidget(self.tab)
-
+    
     def focus(self, str, cpos):
         self.line.setText(str)
         self.line.setCursorPosition(cpos)

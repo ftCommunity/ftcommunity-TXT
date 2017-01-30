@@ -9,6 +9,11 @@ import sys, os, shlex, time
 from subprocess import Popen, call, PIPE
 from TouchStyle import *
 
+try:
+    if TouchStyle_version<1.3: TouchStyle_version=0
+except:
+    TouchStyle_version=0
+
 local = os.path.dirname(os.path.realpath(__file__)) + "/"
 
 IFACE = "wlan0"
@@ -136,8 +141,17 @@ def get_associated(_iface):
     return ""
 
 class KeyDialog(TouchDialog):
-    def __init__(self,title,str,parent):
+    def __init__(self,title,strg,parent):
         TouchDialog.__init__(self, title, parent)
+        
+        self.strg=strg
+        self.confbutpressed=False
+        
+        if TouchStyle_version >= 1.3:
+            confirmbutton = self.addConfirm()
+            confirmbutton.clicked.connect(self.on_confirmbutton)
+            self.setCancelButton()
+        
         self.caps = True
 
         self.layout = QVBoxLayout()
@@ -146,7 +160,7 @@ class KeyDialog(TouchDialog):
         edit.hbox = QHBoxLayout()
         edit.hbox.setContentsMargins(0,0,0,0)
 
-        self.line = QLineEdit(str)
+        self.line = QLineEdit(strg)
         #        self.line.setReadOnly(True)
         self.line.setAlignment(Qt.AlignCenter)
         edit.hbox.addWidget(self.line)
@@ -215,11 +229,16 @@ class KeyDialog(TouchDialog):
                 w = gl.itemAt(j).widget()
                 if keys[i][j] != "Aa":
                     w.setText(keys[i][j]);
-
+    
+    def on_confirmbutton(self):
+        self.confbutpressed=True
+        
     def exec_(self):
         TouchDialog.exec_(self)
-        return self.line.text()
-
+        print("gonewissewint")
+        if self.confbutpressed: return self.line.text()
+        else:                   return self.strg
+      
 # background thread to monitor state of interface
 class MonitorThread(QThread):
     def __init__(self):
