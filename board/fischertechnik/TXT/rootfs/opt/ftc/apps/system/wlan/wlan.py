@@ -12,7 +12,7 @@ from TouchStyle import *
 try:
     if TouchStyle_version<1.3: TouchStyle_version=0
 except:
-    TouchStyle_version=0
+    TouchStyle_version=0.0
 
 local = os.path.dirname(os.path.realpath(__file__)) + "/"
 
