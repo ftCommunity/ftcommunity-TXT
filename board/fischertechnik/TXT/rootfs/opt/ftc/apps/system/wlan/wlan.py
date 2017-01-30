@@ -235,7 +235,6 @@ class KeyDialog(TouchDialog):
         
     def exec_(self):
         TouchDialog.exec_(self)
-        print("gonewissewint")
         if self.confbutpressed: return self.line.text()
         else:                   return self.strg
       
