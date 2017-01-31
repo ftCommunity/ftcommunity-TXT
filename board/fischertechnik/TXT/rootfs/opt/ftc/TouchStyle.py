@@ -701,7 +701,7 @@ class TouchInputContext(QInputContext):
                 if i[-4:] == "-kbd":
                     return True
         except:
-            print("No linux USB subsystem accessible")    
+            pass
 
         return False
 
@@ -716,7 +716,6 @@ class TouchInputContext(QInputContext):
 
         if(event.type() == QEvent.RequestSoftwareInputPanel):
             if self.focusWidget().property("nopopup"):
-                print("ignoring keyboard widget itself")
                 return True
 
             if not self.keyboard:
@@ -734,8 +733,6 @@ class TouchInputContext(QInputContext):
             elif self.widget.inherits("QTextEdit"):
                 text = self.widget.toPlainText()
                 cpos = self.widget.textCursor().position()
-            else:
-                print("Unsupported widget:", self.widget)
 
             self.keyboard.focus(text, cpos)
 
@@ -760,10 +757,22 @@ class TouchApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
         if not TouchInputContext.keyboard_present():
-            # disabled while not finished
             self.setInputContext(TouchInputContext(self))
-            pass
+            # for some reason qtembedded does not rise the
+            # RequestSoftwareInputPanel when the widget gets focus but
+            # only on the next click onto that widget.  We thus
+            # install an event filter which fires a
+            # RequestSoftwareInputPanel event once the widget gets
+            # focus. This works better although the cursor is still at
+            # the text beginning at that moment
+            self.installEventFilter(self)
         else:
             print("Physical keyboard detected")
         TouchSetStyle(self)
 
+    def eventFilter(self, obj, event):
+        # check for focus events
+        if event.type() == event.FocusIn:
+            QApplication.sendEvent(obj, QEvent(QEvent.RequestSoftwareInputPanel))
+
+        return False
