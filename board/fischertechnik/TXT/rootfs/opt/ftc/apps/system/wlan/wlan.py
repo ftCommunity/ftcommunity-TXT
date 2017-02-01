@@ -140,106 +140,6 @@ def get_associated(_iface):
                 return line.split('=')[1]
     return ""
 
-class KeyDialog(TouchDialog):
-    def __init__(self,title,strg,parent):
-        TouchDialog.__init__(self, title, parent)
-        
-        self.strg=strg
-        self.confbutpressed=False
-        
-        if TouchStyle_version >= 1.3:
-            confirmbutton = self.addConfirm()
-            confirmbutton.clicked.connect(self.on_confirmbutton)
-            self.setCancelButton()
-        
-        self.caps = True
-
-        self.layout = QVBoxLayout()
-
-        edit = QWidget()
-        edit.hbox = QHBoxLayout()
-        edit.hbox.setContentsMargins(0,0,0,0)
-
-        self.line = QLineEdit(strg)
-        self.line.setReadOnly(True)
-        self.line.setAlignment(Qt.AlignCenter)
-        edit.hbox.addWidget(self.line)
-        but = QPushButton()
-        pix = QPixmap(local + "erase.png")
-        icn = QIcon(pix)
-        but.setIcon(icn)
-        but.setIconSize(pix.size())
-        but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding);
-        but.clicked.connect(self.key_erase)
-        edit.hbox.addWidget(but)
-
-        edit.setLayout(edit.hbox)
-        self.layout.addWidget(edit)
-
-        self.tab = QTabWidget()
-
-        for a in range(3):
-            page = QWidget()
-            page.grid = QGridLayout()
-            page.grid.setContentsMargins(0,0,0,0)
-
-            cnt = 0
-            for i in keys_upper[a]:
-                if i == "Aa":
-                    but = QPushButton()
-                    pix = QPixmap(local + "caps.png")
-                    icn = QIcon(pix)
-                    but.setIcon(icn)
-                    but.setIconSize(pix.size())
-                    but.clicked.connect(self.caps_changed)
-                else:
-                    but = QPushButton(i)
-                    but.clicked.connect(self.key_pressed)
-
-                but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                page.grid.addWidget(but,cnt/4,cnt%4)
-                cnt+=1
-
-            page.setLayout(page.grid)
-            self.tab.addTab(page, keys_tab[a])
-
-        self.tab.tabBar().setExpanding(True);
-        self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-        self.layout.addWidget(self.tab)
-
-        self.centralWidget.setLayout(self.layout)        
-
-    def key_erase(self):
-        self.line.setText(self.line.text()[:-1]) 
-
-    def key_pressed(self):
-        self.line.setText(self.line.text() + self.sender().text())
-
-        # user pressed the caps button. Exchange all button texts
-    def caps_changed(self):
-        self.caps = not self.caps
-        if self.caps:  keys = keys_upper
-        else:          keys = keys_lower
-
-        # exchange all characters
-        for i in range(self.tab.count()):
-            gw = self.tab.widget(i)
-            gl = gw.layout()
-            for j in range(gl.count()):
-                w = gl.itemAt(j).widget()
-                if keys[i][j] != "Aa":
-                    w.setText(keys[i][j]);
-    
-    def on_confirmbutton(self):
-        self.confbutpressed=True
-        
-    def exec_(self):
-        TouchDialog.exec_(self)
-        if self.confbutpressed: return self.line.text()
-        else:
-            if TouchStyle_version>1.3: return self.strg 
-            else: return self.line.text()
-          
 # background thread to monitor state of interface
 class MonitorThread(QThread):
     def __init__(self):
@@ -310,21 +210,11 @@ class FtcGuiApplication(TouchApplication):
 
         self.vbox.addStretch()
 
-        self.edit_hbox_w = QWidget()
-        self.edit_hbox = QHBoxLayout()
+        self.vbox.addWidget(QLabel(QCoreApplication.translate("Main", "Key:")))
         self.key = QLineEdit(self.encr_key)
         self.key.setPlaceholderText(QCoreApplication.translate("placeholder", "key"))
         self.key.editingFinished.connect(self.do_edit_done)
-        self.edit_hbox.addWidget(self.key)
-        self.edit_but = QPushButton()
-        pix = QPixmap(local + "edit.png")
-        icn = QIcon(pix)
-        self.edit_but.setIcon(icn)
-        self.edit_but.setIconSize(pix.size())
-        self.edit_but.clicked.connect(self.do_key)
-        self.edit_hbox.addWidget(self.edit_but)
-        self.edit_hbox_w.setLayout(self.edit_hbox)
-        self.vbox.addWidget(self.edit_hbox_w)
+        self.vbox.addWidget(self.key)
 
         # the connect button is by default disabled until
         # the user enters a key
@@ -345,6 +235,9 @@ class FtcGuiApplication(TouchApplication):
             self.set_default_encryption(self.ssids_w.currentText())
 
         self.w.centralWidget.setLayout(self.vbox)
+
+        # make sure key edit has focus
+        self.key.setFocus()
         self.w.show() 
 
         # start thread to monitor wlan0 state and connect it to
@@ -378,12 +271,8 @@ class FtcGuiApplication(TouchApplication):
         # user entered a key using a keyboard
     def do_edit_done(self):
         self.set_key(self.sender().text())
+        self.key.setFocus()
 
-        # user hit the "key edit button"
-    def do_key(self):
-        dialog = KeyDialog(QCoreApplication.translate("Main", "Key"),self.encr_key,self.w)
-        self.set_key( dialog.exec_() )
- 
     def do_connect(self):
         ssid = self.ssids_w.currentText()
         enc_type = self.encr_w.currentText()

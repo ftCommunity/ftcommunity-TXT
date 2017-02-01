@@ -4,35 +4,40 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="wlan.py" line="257"/>
+        <location filename="wlan.py" line="168"/>
         <source>WLAN</source>
         <translation>WLAN</translation>
     </message>
     <message>
-        <location filename="wlan.py" line="293"/>
+        <location filename="wlan.py" line="209"/>
         <source>Encryption:</source>
         <translation>Verschlüsselung:</translation>
     </message>
     <message>
-        <location filename="wlan.py" line="405"/>
+        <location filename="wlan.py" line="303"/>
         <source>Connect</source>
         <translation>Verbinde</translation>
     </message>
     <message>
         <location filename="wlan.py" line="374"/>
         <source>Key</source>
-        <translation>Schlüssel</translation>
+        <translation type="obsolete">Schlüssel</translation>
     </message>
     <message>
-        <location filename="wlan.py" line="402"/>
+        <location filename="wlan.py" line="300"/>
         <source>connected</source>
         <translation>verbunden</translation>
+    </message>
+    <message>
+        <location filename="wlan.py" line="216"/>
+        <source>Key:</source>
+        <translation>Schlüssel:</translation>
     </message>
 </context>
 <context>
     <name>placeholder</name>
     <message>
-        <location filename="wlan.py" line="303"/>
+        <location filename="wlan.py" line="218"/>
         <source>key</source>
         <translation>Schlüssel</translation>
     </message>
