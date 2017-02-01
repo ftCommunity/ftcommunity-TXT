@@ -757,22 +757,7 @@ class TouchApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)
         if not TouchInputContext.keyboard_present():
+            self.setAutoSipEnabled(True)
             self.setInputContext(TouchInputContext(self))
-            # for some reason qtembedded does not rise the
-            # RequestSoftwareInputPanel when the widget gets focus but
-            # only on the next click onto that widget.  We thus
-            # install an event filter which fires a
-            # RequestSoftwareInputPanel event once the widget gets
-            # focus. This works better although the cursor is still at
-            # the text beginning at that moment
-            self.installEventFilter(self)
-        else:
-            print("Physical keyboard detected")
+
         TouchSetStyle(self)
-
-    def eventFilter(self, obj, event):
-        # check for focus events
-        if event.type() == event.FocusIn:
-            QApplication.sendEvent(obj, QEvent(QEvent.RequestSoftwareInputPanel))
-
-        return False
