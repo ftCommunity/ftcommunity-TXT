@@ -1,0 +1,102 @@
+TouchAuxiliary is a python sub-module of the TouchStyle.py User interface module.
+
+It provides a set of high-level user interface functionalities to easily add interactive GUIs to TXT python programs/apps.
+
+Important: the on-screen keyboard needs some icons which are located at ../auxicons/
+They must be present for the keyboard to work.
+
+
+Contents:
+  
+class TouchAuxMultibutton(TouchDialog):
+    """ 
+        Opens up a window containing a list of items and returns the item selected by the user
+        
+        ******** function call **********
+        msg = TouchAuxMultibutton(title:str, parent:class)
+         ... some of the methods to configure
+        (succes:bool, result:str) = msg.exec_()
+        
+        with title:str       Title of the input window
+        
+        ******** methods *************
+        
+        msg.setText(text:str)           Optional text above the button list
+        msg.setButtons(items:str[])     Array of str, contains the button text ["Button one","Button two",...]
+                                        Empty intermediate cells will be interpreted as a separator bar
+        msg.leftAlignButtons()          Align the button Text to the left instead of center
+        msg.setTextSize(size:int)       Sets the font size for the message text (1..4, 1 is smallest, default is 3)
+        msg.setBtnTextSize(size:int)    Sets the font size for the button text (1..4, 1 is smallest, default is 3)
+        
+        ******** Return values **********
+        success:bool         True for user confirmed selection, False for user aborted selection
+        result:str           selected item in case of success==True or None in case of success=False
+    """
+
+class TouchAuxFTCamPhotoRequester(TouchDialog):   
+    """
+        opens up a requester window to make a photo snapshot
+        
+        *********** function call ******************
+        
+        req = TouchAuxFTCamPhotoRequester(self, title:str, width:int, height:int, button:str, parent=None)
+        img:QPixmap = req.exec_()
+        
+        title:str       title of the requester window
+        width:int       width setpoint for the image 
+        height:int      height setpoint for the image
+        button:str      text for the "photo" button
+        parent          parent class, optional, defaults to "none"
+    """
+
+class TouchAuxListRequester(TouchDialog):
+    """ 
+        Opens up a window containing a list of items and returns the item selected by the user
+        
+        ******** function call **********
+        (succes:bool, result:str) = TouchAuxListRequester(title:str, items:str[], inititem:str, button:str, parent:class)
+        
+        ******** parameters *************
+        
+        title:str       Title of the input window
+        items:str[]     Array of string contains the list of items to be displayed
+        inititem:str    Initially selected item, will also be returned in case of cancellation 
+        button:str      Text label for the confirm button, only considered for TouchStyle_version<1.3, otherwise confirm and cancel buttons will be part of the window title
+        parent:class    Parent class
+        
+        ******** Return values **********
+        success:bool         True for user confirmed selection, False for user aborted selection
+        result:str           selected item in case of success==True or inititem in case of success==False
+    """
+    
+class TouchAuxRequestInteger(TouchDialog):
+    """ 
+        Opens up a window to get a integer number input
+        
+        ******** function call **********
+        (succes:bool, result:int) = TouchAuxListRequester(title:str, message:str, initvalue:int, maxval:int, minval:int, button:str, parent:class)
+        
+        ******** parameters *************
+        
+        title:str       Title of the input window
+        message:str     text message to be displayed
+        initvalue:int   Init value for the input dial
+        maxval:int      Upper limit for the input number
+        minval:int      Lower limit for the inout number
+        button:str      Text label for the confirm button, only considered for TouchStyle_version<1.3, otherwise confirm and cancel buttons will be part of the window title
+        parent:class    Parent class
+        
+        ******** Return values **********
+        success         True for user confirmed selection, False for user aborted selection
+        result          Input value in case of success==True or initvalue in case of success==False
+    """
+
+
+class TouchAuxPicButton(QAbstractButton):
+    """
+        Provides an image button for PyQT Layouts
+        
+        button = TouchAuxPicButton(pixmap:QPixmap, parent:class=None)
+        
+        
+    """
