@@ -670,12 +670,9 @@ class TouchAuxKeyboard(TouchDialog):
         self.line.setReadOnly(True)
         self.line.setAlignment(Qt.AlignCenter)
         edit.hbox.addWidget(self.line)
-        but = QPushButton()
-        pix = QPixmap(local + "erase.png")
-        icn = QIcon(pix)
-        but.setIcon(icn)
-        but.setIconSize(pix.size())
-        but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding);
+        but = QPushButton(" ")
+        but.setObjectName("osk_erase")
+        but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         but.clicked.connect(self.key_erase)
         edit.hbox.addWidget(but)
 
@@ -693,10 +690,7 @@ class TouchAuxKeyboard(TouchDialog):
             for i in keys_upper[a]:
                 if i == "Aa":
                     but = QPushButton()
-                    pix = QPixmap(local + "caps.png")
-                    icn = QIcon(pix)
-                    but.setIcon(icn)
-                    but.setIconSize(pix.size())
+                    but.setObjectName("osk_caps")
                     but.clicked.connect(self.caps_changed)
                 else:
                     but = QPushButton(i)

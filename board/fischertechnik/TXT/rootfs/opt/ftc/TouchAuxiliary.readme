@@ -2,10 +2,6 @@ TouchAuxiliary is a python sub-module of the TouchStyle.py User interface module
 
 It provides a set of high-level user interface functionalities to easily add interactive GUIs to TXT python programs/apps.
 
-Important: the on-screen keyboard needs some icons which are located at ../auxicons/
-They must be present for the keyboard to work.
-
-
 Contents:
   
 class TouchAuxMultibutton(TouchDialog):
