@@ -555,12 +555,12 @@ class TouchAuxRequestText(TouchDialog):
         
         # the text line
         self.txline=QLineEdit()
-        self.txline.setReadOnly(True)
+        #self.txline.setReadOnly(True)
         self.txline.setText(inittext)
         self.txline.setAlignment(Qt.AlignCenter)
-        self.txline.mousePressEvent = self.gettext
+        #self.txline.mousePressEvent = self.gettext
         self.layout.addWidget(self.txline)
-        self.layout.addStretch()
+        #self.layout.addStretch()
         
         # the button
         but_okay = QPushButton(button)
@@ -572,13 +572,14 @@ class TouchAuxRequestText(TouchDialog):
             cbc.clicked.connect(self.on_cbc)
             self.setCancelButton()
         else:    
+            self.layout.addStretch()
             self.layout.addWidget(but_okay)
         
         self.centralWidget.setLayout(self.layout)    
     
-    def gettext(self,msg):
-        kbd=TouchAuxKeyboard("Input",self.txline.text(),None)
-        self.txline.setText(kbd.exec_())
+    #def gettext(self,msg):
+        #kbd=TouchAuxKeyboard("Input",self.txline.text(),None)
+        #self.txline.setText(kbd.exec_())
     
     def on_cbc(self):
        self.confbutclicked=True
@@ -649,7 +650,6 @@ class TouchAuxPicButton(QAbstractButton):
 class TouchAuxKeyboard(TouchDialog):
     def __init__(self,title,strg,parent):
         TouchDialog.__init__(self, title, parent)
-        
         self.strg=strg
         self.confbutpressed=False
         
@@ -747,5 +747,5 @@ class TouchAuxKeyboard(TouchDialog):
             else: return self.line.text()
 
 if __name__ == "__main__":
-    print("This is a python3 module containing stuff for ft TXT programming\n")
+    print("This is a python3 module containing stuff for ft TXT programming based on the TouchStyle UI\n")
 
