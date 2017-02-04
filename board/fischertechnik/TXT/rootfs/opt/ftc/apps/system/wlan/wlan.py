@@ -9,13 +9,14 @@ import sys, os, shlex, time
 from subprocess import Popen, call, PIPE
 from TouchStyle import *
 
+try:
+    if TouchStyle_version<1.3: TouchStyle_version=0
+except:
+    TouchStyle_version=0.0
+
 local = os.path.dirname(os.path.realpath(__file__)) + "/"
 
 IFACE = "wlan0"
-
-connected_ssid = ""
-
-key = ""
 
 encr = [ "OPEN", "WEP", "WPA", "WPA2" ];
 
@@ -30,8 +31,6 @@ keys_lower = [
     ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
     ["0","1","2","3","4","5","6","7","8","9","+","-","*","/","#","$" ]
 ]
-
-caps = True
 
 def run_program(rcmd):
     """
@@ -108,16 +107,15 @@ def check4dhcp(_iface):
         try:
             cmds = open(os.path.join('/proc', pid, 'cmdline'), 'rt').read().split('\0')
             if cmds[0] == "udhcpc" and _iface in cmds:
-                return int(pid)
+                return True
 
         except IOError: # proc has already terminated
             continue
-    return 0
+    return False
 
 def run_dhcp(_iface):
-    # always kill an restart udhcpd
-    pid = check4dhcp(_iface)
-    if(pid):
+    # ask udhcpc to obtain a fresh address if it's already runnung. Start it otherwise
+    if check4dhcp(_iface):
         run_program("sudo killall -SIGUSR1 udhcpc")
     else:
         run_program("sudo udhcpc -R -n -p /var/run/udhcpc.wlan0.pid -i %s" % _iface)
@@ -142,91 +140,6 @@ def get_associated(_iface):
                 return line.split('=')[1]
     return ""
 
-class KeyDialog(TouchDialog):
-    def __init__(self,title,str,parent):
-        TouchDialog.__init__(self, title, parent)
-
-        self.layout = QVBoxLayout()
-
-        edit = QWidget()
-        edit.hbox = QHBoxLayout()
-        edit.hbox.setContentsMargins(0,0,0,0)
-
-        self.line = QLineEdit(str)
-        #        self.line.setReadOnly(True)
-        self.line.setAlignment(Qt.AlignCenter)
-        edit.hbox.addWidget(self.line)
-        but = QPushButton()
-        pix = QPixmap(local + "erase.png")
-        icn = QIcon(pix)
-        but.setIcon(icn)
-        but.setIconSize(pix.size())
-        but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding);
-        but.clicked.connect(self.key_erase)
-        edit.hbox.addWidget(but)
-
-        edit.setLayout(edit.hbox)
-        self.layout.addWidget(edit)
-
-        self.tab = QTabWidget()
-
-        for a in range(3):
-            page = QWidget()
-            page.grid = QGridLayout()
-            page.grid.setContentsMargins(0,0,0,0)
-
-            cnt = 0
-            for i in keys_upper[a]:
-                if i == "Aa":
-                    but = QPushButton()
-                    pix = QPixmap(local + "caps.png")
-                    icn = QIcon(pix)
-                    but.setIcon(icn)
-                    but.setIconSize(pix.size())
-                    but.clicked.connect(self.caps_changed)
-                else:
-                    but = QPushButton(i)
-                    but.clicked.connect(self.key_pressed)
-
-                but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                page.grid.addWidget(but,cnt/4,cnt%4)
-                cnt+=1
-
-            page.setLayout(page.grid)
-            self.tab.addTab(page, keys_tab[a])
-
-        self.tab.tabBar().setExpanding(True);
-        self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-        self.layout.addWidget(self.tab)
-
-        self.centralWidget.setLayout(self.layout)        
-
-    def key_erase(self):
-        self.line.setText(self.line.text()[:-1]) 
-
-    def key_pressed(self):
-        self.line.setText(self.line.text() + self.sender().text())
-
-        # user pressed the caps button. Exchange all button texts
-    def caps_changed(self):
-        global caps
-        caps = not caps
-        if caps:  keys = keys_upper
-        else:     keys = keys_lower
-
-        # exchange all characters
-        for i in range(self.tab.count()):
-            gw = self.tab.widget(i)
-            gl = gw.layout()
-            for j in range(gl.count()):
-                w = gl.itemAt(j).widget()
-                if keys[i][j] != "Aa":
-                    w.setText(keys[i][j]);
-
-    def exec_(self):
-        TouchDialog.exec_(self)
-        return self.line.text()
-
 # background thread to monitor state of interface
 class MonitorThread(QThread):
     def __init__(self):
@@ -244,10 +157,6 @@ class MonitorThread(QThread):
     
 class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
-        global networks
-        global connected_ssid
-        global key
-
         TouchApplication.__init__(self, args)
 
         translator = QTranslator()
@@ -259,11 +168,14 @@ class FtcGuiApplication(TouchApplication):
 
         self.vbox = QVBoxLayout()
 
-        networks = []
+        self.networks = []
+        self.connected_ssid = ""
+        self.encr_key = ""
+        
         networks_dup = get_networks(IFACE)
         if networks_dup:
             # remove duplicate ssids
-            networks = []
+            self.networks = []
             if len(networks_dup) > 1:
                 for i in range(len(networks_dup)-1):
                     has_dup = False
@@ -272,18 +184,18 @@ class FtcGuiApplication(TouchApplication):
                             has_dup = True
                     if not has_dup:
                         if networks_dup[i]['ssid'] != "\\x00":
-                            networks.append(networks_dup[i])
+                            self.networks.append(networks_dup[i])
 
                 if networks_dup[-1]['ssid'] != "\\x00":
-                    networks.append(networks_dup[-1])
+                    self.networks.append(networks_dup[-1])
 
             # only one ssid returned: This sure has no duplicate
             elif len(networks_dup) > 0:
-                networks.append(networks_dup[0])
+                self.networks.append(networks_dup[0])
         
         self.ssids_w = QComboBox()
-        if networks:
-            for network in networks:
+        if self.networks:
+            for network in self.networks:
                 self.ssids_w.addItem(network['ssid'])
         self.ssids_w.activated[str].connect(self.set_default_encryption)
         self.ssids_w.setCurrentIndex(-1)
@@ -298,21 +210,11 @@ class FtcGuiApplication(TouchApplication):
 
         self.vbox.addStretch()
 
-        self.edit_hbox_w = QWidget()
-        self.edit_hbox = QHBoxLayout()
-        self.key = QLineEdit(key)
+        self.vbox.addWidget(QLabel(QCoreApplication.translate("Main", "Key:")))
+        self.key = QLineEdit(self.encr_key)
         self.key.setPlaceholderText(QCoreApplication.translate("placeholder", "key"))
         self.key.editingFinished.connect(self.do_edit_done)
-        self.edit_hbox.addWidget(self.key)
-        self.edit_but = QPushButton()
-        pix = QPixmap(local + "edit.png")
-        icn = QIcon(pix)
-        self.edit_but.setIcon(icn)
-        self.edit_but.setIconSize(pix.size())
-        self.edit_but.clicked.connect(self.do_key)
-        self.edit_hbox.addWidget(self.edit_but)
-        self.edit_hbox_w.setLayout(self.edit_hbox)
-        self.vbox.addWidget(self.edit_hbox_w)
+        self.vbox.addWidget(self.key)
 
         # the connect button is by default disabled until
         # the user enters a key
@@ -322,17 +224,20 @@ class FtcGuiApplication(TouchApplication):
         self.vbox.addWidget(self.connect)
 
         # check if a network is already connected
-        connected_ssid = get_associated(IFACE)
-        if connected_ssid != "":
-            for i in range(len(networks)):
-                if networks[i]['ssid'] == connected_ssid:
+        self.connected_ssid = get_associated(IFACE)
+        if self.connected_ssid != "":
+            for i in range(len(self.networks)):
+                if self.networks[i]['ssid'] == self.connected_ssid:
                     self.ssids_w.setCurrentIndex(i)
 
         # update gui depending on selected ssid
-        if networks and self.ssids_w.currentText() != "":
+        if self.networks and self.ssids_w.currentText() != "":
             self.set_default_encryption(self.ssids_w.currentText())
 
         self.w.centralWidget.setLayout(self.vbox)
+
+        # make sure key edit has focus
+        self.key.setFocus()
         self.w.show() 
 
         # start thread to monitor wlan0 state and connect it to
@@ -344,22 +249,20 @@ class FtcGuiApplication(TouchApplication):
         self.exec_()        
 
     def on_update_status(self, ssid):
-        global connected_ssid
-        if connected_ssid != ssid:
-            connected_ssid = ssid
+        if self.connected_ssid != ssid:
+            self.connected_ssid = ssid
             self.update_connect_button(self.ssids_w.currentText())
             if ssid != "":
                 save_config(IFACE)
                 run_dhcp(IFACE)
 
     def set_key(self, k):
-        global key
-        key = k
+        self.encr_key = k
 
         # enable connect button if key was entered
         if k != "":
             # but only if the current network isn't already connected
-            self.connect.setDisabled(connected_ssid == self.ssids_w.currentText())
+            self.connect.setDisabled(self.connected_ssid == self.ssids_w.currentText())
         else:
             self.connect.setDisabled(True)
 
@@ -368,24 +271,17 @@ class FtcGuiApplication(TouchApplication):
         # user entered a key using a keyboard
     def do_edit_done(self):
         self.set_key(self.sender().text())
+        self.key.setFocus()
 
-        # user hit the "key edit button"
-    def do_key(self):
-        global key
-        dialog = KeyDialog(QCoreApplication.translate("Main", "Key"),key,self.w)
-        self.set_key( dialog.exec_() )
- 
     def do_connect(self):
-        global networks
         ssid = self.ssids_w.currentText()
         enc_type = self.encr_w.currentText()
         enc_key = self.key.text()
         connect_to_network(IFACE, ssid, enc_type, enc_key)
 
     def set_default_encryption(self,net):
-        global networks
         # search for network is list
-        for i in networks: 
+        for i in self.networks: 
             if i['ssid'] == net:
                 if "WPA2" in i['flag']:
                     self.encr_w.setCurrentIndex(3)
@@ -398,13 +294,12 @@ class FtcGuiApplication(TouchApplication):
         self.update_connect_button(net)
 
     def update_connect_button(self,net):
-        global key
-        if net == connected_ssid:
+        if net == self.connected_ssid:
             self.connect.setText(QCoreApplication.translate("Main", "connected"))
             self.connect.setDisabled(True)
         else:
             self.connect.setText(QCoreApplication.translate("Main", "Connect"))
-            self.connect.setDisabled(key == "")
+            self.connect.setDisabled(self.encr_key == "")
 
 if __name__ == "__main__":
     FtcGuiApplication(sys.argv)
