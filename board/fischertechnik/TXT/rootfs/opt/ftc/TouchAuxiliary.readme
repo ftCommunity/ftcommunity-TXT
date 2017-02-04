@@ -109,42 +109,9 @@ class TouchAuxRequestText(TouchDialog):
     """
 
 class TouchAuxMessageBox(TouchDialog):
-    """ Versatile MessageBox for TouchUI
-        
-        msg = TouchMessageBox(title, parent)
-        (success, text) = msg.exec_()
-        
-        ********* Methods: *********
-        
-        msg.addConfirm() (only for TouchStyle_version>=1.3) confirm button at the left of the title
-        msg.setCancelButton() (only for TouchStyle_version>=1.3) changes style of the close icon to cancel icon
-        
-        msg.addPixmap(QPixmap) adds a QPixmap to be shown on top of the message text
-        msg.setPixmapBelow() places the pixmap below the text (inbetween text and buttons), defalt is above the text
-        
-        msg.setText(text) sets message text, default ist empty string
-        msg.setPosButton(pos_button_text) sets text for positive button, default is None (no button)
-        msg.setNegButton(neg_button_text) sets text for negative button, default is None (no button)
-        
-        msg.setTextSize(size) set 4- big 3 - normal (default); 2 - smaller; 1 - smallest
-        msg.setBtnTextSize(size)
-        
-        msg.alignTop() aligns message text to top of the window
-        msg.alignCenter() centers text in window (default)
-        msg.alignBottom() aligns message text to bottom of the window
-    
-        msg.buttonsVertical(bool=True) arrange buttons on top of each other (True, default) or side-by-side (False)
-        msg.buttonsHorizontal(bool=True) see above...
-        
-        Return values:
-        
-        (success, text) = msg.exec_()
-        success == True if one of the buttons or the confirm button was used
-        success == False if MessageBox was closed by its close icon (top right)
-        
-        text == None if MessageBox was closed by its close icon
-        text == pos_button_text | neg_button_text depending on which button was clicked
-    """
+
+implemented in TouchStyle:TouchMessageBox()-> pass through
+
     
 class TouchAuxPicButton(QAbstractButton):
     """
