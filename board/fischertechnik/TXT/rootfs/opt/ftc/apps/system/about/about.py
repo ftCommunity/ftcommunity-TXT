@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import sys, os
+import sys, os, ftrobopy
 from TxtStyle import *
 
 VERSION_FILE = "/etc/fw-ver.txt"
@@ -66,6 +66,9 @@ class VersionsDialog(TxtDialog):
             py_ver_str += str(sys.version_info[i])
             if(i < 2): py_ver_str += "."
         vbox.addWidget(VersionWidget("Python", py_ver_str))
+
+        # --------- ftrobopy version ----------
+        vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
 
         # --------- qt -----------
         vbox.addWidget(VersionWidget("Qt", QT_VERSION_STR))
