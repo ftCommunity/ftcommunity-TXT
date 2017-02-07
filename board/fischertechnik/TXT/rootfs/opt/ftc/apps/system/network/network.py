@@ -291,8 +291,8 @@ class SmallHighlightLabel(SmallLabel):
     clicked = pyqtSignal(int)
 
     def __init__(self, index, value, on, parent = None):
-        if value[index]: s = str(value[index])
-        else:            s = "___"
+        if value[index] != None: s = str(value[index])
+        else:                    s = "___"
 
         SmallLabel.__init__(self, s, parent)
         self.index = index
@@ -302,8 +302,8 @@ class SmallHighlightLabel(SmallLabel):
         self.clicked.emit(self.index)
 
     def set(self, s):
-        if s: self.setText(str(s))
-        else: self.setText("___")
+        if s != None: self.setText(str(s))
+        else:         self.setText("___")
 
     def highlight(self, on):
         if on:
