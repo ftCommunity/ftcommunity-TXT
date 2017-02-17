@@ -3,6 +3,7 @@
 #
 import sys, os, ftrobopy
 from TxtStyle import *
+from launcher import LauncherPlugin
 
 VERSION_FILE = "/etc/fw-ver.txt"
 
@@ -83,9 +84,9 @@ class VersionsDialog(TxtDialog):
 
         self.setCentralWidget(scroll)
         
-class FtcGuiApplication(TxtApplication):
-    def __init__(self, args):
-        TxtApplication.__init__(self, args)
+class AboutPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
@@ -93,9 +94,9 @@ class FtcGuiApplication(TxtApplication):
         self.installTranslator(translator)
         
         # create the empty main window
-        self.w = TxtWindow(QCoreApplication.translate("FtcGuiApplication","About"))
+        self.mainWindow = TxtWindow(QCoreApplication.translate("FtcGuiApplication","About"))
 
-        menu = self.w.addMenu()
+        menu = self.mainWindow.addMenu()
         menu_ver = menu.addAction(QCoreApplication.translate("FtcGuiApplication","Versions"))
         menu_ver.triggered.connect(self.show_version)
 
@@ -130,29 +131,37 @@ class FtcGuiApplication(TxtApplication):
         self.vbox.addWidget(self.c)
 
         self.vbox.addStretch()
-        self.w.centralWidget.setLayout(self.vbox)
+        self.mainWindow.centralWidget.setLayout(self.vbox)
 
-        self.w.show()
-        self.exec_()        
+        self.mainWindow.show()
  
     def show_license_gpl(self):
         dialog = LicenseDialog(QCoreApplication.translate("FtcGuiApplication", "GPL"),
-                               QCoreApplication.translate("FtcGuiApplication", "gpl.txt"), self.w)
+                               QCoreApplication.translate("FtcGuiApplication", "gpl.txt"), self.mainWindow)
         dialog.exec_()
 
     def show_license_lgpl(self):
         dialog = LicenseDialog(QCoreApplication.translate("FtcGuiApplication", "LGPL"),
-                               QCoreApplication.translate("FtcGuiApplication", "lgpl.txt"), self.w)
+                               QCoreApplication.translate("FtcGuiApplication", "lgpl.txt"), self.mainWindow)
         dialog.exec_()
 
     def show_license_mit(self):
         dialog = LicenseDialog(QCoreApplication.translate("FtcGuiApplication", "MIT"),
-                               QCoreApplication.translate("FtcGuiApplication", "mit.txt"), self.w)
+                               QCoreApplication.translate("FtcGuiApplication", "mit.txt"), self.mainWindow)
         dialog.exec_()
 
     def show_version(self):
-        dialog = VersionsDialog(QCoreApplication.translate("FtcGuiApplication", "Versions"), self.w)
+        dialog = VersionsDialog(QCoreApplication.translate("FtcGuiApplication", "Versions"), self.mainWindow)
         dialog.exec_()
-        
+
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = AboutPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return AboutPlugin(launcher)
+
