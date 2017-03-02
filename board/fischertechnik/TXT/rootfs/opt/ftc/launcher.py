@@ -1239,8 +1239,9 @@ class VerticalScrollArea(QScrollArea):
                 dist_y = self.press_event["event"].globalPos().y() - event.globalPos().y();
                 if (abs(dist_y) > 20):
                     # cancel any long press timer that may still  be runinng
-                    self.press_timer.stop()
-                    self.press_timer = None
+                    if self.press_timer:
+                        self.press_timer.stop()
+                        self.press_timer = None
                 
                     self.dragging = (event.globalPos().y(), self.verticalScrollBar().value())
 
