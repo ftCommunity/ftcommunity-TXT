@@ -3,22 +3,31 @@
 
 # launcher.py
 # TouchUI launcher application.
-# (c) 2016 by Till Harbaum
+# (c) 2016-2017 by Till Harbaum
 
 import configparser, datetime
 import sys, os, subprocess, threading
 import socketserver, select, time, locale
+import xml.etree.ElementTree as ET
 
 from TouchStyle import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtNetwork import *
 
+PLUGINS_DIR = "plugins"
+
 # PTYs are not available on windows.
 if platform.system() != 'Windows':
     import pty
 
 THEME = "default"
+
+# the following is meant to suppress unwanted clicks when scrolling
+if TXT:
+    MIN_CLICK_TIME = 0.1    # a click needs to be 100ms at least ...
+else:
+    MIN_CLICK_TIME = 0
 
 CTRL_PORT = 9000
 BUSY_TIMEOUT = 20
@@ -143,39 +152,8 @@ class ConfirmationDialog(PlainDialog):
     def on_close_timer(self):
         self.close()         # close dialog
 
-# The TXTs window title bar
-class CategoryWidget(QComboBox):
-    def __init__(self,categories, parent = None):
-        QComboBox.__init__(self, parent)
-        self.setObjectName("titlebar")
-        self.setCategories(categories)
-        self.setContentsMargins(0,0,0,0)
-
-    def setCategories(self, categories):
-        prev = self.currentText()
-
-        self.clear()
-        self.addItem(QCoreApplication.translate("Category", "All"))
-        sel_idx = 0  # default category = 0 (All)
-        for i in range(len(categories)):
-            self.addItem(categories[i])
-            if categories[i] == prev: sel_idx = i+1
-
-        # if possible reselect the same category as before
-        # "All" otherwise
-        self.setCurrentIndex(sel_idx)
-
-        # check if category has changed and emit activated signal
-        if prev != "" and self.itemText(sel_idx) != prev:
-            self.activated[str].emit(self.itemText(sel_idx))
-            return True
-        else:
-            return False
-
-# the status bar at the screens top
-PLUGINS_DIR = "plugins"
-
 class StatusPopup(QFrame):
+    # the status bar at the screens top
     def __init__(self, plugins, bar, parent=None):
         QFrame.__init__(self, parent)
         self.setObjectName("statuspopup")
@@ -269,8 +247,10 @@ class StatusBar(QWidget):
 # The TXT/RPi does not use windows. Instead we just paint custom 
 # toplevel windows fullscreen
 class TouchTopWidget(QWidget):
-    def __init__(self,parent,categories):
-        QWidget.__init__(self)
+    power_button_pressed = pyqtSignal()
+
+    def __init__(self,parent=None):
+        QWidget.__init__(self, parent)
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
@@ -296,18 +276,24 @@ class TouchTopWidget(QWidget):
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0,0,0,0)
 
-        self.category_w = CategoryWidget(categories, self.main_widget)
-        self.category_w.activated[str].connect(parent.set_category)
-        self.layout.addWidget(self.category_w)
         self.main_widget.setLayout(self.layout)
 
         self.top_layout.addWidget(self.main_widget)
 
         self.setLayout(self.top_layout)
 
-    def setCategories(self, categories):
-        return self.category_w.setCategories(categories)
-        
+        # on arm (TXT) start thread to monitor power button
+        if INPUT_EVENT_DEVICE:
+            self.buttonThread = ButtonThread()
+            self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.on_power_button )
+            self.buttonThread.start()
+
+    def on_power_button(self):
+        # only react if no app is currently running
+        if self.main_widget.isActiveWindow():
+            # try to get up one folder level
+            self.power_button_pressed.emit()
+
     def addWidget(self,w):
         self.layout.addWidget(w)
 
@@ -403,17 +389,510 @@ class BusyAnimation(QWidget):
 
         painter.end()
 
-        # a toolbutton with drop shadow
-class AppButton(QToolButton):
-    def __init__(self):
-        QToolButton.__init__(self)
+class Icon(QPixmap):
+    def __init__(self, name, parent=None):
+        QPixmap.__init__(self, os.path.join(BASE, "media", name), parent)
 
+    # let the user enter the name of a new folder
+class FolderName(TouchKeyboard):
+    def __init__(self, parent=None):
+        TouchKeyboard.__init__(self, parent)
+
+class FolderOpIcon(QToolButton):
+    def __init__(self, type, parent=None):
+        QToolButton.__init__(self, parent)
+
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setOffset(QPointF(3,3))
+        self.setGraphicsEffect(shadow)
+        
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        pix = Icon(type + ".png")
+        icon = QIcon(pix)
+        self.setIcon(icon)
+        self.setIconSize(pix.size())
+
+# ========================== the central list of objects ===========================
+
+class BaseItem(dict):
+    def __init__(self, name):
+        dict.__init__(self)
+        self["name"] = name
+
+class AppItem(dict):
+    def __init__(self, name):
+        BaseItem.__init__(self, name)
+
+    def local_path(self):
+        app_group, app_dir_name = os.path.split(self['dir'])
+        return os.path.join(os.path.basename(app_group), app_dir_name)
+
+class FolderItem(BaseItem):
+    def __init__(self, name):
+        BaseItem.__init__(self, name)
+        self["apps"] = AppList(self)  # start with an empty app list
+        self["icon"] = Icon("icon_folder.png")
+
+    def updateIcon(self):
+        self["apps"].sort()
+
+        # start with a fresh icon
+        self["icon"] = QPixmap(os.path.join(BASE, "media", "icon_folder.png"))
+
+        # and create a folder icon of the first content icon
+        painter = QPainter(self["icon"])
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+
+        # positions and size of sub icons
+        folder_grid = { 'x':3, 'y': 2 }
+        offset = { 'x':1, 'y':16 }
+        border = 2
+        spacing = 2
+        iw = int((64 - 2*border - (folder_grid['x']-1)*spacing)/folder_grid['x'])
+        ih = int((64 - 2*border - (folder_grid['y']-1)*spacing)/folder_grid['y'])
+        if ih > iw: ih = iw
+        if ih < iw: iw = ih       
+
+        sub_icons = 0
+        for app in self["apps"]:
+            # ignore all folders
+            if "exec" in app and sub_icons < (folder_grid['x'] * folder_grid['y']):
+                pos_x = offset['x'] + border + (iw+spacing) * int(sub_icons % folder_grid['x'])
+                pos_y = offset['y'] + border + (ih+spacing) * int(sub_icons / folder_grid['x'])
+
+                # add small versions of the app icon onto this
+                painter.drawPixmap(QRect(pos_x,pos_y,iw,ih), app["icon"])
+                sub_icons += 1
+ 
+class FolderUpItem(FolderItem):
+    def __init__(self, name, apps):
+        FolderItem.__init__(self, name)
+        self["up_folder"] = True   # to ignore this when searching through the app tree
+        self["apps"] = apps
+        self["icon"] = Icon("icon_folder_up.png")
+
+class AppList(list):
+    ''' an app list contains a list of icons an folders
+    and methods to work on them '''
+    def __init__(self, parent_folder = None):
+        list.__init__(self)
+        self.parent_folder = parent_folder
+
+    def dump(self):
+        for a in self:
+            if "exec" in a:        print(" " + a["name"])
+            elif "up_folder" in a: print("<" + a["name"])
+            else:                  print("+" + a["name"])
+
+    def sort(self):
+        ''' sort the current list '''
+        # return a sorted list
+        # This is actually rather tricky. Locale is being set after locading
+        # the locale file
+        list.sort(self, key=self.key_name_sort)
+
+    def key_name_sort(self, value):
+        # folders are always "in front" of apps and the "up" folder is
+        # always first
+        if "exec" in value:             c = "E"
+        elif not "up_folder" in value:  c = "D"
+        else:                           c = "C"
+        return c + locale.strxfrm(value["name"])
+
+    def append(self, item):
+        # if it's a subfolder that's being appended, then add an appropriate
+        # "up" entry to it and create the appropriate icon
+        if isinstance(item, FolderItem):
+            up_folder = FolderUpItem(item["name"], self)
+            if "category" in item:
+                up_folder["category"] = item["category"]
+
+            item["apps"].insert(0, up_folder)
+            # give FolderItem a reference to this list to allow is to move
+            # up the hierarchy
+            item["parent"] = self
+            item.updateIcon()
+
+        list.append(self, item)
+
+    def getRoot(self):
+        # check if there's a "up_folder" in this list
+        # and return the root of that
+        if "up_folder" in self[0]:
+            return self[0]["apps"].getRoot()
+
+        # otherwise this is the root
+        return self
+
+    def getPath(self):
+        # assemble current path
+        if "up_folder" in self[0]:
+            if "category" in self[0]:
+                name = "~" + self[0]["category"]
+            else:
+                # escape reserved characters
+                name = self[0]["name"]
+                name = name.replace("&", "&amp;")
+                name = name.replace("~", "&tilda;")
+                name = name.replace("/", "&slash;")
+
+            path = self[0]["apps"].getPath() + "/" + name
+        else:
+            path = ""
+
+        return path
+
+    def filename(self):
+        return os.path.join(os.path.expanduser("~"), ".launcher.xml")
+    
+        # export this whole list into an xml file
+    def export(self):
+        root = ET.Element("launcher")
+        self.export_list(ET.SubElement(root, "apps"), True, self)
+        ET.ElementTree(root).write(self.filename())    
+
+    def export_list(self, parent, is_root, apps):
+        for a in apps:
+            if "exec" in a:
+                # ignore apps on root level. This where they end up, anyway
+                if not is_root:
+                    ET.SubElement(parent, "app", path=a.local_path())
+            elif not "up_folder" in a:
+                folder = ET.SubElement(parent, "folder", name=a["name"])
+                if "category" in a:
+                    folder.set("category", a["category"])
+                self.export_list(folder, False, a["apps"])
+
+    def parse_tree(self, apps, elem, category_map):
+        for child in elem:
+            if child.tag == "folder" and "name" in child.attrib:
+                # Translate folder names if they match a category
+                folder = FolderItem(child.attrib["name"])
+                if "category" in child.attrib:
+                    if child.attrib["category"] in category_map:
+                        folder["name"] = category_map[child.attrib["category"]]
+                        folder["category"] = child.attrib["category"]
+                
+                apps.append(folder)
+                self.parse_tree(folder["apps"], child, category_map)
+                folder.updateIcon()
+            if child.tag == "app" and "path" in child.attrib:
+                # try to find app in self
+                for c in self:
+                    if "exec" in c and c.local_path() == child.attrib["path"]:
+                        apps.append(c)  # add app to folders app list
+                        self.remove(c)  # remove app from root app list
+                
+    def apply_tree(self, category_map):
+        # try to load file, just bail out if anything goes wrong
+        try:
+            tree = ET.parse(self.filename())
+        except:
+            return False
+            
+        root = tree.getroot()
+        if root.tag == "launcher":
+            for child in root:
+                if child.tag == "apps":
+                    self.parse_tree(self, child, category_map)
+        
+        return True
+
+    def getFolderList(self, folders):
+        if len(folders) == 0:
+            return self
+
+        for a in self:
+            if not "exec" in a:
+                if folders[0].startswith("~"):
+                    # search by category if that was given
+                    if "category" in a:
+                        if a["category"] == folders[0][1:]:
+                            return a["apps"].getFolderList(folders[1:])
+                else:
+                    folder = folders[0]
+                    folder = folder.replace("&slash;", "/")
+                    folder = folder.replace("&tilda;", "~")
+                    folder = folder.replace("&amp;", "&")
+
+                    # otherwise search by name
+                    if a["name"] == folder:
+                        return a["apps"].getFolderList(folders[1:])
+            
+    # folder selection dialog
+class FolderList(TouchDialog):
+    selected = pyqtSignal(object)
+
+    class FolderListWidget(QListWidget):
+        selected = pyqtSignal(object)
+
+        def __init__(self, apps, parent=None):
+            QListWidget.__init__(self, parent)
+            self.setUniformItemSizes(True)
+            self.setViewMode(QListView.ListMode)
+            self.setMovement(QListView.Static)
+            self.setIconSize(QSize(32,32))
+
+            # add all folders
+            for a in apps:
+                if not "exec" in a and not "up_folder" in a:
+                    item = QListWidgetItem(QIcon(a["icon"]), a["name"])
+                    item.setData(Qt.UserRole, a)
+                    self.addItem(item)
+
+            # react on clicks
+            self.itemClicked.connect(self.onItemClicked)
+
+        def onItemClicked(self, item):
+            self.selected.emit(item.data(Qt.UserRole))            
+
+    def __init__(self, apps, parent = None):
+        super(FolderList, self).__init__(QCoreApplication.translate("Folder", "Select"), parent)
+        self.list = self.FolderListWidget(apps, self)
+        self.list.selected.connect(self.on_selected)
+        self.setCentralWidget(self.list)
+
+    def on_selected(self, folder):
+        self.close()
+        self.selected.emit(folder)
+
+class AppPopup(QFrame):
+    refresh = pyqtSignal()
+    go_to_folder = pyqtSignal(object)
+
+    HEIGHT = 124
+    
+    def __init__(self, parent=None):
+        super(AppPopup, self).__init__(parent)
+        self.setWindowFlags(Qt.Popup)
+        self.setObjectName("popup")
+        # remove bottom/right/left borders
+        self.setStyleSheet("QFrame { border-bottom: 0; border-left: 0; border-right: 0; }");
+
+        # find root window
+        while parent and not parent.inherits("TouchTopWidget"):
+            parent = parent.parent()
+
+        # set size
+        self.resize(parent.width(), self.HEIGHT)
+
+        #
+        vbox = QVBoxLayout(self)
+        vbox.setContentsMargins(0,0,0,0)
+        vbox.setSpacing(0)
+
+        title = QLabel(self.parent().app["name"], self)
+        title.setObjectName("titlebar")
+        title.setAlignment(Qt.AlignCenter)
+        title.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        vbox.addWidget(title)
+
+        self.setLayout(vbox)
+
+        # get access to the icongrid
+        icongrid = self.parent().parent()
+
+        # add three icons
+        hbox_w = QWidget(self)
+        hbox = QHBoxLayout()
+        has_up_folder = False
+        sub_folders = 0
+        for a in icongrid.apps:
+            if "up_folder" in a:
+                has_up_folder = True
+            elif not "dir" in a:
+                sub_folders += 1
+
+        # remove only works if the current folder is not the top folder ...
+        if has_up_folder:
+            if len(icongrid.apps) > 2:
+                # ... and if there will be at least one app icon (plust the dir-up) left
+                remove = FolderOpIcon("icon_remove_from_folder", self)
+                remove.clicked.connect(self.on_remove)
+                hbox.addWidget(remove)
+            else:
+                # otherwise remove the entire folder 
+                remove_and_delete = FolderOpIcon("icon_remove_from_folder_and_delete_folder", self)
+                remove_and_delete.clicked.connect(self.on_remove_and_delete)
+                hbox.addWidget(remove_and_delete)
+
+        # can only move into existing folder if there is at least one
+        if sub_folders > 0:
+            move = FolderOpIcon("icon_move_into_folder", self)
+            move.clicked.connect(self.on_move)
+            hbox.addWidget(move)
+
+        move_new = FolderOpIcon("icon_move_into_new_folder", self)
+        move_new.clicked.connect(self.on_move_new)
+        hbox.addWidget(move_new)
+        hbox_w.setLayout(hbox)
+        vbox.addWidget(hbox_w)
+        
+        vbox.addStretch()
+        self.setLayout(vbox)
+
+        # open popup at the roots bottom
+        pos = parent.mapToGlobal(QPoint(0,parent.height()-self.height()))
+        self.move(pos)
+
+    def app_move_one_folder_up(self):
+        # parent is the appicon, parent.parent is the icongrid
+        appicon = self.parent()
+        icongrid = self.parent().parent()
+
+        # remove from current app list
+        if not icongrid.apps.parent_folder or not "parent" in icongrid.apps.parent_folder:
+            return False
+            
+        # get the parent list
+        # (it's the parent list referenced in the parent folder)
+        parent_list = icongrid.apps.parent_folder["parent"]
+        parent_list.append(appicon.app)
+
+        # update grandparents folder icon if it exists
+        if icongrid.apps.parent_folder["parent"].parent_folder:
+            icongrid.apps.parent_folder["parent"].parent_folder.updateIcon()
+            
+        # and remove it from current list
+        icongrid.apps.remove(appicon.app)
+
+        # update parent icon
+        icongrid.apps.parent_folder.updateIcon()
+
+        return True
+            
+    def on_remove(self):
+        self.close()
+
+        self.app_move_one_folder_up()
+        self.refresh.emit()
+
+    def on_remove_and_delete(self):
+        self.close()
+
+        if self.app_move_one_folder_up():
+            appicon = self.parent()
+            icongrid = self.parent().parent()
+
+            if icongrid.apps.parent_folder and "parent" in icongrid.apps.parent_folder:
+                # remove the now empty folder
+                parent_apps = icongrid.apps.parent_folder["parent"]
+                parent_apps.remove(icongrid.apps.parent_folder)
+                # go up one folder
+                self.go_to_folder.emit(parent_apps)
+
+            self.refresh.emit()        
+        
+    def on_move(self):
+        self.close()
+
+        icongrid = self.parent().parent()
+        folder_list = FolderList(icongrid.apps, self)
+        folder_list.selected.connect(self.on_move_to_folder)
+        folder_list.show()
+        folder_list.exec_()
+
+    def move_to_folder(self, folder):
+        # parent is the appicon, parent.parent is the icongrid
+        appicon = self.parent()
+        icongrid = self.parent().parent()
+
+        # add app to new folder
+        folder["apps"].append(appicon.app)
+
+        # remove app from current folder
+        icongrid.apps.remove(appicon.app)
+
+        # generate icon for new folder
+        folder.updateIcon()
+
+        # and finally sort current list so the new icon
+        # shows up in the right place
+        icongrid.apps.sort()
+
+        # the parent folder icon also may have to be redone
+        if icongrid.apps.parent_folder:
+            icongrid.apps.parent_folder.updateIcon()
+
+    def on_move_to_folder(self, folder):
+        self.move_to_folder(folder)
+        self.refresh.emit()
+        
+    def on_move_new(self):
+        self.close()
+
+        # request name of new folder from user
+        folder_name = FolderName(self)
+        folder_name.titlebar.setText(QCoreApplication.translate("Folder", "New"))
+        folder_name.text_changed.connect(self.on_new_folder)
+        folder_name.show()
+        folder_name.exec_()
+
+    def on_new_folder(self, name):
+        icongrid = self.parent().parent()
+
+        # create a new folder in the current list
+        folder = FolderItem(name)
+        # and append it to the parent dir
+        icongrid.apps.append(folder)
+
+        self.move_to_folder(folder)
+
+        # request refresh of current view since there's
+        # now a new folder
+        self.refresh.emit()
+
+        # a toolbutton with drop shadow
+class AppIcon(QToolButton):
+    refresh = pyqtSignal()
+    go_to_folder = pyqtSignal(object)
+
+    def __init__(self, app, parent=None):
+        QToolButton.__init__(self, parent)
+        self.app = app
+
+        self.setText(app["name"].replace("&", "&&"))
+
+        self.setIcon(QIcon(app["icon"]))
+        self.setIconSize(app["icon"].size())
+        self.installEventFilter(self)
+
+        # check if there's a VerticalScrollArea
+        # in the family tree ...
+        while parent and not parent.inherits("VerticalScrollArea"):
+            parent = parent.parent()
+
+        # ... and register its event filter to let it pre-filter
+        # mouse events
+        if parent:
+            self.installEventFilter(parent)
+            
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setOffset(QPointF(3,3))
         self.setGraphicsEffect(shadow)
 
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
+
+    def eventFilter(self, obj, event):
+        if event.type() == 2000:
+            # current this only doesn't do anything for folders
+            if "dir" in self.app:
+                # get all the app details from the IconGrid
+                popup = AppPopup(self)
+                popup.refresh.connect(self.on_refresh)
+                popup.go_to_folder.connect(self.on_go_to_folder)
+                popup.show()
+            
+        return False
+
+    def on_refresh(self):
+        self.refresh.emit()
+
+    def on_go_to_folder(self, apps):
+        self.go_to_folder.emit(apps)
 
         # hide shadow while icon is pressed
     def mousePressEvent(self, event):
@@ -423,146 +902,113 @@ class AppButton(QToolButton):
     def mouseReleaseEvent(self, event):
         self.graphicsEffect().setEnabled(True)
         QToolButton.mouseReleaseEvent(self,event)
-
+        
         # the main icon grid
-class IconGrid(QStackedWidget):
-    def __init__(self, apps, cat):
-        QStackedWidget.__init__(self)
+class IconGrid(QWidget):
+    launch = pyqtSignal(str)
+    open_folder = pyqtSignal(list)
+
+    def __init__(self, apps):
+        QWidget.__init__(self)
 
         self.apps = apps
-        self.current_apps = self.filterCategory(self.apps, cat)
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+
+        self.grid = QGridLayout()
+        self.grid.setSpacing(0)
+        self.grid.setContentsMargins(0,10,0,10)
+        self.setLayout(self.grid)
 
         # event to know the final size when creating
         # the icon grid
         self.installEventFilter(self)
+        self.columns = 0
 
     def eventFilter(self, obj, event):
         if event.type() == event.Resize:
-            # print("resize to", self.width(), self.height())
-            # icon grid
-            self.columns = int(self.width()/80)
-            self.rows = int(self.height()/80)
-            self.createPages()
+            if self.width() != 0 and int(self.width()/80) != self.columns:
+                # scale icon grid to use the full width
+                self.columns = int(self.width()/80)
+                self.createAppIcons()
+
+                # make sure all columns are the same width
+                w = int(self.width()/self.columns)
+                for i in range(self.columns):
+                    self.grid.setColumnMinimumWidth(i, w)
+
         return False
 
-    def createPages(self):
-        # remove all pages that might already be there
-        while self.count():
-            w = self.widget(self.count()-1)
-            self.removeWidget(w)
-            w.deleteLater()
+    def getPath(self):
+        # remove any trailing "/"
+        return self.apps.getPath().lstrip("/")
 
-        icons_per_page = self.columns * self.rows
-        page = None
+    def setPath(self, path):
+        # empty path given? Return root
+        if path == "": return self.apps.getRoot()
+        # otherwise try to set path
+        self.setApps(self.apps.getRoot().getFolderList(path.split("/")))
+
+    def createAppIcons(self):
+        # remove all existing widgets from grid
+        w = self.grid.takeAt(0)
+        while w:
+            w.widget().deleteLater()
+            w = self.grid.takeAt(0)
 
         # create pages to hold every app
-        for app in self.current_apps:
-            # create a new page if necessary
-            if not page:
-                index = 0
-
-                # create grid widget for page
-                page = QWidget()
-                grid = QGridLayout()
-                grid.setSpacing(0)
-                grid.setContentsMargins(0,0,0,0)
-                page.setLayout(grid)
-
-                # if this isn't the first page, then add a "prev" arrow
-                if self.count():
-                    but = self.createIcon(os.path.join(BASE, "prev.png"), self.do_prev)
-                    grid.addWidget(but, 0, 0, Qt.AlignCenter)
-                    index = 1
-
-            # get app details
-            app_group, app_dir_name = os.path.split(app['dir'])
-            app_group_name = os.path.basename(app_group)
-            app_local_dir = os.path.join(app_group_name, app_dir_name)
-            executable = os.path.join(app_local_dir, app['exec'])
-
-            if 'managed' in app: managed = app['managed']
-            else:                managed = "Yes"
-
-            # use icon file if one is mentioned in the manifest
-            if 'icon' in app:    iconname = os.path.join(app['dir'], app['icon'])
-            else:                iconname = os.path.join(BASE, "icon.png")
-
+        index = 0
+        for app in self.apps:
             # create a launch button for this app
-            but = self.createIcon(iconname, self.do_launch, app['name'], executable)
-            grid.addWidget(but, index/self.columns, index%self.columns, Qt.AlignCenter)
-
-            # check if this is the second last icon on page
-            # and if there are at least two more icons to be added. Then we need a
-            # "next page" arrow
-            if index == icons_per_page - 2:
-                if self.current_apps.index(app) < len(self.current_apps)-2:
-                    index = icons_per_page - 1
-                    but = self.createIcon(os.path.join(BASE, "next.png"), self.do_next)
-                    grid.addWidget(but, index/self.columns, index%self.columns, Qt.AlignCenter)
-
-            # advance position counters
+            but = AppIcon(app, self)
+            but.refresh.connect(self.on_refresh)
+            but.go_to_folder.connect(self.on_go_to_folder)
+            
+            if "exec" in app:
+                but.clicked.connect(self.do_launch)
+            else:
+                but.clicked.connect(self.do_open_folder)
+                
+            self.grid.addWidget(but, index/self.columns, index%self.columns, Qt.AlignCenter)
             index += 1
-            if index == icons_per_page:
-                self.addWidget(page)
-                page = None
-                   
-        # fill last page with empty icons
-        if page:
-            while index < icons_per_page:
-                self.addWidget(page)
-                empty = self.createIcon()
-                grid.addWidget(empty, index/self.columns, index%self.columns, Qt.AlignCenter)
-                index += 1
 
-    # handler of the "next" button
-    def do_next(self):
-        self.setCurrentIndex(self.currentIndex()+1)
+    def on_refresh(self):
+        # the item tree has changed 
 
-    # handler of the "prev" button
-    def do_prev(self):
-        self.setCurrentIndex(self.currentIndex()-1)
+        # write updated tree to disk
+        self.apps.getRoot().export()
 
-    # create an icon with label
-    def createIcon(self, iconfile=None, on_click=None, appname=None, executable=None):
-        button = AppButton()
+        # refresh the view
+        self.createAppIcons()
 
-        button.setText(appname)
-        button.setProperty("executable", executable)
+    def on_go_to_folder(self, apps):
+        self.setApps(apps)
 
-        if iconfile:
-            pix = QPixmap(iconfile)
-            button.setIcon(QIcon(pix))
-            button.setIconSize(pix.size())
-
-        if on_click:
-            button.clicked.connect(on_click)
-
-        return button
-
-        # filter all apps for the given category
-    def filterCategory(self, apps, cat):
-        if cat == QCoreApplication.translate("Category", "All"):
-            return apps
-
-        # extract all those that have a manifest file an check for
-        # current category
-        app_list = []
-        for app in apps:
-            if 'category' in app and app['category'] == cat:
-                app_list.append(app)
-
-        return app_list
-
-    def setCategory(self, cat):
-        self.current_apps = self.filterCategory(self.apps, cat)
-        self.createPages()
+    def on_power_button(self):
+        # check if we are in a sub folder
+        if "up_folder" in self.apps[0]:
+            self.setApps(self.apps[0]["apps"])
+        # TODO: Do something else when at root level
+        # like e.g. launching an app
 
     def setApps(self, apps):
-        self.apps = apps
+        if not apps: return
 
-    launch = pyqtSignal(str)
+        self.apps = apps
+        if self.columns > 0:
+            self.createAppIcons()
+
     def do_launch(self,clicked):
-        self.launch.emit(str(self.sender().property("executable")))
+        # get the executable name relative to the app dir
+        if not "dir" in self.sender().app: return
+        executable = os.path.join(self.sender().app.local_path(), self.sender().app['exec'])
+        self.launch.emit(executable)
+
+    def do_open_folder(self,clicked):
+        name = self.sender().app["name"]
+        for app in self.apps:
+            # ignore apps
+            if not "exec" in app and app["name"] == name:
+                self.open_folder.emit(app["apps"])
 
 # built-in TCP server so other programs can request a icon list refresh
 # or launch an app
@@ -634,8 +1080,215 @@ class TcpServer(QTcpServer):
 
     def socketError(self):
         pass
+
+class LauncherPlugin:
+    def __init__(self, launcher):
+        self.launcher = launcher
+        self.translators = []
+        self.mainWindow = None
+
+    def exit(self):
+        if self.mainWindow:
+            self.mainWindow.close()
+        for translator in self.translators:
+            self.launcher.removeTranslator(translator)
+
+    def installTranslator(self, translator):
+        self.launcher.installTranslator(translator)
+        self.translators.append(translator)
+
+    def isClosed(self):
+        return not (self.mainWindow and self.mainWindow.isVisible())
+    def locale(self):
+        try: return self.launcher.locale
+        except: return QLocale.system()
+
+# Adapter for running lightweight apps as launcher plugins. 
+# Implements parts of the subprocess.Popen API (poll(), kill(), returncode)
+# in order to keep changes to FtcGuiApplication as minimal as possible
+class LauncherPluginAdapter:
+    def __init__(self, launcher, module_script):
+        self.returncode = None
+        self.plugin = None
+        import importlib, re
+        module_name = re.search(BASE + "/(.+).py", module_script).group(1).replace("/", ".")
+        module = importlib.reload(importlib.import_module(module_name))
+        try:
+            self.plugin = module.createPlugin(launcher)
+        except:
+            self.returncode = -1
+
+    def poll(self):
+        # Clean up if the plugin is finished but no return code has been set yet
+        if self.returncode is None and self.plugin and self.plugin.isClosed():
+            self.kill()
+        return self.returncode
+
+    def kill(self):
+        if self.plugin:
+            self.plugin.exit()
+            self.plugin = None
+            self.returncode = 0
+
+class VerticalScrollArea(QScrollArea):
+    TIMER_HZ = 25
+
+    def __init__(self, content, parent=None):
+        QScrollArea.__init__(self, parent)
+
+        self.setWidgetResizable(True)
+        self.setFrameStyle(QFrame.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setWidget(content)
+
+        self.press_event = None
+        self.dragging = None
+        self.delayed_press = False
+        self.drag_speed = None
+        self.timer = None
+        self.release_lock = None
+
+    def eventFilter(self, obj, event):
+        # first make sure the child widget uses the full possible width
+        if event.type() == event.Resize:
+            self.widget().setMinimumWidth(self.width())
+
+        # just eat double clicks ...
+        if event.type() == event.MouseButtonDblClick:
+            return True
+
+        # we also need to catch mouse events
+        if event.type() == event.MouseButtonPress and event.button() == Qt.LeftButton:
+            # a delayed event is just passed through
+            if self.delayed_press:
+                return False
+
+            # any regular press within the release lock time is totally ignored
+            if self.release_lock:
+                return True
+            
+            self.drag_speed = None
+
+            # stop any existing drag timer
+            if self.timer:
+                self.timer.stop()
+                self.timer = None
+
+            # start a timer used to check for long presses
+            self.press_timer = QTimer(self)
+            self.press_timer.timeout.connect(self.on_press_timer)
+            self.press_timer.setSingleShot(True)
+            self.press_timer.start(1000)
+
+            # remember this event to be able to replay it later
+            self.press_event = { "time": time.time(), "obj": obj, "event": QMouseEvent( event) }
+            self.dragging = None
+
+            # don't pass this event to the target now
+            return True
+
+        if(event.type() == event.MouseButtonRelease and 
+           event.button() == Qt.LeftButton):
+
+            # cancel any press timer that may still be running
+            if self.press_timer:
+                self.press_timer.stop()
+                self.press_timer = None
+
+            self.release_lock = int(250*self.TIMER_HZ/1000)   # lock for 250ms
+            # processing of the release lock requires the timer
+            if not self.timer:
+                # start a timer that does some slow decelleration
+                self.timer = QTimer(self)
+                self.timer.timeout.connect(self.on_timer)
+                self.timer.start(1000 / self.TIMER_HZ)
+            
+            # if the user was dragging don't forward any event
+            if self.dragging:
+                self.dragging = None
+                self.press_event = None
+                return True
+
+            # check if the intercepted press event came from the same
+            # object that now receives a release event. In that case
+            # re-inject the intercepted event now
+            if self.press_event and self.press_event["obj"] == obj:
+                # the user was not dragging. But we've eaten the previous
+                # button press event and we thus need to fake the press
+                # event now
+                if time.time() - self.press_event["time"] > MIN_CLICK_TIME:
+                    self.delayed_press = True
+                    QApplication.sendEvent(self.press_event["obj"], self.press_event["event"])
+                    self.delayed_press = False
+                    self.press_event = None
+
+            return False
+
+        if event.type() == event.MouseMove and obj == self.widget() and self.press_event:
+            # we are only interested in the vertical distance
+
+            # not dragging yet? Check if user has moved the mouse far enough vertically
+            # to start dragging
+            if not self.dragging:
+                dist_y = self.press_event["event"].globalPos().y() - event.globalPos().y();
+                if (abs(dist_y) > 20):
+                    # cancel any long press timer that may still  be runinng
+                    self.press_timer.stop()
+                    self.press_timer = None
+                
+                    self.dragging = (event.globalPos().y(), self.verticalScrollBar().value())
+
+                    # restart drag timer
+                    self.last_drag_pos = None
+                    if not self.timer:
+                        # start a timer that does some slow decelleration
+                        self.timer = QTimer(self)
+                        self.timer.timeout.connect(self.on_timer)
+                        self.timer.start(1000 / self.TIMER_HZ)
+
+            if self.dragging:
+                dist_y = self.dragging[0] - event.globalPos().y();
+                self.verticalScrollBar().setValue(self.dragging[1] + dist_y)
         
-class FtcGuiApplication(TouchApplication):
+        return False
+
+    def on_press_timer(self):
+        # send custom "long press" event to the object that would have received the
+        # initial click
+        QApplication.sendEvent(self.press_event["obj"], QEvent(2000))
+   
+        # and cancel any possible future dragging and clicking
+        self.dragging = None
+        self.press_event = None
+
+    def on_timer(self):
+        if self.release_lock:
+            self.release_lock -= 1
+        
+        # measure speed while user still drags
+        if self.dragging:
+            if self.last_drag_pos:
+                self.drag_speed = self.TIMER_HZ * (self.verticalScrollBar().value() - self.last_drag_pos)
+            self.last_drag_pos = self.verticalScrollBar().value()
+        elif self.drag_speed:
+            # scroll ...
+            self.verticalScrollBar().setValue(self.verticalScrollBar().value() + int(self.drag_speed/self.TIMER_HZ))
+
+            if self.drag_speed:
+                dec = 5 * (1000/self.TIMER_HZ)
+                if self.drag_speed < -dec:
+                    self.drag_speed += dec
+                elif self.drag_speed > dec:
+                    self.drag_speed -= dec
+                else:
+                    self.drag_speed = None
+
+        if not self.dragging and not self.drag_speed and not self.release_lock:
+            self.timer.stop()
+            self.timer = None
+
+class Launcher(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
@@ -696,7 +1349,6 @@ class FtcGuiApplication(TouchApplication):
 
     # this signal is received when an app reports it
     # has been launched
-    @pyqtSlot(int)
     def on_app_running(self, pid):
         # popup may have expired in the meantime
         if self.popup:
@@ -704,7 +1356,6 @@ class FtcGuiApplication(TouchApplication):
 
     # this signal is received when app logging is to be 
     # enabled
-    @pyqtSlot(bool)
     def on_enable_logging(self, on):
         if self.log_file:
             self.log_file.write("Logging stopped at: " + datetime.datetime.now().isoformat() + "\n")
@@ -716,7 +1367,42 @@ class FtcGuiApplication(TouchApplication):
             self.log_file.write("Logging started at: " + datetime.datetime.now().isoformat() + "\n")
             self.log_file.flush()
 
+    def settings_file(self):
+        return os.path.join(os.path.expanduser("~"), ".launcher.config")
+
+    def settings_save(self):
+        config = configparser.RawConfigParser()
+        config.add_section('view')
+        config.set("view", 'path', self.icons.getPath())
+        config.set("view", "min_click_time", MIN_CLICK_TIME)
+
+        try:
+            with open(self.settings_file(), 'w') as configfile:
+                config.write(configfile)
+        except:
+            pass
+
+    def settings_load(self):
+        if not os.path.isfile(self.settings_file()):
+            return False
+
+        config = configparser.RawConfigParser()
+        config.read(self.settings_file())
+
+        # get view path 
+        if config.has_option('view', 'path'):
+            path = config.get('view', 'path')
+            self.icons.setPath(path)
+        
+            if config.has_option('view', 'min_click_time'):
+                global MIN_CLICK_TIME
+                MIN_CLICK_TIME = float(config.get("view", "min_click_time"))
+
+        return True
+
     def launch_app(self, executable, managed, name):
+        self.settings_save()
+
         if self.app_is_running():
             return
 
@@ -728,34 +1414,37 @@ class FtcGuiApplication(TouchApplication):
         # run the executable
         self.app_executable = executable
 
-        # assume that we can just launch enything under non-windows
-        if platform.system() != 'Windows':
-
-            # give app the current locale
-            locale = self.locale.name()
-            env = os.environ.copy()
-            env["LANGUAGE"] = locale
-            env["LANG"] = locale
-            env["LC_ALL"] = locale
-
-            if self.log_file:
-                self.log_file.write("Application: " + executable + "\n")
-                self.log_file.write("Application started at: " + datetime.datetime.now().isoformat() + "\n")
-                self.log_file.flush()
-                self.log_master_fd, self.log_slave_fd = pty.openpty()
-                self.app_process = subprocess.Popen(str(executable), env=env, stdout=self.log_slave_fd, stderr=self.log_slave_fd)
-
-                # start a timer to monitor the ptys
-                self.log_timer = QTimer()
-                self.log_timer.timeout.connect(self.on_log_timer)
-                self.log_timer.start(100)
-            else:
-                self.app_process = subprocess.Popen(str(executable), env=env)
+        if managed.lower() == "launcher-plugin":
+            self.app_process = LauncherPluginAdapter(self, executable)
         else:
-            # under windows assume it's a python script that is
-            # to be launched and run that with pythonw (without console)
-            os.environ['PYTHONPATH'] = BASE
-            self.app_process = subprocess.Popen( ("pythonw", str(executable)) )
+            # assume that we can just launch enything under non-windows
+            if platform.system() != 'Windows':
+
+                # give app the current locale
+                locale = self.locale.name()
+                env = os.environ.copy()
+                env["LANGUAGE"] = locale
+                env["LANG"] = locale
+                env["LC_ALL"] = locale
+
+                if self.log_file:
+                    self.log_file.write("Application: " + executable + "\n")
+                    self.log_file.write("Application started at: " + datetime.datetime.now().isoformat() + "\n")
+                    self.log_file.flush()
+                    self.log_master_fd, self.log_slave_fd = pty.openpty()
+                    self.app_process = subprocess.Popen(str(executable), env=env, stdout=self.log_slave_fd, stderr=self.log_slave_fd)
+
+                    # start a timer to monitor the ptys
+                    self.log_timer = QTimer()
+                    self.log_timer.timeout.connect(self.on_log_timer)
+                    self.log_timer.start(100)
+                else:
+                    self.app_process = subprocess.Popen(str(executable), env=env)
+            else:
+                # under windows assume it's a python script that is
+                # to be launched and run that with pythonw (without console)
+                os.environ['PYTHONPATH'] = BASE
+                self.app_process = subprocess.Popen( ("pythonw", str(executable)) )
 
         # display some busy icon
         self.popup = BusyAnimation(self.app_process, self.w)
@@ -821,34 +1510,21 @@ class FtcGuiApplication(TouchApplication):
             "model":    QCoreApplication.translate("Category", "Models"),
             "tools":    QCoreApplication.translate("Category", "Tools"),
             "tool":     QCoreApplication.translate("Category", "Tools"),
-             "demos":    QCoreApplication.translate("Category", "Demos"),
+            "demos":    QCoreApplication.translate("Category", "Demos"),
             "demo":     QCoreApplication.translate("Category", "Demos"),
             "tests":    QCoreApplication.translate("Category", "Demos"),   # deprecated "tests" category
             "test":     QCoreApplication.translate("Category", "Demos")    # deprecated "test" category
         };
 
-    @pyqtSlot()
     def on_rescan(self):
-        # re-translate categories
+        # re-translate categories as the language app may have triggered this
         self.category_setup()
 
         # rescan all apps
         self.apps = self.scan_app_dirs()
 
-        # inform icon grid about new apps list. This will not
-        # redraw anything as this will happen when the categories
-        # are updated
         self.icons.setApps(self.apps)
 
-        self.categories = self.get_categories(self.apps)
-        # set new categories
-        if not self.w.setCategories(self.categories):
-            # cathegory hasn't changed. So we need to redraw the icon 
-            # since the apps listed in the current category may have changed
-            # a refresh can be forced by setting the current category again
-            self.icons.setCategory(self.current_category)
-
-    @pyqtSlot(QTcpSocket)
     def on_get_app(self, s):
         if self.app_is_running():
             # only return the <group>/<app>/<exec> part of the path
@@ -858,7 +1534,6 @@ class FtcGuiApplication(TouchApplication):
             s.write(os.path.join(app_group_name, app_dir_name, app_exec_name))
         s.write("\n")
 
-    @pyqtSlot()
     def on_stop_app(self):
         if self.app_is_running():
             self.app_process.kill()
@@ -871,27 +1546,38 @@ class FtcGuiApplication(TouchApplication):
 
     # read a number of entries from the manifest and return them 
     # as a dictionary
-    def manifest_import(self, manifest):
+    def manifest_import(self, dir, manifest):
         entries = ( "managed", "exec", "name", "icon" );
-        appinfo = { }
+        app = AppItem("")
+        app["dir"] = dir
+
+        # load all entries from manifest
         for i in entries:
             if manifest.has_option('app', i):
-                appinfo[i] = manifest.get('app', i)
+                app[i] = manifest.get('app', i)
 
         # overwrite with locale specific values
         loc = self.locale.name().split('_')[0].strip().lower()
         for i in entries:
             if manifest.has_option(loc, i):
-                appinfo[i] = manifest.get(loc, i)
+                app[i] = manifest.get(loc, i)
 
         # the category needs special treatment as it maps 
         # onto a limited set of pre-defined categories
         if manifest.has_option('app', "category"):
-            c = manifest.get('app', "category").lower()
-            if c in self.category_map:
-                appinfo['category'] = self.category_map[c];
+            # cat_id is the untranslated lowercase name which allows us
+            # to retranslate if the user changes the language
+            app['cat_id'] = manifest.get('app', "category").lower()
+            if app['cat_id'] in self.category_map:
+                app['category'] = self.category_map[app['cat_id']];
 
-        return appinfo
+        # replace icon name by actual pixmap
+        if 'icon' in app:
+            app['icon'] = QPixmap(os.path.join(dir, app['icon']))
+        else:
+            app['icon'] = Icon("icon_app.png")
+                
+        return app
 
     # return a list of directories containing apps
     # searches under /opt/ftc/apps/<group>/<app>
@@ -903,7 +1589,7 @@ class FtcGuiApplication(TouchApplication):
         # scan for app group dirs first
         app_groups = os.listdir(app_base)
         # then scan for app dirs inside
-        app_dirs = []
+        root_applist = AppList()
         for i in app_groups:
             try:
                 app_group_dirs = os.listdir(os.path.join(app_base, i))
@@ -913,42 +1599,71 @@ class FtcGuiApplication(TouchApplication):
                     # check if there's a manifest inside that dir
                     manifestfile = os.path.join(app_dir, "manifest")
                     if os.path.isfile(manifestfile):
-                        # get app name
+                        # get app info
                         manifest = configparser.RawConfigParser()
                         manifest.read_file(open(manifestfile, "r", encoding="utf8"))
-                        appname = manifest.get('app', 'name')
 
-                        # get translated name if possible
-                        if manifest.has_option(loc, 'name'):
-                            appname = manifest.get(loc, 'name')
-
-                        appinfo = self.manifest_import(manifest) 
-                        appinfo["dir"] = os.path.join(app_base, i, a)
-
-                        app_dirs.append((appname, appinfo))
+                        app = self.manifest_import(app_dir, manifest) 
+                        root_applist.append(app)
             except:
                 pass
-                
-        # sort list by apps name
-        #app_dirs.sort(key=lambda tup: tup[0])
 
-        # This is actually rather tricky. Locale is being set after locading
-        # the locale file
-        app_dirs.sort(key=self.key_name_sort)
+        # try to apply folder hierarchy from xml file. 
+        # if no folder hierarchy exists, build one from the categories
+        # embedded in the manifests
+        if not root_applist.apply_tree(self.category_map):
+            # TODO: Move this into the AppList class
+            
+            # get categories
+            categories = { }
+            for i in root_applist:
+                if "category" in i:
+                    categories[i["category"]] = i["cat_id"]
 
-        # return a list of only the appinfo of the now sorted list
-        return ([x[1] for x in app_dirs])
+            # create a folder for each category
+            for c in categories:
+                folder = FolderItem(c)
+                folder["category"] = categories[c]
 
-    def key_name_sort(self,value):
-        return locale.strxfrm(value[0])
+                # move all apps into the category/folder
+                for app in root_applist:
+                    if "category" in app and app["category"] == c:
+                        folder["apps"].append(app)
 
-    @pyqtSlot(str)
+                # and remove them from the main app list
+                for app in folder["apps"]:
+                    if "exec" in app:
+                        root_applist.remove(app)
+
+                # append new folder to list of apps.
+                # This also prepends the "Up" folder
+                root_applist.append(folder)
+
+        root_applist.sort()
+        return root_applist
+
+    # walk through the apps tree trying to find a specific app
+    def search_app(self, apps, app_dir):
+        for app in apps:
+            # only real apps contain a "dir" entry. Folders don't
+            if "dir" in app:
+                if app["dir"] == app_dir:
+                    return app
+            else:
+                # make sure we don't follow the "Up" dir
+                if not "up_folder" in app:
+                    a = self.search_app(app["apps"], app_dir)
+                    if a: 
+                        return a
+        return None
+
     def on_launch(self, name):
         # the given name is of the form group/app/executable
         # self.apps contains all dirs of apps like /opt/ftc/apps/group/app
         # we need to match this
         app_dir = os.path.dirname(os.path.join(BASE, "apps", name))
-        app = next((app for app in self.apps if app["dir"] == app_dir), None)
+
+        app = self.search_app(self.apps, app_dir)
 
         if app and 'exec' in app:
             if 'managed' in app: managed = app['managed']
@@ -968,39 +1683,45 @@ class FtcGuiApplication(TouchApplication):
     def on_confirm(self,sock,str):
         ConfirmationDialog(sock,str).exec_()
 
-    # read the manifet files of all installed apps and scan them
-    # for their category. Generate a unique set of categories from this
-    def get_categories(self, apps):
-        categories = set()
-        for i in apps:
-            if "category" in i:
-                categories.add(i["category"])
-
-        return sorted(categories)
-
-    def set_category(self, cat):
-        if self.current_category != cat:
-            self.current_category = cat
-            self.icons.setCategory(cat)
+    def on_open_folder(self, apps):
+        self.icons.setApps(apps)
 
     def addWidgets(self):
         # scan for available apps
         self.apps = self.scan_app_dirs()
 
-        # extract category information
-        self.current_category = QCoreApplication.translate("Category", "All")
-        self.categories = self.get_categories(self.apps)
-        self.w = TouchTopWidget(self, self.categories)
+        self.w = TouchTopWidget()
 
         # create icon grid
-        self.icons = IconGrid(self.apps, self.current_category)
+        self.icons = IconGrid(self.apps)
+        self.icons.open_folder.connect(self.on_open_folder)
         self.icons.launch.connect(self.on_launch)
 
-        self.w.addWidget(self.icons);
+        # connect power button to icon grid
+        self.w.power_button_pressed.connect(self.icons.on_power_button)
+
+        # create a scrollarea for the icons
+        self.scroll = VerticalScrollArea(self.icons, self.w)
+        self.w.addWidget(self.scroll);
+
+        # try to load current settings
+        self.settings_load()
+
         self.w.show() 
  
 # Only actually do something if this script is run standalone, so we can test our 
 # application, but we're also able to import this program without actually running
 # any code.
 if __name__ == "__main__":
-    FtcGuiApplication(sys.argv)
+
+    # run websockify in the background to allow noVNC to connect to 
+    # the qt embedded built-in vnc server
+    try:
+        import _thread, websockify
+        from websockify.websocket import *
+        from websockify.websocketproxy import *
+        _thread.start_new_thread(websockify.websocketproxy.websockify_init, ())
+    except:
+        pass
+
+    Launcher(sys.argv)
