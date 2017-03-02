@@ -923,6 +923,7 @@ class IconGrid(QWidget):
         # the icon grid
         self.installEventFilter(self)
         self.columns = 0
+        self.button_app = None
 
     def eventFilter(self, obj, event):
         if event.type() == event.Resize:
@@ -937,6 +938,9 @@ class IconGrid(QWidget):
                     self.grid.setColumnMinimumWidth(i, w)
 
         return False
+
+    def setButtonApp(self, app):
+        self.button_app = app
 
     def getPath(self):
         # remove any trailing "/"
@@ -987,8 +991,9 @@ class IconGrid(QWidget):
         # check if we are in a sub folder
         if "up_folder" in self.apps[0]:
             self.setApps(self.apps[0]["apps"])
-        # TODO: Do something else when at root level
-        # like e.g. launching an app
+        elif self.button_app:
+            print("Launch", self.button_app)
+            self.launch.emit(self.button_app)
 
     def setApps(self, apps):
         if not apps: return
@@ -1376,6 +1381,12 @@ class Launcher(TouchApplication):
         config.set("view", 'path', self.icons.getPath())
         config.set("view", "min_click_time", MIN_CLICK_TIME)
 
+        # save the 'button_launch' option if it exists
+        try:
+            config.set("view", "button_launch", self.button_launch)
+        except AttributeError:
+            pass
+        
         try:
             with open(self.settings_file(), 'w') as configfile:
                 config.write(configfile)
@@ -1389,14 +1400,18 @@ class Launcher(TouchApplication):
         config = configparser.RawConfigParser()
         config.read(self.settings_file())
 
+        if config.has_option('view', 'button_launch'):
+            self.button_launch = config.get('view', 'button_launch')
+            self.icons.setButtonApp(self.button_launch)
+
         # get view path 
         if config.has_option('view', 'path'):
             path = config.get('view', 'path')
             self.icons.setPath(path)
         
-            if config.has_option('view', 'min_click_time'):
-                global MIN_CLICK_TIME
-                MIN_CLICK_TIME = float(config.get("view", "min_click_time"))
+        if config.has_option('view', 'min_click_time'):
+            global MIN_CLICK_TIME
+            MIN_CLICK_TIME = float(config.get("view", "min_click_time"))
 
         return True
 
