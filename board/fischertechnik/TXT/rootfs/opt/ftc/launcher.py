@@ -1226,7 +1226,8 @@ class VerticalScrollArea(QScrollArea):
                     self.delayed_press = True
                     QApplication.sendEvent(self.press_event["obj"], self.press_event["event"])
                     self.delayed_press = False
-                    self.press_event = None
+                    
+                self.press_event = None
 
             return False
 
