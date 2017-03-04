@@ -14,13 +14,20 @@ from PyQt4.QtGui import *
 # The TXT can be detected by the presence of /etc/fw-ver.txt
 TXT = os.path.isfile("/etc/fw-ver.txt")
 
+INPUT_EVENT_DEVICE = None
+
 if TXT:
     # TXT values
     INPUT_EVENT_DEVICE = "/dev/input/event1"
     INPUT_EVENT_CODE = 116
+else:
+    if 'TOUCHUI_BUTTON_INPUT' in os.environ:
+        (d, c) = os.environ.get('TOUCHUI_BUTTON_INPUT').split(':')
+        INPUT_EVENT_DEVICE = d
+        INPUT_EVENT_CODE = int(c)
 
-    INPUT_EVENT_FORMAT = 'llHHI'
-    INPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FORMAT)
+INPUT_EVENT_FORMAT = 'llHHI'
+INPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FORMAT)
 
 STYLE_NAME = "themes/default/style.qss"
 
@@ -127,11 +134,10 @@ class TouchBaseWidget(QWidget):
         if TXT:
             self.subdialogs = []
 
-            # on arm (TXT) start thread to monitor power button
-            if platform.machine() == "armv7l":
-                self.buttonThread = ButtonThread()
-                self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
-                self.buttonThread.start()
+        if INPUT_EVENT_DEVICE:
+            self.buttonThread = ButtonThread()
+            self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
+            self.buttonThread.start()
             
         # TXT windows are always fullscreen on arm (txt itself)
         # and windowed else (e.g. on PC)
