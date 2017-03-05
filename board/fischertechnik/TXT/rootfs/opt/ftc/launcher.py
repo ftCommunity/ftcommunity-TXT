@@ -282,11 +282,9 @@ class TouchTopWidget(QWidget):
 
         self.setLayout(self.top_layout)
 
-        # on arm (TXT) start thread to monitor power button
-        if INPUT_EVENT_DEVICE:
-            self.buttonThread = ButtonThread()
-            self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.on_power_button )
-            self.buttonThread.start()
+        # on arm (TXT), connect to the power button monitor thread
+        if BUTTON_THREAD:
+            self.connect( BUTTON_THREAD, SIGNAL("power_button_released()"), self.on_power_button )
 
     def on_power_button(self):
         # only react if no app is currently running
@@ -1086,8 +1084,9 @@ class TcpServer(QTcpServer):
     def socketError(self):
         pass
 
-class LauncherPlugin:
+class LauncherPlugin(QObject):
     def __init__(self, launcher):
+        super().__init__()
         self.launcher = launcher
         self.translators = []
         self.mainWindow = None
@@ -1104,6 +1103,7 @@ class LauncherPlugin:
 
     def isClosed(self):
         return not (self.mainWindow and self.mainWindow.isVisible())
+
     def locale(self):
         try: return self.launcher.locale
         except: return QLocale.system()
