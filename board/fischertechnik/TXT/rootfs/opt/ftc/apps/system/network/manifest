@@ -4,7 +4,7 @@ category: System
 icon: icon.png
 desc: Network information and configuration tool
 exec: network.py
-managed: yes
+managed: launcher-plugin
 uuid: 6d0ef6d4-4b22-4c1c-86fd-4959ff6ecce4
 version: 2.0
 

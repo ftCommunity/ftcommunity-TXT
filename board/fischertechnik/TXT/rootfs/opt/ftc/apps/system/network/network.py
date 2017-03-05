@@ -6,6 +6,7 @@ import sys, os, socket, array, struct, fcntl, string, platform
 import shlex, time, copy
 from subprocess import Popen, call, PIPE
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 DEFAULT="wlan0"
 INTERFACES = "/etc/network/interfaces"
@@ -660,9 +661,9 @@ class NetworkWindow(TouchWindow):
         dialog.centralWidget.setLayout(vbox)
         dialog.exec_()
 
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
@@ -671,7 +672,15 @@ class FtcGuiApplication(TouchApplication):
 
         self.w = NetworkWindow()
         self.w.show() 
-        self.exec_()        
-            
+
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)
+
