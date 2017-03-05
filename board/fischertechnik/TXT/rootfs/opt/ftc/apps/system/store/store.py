@@ -9,6 +9,7 @@ from pathlib import Path
 from PyQt4.QtNetwork import *
 
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').read_text())
 
@@ -697,28 +698,35 @@ class AppListWidget(QListWidget):
         # request launcher refresh
         self.notify_launcher()
 
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "store_"))
+        translator.load(self.locale(), os.path.join(path, "store_"))
         self.installTranslator(translator)
 
         # create the empty main window
-        self.w = TouchWindow(QCoreApplication.translate("Main", "Store"))
+        self.mainWindow = TouchWindow(QCoreApplication.translate("Main", "Store"))
 
         self.vbox = QVBoxLayout()
 
-        self.applist = AppListWidget(self.w)
+        self.applist = AppListWidget(self.mainWindow)
         self.vbox.addWidget(self.applist)
 
-        self.w.centralWidget.setLayout(self.vbox)
+        self.mainWindow.centralWidget.setLayout(self.vbox)
 
-        self.w.show()
-
-        self.exec_()
+        self.mainWindow.show()
 
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)
+
