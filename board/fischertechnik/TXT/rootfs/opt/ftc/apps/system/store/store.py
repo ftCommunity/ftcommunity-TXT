@@ -207,6 +207,7 @@ class NetworkAccessManager(QNetworkAccessManager):
                 self.networkResult.emit((False, QCoreApplication.translate("NetError", "Network error:") + " " + self.get_error(reply.error())))
         else:
             self.networkResult.emit((True, b"".join(self.messageBuffer)))
+        reply.deleteLater()
 
     def slotError(self, code):
         print("Error:", code)
@@ -225,25 +226,23 @@ class NetworkAccessManager(QNetworkAccessManager):
 
     #Append current data to the buffer every time readyRead() signal is emitted
     def slotReadData(self):
-        # += for byte array has a horrible performance
-        # self.messageBuffer += self.reply.readAll()
-        self.messageBuffer.append(self.reply.readAll())
+        self.messageBuffer.append(self.sender().readAll())
     
     def __init__(self, filename, branch=MAIN_BRANCH, ignoreNotFound=False):
         QNetworkAccessManager.__init__(self)
         self.messageBuffer = []
         url   = QUrl((URL % branch) + filename)
         req   = QNetworkRequest(url)
-        self.reply = self.get(req)
-        self.reply.ignoreSslErrors()
+        reply = self.get(req)
+        reply.ignoreSslErrors()
         self.progress_percent = -1
         self.ignoreNotFound = ignoreNotFound
 
-        self.reply.readyRead.connect(self.slotReadData)
-        self.reply.downloadProgress.connect(self.slotProgress)
-        self.reply.finished.connect(self.slotFinished)
-        self.reply.error.connect(self.slotError)
-        self.reply.sslErrors.connect(self.slotSslErrors)
+        reply.readyRead.connect(self.slotReadData)
+        reply.downloadProgress.connect(self.slotProgress)
+        reply.finished.connect(self.slotFinished)
+        reply.error.connect(self.slotError)
+        reply.sslErrors.connect(self.slotSslErrors)
 
 class PackageLoader(NetworkAccessManager):
     result = pyqtSignal(tuple)
