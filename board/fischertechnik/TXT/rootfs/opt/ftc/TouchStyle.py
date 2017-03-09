@@ -58,6 +58,12 @@ class ButtonThread(QThread):
             event = in_file.read(INPUT_EVENT_SIZE)
         return
 
+if INPUT_EVENT_DEVICE:
+    BUTTON_THREAD = ButtonThread()
+    BUTTON_THREAD.start()
+else:
+    BUTTON_THREAD = None
+
 def TouchSetStyle(self):
     # try to find style sheet and load it
     base = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -134,11 +140,9 @@ class TouchBaseWidget(QWidget):
         if TXT:
             self.subdialogs = []
 
-        if INPUT_EVENT_DEVICE:
-            self.buttonThread = ButtonThread()
-            self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
-            self.buttonThread.start()
-            
+        if BUTTON_THREAD:
+            self.connect( BUTTON_THREAD, SIGNAL("power_button_released()"), self.close )
+
         # TXT windows are always fullscreen on arm (txt itself)
         # and windowed else (e.g. on PC)
     def show(self):

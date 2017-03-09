@@ -5,7 +5,7 @@ author: Till Harbaum &lt;till@harbaum.org&gt;
 icon: icon.png
 desc: Language selection
 exec: language.py
-managed: yes
+managed: launcher-plugin
 uuid: e205398c-71c2-4d85-a814-f6fa2d4033d2
 
 [de]
