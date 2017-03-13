@@ -4,7 +4,6 @@ gems:
 languages: [ "en", "de" ]
 
 defaults:
-  -
-    path: ""
+  - path: ""
     values:
       layout: "default"
