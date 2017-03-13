@@ -1,16 +1,41 @@
 html {
-    padding-top: 32px;
     font-family: "arial";
     color: #222;
 }
 
-section {
+body > header {
+    padding-top: 10px;
+    color: white;
+    width: 90%;
+    display: block;
+    margin: auto;
+}
+
+body > header h1 {
+    font-size: 32px;
+    font-weight: bold;
+    border: 1px outset #000;
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    background: #448acc;
+    background: -moz-linear-gradient(top, #448acc 0%, #5c96cc 20%, #0c6acc 100%);
+    background: -webkit-linear-gradient(top, #448acc 0%,#5c96cc 20%,#0c6acc 100%);
+    background: linear-gradient(to bottom, #448acc 0%,#5c96cc 20%,#0c6acc 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#448acc', endColorstr='#0c6acc',GradientType=0 );
+    background-repeat: no-repeat;
+    background-attachment:fixed; 
+    box-shadow: 0 8px 8px 0 rgba(0,0,0,0.2), 0 16px 16px 0 rgba(0,0,0,0.19);
+}
+
+article {
     width: 90%;
     display: block;
     margin: 0 auto;
 }
 
-.content h1 {
+article h1 {
     color: #000;
     font-size: larger;
     font-weight: bold;
@@ -20,38 +45,15 @@ section {
     clear: both;
 }
 
-.content {
+article {
     text-align: justify;
 }
 
-.content img {
+article img {
     float: right;
     max-width: 100%;
     margin-left: 1em;
     margin-bottom: 1ex;
-}
-
-.title {
-    color: white;
-    width: 90%;
-    display: block;
-    margin: auto;
-    margin-bottom: 10px;
-    font-size: 32px;
-    font-weight: bold;
-    border: 1px outset #000;
-    padding-top: 15px;
-    padding-bottom: 15px;
-
-    background: #448acc;
-    background: -moz-linear-gradient(top, #448acc 0%, #5c96cc 20%, #0c6acc 100%);
-    background: -webkit-linear-gradient(top, #448acc 0%,#5c96cc 20%,#0c6acc 100%);
-    background: linear-gradient(to bottom, #448acc 0%,#5c96cc 20%,#0c6acc 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#448acc', endColorstr='#0c6acc',GradientType=0 );
-    background-repeat: no-repeat;
-    background-attachment:fixed; 
-
-    box-shadow: 0 8px 8px 0 rgba(0,0,0,0.2), 0 16px 16px 0 rgba(0,0,0,0.19);
 }
 
 .outline {
