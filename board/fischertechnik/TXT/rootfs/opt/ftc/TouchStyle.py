@@ -760,6 +760,8 @@ class TouchInputContext(QInputContext):
     def on_text_changed(self, str):
         if self.widget.inherits("QLineEdit"):
             self.widget.setText(str)
+            # a line edit emits the editingFinished signal when done
+            self.widget.editingFinished.emit()
         elif self.widget.inherits("QTextEdit"):
             self.widget.setText(str)
 
