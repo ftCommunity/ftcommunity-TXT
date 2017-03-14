@@ -33,38 +33,21 @@ html {
 
     main {
       nav {}
-      article {}
+      article {
+        text-align: justify;
+        width: 90%;
+        max-width: 50em;
+        display: block;
+        margin: 0 auto;
+
+        @import "markdown"
+      }
     }
 
     footer {}
   }
 }
 
-
-article {
-    text-align: justify;
-    width: 90%;
-    max-width: 50em;
-    display: block;
-    margin: 0 auto;
-}
-
-article h1 {
-    color: #000;
-    font-size: larger;
-    font-weight: bold;
-    border-bottom: 1px solid #000;
-    padding-top: 15px;
-    padding-bottom: 5px;
-    clear: both;
-}
-
-article img {
-    float: right;
-    max-width: 100%;
-    margin-left: 1em;
-    margin-bottom: 1ex;
-}
 
 .outline {
     color: black;
