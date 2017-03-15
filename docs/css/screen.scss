@@ -47,13 +47,6 @@ html {
 
         @import "markdown"
       }
-      ::after {
-        content: '\00a0'; /* &nbsp; */
-        display: block;
-        margin-top: var(--space);
-        height: 0px;
-        visibility: hidden;
-      }
     }
 
     footer {
