@@ -3,8 +3,12 @@
 html {
   font-family: "arial";
   color: #222;
+  padding: 0;
+  margin: 0;
 
   body {
+    padding: 0;
+    margin: 0;
     header {
       padding-top: 10px;
       color: white;
@@ -44,7 +48,18 @@ html {
       }
     }
 
-    footer {}
+    footer {
+      // "edit page" link
+      a {
+        display: block;
+        height: 1em;
+        width: 1em;
+        padding: 5px;
+        border-radius: 3px;
+        border-style: outset;
+        border-width: 1px;
+      }
+    }
   }
 }
 
