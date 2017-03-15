@@ -5,11 +5,17 @@ html {
   color: #222;
   padding: 0;
   margin: 0;
+  height: 100%;
 
   body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     padding: 0;
     margin: 0;
+
     header {
+      flex: none;
       padding-top: 10px;
       color: white;
       width: 90%;
@@ -28,15 +34,25 @@ html {
     }
 
     main {
+      flex: 1 0 auto;
+      padding: var(--space) var(--space) 0;
+      width: 100%;
+
       nav {}
       article {
         text-align: justify;
         width: 90%;
         max-width: 50em;
-        display: block;
         margin: 0 auto;
 
         @import "markdown"
+      }
+      ::after {
+        content: '\00a0'; /* &nbsp; */
+        display: block;
+        margin-top: var(--space);
+        height: 0px;
+        visibility: hidden;
       }
     }
 
@@ -47,13 +63,14 @@ html {
       margin: auto;
       margin-bottom: 16px;
       text-align: right;
+      flex: none;
 
       // "edit page" link
       a {
         height: 1em;
         width: 1em;
         display: inline-block;
-        padding: 5px;
+        padding: .25em;
         border-radius: 5px;
         border-style: outset;
         border-width: 1px;
