@@ -75,6 +75,18 @@ html {
   box-shadow: 0 8px 8px 0 rgba(0,0,0,0.2), 0 16px 16px 0 rgba(0,0,0,0.19);
 }
 
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1),
+only screen and (        min-device-pixel-ratio: 2),
+only screen and (                min-resolution: 192dpi),
+only screen and (                min-resolution: 2dppx) {
+  footer a, .icon {
+    font-size: 2rem;
+  }
+}
+
 .outline {
     color: black;
     font-weight: bold;
@@ -100,4 +112,5 @@ html {
     padding: 0px;
     margin: 0px;
     padding-bottom: 0px;
+    height: 1em;
 }
