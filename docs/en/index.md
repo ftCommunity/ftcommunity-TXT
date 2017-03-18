@@ -9,7 +9,7 @@ And best of all: You don't even have to open or modify your TXT for this because
 
 You need:
 * your [**fischertechnik TXT**](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/)
-* a micro sd card with at least 2GB capacity
+* a micro sd card with 2 to 32GB capacity
 
 The installation happens in four simple steps:
 
