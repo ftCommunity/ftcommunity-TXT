@@ -195,6 +195,7 @@ class TouchAuxFTCamPhotoRequester(TouchDialog):
     
     def on_photo(self):
         self.img=self.cw.getPhoto() 
+        self.cw.closeCam()
         self.close()
         
     def exec_(self):
@@ -259,7 +260,9 @@ class TouchAuxCamWidget(QWidget):
 
     def heightForWidth(self,w):
         return w*3/4
-        
+    
+    def closeCam(self):
+        self.cap.release()    
     
     def grab(self):
         self.frame = self.cap.read()[1]
