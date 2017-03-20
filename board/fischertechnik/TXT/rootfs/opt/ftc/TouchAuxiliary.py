@@ -185,7 +185,8 @@ class TouchAuxFTCamPhotoRequester(TouchDialog):
         znap.clicked.connect(self.on_photo)
         vbox.addWidget(znap)
         
-        self.centralWidget.setLayout(vbox) 
+        self.centralWidget.setLayout(vbox)
+        self.titlebar.close.clicked.connect(self.cw.closeCam)
     
     def on_zoom_in(self):
         self.cw.setZoom(True)
