@@ -14,13 +14,20 @@ from PyQt4.QtGui import *
 # The TXT can be detected by the presence of /etc/fw-ver.txt
 TXT = os.path.isfile("/etc/fw-ver.txt")
 
+INPUT_EVENT_DEVICE = None
+
 if TXT:
     # TXT values
     INPUT_EVENT_DEVICE = "/dev/input/event1"
     INPUT_EVENT_CODE = 116
+else:
+    if 'TOUCHUI_BUTTON_INPUT' in os.environ:
+        (d, c) = os.environ.get('TOUCHUI_BUTTON_INPUT').split(':')
+        INPUT_EVENT_DEVICE = d
+        INPUT_EVENT_CODE = int(c)
 
-    INPUT_EVENT_FORMAT = 'llHHI'
-    INPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FORMAT)
+INPUT_EVENT_FORMAT = 'llHHI'
+INPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FORMAT)
 
 STYLE_NAME = "themes/default/style.qss"
 
@@ -50,6 +57,12 @@ class ButtonThread(QThread):
                 self.emit( SIGNAL('power_button_released()'))   
             event = in_file.read(INPUT_EVENT_SIZE)
         return
+
+if INPUT_EVENT_DEVICE:
+    BUTTON_THREAD = ButtonThread()
+    BUTTON_THREAD.start()
+else:
+    BUTTON_THREAD = None
 
 def TouchSetStyle(self):
     # try to find style sheet and load it
@@ -127,12 +140,9 @@ class TouchBaseWidget(QWidget):
         if TXT:
             self.subdialogs = []
 
-            # on arm (TXT) start thread to monitor power button
-            if platform.machine() == "armv7l":
-                self.buttonThread = ButtonThread()
-                self.connect( self.buttonThread, SIGNAL("power_button_released()"), self.close )
-                self.buttonThread.start()
-            
+        if BUTTON_THREAD:
+            self.connect( BUTTON_THREAD, SIGNAL("power_button_released()"), self.close )
+
         # TXT windows are always fullscreen on arm (txt itself)
         # and windowed else (e.g. on PC)
     def show(self):
@@ -750,6 +760,8 @@ class TouchInputContext(QInputContext):
     def on_text_changed(self, str):
         if self.widget.inherits("QLineEdit"):
             self.widget.setText(str)
+            # a line edit emits the editingFinished signal when done
+            self.widget.editingFinished.emit()
         elif self.widget.inherits("QTextEdit"):
             self.widget.setText(str)
 

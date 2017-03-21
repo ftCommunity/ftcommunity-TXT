@@ -185,7 +185,8 @@ class TouchAuxFTCamPhotoRequester(TouchDialog):
         znap.clicked.connect(self.on_photo)
         vbox.addWidget(znap)
         
-        self.centralWidget.setLayout(vbox) 
+        self.centralWidget.setLayout(vbox)
+        self.titlebar.close.clicked.connect(self.cw.closeCam)
     
     def on_zoom_in(self):
         self.cw.setZoom(True)
@@ -195,6 +196,7 @@ class TouchAuxFTCamPhotoRequester(TouchDialog):
     
     def on_photo(self):
         self.img=self.cw.getPhoto() 
+        self.cw.closeCam()
         self.close()
         
     def exec_(self):
@@ -259,7 +261,9 @@ class TouchAuxCamWidget(QWidget):
 
     def heightForWidth(self,w):
         return w*3/4
-        
+    
+    def closeCam(self):
+        self.cap.release()    
     
     def grab(self):
         self.frame = self.cap.read()[1]

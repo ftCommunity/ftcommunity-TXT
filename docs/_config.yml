@@ -1,0 +1,9 @@
+gems:
+  - jekyll-optional-front-matter
+
+languages: [ "en", "de" ]
+
+defaults:
+  - path: ""
+    values:
+      layout: "default"

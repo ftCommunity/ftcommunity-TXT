@@ -1,0 +1,32 @@
+// (S)CSS rules for the rendered markdown content
+h1 {
+    color: #000;
+    font-size: larger;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    clear: both;
+}
+
+img {
+    display: block;
+    float: left;
+    max-width: 30%;
+    margin-right: 1em;
+    margin-left: 0;
+    clear: right;
+    &.left {}
+    &.right {
+      float: right;
+      margin-left: 1em;
+      margin-right: 0;
+    }
+    &:first-child:last-child, &.center {
+      clear: both;
+      float: none;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+}

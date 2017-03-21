@@ -8,6 +8,7 @@
 import sys, os, shlex, time
 from subprocess import Popen, call, PIPE
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 try:
     if TouchStyle_version<1.3: TouchStyle_version=0
@@ -146,25 +147,51 @@ class MonitorThread(QThread):
         QThread.__init__(self)
 
     def __del__(self):
-        self.wait()
- 
+        self.stop()
+
     def run(self):
-        while True:
-            time.sleep(5)  # poll every 5 seconds
-            status = get_associated(IFACE)
-            self.emit( SIGNAL('update_status(QString)'), status )   
-        return
-    
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+        self.timer = QTimer()
+        self.timer.connect( self.timer, SIGNAL("timeout()"), self.on_timer_tick )
+        self.timer.start(5000) # Poll every 5 seconds
+        self.exec_()
+
+    def on_timer_tick(self):
+        status = get_associated(IFACE)
+        self.emit( SIGNAL('update_status(QString)'), status )   
+
+    def stop(self):
+        print("Stopping network monitor thread...")
+        self.timer.stop()
+        self.quit()
+        self.wait()
+        print("... network monitor thread stopped")
+
+class WlanWindow(TouchWindow):
+    def __init__(self, app, str):
+        super().__init__(str)
+        self.monitorThread = MonitorThread()
+        self.connect( self.monitorThread, SIGNAL("update_status(QString)"), app.on_update_status )
+
+    def show(self):
+        super().show()
+        # start thread to monitor wlan0 state and connect it to
+        # slot to receive events
+        self.monitorThread.start()
+
+    def close(self):
+        self.monitorThread.stop()
+        super().close()
+
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "wlan_"))
+        translator.load(self.locale(), os.path.join(path, "wlan_"))
         self.installTranslator(translator)
 
-        self.w = TouchWindow(QCoreApplication.translate("Main", "WLAN"))
+        self.mainWindow = WlanWindow(self, QCoreApplication.translate("Main", "WLAN"))
 
         self.vbox = QVBoxLayout()
 
@@ -234,19 +261,11 @@ class FtcGuiApplication(TouchApplication):
         if self.networks and self.ssids_w.currentText() != "":
             self.set_default_encryption(self.ssids_w.currentText())
 
-        self.w.centralWidget.setLayout(self.vbox)
+        self.mainWindow.centralWidget.setLayout(self.vbox)
 
         # make sure key edit has focus
         self.key.setFocus()
-        self.w.show() 
-
-        # start thread to monitor wlan0 state and connect it to
-        # slot to receive events
-        self.monitorThread = MonitorThread()
-        self.w.connect( self.monitorThread, SIGNAL("update_status(QString)"), self.on_update_status )
-        self.monitorThread.start()
-
-        self.exec_()        
+        self.mainWindow.show()
 
     def on_update_status(self, ssid):
         if self.connected_ssid != ssid:
@@ -302,4 +321,13 @@ class FtcGuiApplication(TouchApplication):
             self.connect.setDisabled(self.encr_key == "")
 
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)
+
