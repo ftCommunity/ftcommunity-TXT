@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 TARGET=$1
 # copy additional rootfs contents
 echo "Adding additional rootfs content ..."
@@ -22,8 +22,8 @@ rm -f "$TARGET/etc/init.d/S93-am335x-pm-firmware-load"
 GIT_VERSION=$(git describe --tags --match='v*' 2>/dev/null)
 if [ -n "$GIT_VERSION" ] ; then
   BASE_VERSION=$(cat board/fischertechnik/TXT/rootfs/etc/fw-ver.txt)
-  if [ "v$BASE_VERSION" = "${GIT_VERSION%%-*}" ] ; then
-    echo "${BASE_VERSION}+${GIT_VERSION#*-}" > $TARGET/etc/fw-ver.txt
+  if [[ "${GIT_VERSION}" == "v${BASE_VERSION}"* ]] ; then
+    echo "${GIT_VERSION}" > $TARGET/etc/fw-ver.txt
   elif [ "${BASE_VERSION#*-}" = "rc" ]; then
     echo "${BASE_VERSION}+${GIT_VERSION}" > $TARGET/etc/fw-ver.txt
   else
