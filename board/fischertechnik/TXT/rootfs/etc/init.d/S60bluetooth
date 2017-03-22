@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# Start/stop bluetooth....
+#
+
+ENABLE_FLAG=/etc/bluetooth/enabled
+
+case "$1" in
+  start)
+	printf "Starting bluetooth: "
+        if [ -f $ENABLE_FLAG ]; then
+	    uim &
+	    modprobe btwilink
+	    bluetoothd
+	    hciconfig hci0 up piscan
+	    echo "OK"
+	else
+	    echo "SERVICE DISABLED"
+	fi
+	;;
+  stop)
+        printf "Stopping bluetooth: "
+        if [ -f $ENABLE_FLAG ]; then
+	    hciconfig hci0 down
+	    killall bluetoothd
+	    killall uim
+	    rmmod btwilink
+	    echo "OK"
+	else
+	    echo "SERVICE DISABLED"
+	fi
+	;;
+  enable)
+        printf "Enabling bluetooth: "
+	touch $ENABLE_FLAG
+	echo "OK"
+	"$0" start
+	;;
+  disable)
+	"$0" stop
+        printf "Disabling bluetooth: "
+	rm -f $ENABLE_FLAG
+	echo "OK"
+	;;
+  restart|reload)
+	"$0" stop
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+
