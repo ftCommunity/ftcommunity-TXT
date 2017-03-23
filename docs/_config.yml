@@ -1,5 +1,7 @@
 gems:
   - jekyll-optional-front-matter
+  - jekyll-relative-links
+  - jekyll-titles-from-headings
 
 languages: [ "en", "de" ]
 
