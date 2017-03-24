@@ -23,7 +23,7 @@ GIT_VERSION=$(git describe --tags --match='v*' 2>/dev/null)
 if [ -n "$GIT_VERSION" ] ; then
   BASE_VERSION=$(cat board/fischertechnik/TXT/rootfs/etc/fw-ver.txt)
   if [[ "${GIT_VERSION}" == "v${BASE_VERSION}"* ]] ; then
-    echo "${GIT_VERSION}" > $TARGET/etc/fw-ver.txt
+    echo "${GIT_VERSION#v}" > $TARGET/etc/fw-ver.txt
   elif [ "${BASE_VERSION#*-}" = "rc" ]; then
     echo "${BASE_VERSION}+${GIT_VERSION}" > $TARGET/etc/fw-ver.txt
   else
