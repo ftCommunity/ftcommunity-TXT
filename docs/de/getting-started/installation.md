@@ -1,13 +1,13 @@
 ---
 title: Installation
 ---
-### Voraussetzungen
+# Voraussetzungen
 
 * Eine MicroSD-Karte (microSD oder microSDHC, d.h. bis 32GB. Größere Karten werden vom TXT unter Umständen nicht erkannt). Die Größe ist nicht so wichtig (die Community-Firmware braucht weniger als 100MB), d.h. sogar eine Karte mit 1GB hat mehr als genug Platz.
 
 * Eine Möglichkeit, ZIP-Dateien auf der MikroSD-Karte auszupacken.
 
-### Installation
+# Installation
 
 1. Zunächst musst Du die Standardfirmware des TXT auf Version 4.2.4 upgraden &mdash; das geht mit RoboPro. Die aktuelle Version von RoboPro findest Du hier: http://www.fischertechnik.de/ResourceImage.aspx?raid=10274
 

@@ -1,7 +1,7 @@
 ---
 title: Einführung GUI
 ---
-### Community-Firmware benutzen
+# Community-Firmware benutzen
 
 Nach dem Start siehst Du den Hauptbildschirm der Community-Firmware mit seinen runden App-Icons:
 
@@ -27,7 +27,7 @@ Mit dem "x" rechts in der Titelzeile oder mit einem kurzen Druck (eine Sekunde o
 
 Ein längerer Druck (zwei Sekunden oder mehr) auf den "ON/OFF"-Schalter fährt den TXT herunter und schaltet ihn ab.
 
-### Verbindung mit einem WLAN
+# Verbindung mit einem WLAN
 
 Mit der "WiFi"-App kannst Du den TXT mit einem bestehenden WLAN-Netzwerk verbinden.
 
@@ -35,7 +35,7 @@ Die Netzwerkeinstellungen werden auf der SD-Karte gespeichert, und der TXT verbi
 
 Eine bestehende WLAN-Verbindung wird durch ein kleines WLAN-Signal in der Statusleiste des Hauptbildschirms angezeigt.
 
-### Zugriff auf das Web-Interface
+# Zugriff auf das Web-Interface
 
 Die Community-Firmware stellt ein Web-Interface zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf das Web-Interface zuzugreifen, gibst Du `http://<ip-addresse>` in die Addresszeile des Browsers ein. Dabei ist `<ip-addresse>` die IP-Adresse Deines TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Hauptbildschirms antippst.
 
