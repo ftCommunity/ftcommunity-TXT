@@ -1,3 +1,7 @@
+---
+title: ROBOPro
+nav-pos: 3
+---
 ### ROBOPro mit der Community-Firmware verwenden.
 
 Mit der "FT-GUI"-App kannst Du aus der Community-Firmware die originale

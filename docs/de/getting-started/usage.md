@@ -1,3 +1,6 @@
+---
+title: Einführung GUI
+---
 ### Community-Firmware benutzen
 
 Nach dem Start siehst Du den Hauptbildschirm der Community-Firmware mit seinen runden App-Icons:

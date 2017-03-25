@@ -1,3 +1,6 @@
+---
+title: Installation
+---
 ### Voraussetzungen
 
 * Eine MicroSD-Karte (microSD oder microSDHC, d.h. bis 32GB. Größere Karten werden vom TXT unter Umständen nicht erkannt). Die Größe ist nicht so wichtig (die Community-Firmware braucht weniger als 100MB), d.h. sogar eine Karte mit 1GB hat mehr als genug Platz.
