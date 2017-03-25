@@ -61,7 +61,7 @@ if ! [ $(wc -c < "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
   echo "validate update failed" >&2
   exit 20
 fi
-
+exit 0
 echo "backing up current system..."
 if ! mkdir -p "${BACKUPDIR}" || \
    ! mv "${BOOTDIR}/uImage" "${BOOTDIR}/am335x-kno_txt.dtb" "${BOOTDIR}/rootfs.img" "${BACKUPDIR}" 1>&2; \
