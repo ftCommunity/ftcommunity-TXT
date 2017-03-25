@@ -7,3 +7,6 @@ language:
 maintained_by:
   en: "maintained by the fischertechnik community"
   de: "erstellt von der fischertechnik community"
+home:
+  de: "Startseite"
+  en: "Home"

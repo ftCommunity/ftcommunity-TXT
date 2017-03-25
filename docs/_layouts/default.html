@@ -3,7 +3,7 @@
   <head>
     <title>fischertechnik TXT community firmware</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="../css/screen.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{site.baseurl}}/css/screen.css" type="text/css" media="screen" />
   </head>
   <body lang="{{ lang }}">
     {% capture lang %}{{ page.url | slice: 1, 2 }}{% endcapture %}
@@ -18,8 +18,8 @@
       <nav>
         <ul>
           {% for l in site.languages %}
-            {% capture svg %}{{ l }}.svg{% endcapture %}
-            <li><a title="{{ label.language[l] }}" href="../{{l}}/{{path}}">{% include {{svg}} %}</a></li>
+            {% assign svg = l | append: ".svg" %}
+            <li><a title="{{ label.language[l] }}" href="{{site.baseurl}}/{{l}}/{{path}}">{% include {{svg}} %}</a></li>
           {% endfor %}
         </ul>
       </nav>
@@ -27,6 +27,10 @@
 
     <main>
       <nav>
+        <ul>
+          <li><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>
+          {% include navigation.html %}
+        </ul>
       </nav>
 
       <article>
