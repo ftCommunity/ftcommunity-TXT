@@ -18,6 +18,8 @@ html {
       flex: none;
       color: white;
       display: block;
+      $fork-icon-bg-color: #e47600;
+      @import "fork-me-on-github";
 
       h1 {
           @extend %header-and-footer;
