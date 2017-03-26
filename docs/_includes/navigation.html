@@ -43,7 +43,7 @@
         {% endunless %}
       {% endfor %}
     {% endunless %}
-    <li {% if current_url contains section %}class='active'{% endif %}>
+    <li {% if current_url contains section %}class='active{% if current_url == section %} current{% endif %}'{% endif %}>
       <a href="{{ target_page.url | relative_url }}">
         {{ target_page.title | default: target_page.url }}
         {% if fallback %}

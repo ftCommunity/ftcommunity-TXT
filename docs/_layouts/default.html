@@ -28,7 +28,7 @@
     <main>
       <nav>
         <ul>
-          <li><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>
+          <li{% if path == "" %} class="active current" {% endif %}><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>
           {% include navigation.html %}
         </ul>
       </nav>
