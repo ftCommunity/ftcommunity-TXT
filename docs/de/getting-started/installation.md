@@ -1,5 +1,5 @@
 ---
-title: Installation
+nav-title: Installation
 ---
 # Voraussetzungen
 

@@ -1,5 +1,5 @@
 ---
-title: ROBOPro
+nav-title: ROBOPro
 nav-pos: 3
 ---
 # ROBOPro mit der Community-Firmware verwenden.

@@ -45,7 +45,7 @@
     {% endunless %}
     <li {% if current_url contains section %}class='active{% if current_url == section %} current{% endif %}'{% endif %}>
       <a href="{{ target_page.url | relative_url }}">
-        {{ target_page.title | default: target_page.url }}
+        {{ target_page.nav-title | default: target_page.title | default: target_page.url }}
         {% if fallback %}
           {% include {{ fallback | append: ".svg"}} %}
         {% endif %}

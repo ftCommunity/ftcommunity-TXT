@@ -1,5 +1,5 @@
 ---
-title: Einführung GUI
+nav-title: Einführung GUI
 ---
 # Community-Firmware benutzen
 
