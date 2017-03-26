@@ -9,11 +9,13 @@
     {% capture lang %}{{ page.url | slice: 1, 2 }}{% endcapture %}
     {% capture path %}{{ page.url | slice: 4, 100000 }}{% endcapture %}
     {% assign label = site.data.label %}
-    <header class="fork-me-wrapper">
-      <div class="fork-me">
-        <a class="fork-me-link" href="https://github.com/ftCommunity/ftcommunity-TXT">
-          <span class="fork-me-text">Fork me on GitHub</span>
-        </a>
+    <header>
+      <div class="fork-me-wrapper">
+        <div class="fork-me">
+          <a class="fork-me-link" href="https://github.com/ftCommunity/ftcommunity-TXT">
+            <span class="fork-me-text">Fork me on GitHub</span>
+          </a>
+        </div>
       </div>
       <h1>
         <div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div>
