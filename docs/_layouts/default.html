@@ -19,19 +19,17 @@
         <div class="outline"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></div>
         community firmware
       </h1>
+    </header>
+
+    <main>
       <nav>
-        <ul>
+        <ul id="language-nav">
           {% for l in site.languages %}
             {% assign svg = l | append: ".svg" %}
             <li><a title="{{ label.language[l] }}" href="{{site.baseurl}}/{{l}}/{{path}}">{% include {{svg}} %}</a></li>
           {% endfor %}
         </ul>
-      </nav>
-    </header>
-
-    <main>
-      <nav>
-        <ul>
+        <ul id="page-nav">
           <li{% if path == "" %} class="active current" {% endif %}><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>
           {% include navigation.html %}
         </ul>

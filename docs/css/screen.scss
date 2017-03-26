@@ -31,14 +31,25 @@ html {
           padding-bottom: 15px;
           margin-bottom: 10px;
       }
+    }
+
+    main {
+      flex: 1 0 auto;
+      padding: var(--space) var(--space) 0;
+      display: flex;
+      flex-direction: row;
+
       nav {
+        margin-top: 0.5em;
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+        flex: 1 0 auto;
+
         ul {
           list-style-type: none;
           padding: 0;
-          margin-top: 0.5em;
-          margin-right: 0.5em;
-          text-align: right;
-          li {
+          margin: 0;
+          &#language-nav li {
             display: inline-block;
             margin-left: .25em;
             a {
@@ -54,20 +65,14 @@ html {
           }
         }
       }
-    }
-
-    main {
-      flex: 1 0 auto;
-      padding: var(--space) var(--space) 0;
-
-      nav {}
       article {
+        flex: 2 0 auto;
         text-align: justify;
         width: 90%;
         max-width: 50em;
         margin: 0 auto;
 
-        @import "markdown"
+        @import "markdown";
       }
     }
 
