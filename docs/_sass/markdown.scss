@@ -1,6 +1,10 @@
 // (S)CSS rules for the rendered markdown content
 
 @import "syntax-highlighting-github";
+.highlight {
+  padding: 1.5em;
+  background: #eee;
+}
 
 h1 {
     color: #000;
