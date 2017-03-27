@@ -43,7 +43,7 @@
         {% endunless %}
       {% endfor %}
     {% endunless %}
-    <li {% if current_url contains section %}class='active{% if current_url == section %} current{% endif %}'{% endif %}>
+    <li class="level-{{level}}{% if current_url contains section %} active{% endif %}{% if current_url == section %} current{% endif %}">
       <a href="{{ target_page.url | relative_url }}">
         {{ target_page.nav-title | default: target_page.title | default: target_page.url }}
         {% if fallback %}
@@ -54,6 +54,7 @@
         {% assign sublevel = level | plus: 1 %}
         {% assign subprefix = section | slice: 1, 1000 %}
         {% include navigation.html prefix=subprefix level=sublevel tag="ul" %}
+        {% assign level = include.level | default: 1 %}
       {% endif %}
     </li>
   {% endfor %}
