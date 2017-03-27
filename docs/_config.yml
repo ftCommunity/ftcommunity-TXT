@@ -3,6 +3,10 @@ gems:
   - jekyll-relative-links
   - jekyll-titles-from-headings
 
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
 languages: [ "en", "de" ]
 
 defaults:

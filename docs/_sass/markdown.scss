@@ -1,4 +1,7 @@
 // (S)CSS rules for the rendered markdown content
+
+@import "syntax-highlighting-github";
+
 h1 {
     color: #000;
     font-size: larger;
