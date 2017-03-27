@@ -32,7 +32,9 @@
           {% endfor %}
         </ul>
         <ul id="page-nav">
-          <li{% if path == "" %} class="active current" {% endif %}><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>
+          <li class="level-1{% if path == "" %} active current{% endif %}">
+            <a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a>
+          </li>
           {% include navigation.html %}
         </ul>
       </nav>
