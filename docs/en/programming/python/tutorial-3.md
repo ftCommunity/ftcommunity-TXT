@@ -5,8 +5,8 @@ nav-title: Controlling A Model
 
 Warning: This tutorial is outdated and needs to be updated!
 
-The previous tutorials have show how to get started with an app ([[Tutorial 1: The first app]]) and how to ease development
-([[Tutorial 2: Development]]). This part will show how to interact with a model.
+The previous tutorials have show how to get started with an app ([Programming Python: The First App](tutorial-1.md)) and how to ease development
+([Programming Python: Development](tutorial-2.md)). This part will show how to interact with a model.
 
 The code for this tutorial can be found in the [apps repository](https://github.com/ftCommunity/ftcommunity-apps/tree/master/packages/app_tutorial_3).
 
@@ -297,7 +297,7 @@ With this app the lamp will change state whenever you press the button on screen
 
 # Running the app on a PC
 
-TXT apps can also be run on a PC as explained in [[Tutorial 2: Development]]. This is even possible with an app like this making use of the TXTs inputs and outputs. The ftrobopy module was actually written for this use case. All you need to do is to put the `ftcobopy.py` file to the same location where you placed the `TxtStyle.py` in the first Tutorial.
+TXT apps can also be run on a PC as explained in [Programming Python: Development](tutorial-2.md). This is even possible with an app like this making use of the TXTs inputs and outputs. The ftrobopy module was actually written for this use case. All you need to do is to put the `ftcobopy.py` file to the same location where you placed the `TxtStyle.py` in the first Tutorial.
 
 Now we only need to tell the app to connect from the PC to the TXT to control its IOs. In order to do so replace this line in your program:
 

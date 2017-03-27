@@ -5,7 +5,7 @@ nav-title: Development
 
 Warning: This tutorial is outdated and needs to be updated!
 
-[[Tutorial 1: The first app]] introduced a basic first app. The whole development cycle used the standard way to upload the app to the TXT via the Web interface. Unfortunately this way of developing an app is not very convenient. This tutorial will present some useful shortcuts to speed development up.
+[Programming Python: The First App](tutorial-1.md) introduced a basic first app. The whole development cycle used the standard way to upload the app to the TXT via the Web interface. Unfortunately this way of developing an app is not very convenient. This tutorial will present some useful shortcuts to speed development up.
 
 # App update via SSH
 

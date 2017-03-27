@@ -168,4 +168,4 @@ Selecting it shows some of the details from the manifest file:
 
 The app can also be deleted from there.
 
-Continue reading [[Tutorial 2: Development]]
+Continue reading [Programming Python: Development](tutorial-2.md)
