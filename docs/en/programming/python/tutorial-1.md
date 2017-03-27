@@ -1,8 +1,9 @@
-# Fischertechnik TXT Community Firmware
+---
+nav-title: The First App
+---
+# Programming in Python: The First App
 
 Warning: This tutorial is outdated and needs to be updated!
-
-## Tutorial #1: The first app
 
 This tutorial is meant to give a basic introduction on how an application
 for the Community Firmware of the Fischertechnik TXT controller is being
@@ -24,7 +25,7 @@ An app consists of at least three files:
  * A icon. This should be a 64x64 pixel PNG file which is being used
    in the launcher as well as the web interface.
 
-### The application program
+## The application program
 
 The application program can be any script or binary the TXT is able to
 execute. Since apps are usually started from the TXTs launcher on the
@@ -62,7 +63,7 @@ TxtStyle. It creates a window labeled "Test", shows that window and
 hands over execution to the window so it can interact with the user
 until it's closed.
 
-### The manifest
+## The manifest
 
 The manifest file is a simple text file containing various fields
 describing the app.

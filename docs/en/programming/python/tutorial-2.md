@@ -1,11 +1,13 @@
-# Fischertechnik TXT Community Firmware
+---
+nav-title: Development
+---
+# Programming in Python: Development
 
 Warning: This tutorial is outdated and needs to be updated!
 
-## Tutorial #2: Development
 [[Tutorial 1: The first app]] introduced a basic first app. The whole development cycle used the standard way to upload the app to the TXT via the Web interface. Unfortunately this way of developing an app is not very convenient. This tutorial will present some useful shortcuts to speed development up.
 
-## App update via SSH
+# App update via SSH
 
 During development usually only single files are being changed and it's not necessary to remove and re-install the entire app on the TXT during the develoment phase. Instead single files can be uploaded to the TXT via SSH.
 
@@ -21,7 +23,7 @@ You can now start your updated app on the TXT using the launcher.
 
 Currently the root password of the TXT is `root`. Later the root login will probably be disabled by default. We'll then provide information how to activate it.
 
-## Starting apps via SSH
+# Starting apps via SSH
 
 When apps are being started using the launcher no debug output and no error message are visible. This may be a problem during development. You can launch apps when being logged in into the TXT via SSH (preferrably as user "ftc"). In order to start the test app log into the TXT via SSH first. Then type:
 
@@ -34,7 +36,7 @@ Again the path is derived from the UUID in the manifest file of your app.
 
 You'll then see the error messages and debug output on the remote shell.
 
-## Start/stop apps via telnet/netcat
+# Start/stop apps via telnet/netcat
 
 SSH is not the only way to start apps remotely. The TXTs launcher implements a little command server to start and stop apps. This has been added to be used via the web interface but can also be used with tools like telnet or netcat.
 
@@ -42,13 +44,13 @@ Connect to the TXT via telnet on port 9000 using the command `telnet 192.168.0.1
 
 The same can be achived with netcat. E.g. `echo "stop-app" | nc 192.168.0.12 9000` will stop the currently running app.
 
-## Running TXT apps on the PC
+# Running TXT apps on the PC
 
 Using the TXT for development still isn't very convenient. Fortunately TXT apps can be run an a PC. Currently all TXT apps are based on the [Python](https://www.python.org/) language and the [Qt Framework](http://www.qt.io/). The combination of both is named [PyQt](https://riverbankcomputing.com/software/pyqt/intro). PyQt comes pre-installed with the TXT community firmware. When running TXT apps on a PC PyQt has to be installed in the PC.
 
 Another approach to integrate Python with Qt is named `PySide`. We are not using PySide on the TXT. But PyQt and PySide are quite similar and it may possible to run TXT apps under PySide with minimal modifications. But this has not been tested.
 
-### Using a Linux PC
+## Using a Linux PC
 
 PyQt is available for all major linux distributions. Use your favorite package managager and search for a package named `pyqt` or `python-qt` or similar. Install this on your PC.
 
@@ -83,7 +85,7 @@ You might notice that the Apps don't look 100% the same. One reason is a differe
 
 Small font rendering differences on TXT (left) and PC (right)
 
-### Using a Windows PC (by LK)
+## Using a Windows PC (by LK)
 
 On all Versions which python supports is it possible to develop and test applications for the
 TXT.

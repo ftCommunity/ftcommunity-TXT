@@ -1,15 +1,16 @@
-# Fischertechnik TXT Community Firmware
+---
+nav-title: Controlling A Model
+---
+# Programming in Python: Controlling A Model
 
 Warning: This tutorial is outdated and needs to be updated!
-
-## Tutorial #3: Controlling a model
 
 The previous tutorials have show how to get started with an app ([[Tutorial 1: The first app]]) and how to ease development
 ([[Tutorial 2: Development]]). This part will show how to interact with a model.
 
 The code for this tutorial can be found in the [apps repository](https://github.com/ftCommunity/ftcommunity-apps/tree/master/packages/app_tutorial_3).
 
-### Including the necessary libraries
+## Including the necessary libraries
 
 The community firmware already ships with the [ftrobopy module](https://github.com/ftrobopy/ftrobopy) which provides python bindings to interface to the Fischertechnik specific input and output connectors on the TXT. These can easily be included into the application started in Tutorial #1:
 
@@ -56,7 +57,7 @@ We use a QLabel for the output of the error message. You can learn more about th
 
 The expamples from the tutorial don't exacly match what we are doing here since they are meant to run on a regular PC and don't use the TXT styled windows. Most of the differences are limited to the main application and the main window. When it comes to the usage of widgets only very few differences exist. E.g. the QLabel itself works the same on the PC and on the TXT.
 
-### Controlling an output
+## Controlling an output
 
 Of course we want our little app to do something special. So please connect a light to O1 on your TXT. You can use the "Pedestrian Lights" model from the [ROBOTICS TXT Discovery Set](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-307/usetemplate-2_column_pano/).
 
@@ -191,7 +192,7 @@ if __name__ == "__main__":
 This app finally allows you to switch the lamp on and off by setting the PWN values to 512 (on) and 0 (off). We've added a handler that is called whenever the user clicks the button. To make the txt variable available to all member functions it was made a member of the class by prepending "self.". There are also tutorials that explaing the the self keyword and [Pythons object oriented approach in general](http://www.tutorialspoint.com/python/python_classes_objects.htm).
 
 
-### Reading an input
+## Reading an input
 
 Now that we can control one of the outputs we of course also want to read an input. Please connect a push button to to I1.
 
@@ -294,7 +295,7 @@ With this app the lamp will change state whenever you press the button on screen
 
 ![](tut3_img1.png)
 
-## Running the app on a PC
+# Running the app on a PC
 
 TXT apps can also be run on a PC as explained in [[Tutorial 2: Development]]. This is even possible with an app like this making use of the TXTs inputs and outputs. The ftrobopy module was actually written for this use case. All you need to do is to put the `ftcobopy.py` file to the same location where you placed the `TxtStyle.py` in the first Tutorial.
 
