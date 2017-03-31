@@ -11,7 +11,7 @@ from PyQt4.QtNetwork import *
 from TouchStyle import *
 from launcher import LauncherPlugin
 
-FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').read_text())
+FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
 
 # url of the "app store"
 URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/packages/"
