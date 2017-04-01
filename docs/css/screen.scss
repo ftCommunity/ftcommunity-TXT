@@ -18,14 +18,17 @@ html {
       flex: none;
       color: white;
       display: block;
-      $fork-icon-bg-color: #448acc;
+      $fork-icon-bg-color: rgba(0,0,0,0);
       $fork-banner-bg-color: #e47600;
       @import "fork-me-on-github";
+
+      #nav-toggle-icon {
+        display: none;
+      }
 
       h1 {
           @extend %header-and-footer;
           border-bottom: 1px outset #000;
-          font-size: 32px;
           font-weight: bold;
           text-align: center;
           padding-top: 15px;
@@ -128,7 +131,6 @@ html {
 
       a.maintained-by {
         padding: .25em;
-        display: inline-block;
         color: white;
         margin-left: auto;
         margin-right: auto;
@@ -160,8 +162,8 @@ only screen and (     -o-min-device-pixel-ratio: 2/1),
 only screen and (        min-device-pixel-ratio: 2),
 only screen and (                min-resolution: 192dpi),
 only screen and (                min-resolution: 2dppx) {
-  footer a, #language-nav {
-    font-size: 2rem;
+  header {
+    font-size: 75%;
   }
 }
 
