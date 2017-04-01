@@ -14,6 +14,11 @@ layout: postprocess-kramdown
     {% capture path %}{{ page.url | slice: 4, 100000 }}{% endcapture %}
     {% assign label = site.data.label %}
     <header>
+      <div id="nav-toggle-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+          <path d="M0 0v1h8v-1h-8zm0 2.97v1h8v-1h-8zm0 3v1h8v-1h-8z" transform="translate(0 1)" />
+        </svg>
+      </div>
       <div class="fork-me-wrapper">
         <div class="fork-me">
           <a class="fork-me-link" href="https://github.com/ftCommunity/ftcommunity-TXT">
@@ -28,7 +33,16 @@ layout: postprocess-kramdown
     </header>
 
     <main>
-      <nav>
+      <nav id="navigation">
+        <script type="text/javascript">
+          var navicon = document.getElementById("nav-toggle-icon");
+          var navigation = document.getElementById("navigation");
+          navicon.classList.add("visible");
+          navigation.classList.add("flyout");
+          navicon.addEventListener("click", function() {
+            document.getElementById("navigation").classList.toggle("visible");
+          });
+        </script>
         <ul id="language-nav">
           {% for l in site.languages %}
             {% assign svg = l | append: ".svg" %}

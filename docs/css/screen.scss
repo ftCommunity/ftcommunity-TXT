@@ -1,5 +1,9 @@
 ---
 ---
+$fork-icon-x-position: 5px;
+$fork-icon-y-position: 5px;
+$fork-icon-width: 42px;
+$fork-icon-height: 42px;
 html {
   font-family: "arial";
   color: #222;
@@ -39,25 +43,20 @@ html {
 
     main {
       flex: 1 0 auto;
-      padding: var(--space) var(--space) 0;
-      margin-top: 0.5em;
-      margin-left: 0.5em;
-      margin-right: 0.5em;
       display: flex;
       flex-direction: row;
 
       nav {
-        flex: 0 1 auto;
-
+        flex: 0 0 auto;
+        padding: 0.5em;
+        width: 12em;
         ul {
           list-style-type: none;
           padding: 0;
           margin: 0;
-          margin-right: 0.5em;
-          width: 12em;
+          width: 100%;
           &#language-nav li {
             display: inline-block;
-            margin-right: .25em;
             a {
               display: block;
               padding: 0;
@@ -73,7 +72,6 @@ html {
             white-space: nowrap;
             padding-top: 0.25em;
             padding-bottom: 0.25em;
-            margin-right: 1.5em;
             &::before {
               content: "\00a0";
               width: 0.25em;
@@ -118,6 +116,7 @@ html {
         width: 90%;
         max-width: 50em;
         margin: 0 auto;
+        padding: 0.5em;
 
         @import "markdown";
       }
@@ -155,15 +154,49 @@ html {
   padding: .5em;
 }
 
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (   min--moz-device-pixel-ratio: 2),
-only screen and (     -o-min-device-pixel-ratio: 2/1),
-only screen and (        min-device-pixel-ratio: 2),
-only screen and (                min-resolution: 192dpi),
-only screen and (                min-resolution: 2dppx) {
-  header {
-    font-size: 75%;
+@media all and (max-width: 40em) {
+  html {
+    body {
+      header {
+        h1 {
+          font-size: 100%;
+        }
+        #nav-toggle-icon.visible {
+            // use the same positioning as the "fork me" icon, only at the left
+            top: $fork-icon-y-position;
+            left: $fork-icon-x-position;
+            display: block;
+            position: absolute;
+            cursor: pointer;
+            padding: 0.25em;
+            svg {
+              width: 1.5em;
+              height: 1.5em;;
+              fill: white;
+            }
+        }
+      }
+
+      main {
+        display: block;
+        nav, article {
+          display: block;
+          width: 95%;
+          position: relative;
+        }
+        nav.flyout {
+          display: none;
+          position: absolute;
+          &.visible {
+            display: block;
+            position: absolute;
+            background-color: #fcfcfc;
+            width: 12em;
+            z-index: 9999;
+          }
+        }
+      }
+    }
   }
 }
 
