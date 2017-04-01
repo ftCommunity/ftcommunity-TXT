@@ -7,6 +7,7 @@
 # Processing:
 # * convert <p><img ... /></p> to <figure><img ... /></figure> and add a
 #   <figcaption> if the image contains a "title" attribute
+layout: compress
 ---
 {% assign tmp = content | split: "<article>" %}
 {% assign prefix = tmp[0] %}
