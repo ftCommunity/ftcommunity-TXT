@@ -33,21 +33,31 @@ h3, h4, h5, h6 {
 img {
     display: block;
     float: left;
+    clear: left;
     max-width: 30%;
     margin-right: 1em;
     margin-left: 0;
-    clear: right;
     &.left {}
     &.right {
       float: right;
+      clear: right;
       margin-left: 1em;
       margin-right: 0;
     }
-    &:first-child:last-child, &.center {
-      clear: both;
-      float: none;
-      max-width: 100%;
-      margin-left: auto;
-      margin-right: auto;
-    }
+}
+
+figure {
+  display: block;
+  clear: both;
+  max-width: 100%;
+  img {
+    float: none;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  figcaption {
+    display: block;
+    text-align: center;
+  }
 }
