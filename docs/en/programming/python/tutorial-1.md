@@ -1,5 +1,6 @@
 ---
 nav-title: The First App
+nav-pos: 1
 ---
 # Programming in Python: The First App
 

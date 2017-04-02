@@ -1,5 +1,6 @@
 ---
 nav-title: Controlling A Model
+nav-pos: 3
 ---
 # Programming in Python: Controlling A Model
 
