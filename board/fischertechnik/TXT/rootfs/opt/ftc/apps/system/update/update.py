@@ -16,10 +16,10 @@ from pathlib import Path
 update_log = "/tmp/update_log.log"
 update_exit = "/tmp/update_exit"
 release_api_url = "https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases"
+fw_ver_file = '/etc/fw-ver.txt'
 
 
 class UpdateCheckThread(QThread):
-
     new_line = pyqtSignal(str)
     error = pyqtSignal(str)
 
@@ -101,19 +101,19 @@ class ErrorDialog(TouchDialog):
     def __init__(self, parent, err):
         if err != "0":
             print("Error: " + err)
-            err_codes = {"20": "Download validation failed!",
-                         "30": "Backup failed!",
-                         "40": "Installation failed!"}
+            err_codes = {"20": QCoreApplication.translate("ErrorCodes", "Download validation failed!"),
+                         "30": QCoreApplication.translate("ErrorCodes", "Backup failed!"),
+                         "40": QCoreApplication.translate("ErrorCodes", "Installation failed!")}
             if err in err_codes:
                 error = err_codes[err]
             else:
-                error = "Unknown Error"
+                error = QCoreApplication.translate("ErrorCodes", "Unknown Error!")
             error = error + "\nCode " + err
-            title = "Error"
+            title = QCoreApplication.translate("ErrorDialog", "Error")
             self.reboot = False
         else:
-            error = "TXT will reboot soon!"
-            title = "Finished"
+            error = QCoreApplication.translate("ErrorDialog", "TXT will reboot soon!")
+            title = QCoreApplication.translate("ErrorDialog", "Finished")
             self.reboot = True
 
         TouchDialog.__init__(self, title, parent)
@@ -126,7 +126,7 @@ class ErrorDialog(TouchDialog):
         vbox.addWidget(lbl)
         vbox.addStretch()
         self.centralWidget.setLayout(vbox)
-        QTimer.singleShot(1, self.do_reboot)
+        #QTimer.singleShot(1, self.do_reboot)
 
     def do_reboot(self):
         if self.reboot:
@@ -147,14 +147,17 @@ class ProgressDialog(PlainDialog):
         self.thread.error.connect(self.error)
 
         self.vbox = QVBoxLayout()
-        title = QLabel("Progress")
+        self.vbox.addStretch()
+        title = QLabel(QCoreApplication.translate("ProgressDialog", "Progress"))
         title.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(title)
-        self.init_label = QLabel("Initializing Update")
+        self.init_label = QLabel(QCoreApplication.translate("ProgressDialog", "Initializing Update"))
+        self.init_label.setWordWrap(True)
         self.init_label.setAlignment(Qt.AlignCenter)
         self.vbox.addWidget(self.init_label)
+        self.vbox.addStretch()
         self.setLayout(self.vbox)
-        QTimer.singleShot(2, self.start)
+        start_timer = QTimer.singleShot(2000, self.start)
         self.check_timer = QTimer()
         self.check_timer.timeout.connect(self.checker)
 
@@ -180,22 +183,22 @@ class ProgressDialog(PlainDialog):
 
     def buildUI(self):
         self.init_label.setParent(None)
-        self.preparation_widget = EntryWidget("Preparation")
-        self.preparation_widget.setText("Pending")
+        self.preparation_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Preparation"))
+        self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.preparation_widget)
-        self.download_widget = EntryWidget("Download")
-        self.download_widget.setText("Pending")
+        self.download_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Download"))
+        self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.download_widget)
-        self.backup_widget = EntryWidget("Backup")
-        self.backup_widget.setText("Pending")
+        self.backup_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Backup"))
+        self.backup_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.backup_widget)
-        self.extract_widget = EntryWidget("Install")
-        self.extract_widget.setText("Pending")
+        self.extract_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Installation"))
+        self.extract_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.extract_widget)
 
     def checker(self):
         if self.state == "download":
-            self.preparation_widget.setText("OK")
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
             try:
                 current_size = os.stat("/tmp/update-" + self.ver + "/ftcommunity-txt-" + self.ver + ".zip").st_size
             except:
@@ -204,12 +207,12 @@ class ProgressDialog(PlainDialog):
             self.download_widget.setText(str("{0:.1f}".format(percentage) + "%"))
 
         elif self.state == "validation":
-            self.preparation_widget.setText("OK")
-            self.download_widget.setText("Validating...")
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
+            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Validating..."))
 
         elif self.state == "backup":
-            self.preparation_widget.setText("OK")
-            self.download_widget.setText("OK")
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
+            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
             count = 0
             base = "/media/sdcard/boot/"
             if not os.path.isfile(base + "am335x-kno_txt.dtb"):
@@ -221,9 +224,9 @@ class ProgressDialog(PlainDialog):
             self.backup_widget.setText({0: "0%", 1: "33%", 2: "67%", 3: "100%"}[count])
 
         elif self.state == "install":
-            self.preparation_widget.setText("OK")
-            self.download_widget.setText("OK")
-            self.backup_widget.setText("OK")
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
+            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
+            self.backup_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
             if self.zip_sizes == {}:
                 zip_file = zipfile.ZipFile("/tmp/update-" + self.ver + "/ftcommunity-txt-" + self.ver + ".zip")
                 for c_file in zip_file.infolist():
@@ -258,18 +261,36 @@ class UpdateListWidget(QListWidget):
     def __init__(self, releases, parent=None):
         super(UpdateListWidget, self).__init__(parent)
 
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
+        lcl = Path(fw_ver_file).read_text().replace('v', '').strip()
+
         id_list = []
         for r in releases:
             id_list.append(r["id"])
+
+        mark = ""
+        for r in releases:
+            if r["tag_name"].replace("v", "") == lcl:
+                mark = r["tag_name"].replace("v", "")
 
         id_list = reversed(sorted(id_list))
 
         for ID in id_list:
             release = self.getReleaseByID(id_list, releases, ID)
+            name = release["tag_name"]
+            try:
+                if "snapshot" in name:
+                    name = "snapshot" + name.split("snapshot-")[1]
+            except:
+                pass
+            item = QListWidgetItem(name)
+            if mark == release["tag_name"].replace("v", ""):
+                item.setBackground(Qt.green)
             if release["prerelease"]:
-                item = QListWidgetItem(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)),"prerelease.png")),release["tag_name"])
+                item.setIcon(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "prerelease.png")))
             else:
-                item= QListWidgetItem(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)),"stable.png")),release["tag_name"])
+                item.setIcon(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "stable.png")))
             item.setData(Qt.UserRole, (release))
             self.addItem(item)
         self.itemClicked.connect(self.onItemClicked)
@@ -284,18 +305,24 @@ class UpdateListWidget(QListWidget):
                 return(r)
         return(None)
 
+
 class TouchGuiApplication(TouchApplication):
 
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
+        translator = QTranslator()
+        path = os.path.dirname(os.path.realpath(__file__))
+        translator.load(QLocale.system(), os.path.join(path, "update_"))
+        self.installTranslator(translator)
+
         # create the empty main window
-        self.w = TouchWindow("Update")
+        self.w = TouchWindow(QCoreApplication.translate("TouchGuiApplication", "Update"))
         self.dialog = None
         self.update_version = ""
 
         self.vbox = QVBoxLayout()
-        self.lbl = QLabel("Searching for updates")
+        self.lbl = QLabel(QCoreApplication.translate("TouchGuiApplication", "Searching for updates"))
         self.lbl.setWordWrap(True)
         self.vbox.addWidget(self.lbl)
         self.but = QPushButton("Update")
@@ -312,7 +339,7 @@ class TouchGuiApplication(TouchApplication):
             if ver == None:
                 ver = self.update_version
             ver = ver.replace('v', '')
-            print("updating to :" + ver)
+            print("updating to: " + ver)
             self.dialog = ProgressDialog(self.w, ver)
             self.dialog.exec_()
             self.w.close()
@@ -334,29 +361,42 @@ class TouchGuiApplication(TouchApplication):
         return(str(ver.major) + "." + str(ver.minor) + "." + str(ver.patch))
 
     def checkUpdate(self):
-        lcl_ver = semantic_version.Version(Path('x/etc/fw-ver.txt').read_text().replace('v', ''))
-        if len(lcl_ver.build) > 0:
-            if "snapshot" in lcl_ver.build[0]:
-                self.lbl.setParent(None)
-                self.but.setParent(None)
-                raw_data = urllib.request.urlopen(release_api_url).read().decode()
-                all_releases = json.loads(raw_data)
-                self.update_list = UpdateListWidget(all_releases)
-                self.update_list.update.connect(self.start)
-                self.vbox.addWidget(self.update_list)
-                return
+        lcl_ver = semantic_version.Version(Path(fw_ver_file).read_text().replace('v', ''))
+        snapshot = False
+        if len(lcl_ver.prerelease) > 1:
+            if "snapshot" in lcl_ver.prerelease[1]:
+                print("SNAPSHOT DETECTED!")
+                snapshot = True
+        if "install-snapshot" in sys.argv:
+            print("SNAPSHOTS TEPORARY ENABLED BY ARGUMENT!")
+            snapshot = True
+        if snapshot:
+            self.lbl.setParent(None)
+            self.but.setParent(None)
+            raw_data = urllib.request.urlopen(release_api_url).read().decode()
+            all_releases = json.loads(raw_data)
+
+            self.info_text = QLabel(QCoreApplication.translate("TouchGuiApplication", "Select one release of the list below:"))
+            self.info_text.setWordWrap(True)
+            self.vbox.addWidget(self.info_text)
+
+            self.update_list = UpdateListWidget(all_releases)
+            self.update_list.update.connect(self.start)
+            self.vbox.addWidget(self.update_list)
+            return
+
         release = self.getLatestRelease()
         if release == None:
-            self.lbl.setText('Error while checking for updates!\nPlease try again later!\nYou are currently using ' + self.to_str(lcl_ver))
+            self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "Error while checking for updates!\nPlease try again later!\nYou are currently using " + self.to_str(lcl_ver)))
             return
         release_ver = semantic_version.Version(release['tag_name'].replace('v', ''))
 
         if lcl_ver < release_ver:
             self.update_version = self.to_str(release_ver)
-            self.lbl.setText('An update to ' + self.update_version + ' is avaible. To Installl press "Update".\nYou are currently using ' + self.to_str(lcl_ver))
+            self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", 'An update to ' + self.update_version + ' is avaible. To Installl press "Update".\nYou are currently using ' + self.to_str(lcl_ver)))
             self.but.setDisabled(False)
         else:
-            self.lbl.setText("No new verion found!\nYou are currently using " + self.to_str(lcl_ver))
+            self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "No new verion found!\nYou are currently using " + self.to_str(lcl_ver)))
 
 
 if __name__ == "__main__":

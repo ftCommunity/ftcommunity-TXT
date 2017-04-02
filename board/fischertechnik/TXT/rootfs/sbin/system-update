@@ -41,26 +41,29 @@ if ! mkdir -p "${TEMPDIR}" && chmod u=rwx,go=rx "${TEMPDIR}"; then
 fi
 
 echo "fetching archive from github..."
-MESSAGE=$(wget -nv "${BASE_URL}/v${TARGET_VERSION}/${ARCHIVE}" -O "${TEMPDIR}/${ARCHIVE}" 2>&1)
+#MESSAGE=$(wget -nv "${BASE_URL}/v${TARGET_VERSION}/${ARCHIVE}" -O "${TEMPDIR}/${ARCHIVE}" 2>&1)
 if [ $? != 0 ] ; then
   echo "download failed\n$MESSAGE" >&2
   exit 10
 fi
 
 echo "validating update..."
+echo "wget -qO- "${TAG_RELEASE_API_URL}/v${TARGET_VERSION}" | get_size_json.py"
 SIZE=$(wget -qO- "${TAG_RELEASE_API_URL}/v${TARGET_VERSION}" | get_size_json.py)
-SIZE_EXEC_OK=$?
+echo $SIZE
+sleep 3
 # TODO: real check of update files against a known developer signature
 # Currently we just check the file size
-if ! [ -f "${TEMPDIR}/${ARCHIVE}" ] || [ $SIZE_EXEC_OK != 0 ]; then
+if ! [ -f "${TEMPDIR}/${ARCHIVE}" ]; then
   echo "validate update failed" >&2
   exit 20
 fi
 
 if ! [ $(wc -c < "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
-  echo "validate update failed" >&2
-  exit 20
+  echo "validate update failed!" >&2
+  exit 21
 fi
+echo "ok"
 exit 0
 echo "backing up current system..."
 if ! mkdir -p "${BACKUPDIR}" || \
