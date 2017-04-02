@@ -160,21 +160,21 @@ class Interfaces(QObject):
                 # print auto list
                 for i in self.ifs_auto:
                     print("auto", i, file=f)
+                print("", file=f)
+
+                # print interfaces
+                for i in self.interfaces:
+                    # print iface line with options
+                    print("iface", i ,end="", file=f)
+                    options = self.interfaces[i]["options"]
+                    for m in [ "inet", "method" ]:
+                        print(" "+options[m], end="", file=f)
                     print("", file=f)
 
-                    # print interfaces
-                    for i in self.interfaces:
-                        # print iface line with options
-                        print("iface", i ,end="", file=f)
-                        options = self.interfaces[i]["options"]
-                        for m in [ "inet", "method" ]:
-                            print(" "+options[m], end="", file=f)
-                        print("", file=f)
-
-                        # print parameter lines
-                        parms = self.interfaces[i]["parms"]
-                        for p in parms:
-                            print("\t"+p+" "+parms[p], file=f)
+                    # print parameter lines
+                    parms = self.interfaces[i]["parms"]
+                    for p in parms:
+                        print("\t"+p+" "+parms[p], file=f)
 
                     print("", file=f)
 
