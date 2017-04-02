@@ -1,4 +1,6 @@
+repository: ftCommunity/ftcommunity-TXT
 gems:
+  - jekyll-github-metadata
   - jekyll-optional-front-matter
   - jekyll-relative-links
   - jekyll-titles-from-headings

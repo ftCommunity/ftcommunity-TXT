@@ -21,7 +21,7 @@ layout: postprocess-kramdown
       </div>
       <div class="fork-me-wrapper">
         <div class="fork-me">
-          <a class="fork-me-link" href="https://github.com/ftCommunity/ftcommunity-TXT">
+          <a class="fork-me-link" href="{{ site.github.repository_url }}">
             <span class="fork-me-text">Fork me on GitHub</span>
           </a>
         </div>
@@ -63,8 +63,8 @@ layout: postprocess-kramdown
     </main>
 
     <footer>
-      <a class="maintained-by" href="https://github.com/ftCommunity">{{ label.maintained_by[lang] }}</a>
-      <a class="edit" title="{{ label.edit_page[lang] }}" href="https://github.com/ftCommunity/ftcommunity-TXT/edit/master/docs/{{page.path}}">
+      <a class="maintained-by" href="{{ site.github.owner_url }}">{{ label.maintained_by[lang] }}</a>
+      <a class="edit" title="{{ label.edit_page[lang] }}" href="{{ site.github.repository_url }}/edit/master/docs/{{page.path}}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
           <path d="M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z" />
         </svg>
