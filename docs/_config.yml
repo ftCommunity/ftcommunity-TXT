@@ -11,6 +11,11 @@ kramdown:
 languages: [ "en", "de" ]
 
 defaults:
-  - path: ""
+  - scope:
+      path: ""
     values:
       layout: "default"
+  - scope:
+      path: "de/programming/brickly/index.md"
+    values:
+      nav-pos: 0
