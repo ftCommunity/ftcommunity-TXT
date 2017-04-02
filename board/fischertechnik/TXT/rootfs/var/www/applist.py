@@ -67,7 +67,10 @@ for app_dir in scan_app_dirs():
 
     # get various fields from manifest
     appname = manifest.get('app', 'name')
-    description = manifest.get('app', 'desc')
+    if manifest.has_option('app', 'desc'):
+        description = manifest.get('app', 'desc')
+    else:
+        description = "no desc"
     # the icon name is a little tricky as the web server accesses files
     # relative to its document root
     group_dir, app_dir_name = os.path.split(app_dir)
@@ -76,9 +79,11 @@ for app_dir in scan_app_dirs():
         iconname = os.path.join( "apps", group_dir_name, app_dir_name, manifest.get('app', 'icon'))
     else:
         iconname = "icon.png"
-        
-    executable = os.path.join(app_dir, manifest.get('app', 'exec'))
-    exec_relative = os.path.join(group_dir_name, app_dir_name, manifest.get('app', 'exec'))
+
+    if manifest.has_option('app', 'exec'):
+        exec_relative = os.path.join(group_dir_name, app_dir_name, manifest.get('app', 'exec'))
+    else:
+        exec_relative = ''
     is_running = current_executable == exec_relative
 
     if count == 0:
