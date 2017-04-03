@@ -18,6 +18,11 @@ defaults:
     values:
       layout: "default"
   - scope:
+      path: "de/programming/brickly"
+    values:
+      edit-repository-url: "https://github.com/EstherMi/ft-brickly-userguide"
+      edit-repository-path: "/de/brickly/"
+  - scope:
       path: "de/programming/brickly/index.md"
     values:
       nav-pos: 0

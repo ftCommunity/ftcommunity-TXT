@@ -11,6 +11,9 @@ layout: postprocess-kramdown
     <link rel="stylesheet" href="{{site.baseurl}}/css/screen.css" type="text/css" media="screen" />
   </head>
   <body lang="{{ lang }}">
+    {% assign edit-repository-url = page.edit-repository-url | default: site.github.repository_url %}
+    {% assign edit-repository-path-default = "/docs" | append: page.dir %}
+    {% assign edit-repository-path = page.edit-repository-path | default: edit-repository-path-default %}
     {% capture lang %}{{ page.url | slice: 1, 2 }}{% endcapture %}
     {% capture path %}{{ page.url | slice: 4, 100000 }}{% endcapture %}
     {% assign label = site.data.label %}
@@ -65,7 +68,7 @@ layout: postprocess-kramdown
 
     <footer>
       <a class="maintained-by" href="{{ site.github.owner_url }}">{{ label.maintained_by[lang] }}</a>
-      <a class="edit" title="{{ label.edit_page[lang] }}" href="{{ site.github.repository_url }}/edit/master/docs/{{page.path}}">
+      <a class="edit" href="{{ edit-repository-url }}/edit/master{{edit-repository-path}}{{page.name}}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
           <path d="M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z" />
         </svg>
