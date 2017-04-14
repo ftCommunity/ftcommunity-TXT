@@ -101,7 +101,12 @@ class ErrorDialog(TouchDialog):
     def __init__(self, parent, err):
         if err != "0":
             print("Error: " + err)
-            err_codes = {"20": QCoreApplication.translate("ErrorCodes", "Download validation failed!"),
+            err_codes = {"3": QCoreApplication.translate("ErrorCodes", "Up-to-date!"),
+                         "4": QCoreApplication.translate("ErrorCodes", "System Files Error!"),
+                         "5": QCoreApplication.translate("ErrorCodes", "System Files Error!"),
+                         "10": QCoreApplication.translate("ErrorCodes", "Download Error!"),
+                         "20": QCoreApplication.translate("ErrorCodes", "Download validation failed!"),
+                         "21": QCoreApplication.translate("ErrorCodes", "Download validation failed!"),
                          "30": QCoreApplication.translate("ErrorCodes", "Backup failed!"),
                          "40": QCoreApplication.translate("ErrorCodes", "Installation failed!")}
             if err in err_codes:
