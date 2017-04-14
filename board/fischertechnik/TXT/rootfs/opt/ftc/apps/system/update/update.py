@@ -126,7 +126,7 @@ class ErrorDialog(TouchDialog):
         vbox.addWidget(lbl)
         vbox.addStretch()
         self.centralWidget.setLayout(vbox)
-        #QTimer.singleShot(1, self.do_reboot)
+        QTimer.singleShot(1, self.do_reboot)
 
     def do_reboot(self):
         if self.reboot:
