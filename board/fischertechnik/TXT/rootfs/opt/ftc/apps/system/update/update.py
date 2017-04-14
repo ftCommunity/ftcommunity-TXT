@@ -306,6 +306,39 @@ class UpdateListWidget(QListWidget):
         return(None)
 
 
+class OkDialog(TouchDialog):
+    ret = None
+
+    def __init__(self, parent, newver):
+        TouchDialog.__init__(self, QCoreApplication.translate("OkDialog", "Confirm"), parent)
+        cur_ver = Path(fw_ver_file).read_text()
+        try:
+            if "snapshot" in cur_ver:
+                cur_ver = "snapshot" + cur_ver.split("snapshot-")[1]
+        except:
+            pass
+        try:
+            if "snapshot" in newver:
+                newver = "snapshot" + newver.split("snapshot-")[1]
+        except:
+            pass
+        self.addConfirm()
+        self.titlebar.confbut.clicked.connect(self.pressed)
+        self.setCancelButton()
+        self.titlebar.close.clicked.connect(self.pressed)
+        self.vbox = QVBoxLayout()
+        self.label = QLabel(QCoreApplication.translate("OkDialog", "Do you want to update from %s to %s?" % (cur_ver, newver)))
+        self.label.setObjectName("smalllabel")
+        self.label.setWordWrap(True)
+        self.vbox.addStretch()
+        self.vbox.addWidget(self.label)
+        self.vbox.addStretch()
+        self.centralWidget.setLayout(self.vbox)
+
+    def pressed(self):
+        self.ret = self.sender().objectName()
+
+
 class TouchGuiApplication(TouchApplication):
 
     def __init__(self, args):
@@ -338,8 +371,16 @@ class TouchGuiApplication(TouchApplication):
         if self.dialog == None:
             if ver == None:
                 ver = self.update_version
-            ver = ver.replace('v', '')
             print("updating to: " + ver)
+            self.dialog = OkDialog(self.w, ver)
+            self.dialog.exec_()
+            if self.dialog.ret == "confirmbut":
+                print("ok")
+            else:
+                self.dialog = None
+                print("abort")
+                return
+            ver = ver.replace('v', '')
             self.dialog = ProgressDialog(self.w, ver)
             self.dialog.exec_()
             self.w.close()
