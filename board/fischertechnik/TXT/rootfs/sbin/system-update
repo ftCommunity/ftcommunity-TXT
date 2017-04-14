@@ -41,7 +41,7 @@ if ! mkdir -p "${TEMPDIR}" && chmod u=rwx,go=rx "${TEMPDIR}"; then
 fi
 
 echo "fetching archive from github..."
-#MESSAGE=$(wget -nv "${BASE_URL}/v${TARGET_VERSION}/${ARCHIVE}" -O "${TEMPDIR}/${ARCHIVE}" 2>&1)
+MESSAGE=$(wget -nv "${BASE_URL}/v${TARGET_VERSION}/${ARCHIVE}" -O "${TEMPDIR}/${ARCHIVE}" 2>&1)
 if [ $? != 0 ] ; then
   echo "download failed\n$MESSAGE" >&2
   exit 10
