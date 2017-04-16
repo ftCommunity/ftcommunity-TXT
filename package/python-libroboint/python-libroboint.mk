@@ -8,4 +8,10 @@ PYTHON_LIBROBOINT_VERSION = 74db52ecc90c37286024a6dd30cd402f80c080db
 PYTHON_LIBROBOINT_SITE = $(call github,PeterDHabermehl,libroboint-py3,$(PYTHON_LIBROBOINT_VERSION))
 PYTHON_LIBROBOINT_DEPENDENCIES = libroboint
 
-$(eval $(call ls))
+define PYTHON_LIBROBOINT_INSTALL_PY_STUFF
+	$(INSTALL) -D -m 0644 $(@D)/robointerface.py $(TARGET_DIR)/usr/lib/python$(PYTHON3_VERSION_MAJOR)/site-packages/robointerface.py
+endef
+PYTHON_LIBROBOINT_POST_INSTALL_TARGET_HOOKS += PYTHON_LIBROBOINT_INSTALL_PY_STUFF
+
+$(eval $(generic-package))
+
