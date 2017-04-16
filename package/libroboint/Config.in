@@ -1,0 +1,12 @@
+config BR2_PACKAGE_LIBROBOINT
+  bool "libroboint"
+  select BR2_PACKAGE_LIBUSB
+  select BR2_PACKAGE_LIBUSB_COMPAT
+  help
+    Install libroboint
+
+config BR2_PACKAGE_LIBROBOINT_PY
+  bool "pylibroboint"
+  depends on BR2_PACKAGE_LIBROBOINT
+  help
+    Python module for libroboint
