@@ -286,54 +286,62 @@ class ProgressDialog(PlainDialog):
 
 
 class UpdateListWidget(QListWidget):
-    update = pyqtSignal(str)
+    # Widget to list all avaible releases from github
+    update = pyqtSignal(str)  # Signal to start update
 
     def __init__(self, releases, parent=None):
-        super(UpdateListWidget, self).__init__(parent)
+        super(UpdateListWidget, self).__init__(parent)  # init UpdateListWidget
 
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)  # enable Scroll bar
 
-        lcl = Path(fw_ver_file).read_text().replace('v', '').strip()
+        lcl = Path(fw_ver_file).read_text().replace('v', '').strip()  # get local version
 
-        id_list = []
+        id_list = []  # init empty release id list
+        # github gives an unique id to each release all over github ascending by date
+        # get release id for each release
         for r in releases:
             id_list.append(r["id"])
 
-        mark = ""
+        mark = ""  # init empty mark variable
+        # search in releases for the current installed release
         for r in releases:
             if r["tag_name"].replace("v", "") == lcl:
-                mark = r["tag_name"].replace("v", "")
+                mark = r["tag_name"].replace("v", "")  # save tag name of installed version
 
-        id_list = reversed(sorted(id_list))
+        id_list = reversed(sorted(id_list))  # reverse id list
 
-        for ID in id_list:
-            release = self.getReleaseByID(id_list, releases, ID)
-            name = release["tag_name"]
+        for ID in id_list:  # process all release
+            release = self.getReleaseByID(id_list, releases, ID)  # get release data by id
+            name = release["tag_name"]  # get name of release
             try:
+                # change the name of snapshot releases
                 if "snapshot" in name:
                     name = "snapshot" + name.split("snapshot-")[1]
             except:
                 pass
-            item = QListWidgetItem(name)
+            item = QListWidgetItem(name)  # init list item with name
+            # mark installed version green
             if mark == release["tag_name"].replace("v", ""):
                 item.setBackground(Qt.green)
+            # mark prereleases with caution icon
             if release["prerelease"]:
                 item.setIcon(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "prerelease.png")))
+            # mark stable releases with a tick
             else:
                 item.setIcon(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)), "stable.png")))
-            item.setData(Qt.UserRole, (release))
-            self.addItem(item)
-        self.itemClicked.connect(self.onItemClicked)
+            item.setData(Qt.UserRole, (release))  # save releas data in list item
+            self.addItem(item)  # add item to list
+        self.itemClicked.connect(self.onItemClicked)  # add on-click-function
 
     def onItemClicked(self, item):
-        release = item.data(Qt.UserRole)
-        self.update.emit(release["tag_name"])
+        release = item.data(Qt.UserRole)  # get item data
+        self.update.emit(release["tag_name"])  # emit update signal
 
     def getReleaseByID(self, id_list, releases, ID):
-        for r in releases:
-            if ID == r["id"]:
-                return(r)
-        return(None)
+        for r in releases:  # process all items
+            if ID == r["id"]:  # check whether ID matches
+                return(r)  # return first item
+        return(None)  # return None if not found
 
 
 class OkDialog(TouchDialog):
