@@ -2,84 +2,90 @@
 # -*- coding: utf-8 -*-
 #
 
-import sys
-from TouchStyle import *
-import time
-import os
-from _thread import start_new_thread
-import zipfile
-import urllib.request
-import json
-import semantic_version
-from pathlib import Path
+#import modules
+import sys  # argv
+from TouchStyle import *  # GUI
+import time  # time operations
+import os  # os operations
+from _thread import start_new_thread  # thread management
+import zipfile  # zipfile readout
+import urllib.request  # web requests
+import json  # json readout
+import semantic_version  # version management
+from pathlib import Path  # needd
 
-update_log = "/tmp/update_log.log"
+update_log = "/tmp/update_log.log"  # paths to update log
 update_exit = "/tmp/update_exit"
-release_api_url = "https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases"
-fw_ver_file = '/etc/fw-ver.txt'
+release_api_url = "https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases"  # github release api url
+fw_ver_file = '/etc/fw-ver.txt'  # path to local version file
 
 
 class UpdateCheckThread(QThread):
-    new_line = pyqtSignal(str)
-    error = pyqtSignal(str)
+    # thread to check the log files for new content
+    new_line = pyqtSignal(str)  # new line signal
+    error = pyqtSignal(str)  # error signal
 
     def __init__(self, parent):
+        # init thread
         super(UpdateCheckThread, self).__init__(parent)
         self.lines = []
 
     def run(self):
-        time.sleep(1)
+        time.sleep(1)  # wait a moment
+        # start loop
         while True:
-            if os.path.isfile(update_exit):
-                with open(update_exit) as f:
-                    self.error.emit(f.read().replace("\n", "").strip())
+            if os.path.isfile(update_exit):  # check exit file exist
+                with open(update_exit) as f:  # open exit file
+                    self.error.emit(f.read().replace("\n", "").strip())  # read code and emit
                     break
 
-            with open(update_log) as f:
-                new_lines = f.readlines()
-            if len(new_lines) > len(self.lines):
-                i = len(self.lines)
-                while i <= len(new_lines) - 1:
-                    self.new_line.emit(new_lines[i].replace("\n", "").strip())
-                    i += 1
-                self.lines = new_lines
+            with open(update_log) as f:  # open log file
+                new_lines = f.readlines()  # read file
+            if len(new_lines) > len(self.lines):  # check whether new lines are present
+                i = len(self.lines)  # get num of already processed lines
+                while i <= len(new_lines) - 1:  # process new lines
+                    self.new_line.emit(new_lines[i].replace("\n", "").strip())  # emit every new line
+                    i += 1  # count up index
+                self.lines = new_lines  # update temp list
 
-            time.sleep(0.1)
+            time.sleep(0.1)  # wait until next check
 
 
 def updateStarter(ver):
+    # function to start the update
     print("Start")
+    # if logfile/exitcodefile exist, remove
     if os.path.isfile(update_log):
         os.remove(update_log)
     if os.path.isfile(update_exit):
         os.remove(update_exit)
+    # start update and echo all output to a file, the exitcode to another
     os.system("sudo system-update " + ver + " > " + update_log + " 2>&1 ; echo $? > " + update_exit)
 
 
 class EntryWidget(QWidget):
-    pressed = pyqtSignal()
+    # cool widget used in update progress
 
     def __init__(self, title, parent=None):
-        QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)  # init QWidget
 
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout()  # init layout
         self.layout.setSpacing(0)
-        self.title = QLabel(title)
-        self.layout.addWidget(self.title)
-        self.value = QLabel("")
-        self.value.setObjectName("smalllabel")
-        self.value.setWordWrap(True)
-        self.layout.addWidget(self.value)
-        self.setLayout(self.layout)
+        self.title = QLabel(title)  # generate title label
+        self.layout.addWidget(self.title)  # add title to layout
+        self.value = QLabel("")  # generate data label
+        self.value.setObjectName("smalllabel")  # data label is smalllabel
+        self.value.setWordWrap(True)  # enable wordwrap
+        self.layout.addWidget(self.value)  # add data widget
+        self.setLayout(self.layout)  # set widget's layout
 
     def setText(self, str):
+        # function to add data label's test
         self.value.setText(str)
-
-    def mousePressEvent(self, event):
-        self.pressed.emit()
 
 
 class PlainDialog(QDialog):
+    # fullscreen dialog class
 
     def __init__(self):
         QDialog.__init__(self)
@@ -97,10 +103,13 @@ class PlainDialog(QDialog):
 
 
 class ErrorDialog(TouchDialog):
+    # the update finished dialog
+    # it is called on error and success
 
     def __init__(self, parent, err):
-        if err != "0":
-            print("Error: " + err)
+        if err != "0":  # check if it is an error or not, 0=success, !=0 => error
+            print("Error: " + err)  # print error code on command line
+            # define the error codes to translated strings
             err_codes = {"3": QCoreApplication.translate("ErrorCodes", "Up-to-date!"),
                          "4": QCoreApplication.translate("ErrorCodes", "System Files Error!"),
                          "5": QCoreApplication.translate("ErrorCodes", "System Files Error!"),
@@ -109,73 +118,80 @@ class ErrorDialog(TouchDialog):
                          "21": QCoreApplication.translate("ErrorCodes", "Download validation failed!"),
                          "30": QCoreApplication.translate("ErrorCodes", "Backup failed!"),
                          "40": QCoreApplication.translate("ErrorCodes", "Installation failed!")}
-            if err in err_codes:
-                error = err_codes[err]
+            if err in err_codes:  # check whether the code is known and can be converted to string
+                error = err_codes[err]  # get error string
             else:
-                error = QCoreApplication.translate("ErrorCodes", "Unknown Error!")
-            error = error + "\nCode " + err
-            title = QCoreApplication.translate("ErrorDialog", "Error")
-            self.reboot = False
+                error = QCoreApplication.translate("ErrorCodes", "Unknown Error!")  # use a defalt string
+            error = error + "\nCode " + err  # add the code to the string
+            title = QCoreApplication.translate("ErrorDialog", "Error")  # translate window title
+            self.reboot = False  # set that the TXT should not reboot automatically
         else:
-            error = QCoreApplication.translate("ErrorDialog", "TXT will reboot soon!")
-            title = QCoreApplication.translate("ErrorDialog", "Finished")
-            self.reboot = True
+            error = QCoreApplication.translate("ErrorDialog", "TXT will reboot soon!")  # write that the TXT will reboot soon
+            title = QCoreApplication.translate("ErrorDialog", "Finished")  # translate window title
+            self.reboot = True  # set that the TXT should reboot automatically
 
-        TouchDialog.__init__(self, title, parent)
+        TouchDialog.__init__(self, title, parent)  # init the dialog
 
-        lbl = QLabel(error)
+        lbl = QLabel(error)  # init the information label
+        # style it
         lbl.setWordWrap(True)
         lbl.setAlignment(Qt.AlignCenter)
-        vbox = QVBoxLayout()
+        vbox = QVBoxLayout()  # generate a vbox
         vbox.addStretch()
-        vbox.addWidget(lbl)
+        vbox.addWidget(lbl)  # add the information label
         vbox.addStretch()
-        self.centralWidget.setLayout(vbox)
-        QTimer.singleShot(1, self.do_reboot)
+        self.centralWidget.setLayout(vbox)  # add the vbox to the dialog
+        QTimer.singleShot(1, self.do_reboot)  # start possible reboot in 1 sec
 
     def do_reboot(self):
-        if self.reboot:
-            os.system("sudo reboot")
+        # function to reboot the TXT
+        if self.reboot:  # check whether we need to reboot the TXT
+            os.system("sudo reboot")  # initiate the reboot
 
 
 class ProgressDialog(PlainDialog):
+    # main update progress dialog
 
     def __init__(self, parent, ver):
-        PlainDialog.__init__(self)
-        self.ver = ver
-        self.parent = parent
-        self.state = ""
-        self.zip_sizes = {}
+        PlainDialog.__init__(self)  # init PlainDialog
+        self.ver = ver  # save version
+        self.parent = parent  # save parent
+        self.state = ""  # init an empty state variable
+        self.zip_sizes = {}  # init an empty dict for the zip sizes
 
-        self.thread = UpdateCheckThread(self)
-        self.thread.new_line.connect(self.new_line)
-        self.thread.error.connect(self.error)
+        self.thread = UpdateCheckThread(self)  # init update check thread
+        self.thread.new_line.connect(self.new_line)  # connect on new line
+        self.thread.error.connect(self.error)  # connect on error
 
-        self.vbox = QVBoxLayout()
+        self.vbox = QVBoxLayout()  # init vbox
         self.vbox.addStretch()
-        title = QLabel(QCoreApplication.translate("ProgressDialog", "Progress"))
-        title.setAlignment(Qt.AlignCenter)
-        self.vbox.addWidget(title)
-        self.init_label = QLabel(QCoreApplication.translate("ProgressDialog", "Initializing Update"))
-        self.init_label.setWordWrap(True)
-        self.init_label.setAlignment(Qt.AlignCenter)
-        self.vbox.addWidget(self.init_label)
+        title = QLabel(QCoreApplication.translate("ProgressDialog", "Progress"))  # init title label
+        title.setAlignment(Qt.AlignCenter)  # move it to the center
+        self.vbox.addWidget(title)  # add title widget
+        self.init_label = QLabel(QCoreApplication.translate("ProgressDialog", "Initializing Update"))  # init init-label
+        self.init_label.setWordWrap(True)  # enable wordwrap for init-label
+        self.init_label.setAlignment(Qt.AlignCenter)  # move it to center
+        self.vbox.addWidget(self.init_label)  # add init-label
         self.vbox.addStretch()
-        self.setLayout(self.vbox)
-        start_timer = QTimer.singleShot(2000, self.start)
-        self.check_timer = QTimer()
-        self.check_timer.timeout.connect(self.checker)
+        self.setLayout(self.vbox)  # set vbox as central layout
+        start_timer = QTimer.singleShot(1000, self.start)  # start update in 1000ms
+        self.check_timer = QTimer()  # init checker timer
+        self.check_timer.timeout.connect(self.checker)  # connect checker on timeout
 
     def start(self):
+        # function to start update
+        # get size of download zip and save it
         self.size = int(os.popen("wget -qO- https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases/tags/v" + self.ver + " | get_size_json.py").read())
-        print("Size: " + str(self.size))
-        start_new_thread(updateStarter, (self.ver,))
-        self.thread.start()
-        self.buildUI()
-        self.check_timer.start(100)
+        print("Size: " + str(self.size))  # print zip size
+        start_new_thread(updateStarter, (self.ver,))  # start the update in extra thread
+        self.thread.start()  # start check thread
+        self.buildUI()  # build UI
+        self.check_timer.start(100)  # start checker timer and check update state every 100ms
 
     def new_line(self, line):
-        print("LINE: " + line)
+        # fuction to precess a new line
+        print("LINE: " + line)  # print new line
+        # if specific line is found, set state
         if line == "fetching archive from github...":
             self.state = "download"
         elif line == "validating update...":
@@ -184,77 +200,86 @@ class ProgressDialog(PlainDialog):
             self.state = "backup"
         elif line == "installing update...":
             self.state = "install"
-        print("State: " + self.state)
+        print("State: " + self.state)  # print state
 
     def buildUI(self):
-        self.init_label.setParent(None)
+        # fuction to build UI
+        self.init_label.setParent(None)  # remove init label
+        # add widgets for 4 states
+        # Preparation
         self.preparation_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Preparation"))
         self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.preparation_widget)
+        # Download
         self.download_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Download"))
         self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.download_widget)
+        # Backup
         self.backup_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Backup"))
         self.backup_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.backup_widget)
+        # Installation
         self.extract_widget = EntryWidget(QCoreApplication.translate("ProgressDialog", "Installation"))
         self.extract_widget.setText(QCoreApplication.translate("ProgressDialog", "Pending"))
         self.vbox.addWidget(self.extract_widget)
 
     def checker(self):
-        if self.state == "download":
-            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
+        # fucntion to refresh the UI
+        if self.state == "download":  # To do while download
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Preparation to done
             try:
-                current_size = os.stat("/tmp/update-" + self.ver + "/ftcommunity-txt-" + self.ver + ".zip").st_size
+                current_size = os.stat("/tmp/update-" + self.ver + "/ftcommunity-txt-" + self.ver + ".zip").st_size  # get current_size of download file
             except:
-                current_size = 0
-            percentage = (current_size / self.size) * 100
-            self.download_widget.setText(str("{0:.1f}".format(percentage) + "%"))
+                current_size = 0  # if file is not present the size is 0
+            percentage = (current_size / self.size) * 100  # calculate percentage of download size
+            self.download_widget.setText(str("{0:.1f}".format(percentage) + "%"))  # write percentage on screen
 
-        elif self.state == "validation":
-            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
-            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Validating..."))
+        elif self.state == "validation":  # To do while validation
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Preparation to done
+            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Validating..."))  # set Download to validating
 
-        elif self.state == "backup":
-            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
-            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
-            count = 0
-            base = "/media/sdcard/boot/"
+        elif self.state == "backup":  # To do while backup
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Preparation to done
+            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Download to done
+            count = 0  # init a count variable
+            base = "/media/sdcard/boot/"  # set base folder
+            # check the three files and count missing files
             if not os.path.isfile(base + "am335x-kno_txt.dtb"):
                 count += 1
             if not os.path.isfile(base + "rootfs.img"):
                 count += 1
             if not os.path.isfile(base + "uImage"):
                 count += 1
-            self.backup_widget.setText({0: "0%", 1: "33%", 2: "67%", 3: "100%"}[count])
+            self.backup_widget.setText({0: "0%", 1: "33%", 2: "67%", 3: "100%"}[count])  # print percentage on screen
 
-        elif self.state == "install":
-            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
-            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
-            self.backup_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))
-            if self.zip_sizes == {}:
-                zip_file = zipfile.ZipFile("/tmp/update-" + self.ver + "/ftcommunity-txt-" + self.ver + ".zip")
-                for c_file in zip_file.infolist():
-                    sub_dict = {"target": c_file.file_size}
-                    self.zip_sizes[c_file.filename] = sub_dict
-            base = "/media/sdcard/boot/"
-            for name, t_size in self.zip_sizes.items():
+        elif self.state == "install":  # To do while install
+            self.preparation_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Preparation to done
+            self.download_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Download to done
+            self.backup_widget.setText(QCoreApplication.translate("ProgressDialog", "Done"))  # set Backup to done
+            if self.zip_sizes == {}:  # check whether we already know the sizes of the extracted files
+                zip_file = zipfile.ZipFile("/tmp/update-" + self.ver + "/ftcommunity-txt-" + self.ver + ".zip")  # init zip file
+                for c_file in zip_file.infolist():  # process every file
+                    sub_dict = {"target": c_file.file_size}  # get size for every file
+                    self.zip_sizes[c_file.filename] = sub_dict  # add file to dict
+            base = "/media/sdcard/boot/"  # set base folder
+            for name, t_size in self.zip_sizes.items():  # process all files
                 try:
-                    current_size = os.stat(base + name).st_size
+                    current_size = os.stat(base + name).st_size  # get file size on sdcard
                 except:
-                    current_size = 0
-                self.zip_sizes[name]["percentage"] = current_size / self.zip_sizes[name]["target"]
+                    current_size = 0  # if file is not present the size is 0
+                self.zip_sizes[name]["size"] = current_size  # save current size of specific file
 
-            percentage = 0
-            target_sum = 0
-            for perc in self.zip_sizes.values():
-                percentage += perc["percentage"] * perc["target"]
-                target_sum += perc["target"]
+            size = 0  # init current size variable
+            target_sum = 0  # init total file size variable
+            for perc in self.zip_sizes.values():  # process all files
+                percentage += perc["size"]  # add file size
+                target_sum += perc["target"]  # add total target sum
 
-            percentage = percentage / target_sum * 100
-            self.backup_widget.setText(str("{0:.1f}".format(percentage) + "%"))
+            percentage = size / target_sum * 100  # calculate current percentage
+            self.backup_widget.setText(str("{0:.1f}".format(percentage) + "%"))  # print percentage on screen
 
     def error(self, err):
+        # function to open the ErrorDialog
         dialog = ErrorDialog(self.parent, err)
         dialog.exec_()
         self.close()
