@@ -345,11 +345,13 @@ class UpdateListWidget(QListWidget):
 
 
 class OkDialog(TouchDialog):
-    ret = None
+    # simple dialog to check whether th euser really wanzs to update
+    ret = None  # init return variable
 
     def __init__(self, parent, newver):
-        TouchDialog.__init__(self, QCoreApplication.translate("OkDialog", "Confirm"), parent)
-        cur_ver = Path(fw_ver_file).read_text()
+        TouchDialog.__init__(self, QCoreApplication.translate("OkDialog", "Confirm"), parent)  # init dialog
+        cur_ver = Path(fw_ver_file).read_text()  # get current installed version
+        # change the name of snapshot releases
         try:
             if "snapshot" in cur_ver:
                 cur_ver = "snapshot" + cur_ver.split("snapshot-")[1]
@@ -360,21 +362,21 @@ class OkDialog(TouchDialog):
                 newver = "snapshot" + newver.split("snapshot-")[1]
         except:
             pass
-        self.addConfirm()
-        self.titlebar.confbut.clicked.connect(self.pressed)
-        self.setCancelButton()
-        self.titlebar.close.clicked.connect(self.pressed)
-        self.vbox = QVBoxLayout()
-        self.label = QLabel(QCoreApplication.translate("OkDialog", "Do you want to update from %s to %s?" % (cur_ver, newver)))
-        self.label.setObjectName("smalllabel")
-        self.label.setWordWrap(True)
+        self.addConfirm()  # add confirm button to title bar
+        self.titlebar.confbut.clicked.connect(self.pressed)  # add on-click-function
+        self.setCancelButton()  # add cancel button to title bar
+        self.titlebar.close.clicked.connect(self.pressed)  # add on-click-function
+        self.vbox = QVBoxLayout()  # init vbox
+        self.label = QLabel(QCoreApplication.translate("OkDialog", "Do you want to update from %s to %s?" % (cur_ver, newver)))  # init info label
+        self.label.setObjectName("smalllabel")  # set it as smalllabel
+        self.label.setWordWrap(True)  # enable wordwrap
         self.vbox.addStretch()
-        self.vbox.addWidget(self.label)
+        self.vbox.addWidget(self.label)  # add info label
         self.vbox.addStretch()
-        self.centralWidget.setLayout(self.vbox)
+        self.centralWidget.setLayout(self.vbox)  # set vbox as centralWidget
 
     def pressed(self):
-        self.ret = self.sender().objectName()
+        self.ret = self.sender().objectName()  # save objectName
 
 
 class TouchGuiApplication(TouchApplication):
