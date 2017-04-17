@@ -429,57 +429,68 @@ class TouchGuiApplication(TouchApplication):
             self.w.close()  # close application
 
     def getLatestRelease(self):
+        # function to get latest release data
         try:
-            raw_data = urllib.request.urlopen(release_api_url).read().decode()
-            all_releases = json.loads(raw_data)
-            i = 0
-            while i <= len(all_releases) - 1:
-                if all_releases[i]["prerelease"] == False:
-                    return(all_releases[i])
-                i += 1
+            raw_data = urllib.request.urlopen(release_api_url).read().decode()  # download release api data
+            all_releases = json.loads(raw_data)  # decode json
+            i = 0  # init count variable
+            while i <= len(all_releases) - 1:  # process all releases
+                if all_releases[i]["prerelease"] == False:  # check whether release is prerelease
+                    return(all_releases[i])  # return release data
+                i += 1  # count one up
         except:
             pass
-        return(None)
+        return(None)  # return None
 
     def to_str(self, ver):
+        # function to generate a version string
         return(str(ver.major) + "." + str(ver.minor) + "." + str(ver.patch))
 
     def checkUpdate(self):
-        lcl_ver = semantic_version.Version(Path(fw_ver_file).read_text().replace('v', ''))
-        snapshot = False
+        # function to check for updates and maybe build the UI to select a specific release
+        lcl_ver = semantic_version.Version(Path(fw_ver_file).read_text().replace('v', ''))  # get current local version
+        snapshot = False  # init snapshot install variable
+        # check whether snapshot is already installed
         if len(lcl_ver.prerelease) > 1:
-            if "snapshot" in lcl_ver.prerelease[1]:
+            if "snapshot" in lcl_ver.prerelease[1]:  # check whether snapshot is installed
                 print("SNAPSHOT DETECTED!")
-                snapshot = True
-        if "install-snapshot" in sys.argv:
+                snapshot = True  # set variable
+        if "install-snapshot" in sys.argv:  # check whether snapshot Installation is enabled via argument
             print("SNAPSHOTS TEPORARY ENABLED BY ARGUMENT!")
-            snapshot = True
-        if snapshot:
-            self.lbl.setParent(None)
-            self.but.setParent(None)
-            raw_data = urllib.request.urlopen(release_api_url).read().decode()
-            all_releases = json.loads(raw_data)
+            snapshot = True  # set variable
+        if snapshot:  # check whether we want to offer snapshot Installation
+            try:
+                raw_data = urllib.request.urlopen(release_api_url).read().decode()  # download release api data
+                all_releases = json.loads(raw_data)  # decode json
+            except:  # show error message in case of error
+                self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "Error while checking for updates!\nPlease try again later!\nYou are currently using " + self.to_str(lcl_ver)))
+                return
 
-            self.info_text = QLabel(QCoreApplication.translate("TouchGuiApplication", "Select one release of the list below:"))
-            self.info_text.setWordWrap(True)
-            self.vbox.addWidget(self.info_text)
+            self.lbl.setParent(None)  # remove info label
+            self.but.setParent(None)  # remove update button
 
-            self.update_list = UpdateListWidget(all_releases)
-            self.update_list.update.connect(self.start)
-            self.vbox.addWidget(self.update_list)
-            return
+            self.info_text = QLabel(QCoreApplication.translate("TouchGuiApplication", "Select one release of the list below:"))  # init new info label
+            self.info_text.setWordWrap(True)  # enable wordwrap
+            self.vbox.addWidget(self.info_text)  # add new info label
 
-        release = self.getLatestRelease()
-        if release == None:
+            self.update_list = UpdateListWidget(all_releases)  # init UpdateListWidget
+            self.update_list.update.connect(self.start)  # connect on update starter
+            self.vbox.addWidget(self.update_list)  # add UpdateListWidget
+            return  # return because the rest is for stable Installation
+
+        release = self.getLatestRelease()  # get latest release
+        if release == None:  # show error message in case of error
             self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "Error while checking for updates!\nPlease try again later!\nYou are currently using " + self.to_str(lcl_ver)))
             return
-        release_ver = semantic_version.Version(release['tag_name'].replace('v', ''))
+        release_ver = semantic_version.Version(release['tag_name'].replace('v', ''))  # generate a semantic_version object for the latest release
 
-        if lcl_ver < release_ver:
-            self.update_version = self.to_str(release_ver)
+        if lcl_ver < release_ver:  # check whether new version is avaible
+            self.update_version = self.to_str(release_ver)  # save update version
+            # show new version information
             self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", 'An update to ' + self.update_version + ' is avaible. To Installl press "Update".\nYou are currently using ' + self.to_str(lcl_ver)))
-            self.but.setDisabled(False)
+            self.but.setDisabled(False)  # enable update button
         else:
+            # show that no new version is avaible
             self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "No new verion found!\nYou are currently using " + self.to_str(lcl_ver)))
 
 
