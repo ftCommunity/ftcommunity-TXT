@@ -380,10 +380,12 @@ class OkDialog(TouchDialog):
 
 
 class TouchGuiApplication(TouchApplication):
+    # main application class
 
     def __init__(self, args):
-        TouchApplication.__init__(self, args)
+        TouchApplication.__init__(self, args)  # init TouchApplication
 
+        # init translator
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
         translator.load(QLocale.system(), os.path.join(path, "update_"))
@@ -391,39 +393,40 @@ class TouchGuiApplication(TouchApplication):
 
         # create the empty main window
         self.w = TouchWindow(QCoreApplication.translate("TouchGuiApplication", "Update"))
-        self.dialog = None
-        self.update_version = ""
+        self.dialog = None  # init dialog variable
+        self.update_version = ""  # init update_version variable
 
-        self.vbox = QVBoxLayout()
-        self.lbl = QLabel(QCoreApplication.translate("TouchGuiApplication", "Searching for updates"))
-        self.lbl.setWordWrap(True)
-        self.vbox.addWidget(self.lbl)
-        self.but = QPushButton("Update")
-        self.but.pressed.connect(self.start)
-        self.but.setDisabled(True)
-        self.vbox.addWidget(self.but)
-        self.w.centralWidget.setLayout(self.vbox)
-        self.w.show()
-        QTimer.singleShot(0, self.checkUpdate)
-        self.exec_()
+        self.vbox = QVBoxLayout()  # init vbox
+        self.lbl = QLabel(QCoreApplication.translate("TouchGuiApplication", "Searching for updates"))  # init info label
+        self.lbl.setWordWrap(True)  # enable wordwrap
+        self.vbox.addWidget(self.lbl)  # add info label
+        self.but = QPushButton("Update")  # init Update button
+        self.but.pressed.connect(self.start)  # conect on-click-function
+        self.but.setDisabled(True)  # disable button
+        self.vbox.addWidget(self.but)  # add Update button
+        self.w.centralWidget.setLayout(self.vbox)  # set vbox as centralWidget
+        self.w.show()  # show window
+        QTimer.singleShot(0, self.checkUpdate)  # Start Update Check
+        self.exec_()  # start event loop
 
     def start(self, ver=None):
-        if self.dialog == None:
-            if ver == None:
-                ver = self.update_version
-            print("updating to: " + ver)
-            self.dialog = OkDialog(self.w, ver)
-            self.dialog.exec_()
-            if self.dialog.ret == "confirmbut":
-                print("ok")
+        # function to start the update
+        if self.dialog == None:  # check whether no dialog is open
+            if ver == None:  # check whether a version was in arguments
+                ver = self.update_version  # get update version from variable
+            print("updating to: " + ver)  # print update version
+            self.dialog = OkDialog(self.w, ver)  # init OkDialog
+            self.dialog.exec_()  # open it
+            if self.dialog.ret == "confirmbut":  # check whether user pressed ok
+                print("ok")  # print ok
             else:
-                self.dialog = None
-                print("abort")
-                return
-            ver = ver.replace('v', '')
-            self.dialog = ProgressDialog(self.w, ver)
-            self.dialog.exec_()
-            self.w.close()
+                self.dialog = None  # clean up dialog variable
+                print("abort")  # print abort
+                return  # abort
+            ver = ver.replace('v', '')  # remove any "v" from str
+            self.dialog = ProgressDialog(self.w, ver)  # init ProgressDialog
+            self.dialog.exec_()  # start update
+            self.w.close()  # close application
 
     def getLatestRelease(self):
         try:
