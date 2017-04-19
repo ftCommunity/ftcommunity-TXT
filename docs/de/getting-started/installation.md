@@ -13,7 +13,7 @@ nav-title: Installation
 
 1. Anschließend musst Du den Bootloader freischalten, wie in der Anleitung von Fischertechnik erklärt: http://www.fischertechnik.de/ResourceImage.aspx?raid=10278
 
-1. Danach lädst Du hier https://github.com/ftCommunity/ftcommunity-TXT/releases/latest das ZIP-Archiv mit der Community-Firmware herunter (der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.2.zip") und kopierst die drei enthaltenen Dateien auf eine FAT32 formtierte micoSD-Karte.
+1. Danach lädst Du hier https://github.com/ftCommunity/ftcommunity-TXT/releases/latest das ZIP-Archiv mit der Community-Firmware herunter (der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.2.zip"), packst das Archiv aus und kopierst die drei enthaltenen Dateien auf eine FAT32 formatierte micoSD-Karte.
 
 1. Jetzt setzt du nur noch die microSD-Karte in den TXT ein und drückst den Startknopf. Nach kurzer Zeit sollte ein gelber Ladebalken und im unteren Bereich des Bildschirms die Aufschrift "Community Edition" erscheinen:
 
