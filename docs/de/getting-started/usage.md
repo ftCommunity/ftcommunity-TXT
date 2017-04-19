@@ -13,9 +13,9 @@ Die schwarze Statusleiste am obren Rand zeigt die aktuelle Zeit und einige Symbo
 
 Tippen auf den unscharfen Bereich unter den Detail-Informationen bringt Dich zurück zum Hauptsbildschirm.
 
-Wenn mehr als neun Apps auf dem TXT installiert sind, kannst Du durch antippen der dreieckigen Icons rechts unten bzw. links oben durch die installierten Apps blättern.
+Wenn mehr als neun Apps auf dem TXT installiert sind, kannst Du durch Antippen der dreieckigen Icons rechts unten bzw. links oben durch die installierten Apps blättern.
 
-Und schließlich kannst Du durch antippen eines der runden App-Icons die zugehörige App starten &mdash; in diesem Beispiel die "About"-App, die ein paar Informationen über die Community-Firmware anzeigt:
+Und schließlich kannst Du durch Antippen eines der runden App-Icons die zugehörige App starten &mdash; in diesem Beispiel die "About"-App, die ein paar Informationen über die Community-Firmware anzeigt:
 
 ![About](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/about.png "Screenshot der 'About'-App")
 
@@ -31,9 +31,9 @@ Ein längerer Druck (zwei Sekunden oder mehr) auf den "ON/OFF"-Schalter fährt d
 
 Mit der "WiFi"-App kannst Du den TXT mit einem bestehenden WLAN-Netzwerk verbinden.
 
-Die Netzwerkeinstellungen werden auf der SD-Karte gespeichert, und der TXT verbindet sich beim nächsten Start automatisch wieder mit dem Netzwerk wenn es in Reichweite ist.
+Die Netzwerkeinstellungen werden auf der SD-Karte gespeichert, und der TXT verbindet sich beim nächsten Start automatisch wieder mit dem Netzwerk, wenn es in Reichweite ist.
 
-Eine bestehende WLAN-Verbindung wird durch ein kleines WLAN-Signal in der Statusleiste des Hauptbildschirms angezeigt.
+Eine bestehende WLAN-Verbindung wird durch ein kleines WLAN-Signal-Symbol in der Statusleiste des Hauptbildschirms angezeigt.
 
 # Zugriff auf das Web-Interface
 
