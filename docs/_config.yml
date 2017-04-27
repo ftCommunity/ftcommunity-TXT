@@ -22,6 +22,7 @@ defaults:
     values:
       edit-repository-url: "https://github.com/EstherMi/ft-brickly-userguide"
       edit-repository-path: "/de/brickly/"
+      translate-repository-path: "/{{language}}/brickly/"
   - scope:
       path: "de/programming/brickly/index.md"
     values:

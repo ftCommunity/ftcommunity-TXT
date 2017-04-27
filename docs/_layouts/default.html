@@ -50,9 +50,39 @@ layout: postprocess-kramdown
         <ul id="language-nav">
           {% for l in site.languages %}
             {% assign svg = l | append: ".svg" %}
-            <li><a title="{{ label.language[l] }}" href="{{site.baseurl}}/{{l}}/{{path}}">{% include {{svg}} %}</a></li>
+            {% assign target_path = "/" | append: l | append: "/" | append: path %}
+            {% assign target_page = site.pages | where: "url", target_path | first %}
+            <li>
+              {% if target_page %}
+                <a title="{{ label.language[l] }}" href="{{site.baseurl}}{{target_page.url}}">{% include {{svg}} %}</a>
+              {% else %}
+                {% assign have-missing-language = true %}
+                {% if page.translate-repository-path %}
+                  {% assign translate-repository-path = page.translate-repository-path | replace_first: "{{language}}", l %}
+                {% else %}
+                  {% assign translate-repository-path = "/docs" | append: target_path %}
+                {% endif %}
+                <a title="{{ label.language[l] }}" href="#" class="translation-missing-icon" onclick="toggle_translation_hint('{{l}}')">{% include {{svg}} %}</a>
+                <div class="translation-missing-text" id="translation-missing-text-{{l}}">
+                  <span>{{ label.translation-missing.message[l] }}</span>
+                  <a class="edit" href="{{ edit-repository-url }}/new/master{{translate-repository-path}}?filename={{ page.name }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+                      <path d="M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z" />
+                    </svg>
+                    {{ label.translation-missing.translate[l] }}
+                  </a>
+                </div>
+              {% endif %}
+            </li>
           {% endfor %}
         </ul>
+        {% if have-missing-language %}
+          <script type="text/javascript">
+            function toggle_translation_hint(language) {
+              document.getElementById("translation-missing-text-" + language).classList.toggle("visible");
+            }
+          </script>
+        {% endif %}
         <ul id="page-nav">
           <li class="level-1{% if path == "" %} active current{% endif %}">
             <a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a>
@@ -72,6 +102,7 @@ layout: postprocess-kramdown
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
           <path d="M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z" />
         </svg>
+        <span>{{ label.edit_page[lang] }}</span>
       </a>
     </footer>
   </body>

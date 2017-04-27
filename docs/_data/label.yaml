@@ -1,6 +1,6 @@
 edit_page:
-  en: "Edit this page"
-  de: "Seite bearbeiten"
+  en: "Edit this page on GitHub"
+  de: "Seite auf GitHub bearbeiten"
 language:
   en: "English"
   de: "Deutsch"
@@ -10,3 +10,10 @@ maintained_by:
 home:
   de: "Startseite"
   en: "Home"
+translation-missing:
+  message:
+    de: "Diese Seite gibt es leider noch nicht auf Deutsch."
+    en: "Sorry, this page has not yet been translated into English."
+  translate:
+    de: "Seite auf GitHub übersetzen"
+    en: "Translate this page on GitHub"

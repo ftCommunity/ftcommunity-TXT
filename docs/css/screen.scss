@@ -62,7 +62,7 @@ html {
           width: 100%;
           &#language-nav li {
             display: inline-block;
-            a {
+            & > a {
               display: block;
               padding: 0;
               margin: 0;
@@ -70,6 +70,44 @@ html {
                 border: 1px solid #000;
                 width: 2.4em;
                 height: 1.2em;
+              }
+            }
+            .translation-missing-icon {
+              display: inline-block;
+              position: relative;
+              cursor: pointer;
+              svg{
+                border: 1px solid #000;
+                width: 2.4em;
+                height: 1.2em;
+              }
+            }
+            .translation-missing-icon::after {
+              position: absolute;
+              top: 0.5em;
+              left: -0.5em;
+              content: "\00a0";
+              background-color: red;
+              width: 3.25em;
+              height: 0.25em;
+              transform: rotate(-27.5deg);
+            }
+            .translation-missing-text {
+              display: none;
+              &.visible {
+                @extend %header-and-footer;
+                color: white;
+                position: absolute;
+                display: block;
+                border: 1px solid black;
+                padding-top: 0;
+                padding-bottom: 0.375em;
+                z-index: 200;
+                * {
+                  display: inline-block;
+                  margin-top: 0.125em;
+                  margin-bottom: 0.125em;
+                }
               }
             }
           }
@@ -131,23 +169,15 @@ html {
       @extend %header-and-footer;
       border-top: 1px outset #000;
       text-align: center;
+      vertical-align: middle;
       flex: none;
+      display: flex;
 
       a.maintained-by {
-        padding: .25em;
+        flex: 1 0 auto;
+        display: block;
         color: white;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      a.edit {
-        height: 1em;
-        width: 1em;
-        float: right;
         padding: .25em;
-        border-radius: 5px;
-        border-style: solid;
-        border-width: 1px;
-        background-color: lighten(#448acc, 30);
       }
     }
   }
@@ -197,11 +227,27 @@ html {
             position: absolute;
             background-color: #fcfcfc;
             width: 12em;
-            z-index: 9999;
+            z-index: 100;
           }
         }
       }
     }
+  }
+}
+
+a.edit {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: .25em;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  background-color: lighten(#448acc, 30);
+  color: black;
+  text-decoration: none;
+  svg {
+    width: 1em;
+    height: 1em;
   }
 }
 
