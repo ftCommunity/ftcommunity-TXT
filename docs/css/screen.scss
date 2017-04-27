@@ -214,20 +214,25 @@ html {
 
       main {
         display: block;
+        position: relative;
         nav, article {
           display: block;
           width: 95%;
           position: relative;
         }
         nav.flyout {
-          display: none;
+          display: block;
           position: absolute;
+          bottom: 0;
+          top: 0;
+          left: -15em;
+          background-color: white;
+          width: 12em;
+          border-right: 1px solid black;
+          z-index: 100;
+          transition: left 0.5s;
           &.visible {
-            display: block;
-            position: absolute;
-            background-color: #fcfcfc;
-            width: 12em;
-            z-index: 100;
+            left: 0;
           }
         }
       }
