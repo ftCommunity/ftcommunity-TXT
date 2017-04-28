@@ -1,0 +1,44 @@
+---
+# Jekyll layout that postprocesses the kramdown output in the <article> element.
+#
+# This layout assumes that the page contains exactly one <article> and
+# that this <article> contains only HTML output from kramdown.
+#
+# Processing:
+# * convert <p><img ... /></p> to <figure><img ... /></figure> and add a
+#   <figcaption> if the image contains a "title" attribute
+layout: compress
+---
+{% assign tmp = content | split: "<article>" %}
+{% assign prefix = tmp[0] %}
+{% assign tmp = tmp[1] | split: "</article>" %}
+{% assign content = tmp[0] %}
+{% assign suffix = tmp[1] %}
+{{ prefix }}
+<article>
+{% assign chunks = content | split: "<p>" %}{{ chunks[0] }}{% assign chunks = chunks | shift %}
+{% for chunk in chunks %}
+  {% assign start = chunk | strip | slice: 0, 5 %}
+  {% if  start == "<img " %}
+    {% assign img = chunk | strip | split: "/>" %}
+    {% if img[1] == "</p>" %}
+      <figure>
+        {% if img[0] contains "title=" %}
+          {% assign before_title = img[0] | split: "title=" %}
+          {% assign title = before_title[1] | split: '"' %}
+          {% assign after_title = title | shift | shift | join: '"' %}
+          {% assign title = title[1] %}
+          {{ before_title}} {{ after_title}}/>
+          <figcaption>{{ title }}</figcaption>
+        {% else %}
+          {{ img[0] }}/>
+        {% endif %}
+      </figure>
+    {% else %}
+      <p>{{ chunk }}
+    {% endif %}
+  {% else %}
+    <p>{{ chunk }}
+  {% endif %}
+{% endfor %}
+</article>{{ suffix }}
