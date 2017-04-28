@@ -2,6 +2,6 @@ config BR2_PACKAGE_LIBROBOINT
   bool "libroboint"
   select BR2_PACKAGE_LIBUSB
   select BR2_PACKAGE_LIBUSB_COMPAT
-  depends on BR2_PACKAGE_UCLIBC
+  select BR2_PACKAGE_UCLIBC
   help
     Install libroboint
