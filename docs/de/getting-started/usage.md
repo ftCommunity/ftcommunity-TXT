@@ -7,7 +7,7 @@ Nach dem Start siehst Du den Hauptbildschirm der Community-Firmware mit seinen r
 
 ![Launcher](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg "Beispielbild mit weiteren Apps")
 
-Die schwarze Statusleiste am obren Rand zeigt die aktuelle Zeit und einige Symbole mit Systeminformationen. Antippen der Statusleiste klappt ein Info-Feld mit mehr Details aus:
+Die schwarze Statusleiste am oberen Rand zeigt die aktuelle Zeit und einige Symbole mit Systeminformationen. Antippen der Statusleiste klappt ein Info-Feld mit mehr Details aus:
 
 ![Launcher](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/launcher-with-info-menu.png "Hauptbildschirm mit ausgeklapptem Info-Bereich")
 
