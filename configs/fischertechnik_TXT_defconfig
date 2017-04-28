@@ -181,8 +181,7 @@ BR2_PACKAGE_UNIONFS=y
 BR2_PACKAGE_LIBROBOINT=y
 BR2_PACKAGE_UCLIBC=y
 BR2_UCLIBC_CONFIG = package\uclibc\uClibc-ng.config
-BR2_PACKAGE_UCLIBC=y
-BR2_GCC_VERSION=6.3.0
+BR2_GCC_VERSION_6_X=y
 
 #
 # Interpreter languages and scripting
