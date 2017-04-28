@@ -12,7 +12,7 @@ import zipfile  # zipfile readout
 import urllib.request  # web requests
 import json  # json readout
 import semantic_version  # version management
-from pathlib import Path  # needd
+from pathlib import Path  # local version readout
 
 update_log = "/tmp/update_log.log"  # paths to update log
 update_exit = "/tmp/update_exit"
