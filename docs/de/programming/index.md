@@ -5,7 +5,7 @@ nav-pos: 2
 
 # Programmierung    
 
-Mit der Community-Firmware kannst du deine Fischertechnik-Modell je nach deinen Kenntnissen und Vorlieben auf verschiedene Arten programmieren.
+Mit der Community-Firmware kannst du deine Fischertechnik-Modelle je nach deinen Kenntnissen und Vorlieben auf verschiedene Arten programmieren.
 
 * Als Anfänger arbeitest du am einfachsten mit der graphischen Programmierumgebung [Brickly](brickly).
 
