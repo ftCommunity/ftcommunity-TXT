@@ -8,6 +8,7 @@
 import sys, os, shlex, time
 from subprocess import Popen, call, PIPE
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 try:
     if TouchStyle_version<1.3: TouchStyle_version=0
@@ -140,131 +141,57 @@ def get_associated(_iface):
                 return line.split('=')[1]
     return ""
 
-class KeyDialog(TouchDialog):
-    def __init__(self,title,strg,parent):
-        TouchDialog.__init__(self, title, parent)
-        
-        self.strg=strg
-        self.confbutpressed=False
-        
-        if TouchStyle_version >= 1.3:
-            confirmbutton = self.addConfirm()
-            confirmbutton.clicked.connect(self.on_confirmbutton)
-            self.setCancelButton()
-        
-        self.caps = True
-
-        self.layout = QVBoxLayout()
-
-        edit = QWidget()
-        edit.hbox = QHBoxLayout()
-        edit.hbox.setContentsMargins(0,0,0,0)
-
-        self.line = QLineEdit(strg)
-        self.line.setReadOnly(True)
-        self.line.setAlignment(Qt.AlignCenter)
-        edit.hbox.addWidget(self.line)
-        but = QPushButton()
-        pix = QPixmap(local + "erase.png")
-        icn = QIcon(pix)
-        but.setIcon(icn)
-        but.setIconSize(pix.size())
-        but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding);
-        but.clicked.connect(self.key_erase)
-        edit.hbox.addWidget(but)
-
-        edit.setLayout(edit.hbox)
-        self.layout.addWidget(edit)
-
-        self.tab = QTabWidget()
-
-        for a in range(3):
-            page = QWidget()
-            page.grid = QGridLayout()
-            page.grid.setContentsMargins(0,0,0,0)
-
-            cnt = 0
-            for i in keys_upper[a]:
-                if i == "Aa":
-                    but = QPushButton()
-                    pix = QPixmap(local + "caps.png")
-                    icn = QIcon(pix)
-                    but.setIcon(icn)
-                    but.setIconSize(pix.size())
-                    but.clicked.connect(self.caps_changed)
-                else:
-                    but = QPushButton(i)
-                    but.clicked.connect(self.key_pressed)
-
-                but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                page.grid.addWidget(but,cnt/4,cnt%4)
-                cnt+=1
-
-            page.setLayout(page.grid)
-            self.tab.addTab(page, keys_tab[a])
-
-        self.tab.tabBar().setExpanding(True);
-        self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-        self.layout.addWidget(self.tab)
-
-        self.centralWidget.setLayout(self.layout)        
-
-    def key_erase(self):
-        self.line.setText(self.line.text()[:-1]) 
-
-    def key_pressed(self):
-        self.line.setText(self.line.text() + self.sender().text())
-
-        # user pressed the caps button. Exchange all button texts
-    def caps_changed(self):
-        self.caps = not self.caps
-        if self.caps:  keys = keys_upper
-        else:          keys = keys_lower
-
-        # exchange all characters
-        for i in range(self.tab.count()):
-            gw = self.tab.widget(i)
-            gl = gw.layout()
-            for j in range(gl.count()):
-                w = gl.itemAt(j).widget()
-                if keys[i][j] != "Aa":
-                    w.setText(keys[i][j]);
-    
-    def on_confirmbutton(self):
-        self.confbutpressed=True
-        
-    def exec_(self):
-        TouchDialog.exec_(self)
-        if self.confbutpressed: return self.line.text()
-        else:
-            if TouchStyle_version>1.3: return self.strg 
-            else: return self.line.text()
-          
 # background thread to monitor state of interface
 class MonitorThread(QThread):
     def __init__(self):
         QThread.__init__(self)
 
     def __del__(self):
-        self.wait()
- 
+        self.stop()
+
     def run(self):
-        while True:
-            time.sleep(5)  # poll every 5 seconds
-            status = get_associated(IFACE)
-            self.emit( SIGNAL('update_status(QString)'), status )   
-        return
-    
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+        self.timer = QTimer()
+        self.timer.connect( self.timer, SIGNAL("timeout()"), self.on_timer_tick )
+        self.timer.start(5000) # Poll every 5 seconds
+        self.exec_()
+
+    def on_timer_tick(self):
+        status = get_associated(IFACE)
+        self.emit( SIGNAL('update_status(QString)'), status )   
+
+    def stop(self):
+        print("Stopping network monitor thread...")
+        self.timer.stop()
+        self.quit()
+        self.wait()
+        print("... network monitor thread stopped")
+
+class WlanWindow(TouchWindow):
+    def __init__(self, app, str):
+        super().__init__(str)
+        self.monitorThread = MonitorThread()
+        self.connect( self.monitorThread, SIGNAL("update_status(QString)"), app.on_update_status )
+
+    def show(self):
+        super().show()
+        # start thread to monitor wlan0 state and connect it to
+        # slot to receive events
+        self.monitorThread.start()
+
+    def close(self):
+        self.monitorThread.stop()
+        super().close()
+
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "wlan_"))
+        translator.load(self.locale(), os.path.join(path, "wlan_"))
         self.installTranslator(translator)
 
-        self.w = TouchWindow(QCoreApplication.translate("Main", "WLAN"))
+        self.mainWindow = WlanWindow(self, QCoreApplication.translate("Main", "WLAN"))
 
         self.vbox = QVBoxLayout()
 
@@ -310,21 +237,11 @@ class FtcGuiApplication(TouchApplication):
 
         self.vbox.addStretch()
 
-        self.edit_hbox_w = QWidget()
-        self.edit_hbox = QHBoxLayout()
+        self.vbox.addWidget(QLabel(QCoreApplication.translate("Main", "Key:")))
         self.key = QLineEdit(self.encr_key)
         self.key.setPlaceholderText(QCoreApplication.translate("placeholder", "key"))
         self.key.editingFinished.connect(self.do_edit_done)
-        self.edit_hbox.addWidget(self.key)
-        self.edit_but = QPushButton()
-        pix = QPixmap(local + "edit.png")
-        icn = QIcon(pix)
-        self.edit_but.setIcon(icn)
-        self.edit_but.setIconSize(pix.size())
-        self.edit_but.clicked.connect(self.do_key)
-        self.edit_hbox.addWidget(self.edit_but)
-        self.edit_hbox_w.setLayout(self.edit_hbox)
-        self.vbox.addWidget(self.edit_hbox_w)
+        self.vbox.addWidget(self.key)
 
         # the connect button is by default disabled until
         # the user enters a key
@@ -344,16 +261,11 @@ class FtcGuiApplication(TouchApplication):
         if self.networks and self.ssids_w.currentText() != "":
             self.set_default_encryption(self.ssids_w.currentText())
 
-        self.w.centralWidget.setLayout(self.vbox)
-        self.w.show() 
+        self.mainWindow.centralWidget.setLayout(self.vbox)
 
-        # start thread to monitor wlan0 state and connect it to
-        # slot to receive events
-        self.monitorThread = MonitorThread()
-        self.w.connect( self.monitorThread, SIGNAL("update_status(QString)"), self.on_update_status )
-        self.monitorThread.start()
-
-        self.exec_()        
+        # make sure key edit has focus
+        self.key.setFocus()
+        self.mainWindow.show()
 
     def on_update_status(self, ssid):
         if self.connected_ssid != ssid:
@@ -378,12 +290,8 @@ class FtcGuiApplication(TouchApplication):
         # user entered a key using a keyboard
     def do_edit_done(self):
         self.set_key(self.sender().text())
+        self.key.setFocus()
 
-        # user hit the "key edit button"
-    def do_key(self):
-        dialog = KeyDialog(QCoreApplication.translate("Main", "Key"),self.encr_key,self.w)
-        self.set_key( dialog.exec_() )
- 
     def do_connect(self):
         ssid = self.ssids_w.currentText()
         enc_type = self.encr_w.currentText()
@@ -413,4 +321,13 @@ class FtcGuiApplication(TouchApplication):
             self.connect.setDisabled(self.encr_key == "")
 
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)
+

@@ -1,0 +1,64 @@
+// (S)CSS rules for the rendered markdown content
+
+@import "syntax-highlighting-github";
+.highlight {
+  padding: 1.5em;
+  background: #eee;
+  overflow: auto;
+}
+
+h1 {
+    color: #000;
+    font-size: larger;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    margin: 0;
+    clear: both;
+}
+
+h2 {
+    color: #000;
+    font-size: large;
+    font-weight: bold;
+    margin: 0;
+}
+
+h3, h4, h5, h6 {
+    color: #000;
+    font-weight: bold;
+    margin: 0;
+}
+
+img {
+    display: block;
+    max-width: 40%;
+    float: right;
+    clear: right;
+    margin-left: 1em;
+    margin-right: 0;
+    &.left {
+      float: left;
+      clear: left;
+      margin-right: 1em;
+      margin-left: 0;
+    }
+    &.right {}
+}
+
+figure {
+  display: block;
+  clear: both;
+  max-width: 100%;
+  img {
+    float: none;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  figcaption {
+    display: block;
+    text-align: center;
+  }
+}

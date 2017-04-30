@@ -1,0 +1,4 @@
+## Permissions for ftc access to programs required
+## for wifi setup
+
+ftc     ALL = NOPASSWD: /sbin/route, /sbin/ifconfig, /sbin/udhcpc, /bin/pkill -SIG* -f udhcpc -R -n -p * -i *

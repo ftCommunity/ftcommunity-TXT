@@ -1,0 +1,277 @@
+---
+---
+$fork-icon-x-position: 5px;
+$fork-icon-y-position: 5px;
+$fork-icon-width: 42px;
+$fork-icon-height: 42px;
+html {
+  font-family: "arial";
+  color: #222;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+
+    header {
+      flex: none;
+      color: white;
+      display: block;
+      $fork-icon-bg-color: rgba(0,0,0,0);
+      $fork-banner-bg-color: #e47600;
+      @import "fork-me-on-github";
+
+      #nav-toggle-icon {
+        display: none;
+      }
+
+      h1 {
+          @extend %header-and-footer;
+          border-bottom: 1px outset #000;
+          font-weight: bold;
+          text-align: center;
+          padding-top: 15px;
+          padding-bottom: 15px;
+          margin-bottom: 10px;
+      }
+
+      .title-home {
+          color: #ffffff;
+          text-decoration: none;
+      }
+    }
+
+    main {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: row;
+
+      nav {
+        flex: 0 0 auto;
+        padding: 0.5em;
+        width: 12em;
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          &#language-nav li {
+            display: inline-block;
+            & > a {
+              display: block;
+              padding: 0;
+              margin: 0;
+              svg{
+                border: 1px solid #000;
+                width: 2.4em;
+                height: 1.2em;
+              }
+            }
+            .translation-missing-icon {
+              display: inline-block;
+              position: relative;
+              cursor: pointer;
+              svg{
+                border: 1px solid #000;
+                width: 2.4em;
+                height: 1.2em;
+              }
+            }
+            .translation-missing-icon::after {
+              position: absolute;
+              top: 0.5em;
+              left: -0.5em;
+              content: "\00a0";
+              background-color: red;
+              width: 3.25em;
+              height: 0.25em;
+              transform: rotate(-27.5deg);
+            }
+            .translation-missing-text {
+              display: none;
+              &.visible {
+                @extend %header-and-footer;
+                color: white;
+                position: absolute;
+                display: block;
+                border: 1px solid black;
+                padding-top: 0;
+                padding-bottom: 0.375em;
+                z-index: 200;
+                * {
+                  display: inline-block;
+                  margin-top: 0.125em;
+                  margin-bottom: 0.125em;
+                }
+              }
+            }
+          }
+          &#page-nav li {
+            white-space: nowrap;
+            padding-top: 0.25em;
+            padding-bottom: 0.25em;
+            &::before {
+              content: "\00a0";
+              width: 0.25em;
+              display: inline-block;
+              height: 100%;
+              vertical-align: middle;
+            }
+            &.level-3::before {
+              margin-right: 1em;
+            }
+            &.level-2::before {
+              margin-right: 0.5em;
+            }
+            &.level-1::before {
+              margin-right: 0;
+            }
+            &.current::before {
+              background-color: #448acc;
+            }
+            a {
+              text-decoration: none;
+              color: inherit;
+              display: inline-block;
+              white-space: normal;
+              vertical-align: middle;
+            }
+            svg {
+              width: 1em;
+              height: 0.5em;
+              display: inline-block;
+              padding-left: .5em;
+            }
+            &.level-1 {
+              border-bottom: 1px solid #000;
+            }
+          }
+        }
+      }
+      article {
+        flex: 1 1 auto;
+        text-align: justify;
+        width: 90%;
+        max-width: 50em;
+        margin: 0 auto;
+        padding: 0.5em;
+
+        @import "markdown";
+      }
+    }
+
+    footer {
+      @extend %header-and-footer;
+      border-top: 1px outset #000;
+      text-align: center;
+      vertical-align: middle;
+      flex: none;
+      display: flex;
+
+      a.maintained-by {
+        flex: 1 0 auto;
+        display: block;
+        color: white;
+        padding: .25em;
+      }
+    }
+  }
+}
+
+%header-and-footer {
+  margin: 0;
+  background: #448acc;
+  padding: .5em;
+}
+
+@media all and (max-width: 40em) {
+  html {
+    body {
+      header {
+        h1 {
+          font-size: 100%;
+        }
+        #nav-toggle-icon.visible {
+            // use the same positioning as the "fork me" icon, only at the left
+            top: $fork-icon-y-position;
+            left: $fork-icon-x-position;
+            display: block;
+            position: absolute;
+            cursor: pointer;
+            padding: 0.25em;
+            svg {
+              width: 1.5em;
+              height: 1.5em;;
+              fill: white;
+            }
+        }
+      }
+
+      main {
+        display: block;
+        position: relative;
+        nav, article {
+          display: block;
+          width: 95%;
+          position: relative;
+        }
+        nav.flyout {
+          display: block;
+          position: absolute;
+          bottom: 0;
+          top: 0;
+          left: -15em;
+          background-color: white;
+          width: 12em;
+          border-right: 1px solid black;
+          z-index: 100;
+          transition: left 0.5s;
+          &.visible {
+            left: 0;
+          }
+        }
+      }
+      footer {
+        flex-direction: column;
+        * {
+          margin: auto;
+        }
+      }
+    }
+  }
+}
+
+a.edit {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: .25em;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  background-color: lighten(#448acc, 30);
+  color: black;
+  text-decoration: none;
+  svg {
+    width: 1em;
+    height: 1em;
+  }
+}
+
+.outline {
+    color: black;
+    font-weight: bold;
+    text-shadow:
+    1px  0px 0 white,
+    -1px  0px 0 white,
+    0px  1px 0 white,
+    0px -1px 0 white,
+    -1px -1px 0 white,
+    1px -1px 0 white,
+    -1px  1px 0 white,
+    1px  1px 0 white,
+}

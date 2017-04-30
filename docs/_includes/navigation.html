@@ -1,0 +1,62 @@
+{% assign prefix = {{include.prefix}} | default: "" %}
+{% assign level = {{include.level}} | default: 1 %}
+{% assign pages = site.pages | sort: "nav-pos", "last" %}
+{% assign current_url = page.url | slice: 3, 1000 %}
+{% comment %}
+ Step 1: Sort pages by nav-pos order, extract the language independent path
+ of all entries that should show up in the navigation into the 'sections'
+ variable, and finally strip all duplicates from 'sections'
+{% endcomment %}
+{% assign sections = "" | split: "/" %}
+{% for entry in pages %}
+  {% assign url_parts = entry.url | split: "/" | shift %}
+  {% assign entry_lang = url_parts[0] %}
+  {% assign full_prefix = "/" | append: entry_lang | append: "/" | append: prefix %}
+  {% if site.languages contains entry_lang and entry.url contains full_prefix %}
+    {% assign entry_level = url_parts | size | plus: -1 %}
+      {% if entry_level == level %}
+        {% assign lang_independent_url = entry.url | slice: 3, 1000 %}
+        {% assign sections = sections | push: lang_independent_url %}
+      {% endif %}
+  {% endif %}
+{% endfor %}
+{% assign sections = sections | uniq %}
+
+{% comment %}
+ Step 2: Build navigation links for everything in 'sections'. Fall back to the
+ first foreign language (in site.languages order) if there is no corresponding
+ page in the current language
+{% endcomment %}
+{% assign section_count = sections | size %}
+{% if section_count > 0 %}
+  {% if include.tag %}<{{include.tag}}>{% endif %}
+  {% for section in sections %}
+    {% assign url = "/" | append: lang | append: section %}
+    {% assign target_page = pages | where: "url", url | first %}
+    {% assign fallback = nil %}
+    {% unless target_page %}
+      {% for lang in site.languages %}
+        {% unless target_page %}
+          {% assign url = "/" | append: lang | append: section %}
+          {% assign target_page = pages | where: "url", url | first %}
+          {% assign fallback = lang %}
+        {% endunless %}
+      {% endfor %}
+    {% endunless %}
+    <li class="level-{{level}}{% if current_url contains section %} active{% endif %}{% if current_url == section %} current{% endif %}">
+      <a href="{{ target_page.url | relative_url }}">
+        {{ target_page.nav-title | default: target_page.title | default: target_page.url }}
+        {% if fallback %}
+          {% include {{ fallback | append: ".svg"}} %}
+        {% endif %}
+      </a>
+      {% if current_url contains section %}
+        {% assign sublevel = level | plus: 1 %}
+        {% assign subprefix = section | slice: 1, 1000 %}
+        {% include navigation.html prefix=subprefix level=sublevel tag="ul" %}
+        {% assign level = include.level | default: 1 %}
+      {% endif %}
+    </li>
+  {% endfor %}
+  {% if include.tag %}</{{include.tag}}>{% endif %}
+{% endif %}

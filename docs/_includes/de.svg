@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 3" width="32" height="16">
+	<title>Deutsch</title>
+	<rect id="black_stripe" width="6" height="3" y="0" x="0" fill="#000"/>
+	<rect id="red_stripe" width="6" height="2" y="1" x="0" fill="#D00"/>
+	<rect id="gold_stripe" width="6" height="1" y="2" x="0" fill="#FFCE00"/>
+</svg>

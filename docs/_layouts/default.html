@@ -1,0 +1,109 @@
+---
+layout: postprocess-kramdown
+---
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>fischertechnik TXT community firmware</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{site.baseurl}}/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="{{site.baseurl}}/css/screen.css" type="text/css" media="screen" />
+  </head>
+  <body lang="{{ lang }}">
+    {% assign edit-repository-url = page.edit-repository-url | default: site.github.repository_url %}
+    {% assign edit-repository-path-default = "/docs" | append: page.dir %}
+    {% assign edit-repository-path = page.edit-repository-path | default: edit-repository-path-default %}
+    {% capture lang %}{{ page.url | slice: 1, 2 }}{% endcapture %}
+    {% capture path %}{{ page.url | slice: 4, 100000 }}{% endcapture %}
+    {% assign label = site.data.label %}
+    <header>
+      <div id="nav-toggle-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+          <path d="M0 0v1h8v-1h-8zm0 2.97v1h8v-1h-8zm0 3v1h8v-1h-8z" transform="translate(0 1)" />
+        </svg>
+      </div>
+      <div class="fork-me-wrapper">
+        <div class="fork-me">
+          <a class="fork-me-link" href="{{ site.github.repository_url }}">
+            <span class="fork-me-text">Fork me on GitHub</span>
+          </a>
+        </div>
+      </div>
+      <h1>
+        <div class="outline"><a class="title-home" href="{{ site.baseurl }}/{{ lang }}/"><font color="red">fischer</font><font color="#046ab4">technik</font>&nbsp;<font color="#fcce04">TXT</font></a></div>
+        <a class="title-home" href="{{ site.baseurl }}/{{ lang }}/">community firmware</a>
+      </h1>
+    </header>
+
+    <main>
+      <nav id="navigation">
+        <script type="text/javascript">
+          var navicon = document.getElementById("nav-toggle-icon");
+          var navigation = document.getElementById("navigation");
+          navicon.classList.add("visible");
+          navigation.classList.add("flyout");
+          navicon.addEventListener("click", function() {
+            document.getElementById("navigation").classList.toggle("visible");
+          });
+        </script>
+        <ul id="language-nav">
+          {% for l in site.languages %}
+            {% assign svg = l | append: ".svg" %}
+            {% assign target_path = "/" | append: l | append: "/" | append: path %}
+            {% assign target_page = site.pages | where: "url", target_path | first %}
+            <li>
+              {% if target_page %}
+                <a title="{{ label.language[l] }}" href="{{site.baseurl}}{{target_page.url}}">{% include {{svg}} %}</a>
+              {% else %}
+                {% assign have-missing-language = true %}
+                {% if page.translate-repository-path %}
+                  {% assign translate-repository-path = page.translate-repository-path | replace_first: "{{language}}", l %}
+                {% else %}
+                  {% assign translate-repository-path = "/docs" | append: target_path %}
+                {% endif %}
+                <a title="{{ label.language[l] }}" href="#" class="translation-missing-icon" onclick="toggle_translation_hint('{{l}}')">{% include {{svg}} %}</a>
+                <div class="translation-missing-text" id="translation-missing-text-{{l}}">
+                  <span>{{ label.translation-missing.message[l] }}</span>
+                  <a class="edit" href="{{ edit-repository-url }}/new/master{{translate-repository-path}}?filename={{ page.name }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+                      <path d="M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z" />
+                    </svg>
+                    {{ label.translation-missing.translate[l] }}
+                  </a>
+                </div>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        {% if have-missing-language %}
+          <script type="text/javascript">
+            function toggle_translation_hint(language) {
+              document.getElementById("translation-missing-text-" + language).classList.toggle("visible");
+            }
+          </script>
+        {% endif %}
+        <ul id="page-nav">
+          <li class="level-1{% if path == "" %} active current{% endif %}">
+            <a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a>
+          </li>
+          {% include navigation.html %}
+        </ul>
+      </nav>
+
+      <article>
+        {{ content }}
+      </article>
+    </main>
+
+    <footer>
+      <a class="maintained-by" href="{{ site.github.owner_url }}">{{ label.maintained_by[lang] }}</a>
+      <a class="edit" href="{{ edit-repository-url }}/edit/master{{edit-repository-path}}{{page.name}}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+          <path d="M6 0l-1 1 2 2 1-1-2-2zm-2 2l-4 4v2h2l4-4-2-2z" />
+        </svg>
+        <span>{{ label.edit_page[lang] }}</span>
+      </a>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+[app]
+name: Bluetooth
+category: System
+author: Till Harbaum &lt;till@harbaum.org&gt;
+icon: icon.png
+desc: Bluetooth config
+exec: bluetooth.py
+managed: yes
+uuid: 8ea0b4a1-24e4-4ee0-b1b9-e087caf5d104
+
+[de]
+name: Bluetooth
+desc: Bluetooth-Konfiguration
