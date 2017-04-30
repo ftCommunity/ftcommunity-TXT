@@ -1,0 +1,38 @@
+From 66a0be606639dde6e557669f5e167a4e0b2dd23b Mon Sep 17 00:00:00 2001
+From: Richard Kunze <richard.kunze@web.de>
+Date: Sat, 29 Apr 2017 21:29:42 +0200
+Subject: [PATCH] Hardcode library name for libroboint.
+
+ctypes.util.find_library() needs ldconfig, but we don't
+have this on the TXT. Since we know which version of
+libroboint is available, simply hard code the library
+name instead.
+---
+ robointerface.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/robointerface.py b/robointerface.py
+index 4f8e4aa..1e1801c 100644
+--- a/robointerface.py
++++ b/robointerface.py
+@@ -143,7 +143,7 @@ def GetNumFtUsbDevices():
+ 
+         Returns Number of ft Interface devices on the USB bus found.
+         """
+-        sLibName = ctypes.util.find_library("roboint")
++        sLibName = "libroboint.so.0"
+         if not sLibName:
+                 print("Error: Can't find Library libroboint",file=sys.stderr)
+         else:
+@@ -237,7 +237,7 @@ class RoboInterface:
+                 bStartTransferArea -- Start the transfer area. Usually you want that.
+                 """
+                 self.transfer_area = None
+-                sLibName = ctypes.util.find_library("roboint")
++                sLibName = "libroboint.so.0"
+                 if not sLibName:
+                         print("Error: Can't find Library libroboint", file=sys.stderr)
+                 else:
+-- 
+2.11.0
+
