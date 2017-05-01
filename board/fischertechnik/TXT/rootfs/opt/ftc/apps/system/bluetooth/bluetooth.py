@@ -3,7 +3,7 @@
 #
 
 import sys, os, shlex, io, time
-from subprocess import Popen, call, PIPE, check_output
+from subprocess import Popen, call, PIPE, check_output, CalledProcessError
 from TouchStyle import *
 
 # only care for the built-in bluetooth adapter
@@ -13,10 +13,11 @@ DEV = "hci0"
 class ExecThread(QThread):
     finished = pyqtSignal(bool,object)
 
-    def __init__(self, cmd, silent):
+    def __init__(self, cmd, silent, wait = 5):
         super(ExecThread,self).__init__()
         self.cmd = cmd
         self.silent = silent
+        self.wait = wait
     
     def run(self):
         self.run_program(self.cmd)
@@ -43,9 +44,10 @@ class ExecThread(QThread):
                 # we must not touch stdout/stderr when running
                 # the init script as proc.communicate will wait ...
                 proc  = Popen(([executable] + executable_options))
-                time.sleep(5)  # artificially wait a little bit
-                # to give script some time to run before hciconfig is
-                # being called etc ....
+                if self.wait:
+                    time.sleep(self.wait)  # artificially wait a little bit
+                    # to give script some time to run before hciconfig is
+                    # being called etc ....
                 response = [ "", "" ]
                 response_stdout = ""
                 response_stderr = ""
@@ -112,7 +114,7 @@ class HciConfig(ExecThread):
                 if cnt == 2:
                     p = l.split()
                     if p[0].lower() == "name:":
-                        result["name"] = p[1].strip("'").strip('"')
+                        result["name"] = ' '.join(p[1:]).strip("'").strip('"')
 
             if cnt >= 0:
                 cnt += 1
@@ -191,6 +193,7 @@ class EntryWidget(QWidget):
 
         layout = QVBoxLayout()
         layout.setSpacing(0)
+        layout.setContentsMargins(0,0,0,0)
         self.title = QLabel(title)
         layout.addWidget(self.title)        
         self.value = QLabel("")
@@ -213,7 +216,16 @@ class FtcGuiApplication(TouchApplication):
         # create the empty main window
         self.w = TouchWindow(QCoreApplication.translate("FtcGuiApplication","Bluetooth"))
 
+        menu = self.w.addMenu()
+        self.menu_btrc = menu.addAction(QCoreApplication.translate("FtcGuiApplication","BT Control Set"))
+        self.menu_btrc.triggered.connect(self.start_bt_remote_server)
+
+        self.check_for_ft_bt_remote_server()
+        
+        menu.addSeparator()
+
         self.vbox = QVBoxLayout()
+        self.vbox.setSpacing(0)
 
         self.vbox.addStretch()
 
@@ -221,8 +233,12 @@ class FtcGuiApplication(TouchApplication):
         self.ena.setDisabled(True)
         self.vbox.addWidget(self.ena)
 
+        self.vbox.addStretch()
+
         self.bdaddr = EntryWidget(QCoreApplication.translate("FtcGuiApplication","BT Address:"))
         self.vbox.addWidget(self.bdaddr)
+
+        self.vbox.addStretch()
 
         self.name = EntryWidget(QCoreApplication.translate("FtcGuiApplication","Name:"))
         self.vbox.addWidget(self.name)
@@ -300,7 +316,21 @@ class FtcGuiApplication(TouchApplication):
         # read name after the flags have been read
         if self.callback:
             self.callback()
-            
 
+    def start_bt_remote_server(self):
+        call("sudo /usr/bin/ft_bt_remote_start.sh &", shell=True)
+        time.sleep(2)   # give script some time to start and set the name etc
+        self.hciconfig(None, self.get_name)
+        self.check_for_ft_bt_remote_server()
+
+    def check_for_ft_bt_remote_server(self):
+        try:
+            check_output(["pidof", "ft_bt_remote_server"])
+            # process exists, prevent user from starting a second one
+            self.menu_btrc.setEnabled(False)
+            
+        except CalledProcessError:
+            pass
+    
 if __name__ == "__main__":
     FtcGuiApplication(sys.argv)
