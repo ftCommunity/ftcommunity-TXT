@@ -255,14 +255,14 @@ class FtcGuiApplication(TouchApplication):
 
         self.btrc_vbox.addStretch()
 
-        label = QLabel(QCoreApplication.translate("BTRC", "The BT Remote Set server is running."))
+        label = QLabel(QCoreApplication.translate("BTRC", "The BT Control Set server is running."))
         label.setObjectName("smalllabel")
         label.setWordWrap(True)
         label.setAlignment(Qt.AlignCenter)
         self.btrc_vbox.addWidget(label)        
         self.btrc_vbox.addStretch()
 
-        label = QLabel(QCoreApplication.translate("BTRC", "You can connect with the blue transmitter from BT Control Set or with a smart phone running the BlueTooth Control app."))
+        label = QLabel(QCoreApplication.translate("BTRC", "You can connect with the blue transmitter from the BT Control Set or with a smart phone running the BlueTooth Control app."))
         label.setObjectName("tinylabel")
         label.setWordWrap(True)
         label.setAlignment(Qt.AlignCenter)

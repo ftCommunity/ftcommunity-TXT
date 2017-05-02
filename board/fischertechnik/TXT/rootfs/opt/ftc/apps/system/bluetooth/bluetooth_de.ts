@@ -5,12 +5,12 @@
     <name>BTRC</name>
     <message>
         <location filename="bluetooth.py" line="260"/>
-        <source>The BT Remote Set server is running.</source>
-        <translation>Der BT-Remote-Server ist aktiv.</translation>
+        <source>The BT Control Set server is running.</source>
+        <translation>Der BT-Control-Set-Server ist aktiv.</translation>
     </message>
     <message>
         <location filename="bluetooth.py" line="267"/>
-        <source>You can connect with the blue transmitter from BT Control Set or with a smart phone running the BlueTooth Control app.</source>
+        <source>You can connect with the blue transmitter from the BT Control Set or with a smart phone running the BlueTooth Control app.</source>
         <translation>Du kannst Dich mit dem blauen Sender aus dem BT-Control-Set verbinden oder mit einem Smart-Phone auf dem die BlueTooth-Control-App läuft. </translation>
     </message>
     <message>
