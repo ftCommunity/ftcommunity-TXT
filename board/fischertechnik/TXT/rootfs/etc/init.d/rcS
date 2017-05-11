@@ -58,7 +58,7 @@ done
 psplash-write "PROGRESS 100"
 psplash-write "QUIT"
 
-# lanuch ftc gui
+# launch ftc gui
 export PYTHONPATH=/opt/ftc
 export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
 export QWS_KEYBOARD=""
