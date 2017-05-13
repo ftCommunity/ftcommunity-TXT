@@ -129,7 +129,7 @@ class TouchTitle(QLabel):
 class TouchBaseWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             size = QApplication.desktop().screenGeometry()
             self.setFixedSize(size.width(), size.height())
         else:
@@ -146,7 +146,7 @@ class TouchBaseWidget(QWidget):
         # TXT windows are always fullscreen on arm (txt itself)
         # and windowed else (e.g. on PC)
     def show(self):
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
@@ -230,7 +230,7 @@ class TouchDialog(QDialog):
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             size = QApplication.desktop().screenGeometry()
             self.setFixedSize(size.width(), size.height())
         else:
@@ -295,7 +295,7 @@ class TouchDialog(QDialog):
         
         # TXT windows are always fullscreen
     def exec_(self):
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
@@ -702,7 +702,7 @@ class TouchInputContext(QInputContext):
     def keyboard_present():
         # on the (non-arm) desktop always return False to force 
         # on screen keyboard
-        if platform.machine() != "armv7l":
+        if platform.machine()[0:3] != "arm":
             print("Forcing on screen keyboard on non-arm device")
             return False
 

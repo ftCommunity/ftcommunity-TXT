@@ -31,9 +31,9 @@ def _ifinfo(sock, addr, ifname):
     return socket.inet_ntoa(info[20:24])
 
 def all_interfaces():
-    if platform.machine() == "armv7l": size = 32
-    else:                              size = 40
-    
+    if platform.machine()[0:3] == "arm": size = 32
+    else:                                size = 40
+
     bytes = 8 * size
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     names = array.array('B', b'\x00' * bytes)
