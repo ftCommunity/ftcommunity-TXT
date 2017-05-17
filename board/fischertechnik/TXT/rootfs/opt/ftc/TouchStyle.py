@@ -351,8 +351,6 @@ class TouchMessageBox(TouchDialog):
         self.text=""
         self.text_okay=None
         self.text_deny=None
-        self.parent=parent
-        
         
         self.confbutclicked=False
         self.confirm=None
