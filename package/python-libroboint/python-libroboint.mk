@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-PYTHON_LIBROBOINT_VERSION = c7e77a991df1b5153b94893936f6d5f4762c44d9
+PYTHON_LIBROBOINT_VERSION = b4dda4e5bad4f828096f44904c98f597b7c13be3
 PYTHON_LIBROBOINT_SITE = $(call github,PeterDHabermehl,libroboint-py3,$(PYTHON_LIBROBOINT_VERSION))
 PYTHON_LIBROBOINT_DEPENDENCIES = libroboint
 
