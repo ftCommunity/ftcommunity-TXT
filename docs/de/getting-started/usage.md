@@ -36,6 +36,6 @@ Die Netzwerkeinstellungen werden auf der MicroSD-Karte gespeichert, und der TXT 
 
 # Zugriff auf das Web-Interface
 
-Die Community-Firmware stellt ein Web-Interface zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf das Web-Interface zuzugreifen, gibst Du "**http:\\IP-Adresse**" in die Addresszeile des Browsers ein. Dabei ist "**IP-Adresse**" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Hauptbildschirms antippst.
+Die Community-Firmware stellt ein Web-Interface zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf das Web-Interface zuzugreifen, gibst Du "**http://IP-Adresse**" in die Addresszeile des Browsers ein. Dabei ist "**IP-Adresse**" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Hauptbildschirms antippst.
 
 Im Beispiel oben ist die IP-Addresse **192.168.0.30**, d.h. Du würdest im Browser http://192.168.0.30 eingeben um das Web-Interface zu starten. (**Achtung: dein TXT hat höchst wahrscheinlich eine andere IP-Addresse.**)
