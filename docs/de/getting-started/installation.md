@@ -3,7 +3,7 @@ nav-title: Installation
 ---
 # Voraussetzungen
 
-* Eine MicroSD-Karte (microSD oder microSDHC, d.h. bis 32GB. **Größere Karten werden vom TXT unter Umständen nicht erkannt**). Die Größe ist nicht so wichtig (die Community-Firmware braucht weniger als 100MB). **Bsp.:** auf einer **2GB** großen micoSD-Karte hätten **1800** Programm und das Betriebssytem platz.
+* Eine MicroSD-Karte (microSD oder microSDHC, d.h. bis 32GB. **Größere Karten werden vom TXT unter Umständen nicht erkannt**). Die Größe ist nicht so wichtig (die Community-Firmware braucht weniger als 100MB). **Bsp.:** auf einer **2GB** großen MicroSD-Karte hätten ca. **1800** Programm (bei 1MB pro Programm) und das Betriebssytem platz.
 
 * Eine Möglichkeit, ZIP-Dateien auf der MikroSD-Karte auszupacken.
 
@@ -15,7 +15,7 @@ nav-title: Installation
 
 1. Danach lädst Du hier https://github.com/ftCommunity/ftcommunity-TXT/releases/latest das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.2.zip"_)
 
-1. packst das Archiv aus und kopierst die drei enthaltenen Dateien auf eine FAT32 formatierte micoSD-Karte.
+1. packst das Archiv aus und kopierst die drei enthaltenen Dateien auf eine FAT32 formatierte MicroSD-Karte.
 
 1. Jetzt setzt du nur noch die microSD-Karte in den TXT ein und drückst den Startknopf. Nach kurzer Zeit erscheint ein gelber Ladebalken und im unteren Bereich des Bildschirms die Aufschrift "Community Edition":
 

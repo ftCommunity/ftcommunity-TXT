@@ -18,17 +18,17 @@ Und schließlich kannst Du durch Antippen eines der runden App-Icons die zugehö
 
 ![About](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/about.png "Screenshot der 'About'-App")
 
-Einige Apps (darunter die "About"-App) stellen zusätzliche Optionen zur Verfügung, die über das "**Drei-Balken-Symbol**" links in der Titelzeile erreichbar sind:
+Einige Apps (darunter die "About"-App) stellen zusätzliche Optionen zur Verfügung, die über das **Drei-Balken-Symbol** links in der Titelzeile erreichbar sind:
 
 ![About](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/about-with-menu.png "Screenshot  der 'About'-App mit ausgeklapptem Options-Menü")
 
-Mit dem "**X**" rechts in der Titelzeile oder mit einem kurzen Druck (eine Sekunde oder kürzer) auf den blau leuchtenden "**ON/OFF**"-Schalter des TXT beendest Du die App und kommst zum Hauptbildschirm zurück.
+Mit dem **X** rechts in der Titelzeile oder mit einem kurzen Druck (eine Sekunde oder kürzer) auf den blau leuchtenden **ON/OFF**-Schalter des TXT beendest Du die App und kommst zum Hauptbildschirm zurück.
 
-Ein längerer Druck (_zwei Sekunden oder mehr_) auf den "**ON/OFF**"-Schalter fährt den TXT herunter und schaltet ihn ab.
+Ein längerer Druck (_zwei Sekunden oder mehr_) auf den **ON/OFF**-Schalter fährt den TXT herunter und schaltet ihn ab.
 
 # Verbindung mit einem WLAN
 
-Mit der "**WiFi**"-App kannst Du den TXT mit einem bestehenden WLAN-Netzwerk verbinden.
+Mit der **WiFi**-App kannst Du den TXT mit einem bestehenden WLAN-Netzwerk verbinden.
 
 Die Netzwerkeinstellungen werden auf der MicroSD-Karte gespeichert, und der TXT verbindet sich beim nächsten Start automatisch wieder mit dem Netzwerk, **wenn es in Reichweite ist**.
 
@@ -36,6 +36,6 @@ Die Netzwerkeinstellungen werden auf der MicroSD-Karte gespeichert, und der TXT 
 
 # Zugriff auf das Web-Interface
 
-Die Community-Firmware stellt ein Web-Interface zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf das Web-Interface zuzugreifen, gibst Du "**http://IP-Adresse**" in die Addresszeile des Browsers ein. Dabei ist "**IP-Adresse**" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Hauptbildschirms antippst.
+Die Community-Firmware stellt ein Web-Interface zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf das Web-Interface zuzugreifen, gibst Du `http://IP-Adresse` in die Addresszeile des Browsers ein. Dabei ist "IP-Adress" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Hauptbildschirms antippst.
 
-Im Beispiel oben ist die IP-Addresse **192.168.0.30**, d.h. Du würdest im Browser http://192.168.0.30 eingeben um das Web-Interface zu starten. (**Achtung: dein TXT hat höchst wahrscheinlich eine andere IP-Addresse.**)
+Im Beispiel oben ist die IP-Addresse `192.168.0.30`, d.h. Du würdest im Browser `http://192.168.0.30` eingeben um das Web-Interface zu starten. (**Achtung: dein TXT hat höchst wahrscheinlich eine andere IP-Addresse.**)
