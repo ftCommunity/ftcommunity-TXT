@@ -19,4 +19,4 @@ Die Installation erfolgt in vier einfachen Schritten:
   1. Entpacke das ZIP-Archiv und kopiere die 3 darin enthaltenen Datein auf die MicroSD-Karte (_**Formatiert in FAT32**_)
   1. Stecke die MicroSD-Karte in Deinen TXT und schalte ihn ein!
 
-Weitere Informationen findest Du in [unserem Wiki](http://cfw.ftcommunity.de/ftcommunity-TXT/de/getting-started/installation.html) und im [fischertechnik Community Forum](https://forum.ftcommunity.de/viewforum.php?f=33).
+Weitere Informationen findest Du in [Installations Anleitung](http://cfw.ftcommunity.de/ftcommunity-TXT/de/getting-started/installation.html) und im [fischertechnik Community Forum](https://forum.ftcommunity.de/viewforum.php?f=33).
