@@ -40,15 +40,15 @@ a TXT styled window looks like this:
 ```
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
+
 import sys
-from TxtStyle import *
+from TouchStyle import *
 
-class FtcGuiApplication(TxtApplication):
+class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
-        TxtApplication.__init__(self, args)
+        TouchApplication.__init__(self, args)
 
-        # create the empty main window
+        # Erstelle eine leeres Hauptfenster
         w = TxtWindow("Test")
         w.show()
         self.exec_()        
