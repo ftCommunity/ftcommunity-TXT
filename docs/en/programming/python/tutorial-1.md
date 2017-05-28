@@ -4,8 +4,6 @@ nav-pos: 1
 ---
 # Programming in Python: The First App
 
-Warning: This tutorial is outdated and needs to be updated!
-
 This tutorial is meant to give a basic introduction on how an application
 for the Community Firmware of the Fischertechnik TXT controller is being
 written.
