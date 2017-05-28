@@ -8,7 +8,7 @@ Dieses Tutorial soll den Einstieg erleichtern und die Grundschritte erklären!
 
 Eine Anwendung besteht aus **3** Teilen:
 
- * Das **Programm**. Dies ist normalerweise ein Python-Script. Es könnte aber auch jede beliebige andere Programmiersprache sein. Seit [Python](https://www.python.org) der Standart für die TXT-Programmierung ist wird dieses Tutorial sich ausschließlich darauf beziehen!
+ * Das **Programm**. Dies ist normalerweise ein Python-Script. Es könnte aber auch jede beliebige andere Programmiersprache sein. Seit [Python](https://www.python.org) der Standard für die TXT-Programmierung ist wird dieses Tutorial sich ausschließlich darauf beziehen!
 
  * Ein **Manifest**. Das ist eine kleine Datei die Den Programmnamen, Autor, und weitere Informationen enthält
 
