@@ -8,7 +8,7 @@ Dieses Tutorial soll den Einstieg erleichtern und die Grundschritte erklären!
 
 Eine Anwendung besteht aus **3** Teilen:
 
- * Das **Programm**. Dies ist normalerweise ein Python-Script. Es könnte aber auch jede beliebige andere Programmiersprache sein Seit [Python](https://www.python.org) der Standart für die TXT-Programmierung ist wird dieses Tutorial sich ausschließlich darauf beziehen!
+ * Das **Programm**. Dies ist normalerweise ein Python-Script. Es könnte aber auch jede beliebige andere Programmiersprache sein. Seit [Python](https://www.python.org) der Standart für die TXT-Programmierung ist wird dieses Tutorial sich ausschließlich darauf beziehen!
 
  * Ein **Manifest**. Das ist eine kleine Datei die Den Programmnamen, Autor, und weitere Informationen enthält
 
@@ -16,7 +16,7 @@ Eine Anwendung besteht aus **3** Teilen:
 
 ## Das Programm
 
-Das Programm kann eine beliebige, vom TXT ausführbare Datei sein. Solange das Programm vom Startbildschirm ausgeführt wird erwartet der Benutzer eine Anzeige des Programms. Deshalb sollte das Programm zumindestens eine minimalistische Oberfläche enthalten.
+Das Programm kann eine beliebige, vom TXT ausführbare Datei sein. Solange das Programm vom Launcher (_Startbildschirm_) ausgeführt wird erwartet der Benutzer eine Anzeige des Programms. Deshalb sollte das Programm zumindestens eine minimalistische Oberfläche enthalten.
 
 Aktuell benützen alle Anwendungen das [Qt4-Framework](http://www.qt.io/) für ihre Anzeigen. 
 Eine minimale Anwendung sieht so aus:
@@ -99,7 +99,7 @@ Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwending sind
  * "manifest", die Anwendungseigenschaften
  * "icon.png" Das Icon
 
-Um diese Datein auf den TXT zu bringen muss ein ZIP-Archiv erstellt werden.(_Z.B. mit [7-Zip](http://www.7-zip.de/download.html_) Alle 3 Datein **müssen** im Hauptordner liegen da sie der TXT sonst **nicht** findet! 
+Um diese Datein auf den TXT zu bringen muss ein ZIP-Archiv erstellt werden.(_Z.B. mit [7-Zip](http://www.7-zip.de/download.html)_) Alle 3 Datein **müssen** im Hauptordner liegen da sie der TXT sonst **nicht** findet! 
 
 Ein Archiv der Demo ist auch [verfügbar](https://github.com/ftCommunity/ftcommunity-apps/raw/master/packages/app_tutorial_1.zip)
 
