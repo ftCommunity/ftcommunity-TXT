@@ -1,5 +1,5 @@
 ---
-nav-title: The First App
+nav-title: Die erste Anwendung
 nav-pos: 1
 ---
 # Programmieren in Python: die erste Anwendung
@@ -107,23 +107,23 @@ Ein Archiv der Demo ist auch [verfügbar](https://github.com/ftCommunity/ftcommu
 
 Rufe mit dem Browser auf deinem PC die Weboberfäche des TXT auf
 
-![tut1_img1.jpg](tut1_img1.jpg)
+![tut1_img1.jpg](../../../en/programming/python/tut1_img1.jpg)
 
 Wähle mit dem Datei-Dialog das test.zip-Archiv aus und bestätige mit Upload:
 
-![tut1_img2.jpg](tut1_img2.jpg)
+![tut1_img2.jpg](../../../en/programming/python/tut1_img2.jpg)
 
 Die Anwendung ist nun sichtbar!
 
-![tut1_img6.jpg](tut1_img6.jpg)
+![tut1_img6.jpg](../../../en/programming/python/tut1_img6.jpg)
 
 Sie ist nun auch im Webinterface zu sehen:
 
-![tut1_img3.jpg](tut1_img3.jpg)
+![tut1_img3.jpg](../../../en/programming/python/tut1_img3.jpg)
 
 Das Webinterface zeigt auch Details des Manifests
 
-![tut1_img5.jpg](tut1_img5.jpg)
+![tut1_img5.jpg](../../../en/programming/python/tut1_img5.jpg)
 
 Natürlich kann die Anwendung von hieraus auch gelöscht werden.
 
