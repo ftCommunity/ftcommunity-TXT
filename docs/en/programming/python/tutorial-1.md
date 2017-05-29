@@ -31,7 +31,7 @@ execute. Since apps are usually started from the TXTs launcher on the
 user will expect some output on the screen. Thus the program should include
 a minimalistic GUI.
 
-Currently all apps use the [Qt Toolkit](http://www.qt.io/) for their user
+Currently all apps use the [Qt4-Toolkit](http://www.qt.io/) for their user
 interface. We'll thus also use Qt. A minimal python application opening
 a TXT styled window looks like this:
 
@@ -46,7 +46,7 @@ class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
-        # Erstelle eine leeres Hauptfenster
+        # Creates a empty MainWindow
         w = TxtWindow("Test")
         w.show()
         self.exec_()        
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
 Please save this file under the name [`test.py`](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/test.py)
 
-This app subclasses the TxtApplication class which was imported from
+This app subclasses the TouchApplication class which was imported from
 TxtStyle. It creates a window labeled "Test", shows that window and
 hands over execution to the window so it can interact with the user
 until it's closed.
