@@ -2,7 +2,7 @@
 nav-title: Die erste Anwendung
 nav-pos: 1
 ---
-# Programmieren in Python: die erste Anwendung
+# Programmieren in Python: Die erste Anwendung
 
 Dieses Tutorial soll den Einstieg erleichtern und die Grundschritte erklären!
 
