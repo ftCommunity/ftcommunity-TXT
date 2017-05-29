@@ -87,9 +87,9 @@ Speichere diese Datei als [`manifest`](https://raw.githubusercontent.com/ftCommu
 
 Das Icon kann jede Datei im JPEG- oder PNG-Format sein. Es muss eine Auflösung von **64x64** Pixeln haben
 
-![icon.png](../../../en/programming/python/icon.ico)
+![icon.png](../../../en/programming/python/icon.png)
 
-Ein Beispiel kann [hier](../../../en/programming/python/icon.ico) gefunden werden.
+Ein Beispiel kann [hier](../../../en/programming/python/icon.png) gefunden werden.
 
 # Verpacken
 

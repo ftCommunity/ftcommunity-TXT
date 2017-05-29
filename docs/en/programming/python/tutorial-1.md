@@ -117,9 +117,9 @@ Please save this file under the name [`manifest`](https://raw.githubusercontent.
 The icon can be any file in JPG or PNG format. It should be 64x64 pixels in
 size.
 
-![icon.png](../../../en/programming/python/icon.ico)
+![icon.png](../../../en/programming/python/icon.png)
 
-An example file can be found at [here](../../../en/programming/python/icon.ico)
+An example file can be found at [here](../../../en/programming/python/icon.png)
 
 This icon has been created using the [Inkscape](https://inkscape.org/) but most other paint programs will also do. The inkscape SVG file for this icon is also available [here](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/icon.svg)
 
