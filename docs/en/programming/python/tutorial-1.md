@@ -58,7 +58,7 @@ if __name__ == "__main__":
 Please save this file under the name [`test.py`](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/test.py)
 
 This app subclasses the TouchApplication class which was imported from
-TxtStyle. It creates a window labeled "Test", shows that window and
+TouchStyle. It creates a window labeled "Test", shows that window and
 hands over execution to the window so it can interact with the user
 until it's closed.
 
