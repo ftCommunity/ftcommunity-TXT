@@ -1,5 +1,5 @@
 auth       [success=ok default=2] /lib/security/pam_exec.so quiet /sbin/pam_null_passwd
-auth       sufficient   /lib/security/pam_exec.so quiet /sbin/pam_touchscreen Allow SSH login as $PAM_USER?
+auth       sufficient   /lib/security/pam_exec.so quiet /sbin/pam_touchscreen Allow SSH login as $PAM_USER from $PAM_RHOST?
 auth       requisite    /lib/security/pam_deny.so
 auth       required     /lib/security/pam_unix.so shadow nodelay
 account    required     /lib/security/pam_nologin.so
