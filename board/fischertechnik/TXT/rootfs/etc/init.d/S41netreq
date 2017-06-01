@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Start the netfilter
+#
+
+case "$1" in
+  start)
+	printf "Starting netfilter: "
+	/usr/sbin/iptables -A INPUT -i lo -j ACCEPT
+	/usr/sbin/iptables -A INPUT -p tcp -m state --state NEW -j NFQUEUE --queue-num 1
+	echo "OK"
+	;;
+  stop)
+	;;
+  *)
+	echo "Usage: $0 {start}"
+	exit 1
+esac
+
+exit $?
+
