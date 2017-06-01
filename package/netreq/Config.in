@@ -1,0 +1,7 @@
+config BR2_PACKAGE_NETREQ
+        bool "netreq"
+        select BR2_PACKAGE_LIBNETFILTER_QUEUE
+        help
+          netreq is a program to intercept incoming tcp connection
+	  requests. It was developed for the fischertechnik TXT
+	  community firmware.
