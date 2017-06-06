@@ -4,14 +4,19 @@
 <context>
     <name>PluginNetReq</name>
     <message>
-        <location filename="netreq.py" line="124"/>
+        <location filename="netreq.py" line="178"/>
         <source>Allow network connection?</source>
         <translation>Netzwerk- verbindung zulassen?</translation>
     </message>
     <message>
-        <location filename="netreq.py" line="196"/>
+        <location filename="netreq.py" line="282"/>
         <source>NetReq</source>
-        <translation type="unfinished"></translation>
+        <translation>NetReq</translation>
+    </message>
+    <message>
+        <location filename="netreq.py" line="229"/>
+        <source>save</source>
+        <translation>speichern</translation>
     </message>
 </context>
 </TS>

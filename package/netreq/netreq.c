@@ -4,7 +4,7 @@
 // iptables -A INPUT -i lo -j ACCEPT
 // iptables -A INPUT -p tcp -m state --state NEW -j NFQUEUE --queue-num 1
 // add exeptions for permanently allowed hosts:
-// iptables -I INPUT 1 -s 10.22.92.170 -m mac --mac-source d4:be:d9:63:7c:c4 -j ACCEPT
+// iptables -I INPUT 1 -m mac --mac-source d4:be:d9:63:7c:c4 -j ACCEPT
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,65 +20,10 @@
 
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
-/* returns packet id */
-static u_int32_t print_pkt (struct nfq_data *tb) {
-  int id = 0;
-  struct nfqnl_msg_packet_hdr *ph;
-  struct nfqnl_msg_packet_hw *hwph;
-  u_int32_t mark,ifi; 
-  int ret;
-  unsigned char *data;
-  
-  ph = nfq_get_msg_packet_hdr(tb);
-  if (ph) {
-    id = ntohl(ph->packet_id);
-    printf("hw_protocol=0x%04x hook=%u id=%u ",
-	   ntohs(ph->hw_protocol), ph->hook, id);
-  }
-  
-  hwph = nfq_get_packet_hw(tb);
-  if (hwph) {
-    int i, hlen = ntohs(hwph->hw_addrlen);
-    
-    printf("hw_src_addr=");
-    for (i = 0; i < hlen-1; i++)
-      printf("%02x:", hwph->hw_addr[i]);
-    printf("%02x ", hwph->hw_addr[hlen-1]);
-  }
-  
-  mark = nfq_get_nfmark(tb);
-  if (mark)
-    printf("mark=%u ", mark);
-  
-  ifi = nfq_get_indev(tb);
-  if (ifi)
-    printf("indev=%u ", ifi);
-  
-  ifi = nfq_get_outdev(tb);
-  if (ifi)
-    printf("outdev=%u ", ifi);
-  ifi = nfq_get_physindev(tb);
-  if (ifi)
-    printf("physindev=%u ", ifi);
-  
-  ifi = nfq_get_physoutdev(tb);
-  if (ifi)
-    printf("physoutdev=%u ", ifi);
-  
-  ret = nfq_get_payload(tb, &data);
-  if (ret >= 0)
-    printf("payload_len=%d ", ret);
-  
-  fputc('\n', stdout);
-
-  return id;
-}
-
 // keep a list of devices that are allowed or disabllowed
 // to access this machine
 typedef struct {
   unsigned char hw_addr[6];
-  unsigned char ip_addr[4];
 } device_t;
 
 int allowed_len = 0;
@@ -136,7 +81,7 @@ static int verify_pkt (struct nfq_data *tb) {
   return 0;
 }
 
-int get_info(struct nfq_data *tb, device_t *dev, uint16_t *port) {
+int get_info(struct nfq_data *tb, device_t *dev, char *ip_addr, uint16_t *port) {
   struct nfqnl_msg_packet_hw *hwph;
   struct iphdr *iph;
   struct tcphdr *tcph;
@@ -147,7 +92,7 @@ int get_info(struct nfq_data *tb, device_t *dev, uint16_t *port) {
   
   if(nfq_get_payload(tb, (unsigned char **)&iph) < 40)
     return -1;
-  memcpy(dev->ip_addr, &iph->saddr, 4);
+  memcpy(ip_addr, &iph->saddr, 4);
 	 
   tcph = (struct tcphdr*)(((char*)iph)+20);
   *port = ntohs(tcph->dest);
@@ -180,21 +125,20 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
   if(verify_pkt(nfa) != 0)
     return nfq_set_verdict(qh, id, NF_DROP, 0, NULL);
 
+  uint8_t ip_addr[4];
   device_t dev;
   uint16_t port;
-  if(get_info(nfa, &dev, &port) != 0)
+  if(get_info(nfa, &dev, ip_addr, &port) != 0)
     return nfq_set_verdict(qh, id, NF_DROP, 0, NULL);
 
   // check if this device already has an entry in the denied/allowed lists
   for(d=0;d<allowed_len;d++) {
-    if((memcmp(allowed[d].hw_addr, dev.hw_addr, 6) == 0) &&
-       (memcmp(allowed[d].ip_addr, dev.ip_addr, 4) == 0))
+    if(memcmp(allowed[d].hw_addr, dev.hw_addr, 6) == 0)
       return nfq_set_verdict(qh, id, NF_ACCEPT, 0, NULL);
   }
     
   for(d=0;d<denied_len;d++)
-    if((memcmp(denied[d].hw_addr, dev.hw_addr, 6) == 0) &&
-       (memcmp(denied[d].ip_addr, dev.ip_addr, 4) == 0))
+    if(memcmp(denied[d].hw_addr, dev.hw_addr, 6) == 0)
       return nfq_set_verdict(qh, id, NF_DROP, 0, NULL);
   
   // if we have a pending request then just drop everything
@@ -214,8 +158,8 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
   printf("%02x ", pending->hw_addr[5]);
 
   for (i = 0; i < 3; i++)
-    printf("%u.", pending->ip_addr[i]);
-  printf("%u ", pending->ip_addr[3]);
+    printf("%u.", ip_addr[i]);
+  printf("%u ", ip_addr[3]);
 
   printf("%u\n", port);
 
@@ -332,22 +276,14 @@ int main(int argc, char **argv) {
 	  for(d=0;d<allowed_len;d++) {
 	    for (i = 0; i < 5; i++)
 	      printf("%02x:", allowed[d].hw_addr[i]);
-	    printf("%02x ", allowed[d].hw_addr[5]);
-
-	    for (i = 0; i < 3; i++)
-	      printf("%u.", allowed[d].ip_addr[i]);
-	    printf("%u\n", allowed[d].ip_addr[3]);
+	    printf("%02x\n", allowed[d].hw_addr[5]);
 	  }
 	  
 	  printf("Denied:\n");
 	  for(d=0;d<denied_len;d++) {
 	    for (i = 0; i < 5; i++)
 	      printf("%02x:", denied[d].hw_addr[i]);
-	    printf("%02x ", denied[d].hw_addr[5]);
-
-	    for (i = 0; i < 3; i++)
-	      printf("%u.", denied[d].ip_addr[i]);
-	    printf("%u\n", denied[d].ip_addr[3]);
+	    printf("%02x\n", denied[d].hw_addr[5]);
 	  }
 	}
       }

@@ -3,7 +3,59 @@
 
 from PyQt4.QtCore import QCoreApplication
 from TouchStyle import *
-import pty, subprocess, select, atexit
+import pty, subprocess, select, atexit, socket, struct
+
+# name of the file used to permanently store permissions
+# The file contains a list of allowed and denied mac addresses
+
+FILE="/etc/netreq_permissions"
+
+class PermissionsFile(QObject):
+    def __init__(self):
+        super(PermissionsFile,self).__init__()
+
+        self.file_ok = True
+        self.allowed = []
+        self.denied = []
+
+        # file must be writable
+        if not os.access(FILE, os.W_OK):
+            self.file_ok = False
+            return
+    
+        # try to open the file
+        try:
+            with open(FILE, "r") as f:
+                for l in f:
+                    # ignore anything after '#'
+                    i = l.split('#')[0].split()
+                    if len(i) == 2:
+                        if i[0][0].lower() == 'a':
+                            self.allowed.append( i[1] )
+                        if i[0][0].lower() == 'd':
+                            self.denied.append( i[1] )
+        except:
+            self.file_ok = False
+
+    def is_available(self):
+        return self.file_ok
+
+    def append(self, perm, dev):
+        for i in self.allowed:
+            if i == dev:
+                return
+            
+        for i in self.denied:
+            if i == dev:
+                return
+        
+        with open(FILE, "a") as f:
+            print(perm, dev, file=f)
+
+        if perm == 'a':
+            self.allowed.append( dev )
+        if perm == 'd':
+            self.denied.append( dev )
 
 # a seperate thread runs the tools in the background
 class ExecThread(QThread):
@@ -85,7 +137,6 @@ class IconBut(QToolButton):
         shadow.setOffset(QPointF(3,3))
         self.setGraphicsEffect(shadow)
 
-        self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         pix = QPixmap(os.path.join(os.path.dirname(os.path.realpath(__file__)), icon))
         icon = QIcon(pix)
         self.setIcon(icon)
@@ -100,7 +151,6 @@ class IconBut(QToolButton):
         self.graphicsEffect().setEnabled(True)
         QToolButton.mouseReleaseEvent(self,event)
 
-
 # a simple dialog without any decorations (and this without
 # the user being able to get rid of it by himself)
 class NetReqDialog(QDialog):
@@ -114,6 +164,9 @@ class NetReqDialog(QDialog):
         else:
             self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
 
+        self.req = req
+        self.pfile = PermissionsFile()
+            
         self.setObjectName("centralwidget")
 
         vbox = QVBoxLayout()
@@ -126,42 +179,74 @@ class NetReqDialog(QDialog):
         vbox.addWidget(lbl)
         vbox.addStretch()
 
-        # ip address
-        lbl = QLabel(req[1])
-        lbl.setObjectName("smalllabel")
-        lbl.setAlignment(Qt.AlignCenter)
-        vbox.addWidget(lbl)
-        vbox.addStretch()
+        # button hbox
+        hbox_w = QWidget()
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0,0,0,0)
+        allowBut = IconBut("allow")
+        allowBut.clicked.connect(self.on_allow)
+        hbox.addStretch()
+        hbox.addWidget(allowBut)
+        hbox.addStretch()
+        hbox.addStretch()
+        denyBut = IconBut("deny")
+        denyBut.clicked.connect(self.on_deny)
+        hbox.addWidget(denyBut)
+        hbox.addStretch()
+        hbox_w.setLayout(hbox)
+        vbox.addWidget(hbox_w)
 
         # mac address
         lbl = QLabel(req[0])
+        lbl.setObjectName("smalllabel")
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+
+        # try to lookup a name
+        name = None
+        try:
+            name = socket.gethostbyaddr(req[1])[0].split('.')[0]
+        except:
+            # ignore any errors
+            name = req[1]
+
+        # ip address
+        lbl = QLabel(name)
         lbl.setObjectName("tinylabel")
         lbl.setAlignment(Qt.AlignCenter)
         vbox.addWidget(lbl)
         vbox.addStretch()
 
-        # button hbox
-        hbox_w = QWidget()
-        hbox = QHBoxLayout()
-        allowBut = IconBut("allow")
-        allowBut.clicked.connect(self.on_allow)
-        hbox.addWidget(allowBut)
-        denyBut = IconBut("deny")
-        denyBut.clicked.connect(self.on_deny)
-        hbox.addWidget(denyBut)
-        hbox_w.setLayout(hbox)
+        # if the permissions file is available then let
+        # the user choose to save the setting
+        self.check_save = False
+        if self.pfile.is_available():
+            hbox_w = QWidget()
+            hbox = QHBoxLayout()
+            hbox.setContentsMargins(0,0,0,0)
+            self.check_save = QCheckBox(QCoreApplication.translate("PluginNetReq", "save"))
+            hbox.addStretch()
+            hbox.addWidget(self.check_save)
+            hbox.addStretch()
+            hbox_w.setLayout(hbox)
+            vbox.addWidget(hbox_w)
 
-        vbox.addWidget(hbox_w)
-        vbox.addStretch()
-        
+        vbox.addStretch()        
+          
         self.setLayout(vbox)        
 
     def on_allow(self):
         self.command.emit('a')
+        if self.check_save and self.check_save.isChecked():
+            self.pfile.append('a', self.req[0])
+            
         self.close()
 
     def on_deny(self):
         self.command.emit('d')
+        if self.check_save and self.check_save.isChecked():
+            self.pfile.append('d', self.req[0])
+
         self.close()
 
     def exec_(self):
@@ -172,6 +257,10 @@ class NetReqReceiver(QObject):
     def __init__(self):
         super(NetReqReceiver, self).__init__()
 
+        # figure out the default gateways IP address
+        # as we'd reject any connection from there
+        self.default = self.get_default_gateway_linux()
+
         self.netreq_proc = NetReq()
         self.netreq_proc.request.connect(self.on_request)
         self.netreq_proc.start()
@@ -179,8 +268,12 @@ class NetReqReceiver(QObject):
         # make sure we get a chance to stop the client
         # on laucnher exit
         atexit.register(self.on_atexit)
-    
+
     def on_request(self, req):
+        if req[1] == self.default:
+            self.command.emit('d')
+            return
+
         dialog = NetReqDialog(req)
         dialog.command.connect(self.on_command)
         dialog.exec_()
@@ -191,36 +284,23 @@ class NetReqReceiver(QObject):
     def on_atexit(self):
         self.netreq_proc.stop()
 
+    def get_default_gateway_linux(self):
+        with open("/proc/net/route") as fh:
+            for line in fh:
+                fields = line.strip().split()
+                if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+                    continue
+
+                return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
+        
 def name():
     return QCoreApplication.translate("PluginNetReq", "NetReq")
 
 def icon():
-    # create icon from png: convert x.png -monochrome x.xpm
-    icon_data = [ "16 16 2 1 ", "  c None", ". c white",
-                  "                ",
-                  "      ....      ",
-                  "      ....      ",
-                  "      ..        ",
-                  "      ..        ",
-                  "      ..        ",
-                  "      ..        ",
-                  "      ..        ",
-                  "     ....       ",
-                  "    ......      ",
-                  "   ..    ..     ",
-                  "   ..    ..     ",
-                  "   ..    ..     ",
-                  "    ......      ",
-                  "     ....        ",
-                  "                " ]    
-    
-    # device present but no link: draw darkgrey
-    # icon_data[2] = ". c #606060"
-    #return None
-    return icon_data
+    return None
 
 def status():
-    return QCoreApplication.translate("PluginNetReq", "")
+    return None
 
 netreqreceiver = NetReqReceiver()
 

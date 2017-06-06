@@ -14,4 +14,4 @@ clean:
 	rm -f $(PROG) *.o *~
 
 install: $(PROG)
-	cp $< /usr/bin
+	cp $< netreq_setup.sh /usr/bin
