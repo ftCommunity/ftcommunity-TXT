@@ -15,6 +15,7 @@ from launcher import LauncherPlugin
 DEFAULT="wlan0"
 INTERFACES = "/etc/network/interfaces"
 RESOLVCONF = "/etc/resolv.conf"
+PFILE="/etc/netreq_permissions"
 
 # For testing on PC: environment may point to buildroot
 if 'TOUCHUI_FAKEROOT' in os.environ:
@@ -139,6 +140,7 @@ def set_config(iface, cfg):
         if "gateway" in cfg["parms"]:
             cmd = "route add default gw " + cfg["parms"]["gateway"] + " " + iface
             run_program("sudo " + cmd)
+
             
 # deal with /etc/resolv.conf (on busybox systems)
 class ResolvConf(QObject):
@@ -188,7 +190,78 @@ class ResolvConf(QObject):
         except:
             pass
 
+class PermissionsFile(QObject):
+    def __init__(self):
+        super(PermissionsFile,self).__init__()
 
+        self.file_ok = True
+        self.allowed = []
+        self.denied = []
+
+        # file must be writable
+        if not os.access(PFILE, os.W_OK):
+            self.file_ok = False
+            return
+    
+        # try to open the file
+        try:
+            with open(PFILE, "r") as f:
+                for l in f:
+                    # ignore anything after '#'
+                    i = l.split('#')[0].split()
+                    if len(i) >= 2:
+                        name = None
+                        if len(i) > 2:
+                            name = i[2]
+                            
+                        if i[0][0].lower() == 'a':
+                            self.allowed.append( (i[1], name) )
+                        if i[0][0].lower() == 'd':
+                            self.denied.append( (i[1], name) )
+        except:
+            self.file_ok = False
+
+    def isAvailable(self):
+        return self.file_ok
+
+    def permissions(self):
+        perm = []
+        for i in self.allowed:
+            perm.append( ('a', i) )
+        for i in self.denied:
+            perm.append( ('d', i) )
+
+        return perm
+
+    def dump(self):
+        print("Allowed:")
+        for i in self.allowed:
+            print(i)
+        print("Denied:")
+        for i in self.denied:
+            print(i)
+    
+    def remove(self, perm):
+        if perm[0] == 'a':
+            self.allowed.remove(perm[1])
+        else:
+            self.denied.remove(perm[1])
+
+        # and write modfied file
+        with open(PFILE, "w") as f:
+            print("# netreq permissions written by network.py", file=f)
+            for i in self.allowed:
+                if i[1]:
+                    print("a", i[0], i[1], file=f)
+                else:
+                    print("a", i[0], file=f)
+                
+            for i in self.denied:
+                if i[1]:
+                    print("d", i[0], i[1], file=f)
+                else:
+                    print("d", i[0], file=f)
+        
 # deal with /etc/network/interfaces
 class Interfaces(QObject):
     error = pyqtSignal(str)
@@ -587,7 +660,6 @@ class EditDialog(TouchDialog):
 
         self.vbox = QVBoxLayout()
 
-        # xyz
         self.dhcp = QComboBox(self)
         self.dhcp.addItem(QCoreApplication.translate("Main", "automatic"), "dhcp")
         self.dhcp.addItem(QCoreApplication.translate("Main", "static"), "static")
@@ -598,10 +670,6 @@ class EditDialog(TouchDialog):
         
         self.dhcp.activated[int].connect(self.on_dhcp_toggle)
 
-        
-#        dhcp = QCheckBox(QCoreApplication.translate("Main", "automatic"))
-#        dhcp.setChecked(self.iface["options"]["method"] == "dhcp")
-#        dhcp.toggled.connect(self.on_dhcp_toggle)
         self.vbox.addWidget(self.dhcp)
 
         self.vbox.addStretch()
@@ -693,19 +761,140 @@ class EditDnsDialog(TouchDialog):
 
         TouchDialog.close(self)
 
+
+class DeletePermDialog(TouchDialog):
+    confirmed = pyqtSignal()
+    
+    def __init__(self, perm, parent):
+        TouchDialog.__init__(self, QCoreApplication.translate("Permissions", "Delete?"), parent)
+        
+        self.addConfirm()
+        self.setCancelButton()
+
+        vbox = QVBoxLayout()
+        vbox.addStretch()
+
+        lbl = QLabel(QCoreApplication.translate("Permissions", "Really delete this permission?"))
+        lbl.setObjectName("smalllabel")
+        lbl.setWordWrap(True)
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+        vbox.addStretch()
+        
+        # Icon
+        if perm[0] == 'a':
+            icon = "allow.png"
+        else:
+            icon = "deny.png"
+            
+        icn = QLabel()
+        icn.setPixmap(QPixmap(os.path.join(os.path.dirname(os.path.realpath(__file__)),icon)))
+        icn.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(icn)
+        
+        lbl = QLabel(perm[1][0])
+        lbl.setObjectName("smalllabel")
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+
+        if perm[1][1]:    
+            lbl = QLabel(perm[1][1])
+            lbl.setObjectName("tinylabel")
+            lbl.setAlignment(Qt.AlignCenter)
+            vbox.addWidget(lbl)
+
+        vbox.addStretch()
+        
+        lbl = QLabel(QCoreApplication.translate("Permissions", "Changes take effect after next reboot."))
+        lbl.setObjectName("tinylabel")
+        lbl.setWordWrap(True)
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+        
+        vbox.addStretch()
+        self.centralWidget.setLayout(vbox)
+        
+    def close(self):
+        if self.sender().objectName()=="confirmbut":
+            self.confirmed.emit()
+
+        TouchDialog.close(self)
+
+     
+class PermissionWidget(QListWidget):
+    def __init__(self, pfile, parent=None):
+        super(PermissionWidget, self).__init__(parent)
+
+        self.pfile = pfile
+        self.setUniformItemSizes(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setTextElideMode(Qt.ElideRight)
+        self.setViewMode(QListView.ListMode)
+        self.setMovement(QListView.Static)
+        self.setIconSize(QSize(32,32))
+        self.parent = parent
+
+        self.set(pfile)
+        
+        # react on clicks
+        self.itemClicked.connect(self.onItemClicked)
+        self.setIconSize(QSize(32, 32))
+
+    def set(self, pfile):
+        for p in pfile.permissions():
+            if p[0] == 'a':
+                icon = "allow.png"
+            else:
+                icon = "deny.png"
+
+            # if entry has a host name show that instead
+            if p[1][1]:
+                name = p[1][1]
+            else:
+                name = p[1][0]
+               
+            item = QListWidgetItem(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)),icon)),name)
+            item.setData(Qt.UserRole, p)
+            self.addItem(item)
+
+    def onItemClicked(self, item):
+        permission = item.data(Qt.UserRole)
+        
+        # get confirmation from user to delete this permission
+        dialog = DeletePermDialog(permission, self.parent)
+        dialog.confirmed.connect(self.on_delete)
+        dialog.exec_()
+        
+    def on_delete(self):
+        item = self.takeItem(self.currentRow())
+        self.pfile.remove(item.data(Qt.UserRole))
+        
+class EditPermDialog(TouchDialog):
+    def __init__(self, pfile, parent):
+        TouchDialog.__init__(self, QCoreApplication.translate("Permissions", "Permissions"), parent)
+
+        self.perm = PermissionWidget(pfile)
+        self.setCentralWidget(self.perm)
+        self.show()
+
 class NetworkWindow(TouchWindow):
     def __init__(self):
         TouchWindow.__init__(self, QCoreApplication.translate("Main", "Network"))
-        
+
+        # check for Busybox since some network related things work differently there
         self.busybox = self.check4busybox()
-        print("busybox:", self.busybox)
 
         menu = self.addMenu()
         menu_dns = menu.addAction(QCoreApplication.translate("Menu","DNS"))
         menu_dns.triggered.connect(self.edit_dns)
 
-        menu.addSeparator()
-
+        # if the permissions file is present and can be read and written, then
+        # allow user to edit it
+        self.pfile = PermissionsFile()
+        if self.pfile.isAvailable():
+            menu_permissions = menu.addAction(QCoreApplication.translate("Menu","Permissions"))
+            menu_permissions.triggered.connect(self.edit_perm)
+        
         self.interfaces_file = Interfaces(self.busybox)    # get interfaces from config file
         self.ifs = all_interfaces()                        # get interfaces from system
 
@@ -771,6 +960,10 @@ class NetworkWindow(TouchWindow):
         # busybox
         cat_help = check_output(["cat", "--help"]).decode("UTF-8")
         return cat_help.lower().find("busybox") >= 0
+
+    def edit_perm(self):
+        dialog = EditPermDialog(self.pfile, self)
+        dialog.exec_()
 
     def edit_dns(self):
         # use nameservers resolv.conf on busybox system, otherwise from interfaces file
