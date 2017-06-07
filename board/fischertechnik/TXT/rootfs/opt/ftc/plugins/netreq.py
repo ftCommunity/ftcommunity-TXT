@@ -29,7 +29,7 @@ class PermissionsFile(QObject):
                 for l in f:
                     # ignore anything after '#'
                     i = l.split('#')[0].split()
-                    if len(i) == 2:
+                    if len(i) >= 2:
                         if i[0][0].lower() == 'a':
                             self.allowed.append( i[1] )
                         if i[0][0].lower() == 'd':
@@ -40,7 +40,7 @@ class PermissionsFile(QObject):
     def is_available(self):
         return self.file_ok
 
-    def append(self, perm, dev):
+    def append(self, perm, dev, name=None):
         for i in self.allowed:
             if i == dev:
                 return
@@ -50,7 +50,10 @@ class PermissionsFile(QObject):
                 return
         
         with open(FILE, "a") as f:
-            print(perm, dev, file=f)
+            if name:
+                print(perm, dev, name, file=f)
+            else:
+                print(perm, dev, file=f)
 
         if perm == 'a':
             self.allowed.append( dev )
@@ -203,15 +206,19 @@ class NetReqDialog(QDialog):
         vbox.addWidget(lbl)
 
         # try to lookup a name
-        name = None
+        self.name = None
         try:
-            name = socket.gethostbyaddr(req[1])[0].split('.')[0]
+            self.name = socket.gethostbyaddr(req[1])[0].split('.')[0]
         except:
             # ignore any errors
-            name = req[1]
+            pass
 
         # ip address
-        lbl = QLabel(name)
+        if self.name:
+            lbl = QLabel(self.name)
+        else:
+            lbl = QLabel(req[1])
+        
         lbl.setObjectName("tinylabel")
         lbl.setAlignment(Qt.AlignCenter)
         vbox.addWidget(lbl)
@@ -238,14 +245,14 @@ class NetReqDialog(QDialog):
     def on_allow(self):
         self.command.emit('a')
         if self.check_save and self.check_save.isChecked():
-            self.pfile.append('a', self.req[0])
+            self.pfile.append('a', self.req[0], self.name)
             
         self.close()
 
     def on_deny(self):
         self.command.emit('d')
         if self.check_save and self.check_save.isChecked():
-            self.pfile.append('d', self.req[0])
+            self.pfile.append('d', self.req[0], self.name)
 
         self.close()
 
