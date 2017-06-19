@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # set up the iptables rules for netreq
 PERMFILE=/etc/netreq_permissions
 
