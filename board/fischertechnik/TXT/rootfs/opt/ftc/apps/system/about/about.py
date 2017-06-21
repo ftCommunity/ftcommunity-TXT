@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import sys, os, ftrobopy
+import sys, os, time, ftrobopy
 from TxtStyle import *
 from launcher import LauncherPlugin
 
@@ -124,7 +124,7 @@ class AboutPlugin(LauncherPlugin):
 
         self.vbox.addStretch()
 
-        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016 the ft:community"))
+        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","© %year% the ft:community").replace("%year%", time.strftime("%Y")))
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)
