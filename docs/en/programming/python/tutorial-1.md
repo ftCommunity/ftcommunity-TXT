@@ -36,26 +36,10 @@ interface. We'll thus also use Qt. A minimal python application opening
 a TXT styled window looks like this:
 
 ```
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-import sys
-from TouchStyle import *
-
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
-
-        # Creates a empty MainWindow
-        w = TxtWindow("Test")
-        w.show()
-        self.exec_()        
-
-if __name__ == "__main__":
-    FtcGuiApplication(sys.argv)
+{% include_relative examples/tutorial-1/test.py %}
 ```
 
-Please save this file under the name [`test.py`](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/test.py)
+Please save this file under the name [`test.py`](examples/tutorial-1/test.py)
 
 This app subclasses the TouchApplication class which was imported from
 TouchStyle. It creates a window labeled "Test", shows that window and
@@ -68,18 +52,7 @@ The manifest file is a simple text file containing various fields
 describing the app.
 
 ```
-[app]
-name: Test
-category: Tests
-author: Joe Developer
-icon: icon.png
-desc: TXT app tutorial #1
-url: https://github.com/ftCommunity/ftcommunity-TXT/wiki/FTC-FW-App-Tutorial-1
-exec: test.py
-managed: yes
-uuid: 191fe5a6-313b-4083-af65-d1ad7fd6d281
-version: 1.0
-firmware: 0.9
+{% include_relative examples/tutorial-1/manifest %}
 ```
 
 The mandatory fields are name, icon, desc, exec, uuid and managed.
@@ -110,7 +83,7 @@ Some optional fields are also used:
 
 The **set** and **model** entries are currently unused but may be used in the future to allow the user to find apps relating to a specific model he e.g. just built.
 
-Please save this file under the name [`manifest`](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/manifest)
+Please save this file under the name [`manifest`](examples/tutorial-1/manifest)
 
 # The icon
 

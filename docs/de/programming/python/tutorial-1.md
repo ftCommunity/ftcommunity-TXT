@@ -21,26 +21,10 @@ Das Programm kann eine beliebige, vom TXT ausführbare Datei sein. Solange das P
 Aktuell benützen alle Anwendungen das [Qt4-Framework](http://www.qt.io/) für ihre Anzeigen. 
 Eine minimale Anwendung sieht so aus:
 ```
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-import sys
-from TouchStyle import *
-
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
-
-        # Erstelle eine leeres Hauptfenster
-        w = TxtWindow("Test")
-        w.show()
-        self.exec_()        
-
-if __name__ == "__main__":
-    FtcGuiApplication(sys.argv)
+{% include_relative examples/tutorial-1/test.py %}
 ```
 
-Speichere diese Datei unter [`Test.py`](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/test.py)
+Speichere diese Datei unter [`test.py`](examples/tutorial-1/test.py)
 
 **Erkärung:**
 Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket TouchStyle) abgeleitet Klasse, die ein Fenster mit dem Titel "Test" erstellt, solange die Anwendung nicht geschlossen wird!
@@ -50,18 +34,7 @@ Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket To
 Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung
 
 ```
-[app]
-name: Test
-category: Tests
-author: Joe Developer
-icon: icon.png
-desc: TXT app tutorial #1
-url: https://github.com/ftCommunity/ftcommunity-TXT/wiki/FTC-FW-App-Tutorial-1
-exec: test.py
-managed: yes
-uuid: 191fe5a6-313b-4083-af65-d1ad7fd6d281
-version: 1.0
-firmware: 0.9.2
+{% include_relative examples/tutorial-1/manifest %}
 ```
 
 **Notwendigen Felder:**
@@ -81,7 +54,7 @@ firmware: 0.9.2
  * **author** ist der Autor
  * **url** ist der Link zu einer Webseite, zu der du über das Webinterface gelangen kann
 
-Speichere diese Datei als [`manifest`](https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/master/packages/app_tutorial_1/manifest)
+Speichere diese Datei als [`manifest`](examples/tutorial-1/manifest)
 
 # Das Icon
 
