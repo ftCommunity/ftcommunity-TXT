@@ -36,10 +36,10 @@ interface. We'll thus also use Qt. A minimal python application opening
 a TXT styled window looks like this:
 
 ```
-{% include_relative examples/tutorial-1/test.py %}
+{% include examples/python/tutorial-1/test.py %}
 ```
 
-Please save this file under the name [`test.py`](examples/tutorial-1/test.py)
+Please save this file under the name [`test.py`](../../../media/examples/python/tutorial-1/test.py)
 
 This app subclasses the TouchApplication class which was imported from
 TouchStyle. It creates a window labeled "Test", shows that window and
@@ -52,7 +52,7 @@ The manifest file is a simple text file containing various fields
 describing the app.
 
 ```
-{% include_relative examples/tutorial-1/manifest %}
+{% include examples/python/tutorial-1/manifest %}
 ```
 
 The mandatory fields are name, icon, desc, exec, uuid and managed.
@@ -83,7 +83,7 @@ Some optional fields are also used:
 
 The **set** and **model** entries are currently unused but may be used in the future to allow the user to find apps relating to a specific model he e.g. just built.
 
-Please save this file under the name [`manifest`](examples/tutorial-1/manifest)
+Please save this file under the name [`manifest`](../../../media/examples/python/tutorial-1/manifest)
 
 # The icon
 

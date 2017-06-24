@@ -21,10 +21,10 @@ Das Programm kann eine beliebige, vom TXT ausführbare Datei sein. Solange das P
 Aktuell benützen alle Anwendungen das [Qt4-Framework](http://www.qt.io/) für ihre Anzeigen. 
 Eine minimale Anwendung sieht so aus:
 ```
-{% include_relative examples/tutorial-1/test.py %}
+{% include examples/python/tutorial-1/test.py %}
 ```
 
-Speichere diese Datei unter [`test.py`](examples/tutorial-1/test.py)
+Speichere diese Datei unter [`test.py`](../../../media/examples/python/tutorial-1/test.py)
 
 **Erkärung:**
 Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket TouchStyle) abgeleitet Klasse, die ein Fenster mit dem Titel "Test" erstellt, solange die Anwendung nicht geschlossen wird!
@@ -34,7 +34,7 @@ Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket To
 Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung
 
 ```
-{% include_relative examples/tutorial-1/manifest %}
+{% include examples/python/tutorial-1/manifest %}
 ```
 
 **Notwendigen Felder:**
@@ -54,7 +54,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung
  * **author** ist der Autor
  * **url** ist der Link zu einer Webseite, zu der du über das Webinterface gelangen kann
 
-Speichere diese Datei als [`manifest`](examples/tutorial-1/manifest)
+Speichere diese Datei als [`manifest`](../../../media/examples/python/tutorial-1/manifest)
 
 # Das Icon
 
