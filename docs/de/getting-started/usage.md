@@ -7,7 +7,7 @@ Nach dem Start siehst Du den Startbildschirm der Community-Firmware mit seinen r
 
 ![Launcher](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg "Beispielbild mit weiteren Apps")
 
-Die schwarze Statusleiste am oberen Rand zeigt die aktuelle Zeit und einige Symbole mit Systeminformationen. Durch antippen der Statusleiste klappt ein Info-Feld mit mehr Details aus:
+Die schwarze Statusleiste am oberen Rand zeigt die aktuelle Zeit und einige Symbole mit Systeminformationen. Durch Antippen der Statusleiste klappt ein Info-Feld mit mehr Details aus:
 
 ![Launcher](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/launcher-with-info-menu.png "Hauptbildschirm mit ausgeklapptem Info-Bereich")
 
@@ -36,6 +36,6 @@ Die Netzwerkeinstellungen werden auf der MicroSD-Karte gespeichert, und der TXT 
 
 # Zugriff auf das Web-Interface
 
-Die Community-Firmware stellt ein Weboberfäche zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf die Weboberfäche zuzugreifen, gibst Du `http://IP-Adresse` in die Addresszeile des Browsers ein. Dabei ist "IP-Adresse" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Startbildschirm antippst.
+Die Community-Firmware stellt eine Weboberfäche zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf die Weboberfäche zuzugreifen, gibst Du `http://IP-Adresse` in die Addresszeile des Browsers ein. Dabei ist "IP-Adresse" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn Du die Statuszeile des Startbildschirm antippst.
 
-Im Beispiel oben ist die IP-Addresse `192.168.0.30`, d.h. Du würdest im Browser `http://192.168.0.30` eingeben um das Web-Interface zu starten. (**Achtung: dein TXT hat höchst wahrscheinlich eine andere IP-Addresse.**)
+Im Beispiel oben ist die IP-Addresse `192.168.0.30`, d.h. Du würdest im Browser `http://192.168.0.30` eingeben, um das Web-Interface zu starten. (**Achtung: dein TXT hat höchst wahrscheinlich eine andere IP-Addresse.**)
