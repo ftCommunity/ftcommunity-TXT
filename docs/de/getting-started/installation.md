@@ -13,7 +13,7 @@ nav-title: Installation
 
 1. Anschließend musst Du den Bootloader freischalten, wie in der Anleitung von Fischertechnik erklärt: [http://www.fischertechnik.de/ResourceImage.aspx?raid=10278](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278)
 
-1. Danach lädst Du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.2.zip"_)
+1. Danach lädst Du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.3.zip"_)
 
 1. Du packst das Archiv aus und kopierst die drei enthaltenen Dateien auf eine FAT32 formatierte MicroSD-Karte.
 
