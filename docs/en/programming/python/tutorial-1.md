@@ -4,9 +4,8 @@ nav-pos: 1
 ---
 # Programming in Python: The First App
 
-This tutorial is meant to give a basic introduction on how an application
-for the Community Firmware of the Fischertechnik TXT controller is being
-written.
+This tutorial will give a basic introduction on how to write an application
+for the Community Firmware of the Fischertechnik TXT controller.
 
 An app consists of at least three files:
 
@@ -21,13 +20,13 @@ An app consists of at least three files:
    information about the App like its display name, its author and the
    name of the executable.
 
- * A icon. This should be a 64x64 pixel PNG file which is being used
+ * An icon. This should be a 64x64 pixel PNG file which is being used
    in the launcher as well as the web interface.
 
 ## The application program
 
 The application program can be any script or binary the TXT is able to
-execute. Since apps are usually started from the TXTs launcher on the
+execute. Since apps are usually started from the TXTs launcher the
 user will expect some output on the screen. Thus the program should include
 a minimalistic GUI.
 
@@ -65,7 +64,7 @@ The mandatory fields are name, icon, desc, exec, uuid and managed.
  * **exec** is the name of the executable. In this example it refers
    to our test.py python script.
  * **uuid** is a unique id used to identify this app. You can generate
-   one for your app e.g. online with services like [this](https://www.famkruithof.net/uuid/uuidgen). The uuid identifies an app, so all versions of an app must use the same uuid. The uuid is also used to generate the apps unique directory on the TXT.
+   one for your app e.g. online with services like [this](https://www.famkruithof.net/uuid/uuidgen). The uuid identifies an app, so all versions of an app must use the same uuid. The uuid is also used to generate the apps' unique directory on the TXT.
  * **managed** is currently unused and should be set to yes. This tells
    the launcher that the app has a Qt GUI. In the future this will
    allow the launcher to support apps using a different GUI toolkit.
@@ -76,8 +75,7 @@ Some optional fields are also used:
 
  * **category** is used to group apps in the launcher
  * **author** gives information about the developer of this app
- * **url** can be used to link to a web page. This will then be
-   acccesible through the TXTs web interface
+ * **url** can be used to link to a web page. This will then be acccesible through the TXTs web interface.
  * **set** optionally refers to the Fischertechnik set related to a model the app can be used for. E.g. `524328 ROBOTICS TXT Discovery Set`
  * **model** optionally refers to the english model name from the set. E.g. `Pedestrian Light`
 
@@ -124,20 +122,20 @@ Use the file dialog to select our test.zip archive and hit upload:
 The app is now being intalled on the TXT and becomes visible in the
 TXTs launcher:
 
-![tut1_img6.jpg](tut1_img6.jpg)
+![tut1_img7.png](tut1_img7.png)
 
 The app can be launched like any other app by clicking it:
 
-![tut1_img4.jpg](tut1_img4.jpg)
+![tut1_img10.png](tut1_img10.png)
 
 It's now also visible in the web interface:
 
-![tut1_img3.jpg](tut1_img3.jpg)
+![tut1_img8.png](tut1_img8.png)
 
 Selecting it shows some of the details from the manifest file:
 
-![tut1_img5.jpg](tut1_img5.jpg)
+![tut1_img9.png](tut1_img9.png)
 
-The app can also be deleted from there.
+In the web interface, you can also delete the app.
 
 Continue reading [Programming Python: Development](tutorial-2.md)

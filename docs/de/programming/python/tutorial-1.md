@@ -31,7 +31,7 @@ Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket To
 
 ## Das Manifest
 
-Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung
+Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
 
 ```
 {% include examples/python/tutorial-1/manifest %}
@@ -74,7 +74,6 @@ Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwending sind:
 
 Um diese Datein auf den TXT zu bringen, musst du ein ZIP-Archiv erstellen (_z.B. mit [7-Zip](http://www.7-zip.de/download.html)_). Alle 3 Datein **müssen** im Hauptordner liegen, da sie der TXT sonst **nicht** findet! 
 
-Ein Archiv der Demo ist [hier verfügbar](https://github.com/ftCommunity/ftcommunity-apps/raw/master/packages/app_tutorial_1.zip).
 
 # Hochladen zum TXT
 
@@ -82,22 +81,29 @@ Rufe mit dem Browser auf deinem PC die Weboberfläche des TXT auf:
 
 ![tut1_img1.jpg](../../../en/programming/python/tut1_img1.jpg)
 
-Wähle mit dem Datei-Dialog das test.zip-Archiv aus und bestätige mit Upload:
+Wähle mit dem Datei-Dialog das test.zip-Archiv aus und bestätige mit Upload.
 
 ![tut1_img2.jpg](../../../en/programming/python/tut1_img2.jpg)
 
-Die Anwendung ist nun sichtbar!
+Nach der Installation ist die Anwendung sichtbar!
 
-![tut1_img6.jpg](../../../en/programming/python/tut1_img6.jpg)
+![tut1_img7.png](../../../en/programming/python/tut1_img7.png)    
+        
+So sieht die Ausgabe des Programms auf dem TXT aus:
 
-Sie ist nun auch im Webinterface zu sehen:
+![tut1_img10.png](../../../en/programming/python/tut1_img10.png)       
 
-![tut1_img3.jpg](../../../en/programming/python/tut1_img3.jpg)
+Sie ist jetzt auch im Webinterface zu sehen:
+
+![tut1_img8.png](../../../en/programming/python/tut1_img8.png)
 
 Das Webinterface zeigt auch Details des Manifests:
 
-![tut1_img5.jpg](../../../en/programming/python/tut1_img5.jpg)
+![tut1_img9.png](../../../en/programming/python/tut1_img9.png)
 
 Hier kannst du die Anwendung auch löschen.
+
+
+
 
 **Hier geht es weiter**: [Programmieren in Python: Entwicklung](tutorial-2.md)

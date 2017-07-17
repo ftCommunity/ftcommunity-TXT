@@ -8,8 +8,8 @@ class FtcGuiApplication(TouchApplication):
     def __init__(self, args):
         TouchApplication.__init__(self, args)
 
-        # Creates a empty MainWindow
-        w = TxtWindow("Test")
+        # Creates an empty MainWindow
+        w = TouchWindow("Test")
         w.show()
         self.exec_()        
 
