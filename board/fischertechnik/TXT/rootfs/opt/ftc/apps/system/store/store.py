@@ -1,12 +1,16 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
+# TODO:
+# + fix GUI hang with network problems
+# - fix segfault after network problems
 
 import sys, os, io, time
 import configparser, zipfile, shutil
 import semantic_version
 from pathlib import Path
 from PyQt4.QtNetwork import *
+import xml.etree.ElementTree as ET
 
 from TouchStyle import *
 from launcher import LauncherPlugin
@@ -18,6 +22,9 @@ URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/package
 MAIN_BRANCH = "master"
 ALTERNATE_BRANCH = "v%d.%d.%d" % (FW_VERSION.major, FW_VERSION.minor, FW_VERSION.patch)
 PACKAGEFILE = "00packages"
+
+# predefined alternate repositories, currently only githib is supported
+GITHUB_URL = "https://raw.githubusercontent.com/%s/%%s/packages/"
 
 # directory were the user installed apps are located
 APPBASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -228,10 +235,10 @@ class NetworkAccessManager(QNetworkAccessManager):
     def slotReadData(self):
         self.messageBuffer.append(self.sender().readAll())
     
-    def __init__(self, filename, branch=MAIN_BRANCH, ignoreNotFound=False):
+    def __init__(self, filename, url, branch=MAIN_BRANCH, ignoreNotFound=False):
         QNetworkAccessManager.__init__(self)
         self.messageBuffer = []
-        url   = QUrl((URL % branch) + filename)
+        url   = QUrl((url % branch) + filename)
         req   = QNetworkRequest(url)
         reply = self.get(req)
         reply.ignoreSslErrors()
@@ -247,8 +254,8 @@ class NetworkAccessManager(QNetworkAccessManager):
 class PackageLoader(NetworkAccessManager):
     result = pyqtSignal(tuple)
 
-    def __init__(self, str, branch=MAIN_BRANCH):
-        NetworkAccessManager.__init__(self, str + ".zip", branch)
+    def __init__(self, str, url, branch=MAIN_BRANCH):
+        NetworkAccessManager.__init__(self, str + ".zip", url, branch)
         self.networkResult.connect(self.onNetworkResult)
 
     def onNetworkResult(self, result):
@@ -314,6 +321,65 @@ class PackageLoader(NetworkAccessManager):
         print("done")
         return((True,""))
 
+class NewRepoDialog(TouchDialog):
+    new_repo = pyqtSignal(dict)
+    
+    class EntryWidget(QWidget):        
+        def __init__(self, title_str, parent):
+            QWidget.__init__(self, parent)
+            vbox = QVBoxLayout()
+            vbox.setSpacing(0)
+            vbox.setContentsMargins(0,0,0,0)
+            
+            title = QLabel(title_str, self)
+            title.setObjectName("smalllabel")
+            vbox.addWidget(title)
+            
+            self.field = QLineEdit(self)
+            vbox.addWidget(self.field)
+            
+            self.setLayout(vbox)
+
+        def text(self):
+            return self.field.text()
+
+    def __init__(self, parent):
+        TouchDialog.__init__(self, QCoreApplication.translate("NewRepo", "New"), parent)
+
+        conf=self.addConfirm()
+        self.setCancelButton()
+        
+        vbox = QVBoxLayout()
+        vbox.setSpacing(0)
+        vbox.setContentsMargins(0,0,0,0)
+
+        vbox.addStretch()
+
+        self.name = self.EntryWidget(QCoreApplication.translate("NewRepo", "Name:"), self)
+        vbox.addWidget(self.name)
+        vbox.addStretch()
+
+        # currently only github repositories are supported
+        gh = QLabel(QCoreApplication.translate("NewRepo", "Github:"), self)
+        gh.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(gh)
+            
+        self.gh_user = self.EntryWidget(QCoreApplication.translate("NewRepo", "User:"), self)
+        vbox.addWidget(self.gh_user)
+        
+        self.gh_repo = self.EntryWidget(QCoreApplication.translate("NewRepo", "Repository:"), self)
+        vbox.addWidget(self.gh_repo)
+        vbox.addStretch()
+
+        self.centralWidget.setLayout(vbox)
+        
+    def close(self):
+        # user has close the input dialog. Sent updated string 
+        # to invoking widget
+        TouchDialog.close(self)
+        if self.sender().objectName()=="confirmbut":
+            self.new_repo.emit( { "name": self.name.text(), "user": self.gh_user.text(), "repo": self.gh_repo.text() } )
+
 class AppDialog(TouchDialog):
     def format(id):
         # map app key to human readable text.
@@ -332,9 +398,11 @@ class AppDialog(TouchDialog):
 
     refresh = pyqtSignal()
 
-    def __init__(self,title,parms,inst_ver,parent):
+    def __init__(self, title, url, parms, inst_ver, parent):
         TouchDialog.__init__(self, title, parent)
 
+        self.url = url
+        
         self.package_name = parms['package']
         if 'uuid' in parms:
             self.package_uuid = parms['uuid']
@@ -392,7 +460,7 @@ class AppDialog(TouchDialog):
                 msgBox.exec_()
                 return
 
-        self.package_loader = PackageLoader(self.package_name, self.package_branch)
+        self.package_loader = PackageLoader(self.package_name, self.url, self.package_branch)
         self.package_loader.result.connect(self.onResult)
 
         self.busy = BusyAnimation(self)
@@ -456,8 +524,8 @@ class AppDialog(TouchDialog):
 class PackageListLoader(NetworkAccessManager):
     result = pyqtSignal(tuple)
 
-    def __init__(self, branch=MAIN_BRANCH):
-        NetworkAccessManager.__init__(self, PACKAGEFILE, branch, branch!=MAIN_BRANCH)
+    def __init__(self, url, branch=MAIN_BRANCH):
+        NetworkAccessManager.__init__(self, PACKAGEFILE, url, branch, branch!=MAIN_BRANCH)
         self.branch = branch
         self.networkResult.connect(self.onNetworkResult)
 
@@ -515,8 +583,10 @@ class AppListWidget(QListWidget):
         self.setViewMode(QListView.ListMode)
         self.setMovement(QListView.Static)
         self.setIconSize(QSize(32,32))
+        self.parent = parent
 
         # scan for installed apps
+        self.url = URL
         self.installed_apps = self.scan_installed_app_dirs()
 
         # start package list download
@@ -524,7 +594,7 @@ class AppListWidget(QListWidget):
         self.apps_by_uuid = {}
         self.active_loaders = {}
         for branch in (MAIN_BRANCH, ALTERNATE_BRANCH):
-            loader = PackageListLoader(branch)
+            loader = PackageListLoader(self.url, branch)
             self.active_loaders[branch] = loader;
             loader.result.connect(self.onLoadPackageList)
         self.busy = BusyAnimation(parent)
@@ -630,7 +700,7 @@ class AppListWidget(QListWidget):
         self.busy.close()
 
         if not result[0]:
-            msgBox = TouchMessageBox(QCoreApplication.translate("Error", "Error"), self.parent())
+            msgBox = TouchMessageBox(QCoreApplication.translate("Error", "Error"), self.parent)
             msgBox.setText(result[1])
             msgBox.exec_()
             return
@@ -667,7 +737,7 @@ class AppListWidget(QListWidget):
             else:              installed_version = QCoreApplication.translate("Error", "no version info")
 
         # set TouchWindow as parent
-        dialog = AppDialog(item.text(), app_parms, installed_version, self.parent())
+        dialog = AppDialog(item.text(), self.url, app_parms, installed_version, self.parent)
         dialog.refresh.connect(self.on_refresh)
         dialog.exec_()
 
@@ -683,6 +753,24 @@ class AppListWidget(QListWidget):
         finally:
             sock.close()
 
+    def set(self, repo):
+        if "url" in repo:
+            self.url = repo["url"]
+        if "user" in repo and "repo" in repo:
+            self.url = GITHUB_URL % (repo["user"]+"/"+repo["repo"])
+
+        self.model().removeRows( 0, self.model().rowCount() )
+
+        self.apps_by_uuid = {}
+        self.active_loaders = {}
+        for branch in (MAIN_BRANCH, ALTERNATE_BRANCH):
+            loader = PackageListLoader(self.url, branch)
+            self.active_loaders[branch] = loader;
+            loader.result.connect(self.onLoadPackageList)
+        self.busy = BusyAnimation(self.parent)
+        self.busy.show()
+         
+        
     def on_refresh(self):
         # do two things: 1. refresh own list, 2. tell launcher to refresh
 
@@ -698,9 +786,16 @@ class AppListWidget(QListWidget):
         self.notify_launcher()
 
 class FtcGuiPlugin(LauncherPlugin):
+
+    def filename(self):
+        return os.path.join(os.path.expanduser("~"), ".repositories.xml")
+
     def __init__(self, application):
         LauncherPlugin.__init__(self, application)
 
+        self.repos = self.load_repos()
+        self.repo = "ftc"  # current repository 
+        
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
         translator.load(self.locale(), os.path.join(path, "store_"))
@@ -709,7 +804,35 @@ class FtcGuiPlugin(LauncherPlugin):
         # create the empty main window
         self.mainWindow = TouchWindow(QCoreApplication.translate("Main", "Store"))
 
+        # TODO: Load list
+        self.menu = self.mainWindow.addMenu()
+        menu_new = self.menu.addAction(QCoreApplication.translate("menu", "New"))
+        menu_new.triggered.connect(self.on_menu_new)
+        self.menu_del = self.menu.addAction(QCoreApplication.translate("menu", "Remove"))
+        self.menu_del.setEnabled(False)  # cannot delete default repo
+        self.menu_del.triggered.connect(self.on_menu_del)
+        self.group = QActionGroup( self.menu )
+        self.menu.addSeparator()
+
+        self.menu_ftc = self.menu.addAction(QCoreApplication.translate("menu", "ftc"))
+        self.menu_ftc.setCheckable(True)
+        self.menu_ftc.setActionGroup(self.group)
+        self.menu_ftc.setChecked(True)
+        self.menu_ftc.setData( { "name": "ftc", "url": URL } )
+        self.menu_ftc.triggered.connect(self.on_menu_select_repo)
+
+        self.repo_menu = { }
+        for repo in self.repos:
+            menu_repo = self.menu.addAction(repo["name"])
+            menu_repo.setCheckable(True)
+            menu_repo.setActionGroup(self.group)
+            menu_repo.setData( repo )
+            menu_repo.triggered.connect(self.on_menu_select_repo)
+            self.repo_menu[repo["name"]] = menu_repo
+        
         self.vbox = QVBoxLayout()
+        self.vbox.setSpacing(0)
+        self.vbox.setContentsMargins(0,0,0,0)
 
         self.applist = AppListWidget(self.mainWindow)
         self.vbox.addWidget(self.applist)
@@ -717,6 +840,84 @@ class FtcGuiPlugin(LauncherPlugin):
         self.mainWindow.centralWidget.setLayout(self.vbox)
 
         self.mainWindow.show()
+
+    def load_repos(self):
+        repos = [ ]
+        
+        try:
+            tree = ET.parse(self.filename())
+            root = tree.getroot()
+            if root.tag == "repositories":
+                for child in root:
+                    if child.tag == "repository":
+                        repo = { }
+                        repo["name"] = child.attrib["name"]
+                        repo["user"] = child.attrib["user"]
+                        repo["repo"] = child.attrib["repo"]
+                        repos.append(repo)
+        except:
+            pass
+            
+        return repos
+
+    def save_repos(self):
+        root_element = ET.Element("repositories")
+        for r in self.repos:
+            repo_element = ET.SubElement(root_element, "repository")
+            repo_element.set("name", r["name"])
+            repo_element.set("user", r["user"])
+            repo_element.set("repo", r["repo"])
+        ET.ElementTree(root_element).write(self.filename())
+
+    
+    def on_menu_del(self):
+        # remove menu entry
+        self.menu.removeAction(self.repo_menu[self.repo])
+        # remove from repo menu entry list
+        self.repo_menu.pop(self.repo)
+        # remove from repo list
+        for r in self.repos:
+            if self.repo == r["name"]:
+                self.repos.remove(r)
+        
+        # and save the new list
+        self.save_repos()
+        # and finally select the default repo
+        self.menu_ftc.trigger()
+                    
+    def on_menu_new(self):
+        dialog = NewRepoDialog(self.mainWindow)
+        dialog.new_repo.connect(self.on_new_repo)
+        dialog.exec_()
+
+    def on_new_repo(self, repo):
+        # do some sanity checks
+        if not repo["name"] or not len(repo["name"]): return
+        if not repo["user"] or not len(repo["user"]): return
+        if not repo["repo"] or not len(repo["repo"]): return
+
+        if repo["name"] == "ftc": return
+
+        # append repo to list of repos
+        self.repos.append(repo)
+
+        # create a menu entry
+        menu_repo = self.menu.addAction(repo["name"])
+        menu_repo.setCheckable(True)
+        menu_repo.setActionGroup(self.group)
+        menu_repo.setData( repo )
+        menu_repo.triggered.connect(self.on_menu_select_repo)
+        self.repo_menu[repo["name"]] = menu_repo
+
+        self.save_repos()
+
+    def select_repo(self, repo):
+        self.repo = repo["name"]
+        self.menu_del.setEnabled( repo["name"] != "ftc" )   # cannot delete default repo
+        self.applist.set(repo)
+        
+    def on_menu_select_repo(self):
+        self.select_repo(self.sender().data())
 
 if __name__ == "__main__":
     class FtcGuiApplication(TouchApplication):

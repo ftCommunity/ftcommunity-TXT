@@ -49,7 +49,7 @@ else:
 class PlainDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             size = QApplication.desktop().screenGeometry()
             self.setFixedSize(size.width(), size.height())
         else:
@@ -254,7 +254,7 @@ class TouchTopWidget(QWidget):
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             size = QApplication.desktop().screenGeometry()
             self.setFixedSize(size.width(), size.height())
         else:
@@ -298,7 +298,7 @@ class TouchTopWidget(QWidget):
         # TXT windows are always fullscreen
     def show(self):
         # go fullscreen on arm, stay windowed otherwise
-        if platform.machine() == "armv7l":
+        if platform.machine()[0:3] == "arm":
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)

@@ -3,7 +3,7 @@
 #
 
 import sys, os, shlex, io, time
-from subprocess import Popen, call, PIPE, check_output
+from subprocess import Popen, call, PIPE, check_output, CalledProcessError
 from TouchStyle import *
 
 # only care for the built-in bluetooth adapter
@@ -13,10 +13,11 @@ DEV = "hci0"
 class ExecThread(QThread):
     finished = pyqtSignal(bool,object)
 
-    def __init__(self, cmd, silent):
+    def __init__(self, cmd, silent, wait = 5):
         super(ExecThread,self).__init__()
         self.cmd = cmd
         self.silent = silent
+        self.wait = wait
     
     def run(self):
         self.run_program(self.cmd)
@@ -43,9 +44,10 @@ class ExecThread(QThread):
                 # we must not touch stdout/stderr when running
                 # the init script as proc.communicate will wait ...
                 proc  = Popen(([executable] + executable_options))
-                time.sleep(5)  # artificially wait a little bit
-                # to give script some time to run before hciconfig is
-                # being called etc ....
+                if self.wait:
+                    time.sleep(self.wait)  # artificially wait a little bit
+                    # to give script some time to run before hciconfig is
+                    # being called etc ....
                 response = [ "", "" ]
                 response_stdout = ""
                 response_stderr = ""
@@ -112,7 +114,7 @@ class HciConfig(ExecThread):
                 if cnt == 2:
                     p = l.split()
                     if p[0].lower() == "name:":
-                        result["name"] = p[1].strip("'").strip('"')
+                        result["name"] = ' '.join(p[1:]).strip("'").strip('"')
 
             if cnt >= 0:
                 cnt += 1
@@ -191,6 +193,7 @@ class EntryWidget(QWidget):
 
         layout = QVBoxLayout()
         layout.setSpacing(0)
+        layout.setContentsMargins(0,0,0,0)
         self.title = QLabel(title)
         layout.addWidget(self.title)        
         self.value = QLabel("")
@@ -213,7 +216,15 @@ class FtcGuiApplication(TouchApplication):
         # create the empty main window
         self.w = TouchWindow(QCoreApplication.translate("FtcGuiApplication","Bluetooth"))
 
+        menu = self.w.addMenu()
+        self.menu_btrc = menu.addAction(QCoreApplication.translate("FtcGuiApplication","BT Control Set"))
+        self.menu_btrc.triggered.connect(self.start_bt_remote_server)
+
+        self.stack = QStackedWidget(self.w)
+        self.main_w = QWidget()
+        
         self.vbox = QVBoxLayout()
+        self.vbox.setSpacing(0)
 
         self.vbox.addStretch()
 
@@ -221,15 +232,58 @@ class FtcGuiApplication(TouchApplication):
         self.ena.setDisabled(True)
         self.vbox.addWidget(self.ena)
 
+        self.vbox.addStretch()
+
         self.bdaddr = EntryWidget(QCoreApplication.translate("FtcGuiApplication","BT Address:"))
         self.vbox.addWidget(self.bdaddr)
+
+        self.vbox.addStretch()
 
         self.name = EntryWidget(QCoreApplication.translate("FtcGuiApplication","Name:"))
         self.vbox.addWidget(self.name)
         
         self.vbox.addStretch()
 
-        self.w.centralWidget.setLayout(self.vbox)
+        self.main_w.setLayout(self.vbox)
+        self.stack.addWidget(self.main_w)
+
+        # when the bt remote server is active only a simple text is being shown
+        self.btrc_w = QWidget()
+
+        self.btrc_vbox = QVBoxLayout()
+        self.btrc_vbox.setSpacing(0)
+
+        self.btrc_vbox.addStretch()
+
+        label = QLabel(QCoreApplication.translate("BTRC", "The BT Control Set server is running."))
+        label.setObjectName("smalllabel")
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignCenter)
+        self.btrc_vbox.addWidget(label)        
+        self.btrc_vbox.addStretch()
+
+        label = QLabel(QCoreApplication.translate("BTRC", "You can connect with the blue transmitter from the BT Control Set or with a smart phone running the BlueTooth Control app."))
+        label.setObjectName("tinylabel")
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignCenter)
+        self.btrc_vbox.addWidget(label)        
+        self.btrc_vbox.addStretch()
+
+        label = QLabel(QCoreApplication.translate("BTRC", "Reboot your TXT to return to normal bluetooth operation."))
+        label.setObjectName("tinylabel")
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignCenter)
+        self.btrc_vbox.addWidget(label)        
+        self.btrc_vbox.addStretch()
+
+        self.btrc_w.setLayout(self.btrc_vbox)
+        self.stack.addWidget(self.btrc_w)
+
+        self.w.setCentralWidget(self.stack)
+
+        # check if the bt_remote_server is already running and switch gui
+        # if that's the case
+        self.check_for_ft_bt_remote_server()
 
         # get generic info first, then get name
         self.service_is_running = False  # assume no bluetooth is running
@@ -300,7 +354,39 @@ class FtcGuiApplication(TouchApplication):
         # read name after the flags have been read
         if self.callback:
             self.callback()
-            
 
+    def start_bt_remote_server(self):
+        call("sudo /usr/bin/ft_bt_remote_start.sh &", shell=True)
+        # disable local gui to give server some time to start
+        self.ena.setDisabled(True)
+        self.w.centralWidget.setGraphicsEffect(QGraphicsBlurEffect(self))
+        self.w.titlebar.setGraphicsEffect(QGraphicsBlurEffect(self))
+        self.busy = BusyAnimation(self.w)
+        self.busy.show()
+        
+        self.start_timer = QTimer(self)
+        self.start_timer.timeout.connect(self.on_bt_remote_server_startup)
+        self.start_timer.setSingleShot(True)
+        self.start_timer.start(3000)
+        
+    def on_bt_remote_server_startup(self):
+        self.busy.close()
+        self.busy = None
+        self.w.centralWidget.setGraphicsEffect(None)
+        self.w.titlebar.setGraphicsEffect(None)
+        self.start_timer = None
+        
+        self.check_for_ft_bt_remote_server()
+
+    def check_for_ft_bt_remote_server(self):
+        try:
+            check_output(["pidof", "ft_bt_remote_server"])
+            # process exists, prevent user from starting a second one
+            self.menu_btrc.setEnabled(False)
+            self.stack.setCurrentWidget(self.btrc_w)
+            
+        except CalledProcessError:
+            pass
+    
 if __name__ == "__main__":
     FtcGuiApplication(sys.argv)

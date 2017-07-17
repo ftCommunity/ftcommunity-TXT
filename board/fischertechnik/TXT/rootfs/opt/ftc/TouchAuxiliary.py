@@ -711,7 +711,8 @@ class TouchAuxKeyboard(TouchDialog):
         self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
         self.layout.addWidget(self.tab)
 
-        self.centralWidget.setLayout(self.layout)        
+        self.centralWidget.setLayout(self.layout)
+        if strg.isnumeric(): self.tab.setCurrentIndex(2)
 
     def key_erase(self):
         self.line.setText(self.line.text()[:-1]) 

@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Start the netfilter for netreq
+#
+
+case "$1" in
+  start)
+      printf "Starting netfilter: "
+      /usr/bin/netreq_setup.sh
+      echo "OK"
+      ;;
+  stop)
+      ;;
+  *)
+      echo "Usage: $0 {start}"
+      exit 1
+esac
+
+exit $?
+

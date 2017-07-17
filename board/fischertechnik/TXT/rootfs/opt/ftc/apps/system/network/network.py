@@ -2,18 +2,25 @@
 # -*- coding: utf-8 -*-
 #
 
+# TODO:
+# - DNS settings
+# - deal with non-busybox systems
+
 import sys, os, socket, array, struct, fcntl, string, platform
 import shlex, time, copy
-from subprocess import Popen, call, PIPE
+from subprocess import Popen, call, PIPE, check_output
 from TouchStyle import *
 from launcher import LauncherPlugin
 
 DEFAULT="wlan0"
 INTERFACES = "/etc/network/interfaces"
+RESOLVCONF = "/etc/resolv.conf"
+PFILE="/etc/netreq_permissions"
 
 # For testing on PC: environment may point to buildroot
 if 'TOUCHUI_FAKEROOT' in os.environ:
     INTERFACES = os.environ.get('TOUCHUI_FAKEROOT') + INTERFACES
+    RESOLVCONF = os.environ.get('TOUCHUI_FAKEROOT') + RESOLVCONF
 
 SIOCGIFCONF    = 0x8912
 SIOCGIFADDR    = 0x8915
@@ -25,9 +32,9 @@ def _ifinfo(sock, addr, ifname):
     return socket.inet_ntoa(info[20:24])
 
 def all_interfaces():
-    if platform.machine() == "armv7l": size = 32
-    else:                              size = 40
-    
+    if platform.machine()[0:3] == "arm": size = 32
+    else:                                size = 40
+
     bytes = 8 * size
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     names = array.array('B', b'\x00' * bytes)
@@ -133,14 +140,135 @@ def set_config(iface, cfg):
         if "gateway" in cfg["parms"]:
             cmd = "route add default gw " + cfg["parms"]["gateway"] + " " + iface
             run_program("sudo " + cmd)
-            
 
+            
+# deal with /etc/resolv.conf (on busybox systems)
+class ResolvConf(QObject):
+    def __init__(self, parent = None):
+        QObject.__init__(self, parent)
+        self.parse()
+        self.modified = False
+        
+    def parse_line(self, l):
+        cmd = l.split()[0].lower()
+        if cmd == "search":
+            for s in l.split()[1:]:
+                self.search.append(s)
+        elif cmd == "nameserver":
+            for n in l.split()[1:]:
+                s = { }
+                s["parms"] = { }
+                s["parms"]["address"] = n
+                self.nameserver.append(s)
+        else:
+            print("unpected entry", cmd)
+            self.err = False
+    
+    def parse(self):
+        self.search = [ ]
+        self.nameserver = [ ]
+
+        try:
+            with open(RESOLVCONF, "r") as f:
+                for l in f:
+                    # remove any comments
+                    l = l.split('#')[0].rstrip()
+                    if l != "":
+                        self.parse_line(l)
+        except:
+            pass
+
+    def write(self):
+        try:
+            with open(RESOLVCONF, "w") as f:
+                print("# resolv.conf, written by network.py", file=f)
+                for n in self.nameserver:
+                    if "parms" in n and "address" in n["parms"]:
+                        print("nameserver", n["parms"]["address"], file=f)
+                for s in self.search: 
+                    print("search", s, file=f)
+        except:
+            pass
+
+class PermissionsFile(QObject):
+    def __init__(self):
+        super(PermissionsFile,self).__init__()
+
+        self.file_ok = True
+        self.allowed = []
+        self.denied = []
+
+        # file must be writable
+        if not os.access(PFILE, os.W_OK):
+            self.file_ok = False
+            return
+    
+        # try to open the file
+        try:
+            with open(PFILE, "r") as f:
+                for l in f:
+                    # ignore anything after '#'
+                    i = l.split('#')[0].split()
+                    if len(i) >= 2:
+                        name = None
+                        if len(i) > 2:
+                            name = i[2]
+                            
+                        if i[0][0].lower() == 'a':
+                            self.allowed.append( (i[1], name) )
+                        if i[0][0].lower() == 'd':
+                            self.denied.append( (i[1], name) )
+        except:
+            self.file_ok = False
+
+    def isAvailable(self):
+        return self.file_ok
+
+    def permissions(self):
+        perm = []
+        for i in self.allowed:
+            perm.append( ('a', i) )
+        for i in self.denied:
+            perm.append( ('d', i) )
+
+        return perm
+
+    def dump(self):
+        print("Allowed:")
+        for i in self.allowed:
+            print(i)
+        print("Denied:")
+        for i in self.denied:
+            print(i)
+    
+    def remove(self, perm):
+        if perm[0] == 'a':
+            self.allowed.remove(perm[1])
+        else:
+            self.denied.remove(perm[1])
+
+        # and write modfied file
+        with open(PFILE, "w") as f:
+            print("# netreq permissions written by network.py", file=f)
+            for i in self.allowed:
+                if i[1]:
+                    print("a", i[0], i[1], file=f)
+                else:
+                    print("a", i[0], file=f)
+                
+            for i in self.denied:
+                if i[1]:
+                    print("d", i[0], i[1], file=f)
+                else:
+                    print("d", i[0], file=f)
+        
 # deal with /etc/network/interfaces
 class Interfaces(QObject):
     error = pyqtSignal(str)
 
-    def __init__(self, parent = None):
+    def __init__(self, busybox, parent = None):
         QObject.__init__(self, parent)
+        self.busybox = busybox   # true if this is a busybox system
         self.parse(INTERFACES)
         self.modified = False
 
@@ -178,7 +306,20 @@ class Interfaces(QObject):
 
                     print("", file=f)
 
+                if not self.busybox:
+                    # include dns servers on non-busybox systems
+                    if len(self.dns) > 0:
+                        nameservers = ""
+                        for n in self.dns:
+                            if "parms" in n and "address" in n["parms"]:
+                                nameservers = nameservers + n["parms"]["address"] + " "
+
+                        if len(nameservers) > 0:
+                            print("dns-nameservers", nameservers.strip(), file=f)
+                            print("", file=f)
+
                 f.close()
+
             except IOError as e:
                 self.error.emit(e.strerror)
 
@@ -194,7 +335,7 @@ class Interfaces(QObject):
                     self.interfaces[iface]["parms"].pop("netmask", None)
                     self.interfaces[iface]["parms"].pop("gateway", None)
                     self.interfaces[iface]["parms"].pop("broadcast", None)
-                else:
+                elif self.interfaces[iface]["options"]["method"] == "static":
                     # derive broadcast if address and netmask are given
                     if ( "address" in self.interfaces[iface]["parms"] and 
                          "netmask" in self.interfaces[iface]["parms"] ):
@@ -210,6 +351,11 @@ class Interfaces(QObject):
     def set(self, name, iface):
         self.interfaces[name] = iface
         self.interfaces[name]["modified"] = True
+        self.modified = True
+
+        # remember that something has been changed in the file and it needs
+        # to be saved
+    def set_modfied(self):
         self.modified = True
 
     def parse_indented_line(self, l):
@@ -245,6 +391,14 @@ class Interfaces(QObject):
             if self.iface:
                 self.interfaces[self.iface["name"]] = self.iface
             self.iface = self.parse_iface(l.split()[1:])
+        elif cmd == "dns-nameservers":
+            # these aren't used on busybox systems
+            if not self.busybox:
+                for n in l.split()[1:]:
+                    s = { }
+                    s["parms"] = { }
+                    s["parms"]["address"] = n
+                    self.dns.append(s)
         else:
             print("unpected entry", cmd)
             self.err = False
@@ -257,6 +411,7 @@ class Interfaces(QObject):
 
     def parse(self, fname):
         self.ifs_auto = [ ]
+        self.dns = [ ]
         self.iface = None
         self.interfaces = { }
         self.err = False
@@ -411,10 +566,17 @@ class IpEdit(TouchDialog):
         elif val == "<":
             if self.value[self.index]:
                 self.value[self.index] = int(self.value[self.index] / 10)
+                self.ip[self.index].set(self.value[self.index])
             elif self.value[self.index] == 0:
                 self.value[self.index] = None
+                self.ip[self.index].set(self.value[self.index])
+                
+                # jump to next/previous field which isn't "None"
+                if self.index < 3 and self.value[self.index+1]:
+                    self.ip_clicked(self.index + 1)
+                elif self.index > 0 and self.value[self.index-1]:
+                    self.ip_clicked(self.index - 1)                    
 
-            self.ip[self.index].set(self.value[self.index])
         else:
             # process edit state
             if not self.state:
@@ -487,7 +649,7 @@ class IpWidget(QWidget):
     
 class EditDialog(TouchDialog):
     iface_changed = pyqtSignal(object)
-
+    
     def __init__(self,ifname, iface, parent):
         TouchDialog.__init__(self, ifname, parent)
         self.addConfirm()
@@ -498,10 +660,17 @@ class EditDialog(TouchDialog):
 
         self.vbox = QVBoxLayout()
 
-        dhcp = QCheckBox(QCoreApplication.translate("Main", "automatic"))
-        dhcp.setChecked(self.iface["options"]["method"] == "dhcp")
-        dhcp.toggled.connect(self.on_dhcp_toggle)
-        self.vbox.addWidget(dhcp)
+        self.dhcp = QComboBox(self)
+        self.dhcp.addItem(QCoreApplication.translate("Main", "automatic"), "dhcp")
+        self.dhcp.addItem(QCoreApplication.translate("Main", "static"), "static")
+        self.dhcp.addItem(QCoreApplication.translate("Main", "disabled"), "manual")
+        index = self.dhcp.findData(self.iface["options"]["method"])
+        if index >= 0:
+            self.dhcp.setCurrentIndex(index)
+        
+        self.dhcp.activated[int].connect(self.on_dhcp_toggle)
+
+        self.vbox.addWidget(self.dhcp)
 
         self.vbox.addStretch()
 
@@ -521,7 +690,7 @@ class EditDialog(TouchDialog):
         self.gw.iface_changed.connect(self.on_iface_changed)
         self.vbox.addWidget(self.gw)
 
-        self.on_dhcp_toggle(dhcp.isChecked())
+        self.on_dhcp_toggle(self.dhcp.currentIndex())
 
         self.centralWidget.setLayout(self.vbox)
         self.show() 
@@ -530,16 +699,15 @@ class EditDialog(TouchDialog):
         self.iface_has_been_changed = True
         self.iface = iface
 
-    def on_dhcp_toggle(self, on):
-        if on:
-            self.iface["options"]["method"] = "dhcp"
-        else:
-            self.iface["options"]["method"] = "static"
-
+    def on_dhcp_toggle(self, index):
+        if self.iface["options"]["method"] != self.dhcp.itemData(index):
+            self.iface["options"]["method"] = self.dhcp.itemData(index)
+            self.iface_has_been_changed = True
+            
+        on = self.iface["options"]["method"] != "static"
         self.ip.setDisabled(on)
         self.nm.setDisabled(on)
         self.gw.setDisabled(on)
-        self.iface_has_been_changed = True
 
     def close(self):
         if self.iface_has_been_changed:
@@ -548,13 +716,193 @@ class EditDialog(TouchDialog):
 
         TouchDialog.close(self)
 
+class EditDnsDialog(TouchDialog):
+    changed = pyqtSignal(object)
+    
+    def __init__(self, servers, parent):
+        TouchDialog.__init__(self, QCoreApplication.translate("DNS", "DNS"), parent)
+        self.addConfirm()
+        self.setCancelButton()
+
+        # create a local copy of servers
+        self.servers = copy.deepcopy(servers)
+        
+        # make sure we have at least two server entries. If there are
+        # less create empty ones
+        while len(self.servers) < 2:
+            n = { }
+            n["parms"] = {}
+            self.servers.append(n)
+        
+        self.servers_have_been_changed = False
+
+        self.vbox = QVBoxLayout()
+
+        self.vbox.addStretch()
+
+        self.dns = [ None, None ]
+        for i in range(2):
+            self.dns[i] = IpWidget(QCoreApplication.translate("DNS", "Server") + " " + str(i), self.servers[i], "address", self)
+            self.dns[i].iface_changed.connect(self.on_server_changed)
+            self.vbox.addWidget(self.dns[i])
+
+        self.vbox.addStretch()
+    
+        self.centralWidget.setLayout(self.vbox)
+        self.show()
+
+    def on_server_changed(self):
+        self.servers_have_been_changed = True
+        
+    def close(self):
+        if self.servers_have_been_changed:
+            if self.sender().objectName()=="confirmbut":
+                self.changed.emit(self.servers)
+
+        TouchDialog.close(self)
+
+
+class DeletePermDialog(TouchDialog):
+    confirmed = pyqtSignal()
+    
+    def __init__(self, perm, parent):
+        TouchDialog.__init__(self, QCoreApplication.translate("Permissions", "Delete?"), parent)
+        
+        self.addConfirm()
+        self.setCancelButton()
+
+        vbox = QVBoxLayout()
+        vbox.addStretch()
+
+        lbl = QLabel(QCoreApplication.translate("Permissions", "Really delete this permission?"))
+        lbl.setObjectName("smalllabel")
+        lbl.setWordWrap(True)
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+        vbox.addStretch()
+        
+        # Icon
+        if perm[0] == 'a':
+            icon = "allow.png"
+        else:
+            icon = "deny.png"
+            
+        icn = QLabel()
+        icn.setPixmap(QPixmap(os.path.join(os.path.dirname(os.path.realpath(__file__)),icon)))
+        icn.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(icn)
+        
+        lbl = QLabel(perm[1][0])
+        lbl.setObjectName("smalllabel")
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+
+        if perm[1][1]:    
+            lbl = QLabel(perm[1][1])
+            lbl.setObjectName("tinylabel")
+            lbl.setAlignment(Qt.AlignCenter)
+            vbox.addWidget(lbl)
+
+        vbox.addStretch()
+        
+        lbl = QLabel(QCoreApplication.translate("Permissions", "Changes take effect after next reboot."))
+        lbl.setObjectName("tinylabel")
+        lbl.setWordWrap(True)
+        lbl.setAlignment(Qt.AlignCenter)
+        vbox.addWidget(lbl)
+        
+        vbox.addStretch()
+        self.centralWidget.setLayout(vbox)
+        
+    def close(self):
+        if self.sender().objectName()=="confirmbut":
+            self.confirmed.emit()
+
+        TouchDialog.close(self)
+
+     
+class PermissionWidget(QListWidget):
+    def __init__(self, pfile, parent=None):
+        super(PermissionWidget, self).__init__(parent)
+
+        self.pfile = pfile
+        self.setUniformItemSizes(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setTextElideMode(Qt.ElideRight)
+        self.setViewMode(QListView.ListMode)
+        self.setMovement(QListView.Static)
+        self.setIconSize(QSize(32,32))
+        self.parent = parent
+
+        self.set(pfile)
+        
+        # react on clicks
+        self.itemClicked.connect(self.onItemClicked)
+        self.setIconSize(QSize(32, 32))
+
+    def set(self, pfile):
+        for p in pfile.permissions():
+            if p[0] == 'a':
+                icon = "allow.png"
+            else:
+                icon = "deny.png"
+
+            # if entry has a host name show that instead
+            if p[1][1]:
+                name = p[1][1]
+            else:
+                name = p[1][0]
+               
+            item = QListWidgetItem(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)),icon)),name)
+            item.setData(Qt.UserRole, p)
+            self.addItem(item)
+
+    def onItemClicked(self, item):
+        permission = item.data(Qt.UserRole)
+        
+        # get confirmation from user to delete this permission
+        dialog = DeletePermDialog(permission, self.parent)
+        dialog.confirmed.connect(self.on_delete)
+        dialog.exec_()
+        
+    def on_delete(self):
+        item = self.takeItem(self.currentRow())
+        self.pfile.remove(item.data(Qt.UserRole))
+        
+class EditPermDialog(TouchDialog):
+    def __init__(self, pfile, parent):
+        TouchDialog.__init__(self, QCoreApplication.translate("Permissions", "Permissions"), parent)
+
+        self.perm = PermissionWidget(pfile)
+        self.setCentralWidget(self.perm)
+        self.show()
+
 class NetworkWindow(TouchWindow):
     def __init__(self):
         TouchWindow.__init__(self, QCoreApplication.translate("Main", "Network"))
-        
-        self.interfaces_file = Interfaces()    # get interfaces from config file
-        self.ifs = all_interfaces()            # get interfaces from system
 
+        # check for Busybox since some network related things work differently there
+        self.busybox = self.check4busybox()
+
+        menu = self.addMenu()
+        menu_dns = menu.addAction(QCoreApplication.translate("Menu","DNS"))
+        menu_dns.triggered.connect(self.edit_dns)
+
+        # if the permissions file is present and can be read and written, then
+        # allow user to edit it
+        self.pfile = PermissionsFile()
+        if self.pfile.isAvailable():
+            menu_permissions = menu.addAction(QCoreApplication.translate("Menu","Permissions"))
+            menu_permissions.triggered.connect(self.edit_perm)
+        
+        self.interfaces_file = Interfaces(self.busybox)    # get interfaces from config file
+        self.ifs = all_interfaces()                        # get interfaces from system
+
+        # load resolv,conf on non-busybox systems
+        self.resolv_conf = None
+        if self.busybox:
+            self.resolv_conf = ResolvConf()
+        
         # add unconfigured interfaces missing from the system and set ip/netmask to "---"
         for i in self.interfaces_file.ifs():
             if not i in self.ifs:
@@ -606,7 +954,35 @@ class NetworkWindow(TouchWindow):
             self.set_net(DEFAULT)
         else:
             self.set_net(names[0])
-   
+
+    def check4busybox(self):
+        # cat (like most other tools) will tell if they are in fact
+        # busybox
+        cat_help = check_output(["cat", "--help"]).decode("UTF-8")
+        return cat_help.lower().find("busybox") >= 0
+
+    def edit_perm(self):
+        dialog = EditPermDialog(self.pfile, self)
+        dialog.exec_()
+
+    def edit_dns(self):
+        # use nameservers resolv.conf on busybox system, otherwise from interfaces file
+        dns_servers = self.interfaces_file.dns
+        if self.resolv_conf:
+            dns_servers = self.resolv_conf.nameserver
+        
+        dialog = EditDnsDialog(dns_servers, self)
+        dialog.changed.connect(self.on_dns_changed)
+        dialog.exec_()
+
+    def on_dns_changed(self, nameserver):
+        if self.resolv_conf:
+            self.resolv_conf.nameserver = nameserver
+        else:
+            self.interfaces_file.dns = nameserver
+            self.interfaces_file.set_modfied()
+        
+            
     def on_edit(self):
         name = self.nets_w.currentText()
         if name in self.interfaces_file.ifs():
@@ -640,6 +1016,11 @@ class NetworkWindow(TouchWindow):
     def close(self):
         self.interfaces_file.error.connect(self.file_error)
         self.interfaces_file.write()
+
+        # write resolv.conf if being used
+        if self.resolv_conf:
+            self.resolv_conf.write()
+        
         self.update_interfaces()
         TouchWindow.close(self)
 

@@ -15,7 +15,7 @@ The installation happens in four simple steps:
 
 1. Make sure that you are running at least [RoboPro Version 4.2.4](http://www.fischertechnik.de/ResourceImage.aspx?raid=10274)
 1. Enable the bootloader of your TXT by following the [official fischertechnik instructions](http://www.fischertechnik.de/en/ResourceImage.aspx?raid=10279)
-1. Copy the contents of the [community firmware ZIP archive](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/v0.9.2/ftcommunity-txt-0.9.2.zip) onto your sd card
+1. Copy the contents of the [community firmware ZIP archive](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/v0.9.3/ftcommunity-txt-0.9.3.zip) onto your sd card
 1. Insert the sd card into your TXT and switch it on!
 
 More information can be found [in our wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BEN%5D-Tutorial%3A-Setting-up-the-ftcommunity-TXT-Firmware) and in the [fischertechnik community forum](https://forum.ftcommunity.de/viewforum.php?f=33).
