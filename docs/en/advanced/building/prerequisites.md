@@ -1,5 +1,5 @@
 +---
-+nav-title: Prequesites
++nav-title: Prerequesites
 +nav-pos: 1
 +---
 
