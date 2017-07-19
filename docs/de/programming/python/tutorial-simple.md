@@ -11,7 +11,7 @@ beschrieben.
 
 Für sehr einfache Anwendungen und für schnelle Tests ist selbst das aber
 oft unverhältnismäßig viel Aufwand. Oft möchte man nur ein einfaches
-Pythonprogramm ein paar Schritte ausführen uns sich dann beenden lassen.
+Pythonprogramm ein paar Schritte ausführen und sich dann beenden lassen.
 Ein Beispiel für ein solches minimales Python-Programm ist das klassische
 [Hello World](https://www.learnpython.org/en/Hello%2C_World%21):
 
