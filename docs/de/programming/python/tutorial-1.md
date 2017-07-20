@@ -89,11 +89,11 @@ Nach der Installation ist die Anwendung sichtbar!
 
 ![tut1_img7.png](../../../en/programming/python/tut1_img7.png)    
         
-So sieht die Ausgabe des Programms auf dem TXT aus:
+So sieht die Ausgabe der Anwendung auf dem TXT aus:
 
 ![tut1_img10.png](../../../en/programming/python/tut1_img10.png)       
 
-Sie ist jetzt auch im Webinterface zu sehen:
+Die Anwendung ist jetzt auch im Webinterface zu sehen:
 
 ![tut1_img8.png](../../../en/programming/python/tut1_img8.png)
 

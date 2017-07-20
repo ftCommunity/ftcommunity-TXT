@@ -4,29 +4,25 @@ nav-pos: 2
 ---
 # Programming in Python: Development
 
-Warning: This tutorial is outdated and needs to be updated!
-
-[Programming Python: The First App](tutorial-1.md) introduced a basic first app. The whole development cycle used the standard way to upload the app to the TXT via the Web interface. Unfortunately this way of developing an app is not very convenient. This tutorial will present some useful shortcuts to speed development up.
+[Programming Python: The First App](tutorial-1.md) introduced a basic first app. The whole development cycle uses the standard way to upload the app to the TXT via the Web interface. Unfortunately this way of developing an app is not very convenient. This tutorial will present some useful shortcuts to speed up development.
 
 # App update via SSH
 
-During development usually only single files are being changed and it's not necessary to remove and re-install the entire app on the TXT during the develoment phase. Instead single files can be uploaded to the TXT via SSH.
+During development usually only single files are changed and it's not necessary to remove and re-install the entire app on the TXT during the develoment phase. Instead single files can be uploaded to the TXT via SCP and SSH.
 
 With a command line SSH client the `test.py` from tutorial 1 can be updated like this if the IP address of your TXT is 192.168.0.12 (use the TXTs netinfo app to find the ip address of your TXT):
 
 ```
-scp test.py root@192.168.0.12:/opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/
+scp test.py ftc@192.168.0.12:/opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/
 ```
 
-This will copy the new `test.py` file into the correct directory on the TXT. The directory target name on the TXT is the uuid from the manifest in the ZIP file you initially uploaded. E.g. if your apps manifest contained the line  ```uuid: 191fe5a6-313b-4083-af65-d1ad7fd6d281``` then the target directory is `/opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281`
+This will copy the new `test.py` file into the correct directory on the TXT. The directory target name on the TXT is the uuid from the manifest in the ZIP file you initially uploaded. E.g. if your apps manifest contained the line  ```uuid: 191fe5a6-313b-4083-af65-d1ad7fd6d281``` then the target directory is `/opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281`. Please note that community-firmware-versions built after September 21, 2016 show a confirmation dialog on the screen of the TXT when the user 'ftc' logs on via SSH. 
 
 You can now start your updated app on the TXT using the launcher.
 
-Currently the root password of the TXT is `root`. Later the root login will probably be disabled by default. We'll then provide information how to activate it.
-
 # Starting apps via SSH
 
-When apps are being started using the launcher no debug output and no error message are visible. This may be a problem during development. You can launch apps when being logged in into the TXT via SSH (preferrably as user "ftc"). In order to start the test app log into the TXT via SSH first. Then type:
+When apps are being started using the launcher no debug output and no error messages are visible. This may be a problem during development. You can launch apps when being logged in into the TXT via SSH (as user "ftc", no password). In order to start the test app log into the TXT via SSH first. Then type:
 
 ```
 $ export PYTHONPATH=/opt/ftc
@@ -37,7 +33,7 @@ Again the path is derived from the UUID in the manifest file of your app.
 
 You'll then see the error messages and debug output on the remote shell.
 
-# Start/stop apps via telnet/netcat
+# Start/stop apps via telnet/netcat (needs update)
 
 SSH is not the only way to start apps remotely. The TXTs launcher implements a little command server to start and stop apps. This has been added to be used via the web interface but can also be used with tools like telnet or netcat.
 
@@ -57,9 +53,9 @@ PyQt is available for all major linux distributions. Use your favorite package m
 
 The TXT apps come with a special Qt TXT theming. In order to run TXT apps on the PC the files implementing this theme have also to be installed on the PC.
 
-Please copy the file `TxtStyle.py` and the entire `themes` subdirectory to the same place on your PC. You can get these files from the [Repository](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc).
+Please copy the file `TouchStyle.py` and the entire `themes` subdirectory to the same place on your PC. You can get these files from the [Repository](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc).
 
-If you placed the files into the directory of you app then you don't have to do anything else. If you placed them somewhere else you need to make notify python of this directory. E.g. if `TxtStyle.py` and the `themes` directory have been placed under `/tmp/mytxtenv` then you need to enter:
+If you placed the files into the directory of your app then you don't have to do anything else. If you placed them somewhere else you need to notify python of this directory. E.g. if `TouchStyle.py` and the `themes` directory have been placed under `/tmp/mytxtenv` then you need to enter:
 
 ```
 export PYTHONPATH=/tmp/mytxtenv
@@ -78,15 +74,15 @@ You can now run your app locally on your PC by typing:
 $ ./test.py
 ```
 
-The file `TxtStyle.py` detects that you are running the app on a PC and creates a Window of 240x320 pixels for it.
+The file `TouchStyle.py` detects that you are running the app on a PC and creates a window of 240x320 pixels for it.
 
-You might notice that the Apps don't look 100% the same. One reason is a different font handling on the TXT and on the desktop PC. Furthermore the Qt and Python versions are not necessarily the same on the TXT and on the PC. Furthermore the app runs under the X11 window system on a PC while the TXT uses the QWS window manager for embedded systems. But the differences are small enough to allow for convenient app development on a PC.
+You might notice that the apps don't look 100% the same. One reason is a different font handling on the TXT and on the desktop PC. Furthermore the Qt and Python versions are not necessarily the same on the TXT and on the PC. Furthermore the app runs under the X11 window system on a PC while the TXT uses the QWS window manager for embedded systems. But the differences are small enough to allow for convenient app development on a PC.
 
-![Running on a TXT](tut2_img1.png) ![Running on a PC](tut2_img2.png)
+![Running on a TXT or a PC](tut2_img1b.png)    
 
 Small font rendering differences on TXT (left) and PC (right)
 
-## Using a Windows PC (by LK)
+## Using a Windows PC (by LK, needs update)
 
 On all Versions which python supports is it possible to develop and test applications for the
 TXT.
