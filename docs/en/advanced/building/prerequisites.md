@@ -2,7 +2,7 @@
 nav-title: Prequesites
 nav-pos: 1
 ---
-To follow this guide, you need 
+To follow this **guide**, you need: 
 
 * A network connection to the TXT:
     * USB-based network connection: IP 192.168.7.2
@@ -11,7 +11,7 @@ To follow this guide, you need
         * in this mode, the TXT serves as an access point
         * the network SSID is the name of the TXT displayed on the main screen
         * the WPA-Key can be found in the menu “Settings” -> “Network” -> WLAN Setup
-    * BT-based network connection IP 192.168.9.2 (I haven’t tried this…)
+    * BT-based network connection IP 192.168.9.2
         * BT needs to be switched on first: “Settings” -> “Network”
 
 * A ssh-client to connect to the TXT
