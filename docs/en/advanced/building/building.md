@@ -1,7 +1,7 @@
-+---
-+nav-title: Building
-+nav-pos: 3
-+---
+---
+nav-title: Building
+nav-pos: 3
+---
 
 Usually you don't need to build the firmware yourself. Instead you probably just want to download pre-built [releases](https://github.com/ftCommunity/ftcommunity-TXT/releases).
 

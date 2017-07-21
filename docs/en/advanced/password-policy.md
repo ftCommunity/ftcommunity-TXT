@@ -1,8 +1,10 @@
-+---
-+nav-title: Password Policy
-+nav-pos: 1
-+---
+---
+nav-title: Password Policy
+nav-pos: 1
+---
+
 # Useres, passwords and root access on the TXT
+
 
 ## Out-of-box status of user accounts
 By default, the ftcommunity-TXT comes with two relevant users with the user names 'ftc' and 'root'. (A third user - 'ROBOPro' is only included for compatibility reasons and of no further relevance here.)
@@ -11,13 +13,13 @@ By default, the ftcommunity-TXT comes with two relevant users with the user name
 - user 'root'     is disabled
 
 ## The "two factor" authentication
-Community-firmware-versions built after September 21, 2016 show a confirmation dialog on the screen of the TXT when the user 'ftc' logs on via SSH and when a sudo-command is executed. (cf. https://forum.ftcommunity.de/viewtopic.php?f=8&t=3429&start=560#p26486).
+Community-firmware-versions built after September 21, 2016 show a confirmation dialog on the screen of the TXT when the user 'ftc' logs on via SSH and when a sudo-command is executed. ([https://forum.ftcommunity.de/viewtopic.php?f=8&t=3429&start=560#p26486](Communityforum)).
 
 This means that you have to have access to your TXT's touchscreen to log on via SSH.
 
 To change this behavior, add a password for the root user (see below for instructions).
 
-## Enabeling the 'root' user
+## Enabeling the root user
 To enable the root user, you have to set a password for the user ftc first; then you're able to set a password for user 'root':
 
 Set a password for user 'ftc':

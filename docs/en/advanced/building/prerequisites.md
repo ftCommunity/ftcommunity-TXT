@@ -1,7 +1,7 @@
-+---
-+nav-title: Prequesites
-+nav-pos: 1
-+---
+---
+nav-title: Prequesites
+nav-pos: 1
+---
 
 To follow this guide, you need 
 

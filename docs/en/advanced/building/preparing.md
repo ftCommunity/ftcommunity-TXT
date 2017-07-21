@@ -1,7 +1,7 @@
-+---
-+nav-title: Preparing the TXT
-+nav-pos: 2
-+---
+---
+nav-title: Preparing the TXT
+nav-pos: 2
+---
 
 ## Update to latest official firmware for TXT-Controller 
 The first step should be to update the official firmware to the latest version. The easiest way to achieve this is updating ROBOPro to its latest version and using the built-in firmware update method.

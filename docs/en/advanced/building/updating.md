@@ -1,7 +1,7 @@
-++---
-++nav-title: Updating
-++nav-pos: 4
-++---
+---
+nav-title: Updating
+nav-pos: 4
+---
 # Fetch latest changes and make a new build
 To fetch changes from the main git repository of ftcommunity-TXT, you have to update your local copy of the repository and then rebuilt the firmware package. (This will be a lot quicker than the initial build, as only the changes will be downloaded and only changed parts will be recompiled).
 ## Updating the local clone of the git-repository
