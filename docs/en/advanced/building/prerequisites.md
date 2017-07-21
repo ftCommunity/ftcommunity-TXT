@@ -2,7 +2,6 @@
 nav-title: Prequesites
 nav-pos: 1
 ---
-
 To follow this guide, you need 
 
 * A network connection to the TXT:
