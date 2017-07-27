@@ -7,13 +7,13 @@ nav-pos: 1
 
 
 ## Out-of-box status of user accounts
-By default, the ftcommunity-TXT comes with two relevant users with the user names 'ftc' and 'root'. (A third user - 'ROBOPro' is only included for compatibility reasons and of no further relevance here.)
+By default, the ftcommunity-TXT comes with two relevant users with the user names '**ftc**' and '**root**'. (*A third user - 'ROBOPro' is only included for compatibility reasons.*)
 
-- user 'ftc'     has no password
-- user 'root'     is disabled
+- user 'ftc' has **no password**
+- user 'root'is **disabled**
 
 ## The "two factor" authentication
-Community-firmware-versions built after September 21, 2016 show a confirmation dialog on the screen of the TXT when the user 'ftc' logs on via SSH and when a sudo-command is executed. ([https://forum.ftcommunity.de/viewtopic.php?f=8&t=3429&start=560#p26486](Communityforum)).
+The Community Firmware (*since version 0.9.3*) has a **"two-factor authentication"**. To connect to the TXT by every internet you have to accept on the display!
 
 This means that you have to have access to your TXT's touchscreen to log on via SSH.
 
@@ -33,21 +33,3 @@ Simply type
     ```sudo passwd root ```  
 
 You will again be prompted for a confirmatory click on the TXT-display to permit the "sudo"-command.
-
-> ### For older versions
-> Should this fail, you may have to set a password for the user ftc first (particularly in fw-builds older than September 28, 2016): 
-
-> 1. Set a password for the current user (=ftc)  
->      ```passwd ```   
->      and follow the instructions  
-
-> 2. Set a password for the user 'root'  
->     ```sudo passwd root ```  
-
->     Attention: You'll first be prompted for a password by _sudo_ - this means you have to enter the password of the current user (ftc) - i.e. the one you just set for 'ftc'
-
-Now you should be able to log in to the TXT as root user as well - e.g. to run updates of the TXT over the air.
-
-Try if you can log on as root using
-```ssh root@192.168.7.2 ```  
-and your new root password.
