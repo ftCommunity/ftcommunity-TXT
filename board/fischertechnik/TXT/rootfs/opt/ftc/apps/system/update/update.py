@@ -491,7 +491,7 @@ class TouchGuiApplication(TouchApplication):
             self.but.setDisabled(False)  # enable update button
         else:
             # show that no new version is avaible
-            self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "No new verion found!\nYou are currently using " + self.to_str(lcl_ver)))
+            self.lbl.setText(QCoreApplication.translate("TouchGuiApplication", "No new version found!\nYou are currently using " + self.to_str(lcl_ver)))
 
 
 if __name__ == "__main__":
