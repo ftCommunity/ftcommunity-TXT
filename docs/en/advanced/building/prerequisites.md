@@ -1,9 +1,9 @@
 ---
-nav-title: Prequesites
+nav-title: Prerequisites
 nav-pos: 1
 ---
 
-# Prerequesites
+# Prerequisites
 
 You need a few things to be able to build the Community-Firmware
 
