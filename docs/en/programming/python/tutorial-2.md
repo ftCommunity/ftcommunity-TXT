@@ -33,11 +33,11 @@ Again the path is derived from the UUID in the manifest file of your app.
 
 You'll then see the error messages and debug output on the remote shell.
 
-# Start/stop apps via telnet/netcat (needs update)
+# Start/stop apps via telnet/netcat
 
 SSH is not the only way to start apps remotely. The TXTs launcher implements a little command server to start and stop apps. This has been added to be used via the web interface but can also be used with tools like telnet or netcat.
 
-Connect to the TXT via telnet on port 9000 using the command `telnet 192.168.0.12 9000`. Once connected you can enter `launch test/test.py` to launch the test app. The command `stop-app` will stop the currently running app. The command `quit` will close the telnet connection to the TXT.
+Connect to the TXT via telnet on port 9000 using the command `telnet 192.168.0.12 9000` (use the TXTs netinfo app to find the ip address of your TXT). Once connected you can enter `launch user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py` to launch the test app. The command `stop-app` will stop the currently running app. The command `quit` will close the telnet connection to the TXT.
 
 The same can be achived with netcat. E.g. `echo "stop-app" | nc 192.168.0.12 9000` will stop the currently running app.
 
@@ -82,32 +82,10 @@ You might notice that the apps don't look 100% the same. One reason is a differe
 
 Small font rendering differences on TXT (left) and PC (right)
 
-## Using a Windows PC (by LK, needs update)
+## Using a Windows PC
 
-On all Versions which python supports is it possible to develop and test applications for the
-TXT.
+PyQt is available for all Windows-Versions. First, you have to install PyQt. Download the correct file from [PyQt4](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/). (*For a Windows x64 system with Python 3.4 x64 [**PyQt4**-4.11.4-gpl- **Py3.4** - **Qt4.8.7** - **x64** .exe](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt4-4.11.4-gpl-Py3.4-Qt4.8.7-x64.exe/download) is the file you need.*)
 
-At first you need a python version, which is ok with the PyQt Version: For this you need to check first which Python version you need. Look at: https://www.riverbankcomputing.com/software/pyqt/download, there is a part which
-is called „Binary Packages“ go there and downloads one version (64bit/32bit) for every download look for the Python version.
-
-**Example:**
-If your download name is: `PyQt4-4.11.4-gpl-Py3.4-Qt4.8.7-x64.exe`:
-Do you get PyQt version 4-4.11.4 or Qt version 4.8.7
-You need Python version 3.4 (Note: every other Python version can go, but maybe not
-correct)
-
-Your version is a 64bit version.
-Now download (https://www.python.org/download/releases/3.4.3/) and install the Python
-version which you found before.
-Now you can go through the installer.
-Now you should be able to start PyQt Programs!
-
-Before you can start developing you Programs you must first download one file and one
-directory. Go for it at https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc and download the themes folder and next to the `TxtStyle.py` file. Copy it into your Path in which your Python program is.
-
-Like on Linux the Window don’t looks like at the TXT. Why can you read in the end of the
-Linux contribution. But to show you how it looks on Windows here is it:
+Additionally, TXT apps need a dedicated theme to make them look as on the TXT. Download this from [Github](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc). (*You need the file `TouchStyle.py` und the directory `themes`.*). Copy these files into your directory `site-packages`. Now write a test program. To start the program, use the Windows console and enter `python Test.py`. A TXT-like window will show up immediately.
 
 ![Running on a Windows PC](tut2_img3.png)
-
-(Tipp: It’s normal that the TxtStyle modul says: “('Unable to connect to launcher:’ ConnectionRefusedError (10061, 'Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte', None, 10061, None))”, and think on it your PC is normaly really faster than the TXT!)

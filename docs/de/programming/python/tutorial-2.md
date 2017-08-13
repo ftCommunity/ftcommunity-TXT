@@ -33,6 +33,14 @@ Der Pfad ergibt sich wieder aus der UUID, wie sie in der Manifest-Datei deiner A
 
 Jetzt kannst du Fehlermeldungen und Debug-Ausgaben in deiner Remote-Shell sehen.
 
+# Apps über Telnet oder Netcat starten und stoppen
+
+SSH ist nicht die einzige Methode, um Apps auf dem TXT von außen über WLAN zu starten. Der TXT-Launcher liefert einen kleinen Steuer-Server (Command-Server), mit dem du Apps sowohl über das Web-Interface als auch über Programme wie Telnet oder Netcat starten und stoppen kannst.
+
+Verbinde dich über Telnet mit dem TXT auf Port 9000 mit dem Befehl: `telnet 192.168.0.12 9000` (verwende die aktuelle IP-Adresse deines TXT, die durch mit der Netinfo-App herausfindest). Wenn die Verbindung besteht, kannst du `launch user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py` eingeben, um die Test-App zu starten. Der Befehl `stop-app` beendet die laufende App. Der Befehl `quit` schließt die Telnet-Verbindung mit dem TXT.
+
+Du kannst die Apps auch mit Netcat starten und stoppen. Der Befehl `echo "stop-app" | nc 192.168.0.12 9000` beendet die laufende App.
+
 
 # TXT-Apps auf dem PC ausführen
 
@@ -77,7 +85,8 @@ Du wirst merken, dass die Apps auf dem TXT und dem PC nicht 100 % gleich aussehe
 Kleine Abweichungen in der Schriftdarstellung zwischen TXT (links) und PC (rechts)
 
 ## Unter Windows
- PyQt4 ist für so gut wie alle Windows-Versionen verfügbar. Um es zu installieren, gehe auf die Download-Webseite von [PyQt4](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/) und lade dir dort die passende Datei herunter. (*Für ein Windows x64 mit Python 3.4 x64 wäre [**PyQt4**-4.11.4-gpl- **Py3.4** - **Qt4.8.7** - **x64** .exe](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt4-4.11.4-gpl-Py3.4-Qt4.8.7-x64.exe/download) die richtige Datei.*)
+
+PyQt4 ist für so gut wie alle Windows-Versionen verfügbar. Um es zu installieren, gehe auf die Download-Webseite von [PyQt4](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/) und lade dir dort die passende Datei herunter. (*Für ein Windows x64 mit Python 3.4 x64 wäre [**PyQt4**-4.11.4-gpl- **Py3.4** - **Qt4.8.7** - **x64** .exe](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt4-4.11.4-gpl-Py3.4-Qt4.8.7-x64.exe/download) die richtige Datei.*)
 
 TXT Anwendungen benötigen jedoch ein spezielles Thema, damit sie wie auf dem TXT aussehen. Lade dir dies von [Github](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc) herunter (*Du brauchst die Datei `TouchStyle.py` und den Ordner `themes`.*) Kopiere diese Dateien in deinen `site-packages`-Ordner. Schreibe nun ein Testprogramm. Jetzt kannst du in die Windows-Konsole gehen und wenn du `python Test.py` eingibst, wirst du auch sogleich ein TXT-Fenster sehen.
 
