@@ -10,14 +10,14 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="64"
+   width="63.997658"
    height="64"
-   viewBox="0 0 64 64.000002"
+   viewBox="0 0 63.997658 64.000002"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="icon.svg"
-   inkscape:export-filename="/home/harbaum/projekte/private_stuff/txt/apps/about/icon.png"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="icon_cfw.svg"
+   inkscape:export-filename="/home/apdent/public_html/ftcommunity-TXT/board/fischertechnik/TXT/rootfs/opt/ftc/media/icon_cfw.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -43,7 +43,7 @@
        fx="9"
        fy="1028.1622"
        r="13"
-       gradientTransform="matrix(0.60007064,0,0,0.60390713,-0.07462054,404.55765)"
+       gradientTransform="matrix(0.60007078,0,0,0.60389878,-0.07462409,404.56641)"
        gradientUnits="userSpaceOnUse"
        spreadMethod="pad" />
   </defs>
@@ -54,22 +54,23 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="15.839192"
-     inkscape:cx="15.922552"
-     inkscape:cy="41.507993"
+     inkscape:zoom="11.2"
+     inkscape:cx="33.764145"
+     inkscape:cy="38.328658"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="px"
-     inkscape:window-width="1280"
-     inkscape:window-height="1004"
-     inkscape:window-x="-2"
-     inkscape:window-y="-3"
+     inkscape:window-width="1920"
+     inkscape:window-height="1005"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0">
+     fit-margin-bottom="0"
+     inkscape:snap-text-baseline="false">
     <inkscape:grid
        type="xygrid"
        id="grid3336"
@@ -77,8 +78,8 @@
        visible="true"
        enabled="true"
        snapvisiblegridlinesonly="true"
-       originx="-1.3173673e-09px"
-       originy="-6.654646e-05px" />
+       originx="-0.0011696421px"
+       originy="-0.0011574822px" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -96,31 +97,56 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-988.36213)">
+     transform="translate(-0.00116964,-988.36104)">
     <ellipse
-       style="fill:url(#radialGradient4165);fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.61390746;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:url(#radialGradient4165);fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.61389053;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3357"
        cx="15.899113"
        cy="1036.4242"
        rx="15.34031"
        ry="15.376954"
-       d="m 31.239423,1036.4242 c 0,8.4925 -6.868091,15.3769 -15.34031,15.3769 -8.4722196,0 -15.3403104,-6.8844 -15.3403104,-15.3769 0,-8.4925 6.8680908,-15.377 15.3403104,-15.377 8.472219,0 15.34031,6.8845 15.34031,15.377 z"
        sodipodi:cx="15.899113"
        sodipodi:cy="1036.4242"
        sodipodi:rx="15.34031"
        sodipodi:ry="15.376954"
-       transform="matrix(2.0451339,0,0,2.0402602,-0.51581362,-1094.2129)" />
+       transform="matrix(2.0451334,0,0,2.0402884,-0.51463673,-1094.2432)"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:61.28086853px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:sans-serif"
-       x="16.429712"
-       y="1044.2227"
-       id="text4225"
-       sodipodi:linespacing="125%"
-       transform="scale(1.0011937,0.99880776)"><tspan
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1000%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:1.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x="6.3392859"
+       y="1022.6123"
+       id="text4139"
+       sodipodi:linespacing="1000%"><tspan
          sodipodi:role="line"
-         id="tspan4227"
-         x="16.429712"
-         y="1044.2227">?</tspan></text>
+         id="tspan4141"
+         x="6.3392859"
+         y="1022.6123"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;line-height:1000%;font-family:'DejaVu Sans Mono';-inkscape-font-specification:'DejaVu Sans Mono, Bold';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke:#ffffff;stroke-width:1.25;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">c</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1000%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#046ab4;fill-opacity:1;stroke:#ffffff;stroke-width:1.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       x="18.5"
+       y="1033.255"
+       id="text4143"
+       sodipodi:linespacing="1000%"><tspan
+         sodipodi:role="line"
+         id="tspan4145"
+         x="18.5"
+         y="1033.255"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;line-height:1000%;font-family:'DejaVu Sans Mono';-inkscape-font-specification:'DejaVu Sans Mono, Bold';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke:#ffffff;stroke-opacity:1;stroke-width:1.25;stroke-miterlimit:4;stroke-dasharray:none">f</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1000%;font-family:'Adobe New Century Schoolbook';-inkscape-font-specification:'Adobe New Century Schoolbook, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#fcce04;fill-opacity:1;stroke:none;stroke-width:1.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       x="33.017857"
+       y="1037.7015"
+       id="text4147"
+       sodipodi:linespacing="1000%"><tspan
+         sodipodi:role="line"
+         id="tspan4149"
+         x="33.017857"
+         y="1037.7015"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:40px;line-height:1000%;font-family:'DejaVu Sans Mono';-inkscape-font-specification:'DejaVu Sans Mono, Bold';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke:#ffffff;stroke-opacity:1;stroke-width:1.25;stroke-miterlimit:4;stroke-dasharray:none">w</tspan></text>
   </g>
 </svg>
