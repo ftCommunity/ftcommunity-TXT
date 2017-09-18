@@ -9,7 +9,7 @@ nav-title: Installation
 
 # Installation
 
-1. Zunächst musst du die Standardfirmware des TXT auf Version 4.2.4 upgraden (_das geht mit RoboPro_). Die aktuelle Version von RoboPro findest du hier: [https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/01-update-robopro-424.ashx](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/01-update-robopro-424.ashx)
+1. Zunächst musst du die Standardfirmware des TXT auf Version 4.2.4 upgraden (_das geht mit RoboPro_). Die aktuelle Version von RoboPro findest du [hier bei Fischertechnik](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/01-update-robopro-424.ashx)
 
 1. Anschließend musst du den Bootloader freischalten, wie in der Anleitung von Fischertechnik erklärt: [http://www.fischertechnik.de/ResourceImage.aspx?raid=10278](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278)
 
