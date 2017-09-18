@@ -8,7 +8,7 @@ nav-title: Installation
 # Installation
 1. Upgrade the Standard-Firmware to the latest Version 4.2.4
 You can find the update to RoboPro 4.2.4 (which will also update the TXT) here:
-[http://www.fischertechnik.de/en/ResourceImage.aspx?raid=10275](http://www.fischertechnik.de/en/ResourceImage.aspx?raid=10275)
+[https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/02-demoversion-robopro-english.ashx](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/02-demoversion-robopro-english.ashx)
 
 2. Enable booting from MicroSD-card (in Fischertechnik-terminology: "Activation Bootloader"). Please follow the official guide which is available here:
 [http://www.fischertechnik.de/ResourceImage.aspx?raid=10278](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278)
