@@ -17,3 +17,4 @@
 /sbin/unix_chkpwd                       r      4755     0       0       -       -       -       -       -
 /etc/network/interfaces                 f       666     0       0       -       -       -       -       -
 /etc/locale                             f       666     0       0       -       -       -       -       -
+/etc/netreq_permissions                 f       666     0       0       -       -       -       -       -
