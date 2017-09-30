@@ -4,7 +4,7 @@
 # additional functionality to communicate with the app launcher and
 # the like
 
-TouchStyle_version = 1.31
+TouchStyle_version = 1.4
 
 import struct, os, platform, socket
 from PyQt4.QtCore import *
@@ -39,6 +39,10 @@ if 'SCREEN' in os.environ:
 else:
     WIN_WIDTH = 240
     WIN_HEIGHT = 320
+    # uncomment for testing purposes on PC to set landscape mode
+    #WIN_WIDTH = 320
+    #WIN_HEIGHT = 240
+
 
 # background thread to monitor power button event device
 class ButtonThread(QThread):
@@ -595,6 +599,9 @@ class TouchKeyboard(TouchDialog):
     def __init__(self,parent = None):
         TouchDialog.__init__(self, "Input", parent)
 
+        w=self.width()
+        h=self.height()
+        
         conf=self.addConfirm()
       
         self.setCancelButton()
@@ -641,7 +648,11 @@ class TouchKeyboard(TouchDialog):
                     but.clicked.connect(self.key_pressed)
 
                 but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                page.grid.addWidget(but,cnt/4,cnt%4)
+                if w<h:
+                    page.grid.addWidget(but,cnt/4,cnt%4)
+                else:
+                    page.grid.addWidget(but,cnt/8,cnt%8)
+                cnt+=1
 
             page.setLayout(page.grid)
             self.tab.addTab(page, self.keys_tab[a])

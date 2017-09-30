@@ -18,15 +18,15 @@ local = os.path.dirname(os.path.realpath(__file__)) + "/auxicon/"
 
 keys_tab = [ "A-O", "P-Z", "0-9" ]
 keys_upper = [
-    ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","Aa" ],
-    ["P","Q","R","S","T","U","V","W","X","Y","Z",".",","," ","_","Aa" ],
-    ["0","1","2","3","4","5","6","7","8","9","+","-","#","^","<","Aa" ]
-]
+        ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","Aa" ],
+        ["P","Q","R","S","T","U","V","W","X","Y","Z",".",","," ","_","Aa" ],
+        ["=","!",'"',"§","$","%","&","/","(",")","*","_","'","°",">","Aa" ]
+    ]
 keys_lower = [
-    ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","Aa" ],
-    ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
-    ["=","!",'"',"§","$","%"," ","/","(",")","*","_","'","°",">","Aa" ]
-]
+        ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","Aa" ],
+        ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
+        ["0","1","2","3","4","5","6","7","8","9","+","-","#","^","<","Aa" ]
+    ]
 
 class TouchAuxMessageBox(TouchMessageBox): pass
 
@@ -654,6 +654,10 @@ class TouchAuxPicButton(QAbstractButton):
 class TouchAuxKeyboard(TouchDialog):
     def __init__(self,title,strg,parent):
         TouchDialog.__init__(self, title, parent)
+        
+        w=self.width()
+        h=self.height()
+        
         self.strg=strg
         self.confbutpressed=False
         
@@ -701,7 +705,10 @@ class TouchAuxKeyboard(TouchDialog):
                     but.clicked.connect(self.key_pressed)
 
                 but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                page.grid.addWidget(but,cnt/4,cnt%4)
+                if w<h:
+                    page.grid.addWidget(but,cnt/4,cnt%4)
+                else:
+                    page.grid.addWidget(but,cnt/8,cnt%8)
                 cnt+=1
 
             page.setLayout(page.grid)
