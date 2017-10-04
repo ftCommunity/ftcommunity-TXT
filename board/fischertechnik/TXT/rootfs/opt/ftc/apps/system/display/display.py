@@ -10,7 +10,13 @@ class DisplaySettingsPlugin(LauncherPlugin):
 
     def __init__(self, application):
         LauncherPlugin.__init__(self, application)
-        self.mainWindow = TouchWindow(QCoreApplication.translate("main", "Settings"))
+
+        translator = QTranslator()
+        path = os.path.dirname(os.path.realpath(__file__))
+        translator.load(self.locale(), os.path.join(path, "display_"))
+        self.installTranslator(translator)
+
+        self.mainWindow = TouchWindow(QCoreApplication.translate("main", "Display"))
         rotation = 0
         try:
           config = open("/etc/default/launcher", "r")
@@ -23,16 +29,16 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.vbox = QVBoxLayout()
         self.mainWindow.centralWidget.setLayout(self.vbox)
         self.rotate = QComboBox()
-        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 0°"))
-        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 90°"))
-        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 180°"))
-        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 270°"))
+        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 0"))
+        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 90"))
+        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 180"))
+        self.rotate.addItem(QCoreApplication.translate("main", "Rotate 270"))
         rot_idx = int(rotation / 90)
         if (rot_idx < 4):
           self.rotate.setCurrentIndex(rot_idx)
         self.rotate.activated.connect(self.on_change_orientation)
         self.vbox.addWidget(self.rotate)
-        self.calibrate = QPushButton(QCoreApplication.translate("main", "Calibrate touch"))
+        self.calibrate = QPushButton(QCoreApplication.translate("main", "Calibrate\ntouchscreen"))
         self.calibrate.clicked.connect(self.on_calibrate_touchscreen)
         self.vbox.addWidget(self.calibrate)
         self.mainWindow.show()
@@ -44,14 +50,15 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.mainWindow.show()
         old_window.close()
         subprocess.run(["sudo", "/usr/bin/ts_calibrate"])
-        self.restart_launcher(QCoreApplication.translate("main", "Activating new touch screen calibration..."))
+        self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
     def on_change_orientation(self, index):
         rotation = index * 90
         config = open("/etc/default/launcher", "w")
         config.write("SCREEN_ROTATION=%i\n" % rotation)
         config.close()
-        self.restart_launcher(QCoreApplication.translate("main", "Rotating screen to %i°...") % rotation)
+        msg = QCoreApplication.translate("main", "Rotating screen to %i...")
+        self.restart_launcher(msg % rotation)
 
     def restart_launcher(self, text):
         old_window = self.mainWindow
