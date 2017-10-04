@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 #
 import sys, time, os, shlex
-import numpy, cv2
+import numpy
+try:
+    cv2
+except:
+    print("no opencv")
+
 from subprocess import *
 from TouchStyle import *
 from threading import Timer
@@ -719,7 +724,9 @@ class TouchAuxKeyboard(TouchDialog):
         self.layout.addWidget(self.tab)
 
         self.centralWidget.setLayout(self.layout)
-        if strg.isnumeric(): self.tab.setCurrentIndex(2)
+        if strg.isnumeric() or (strg[1:].isnumeric() and strg[0:1]=="-"): 
+            self.tab.setCurrentIndex(2)
+            self.caps_changed()
 
     def key_erase(self):
         self.line.setText(self.line.text()[:-1]) 
