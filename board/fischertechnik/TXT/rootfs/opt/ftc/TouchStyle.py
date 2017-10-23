@@ -13,6 +13,7 @@ from PyQt4.QtGui import *
 # enable special features for the Fischertechnik TXT
 # The TXT can be detected by the presence of /etc/fw-ver.txt
 TXT = os.path.isfile("/etc/fw-ver.txt")
+DEV = os.path.isfile("/etc/ft-cfw-dev.txt")
 
 INPUT_EVENT_DEVICE = None
 
@@ -150,7 +151,7 @@ class TouchBaseWidget(QWidget):
         # TXT windows are always fullscreen on arm (txt itself)
         # and windowed else (e.g. on PC)
     def show(self):
-        if platform.machine()[0:3] == "arm":
+        if platform.machine()[0:3] == "arm" and not DEV:
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
@@ -234,7 +235,7 @@ class TouchDialog(QDialog):
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
-        if platform.machine()[0:3] == "arm":
+        if platform.machine()[0:3] == "arm" and not DEV:
             size = QApplication.desktop().screenGeometry()
             self.setFixedSize(size.width(), size.height())
         else:
@@ -295,11 +296,10 @@ class TouchDialog(QDialog):
             self.parent.unregister(self)
 
         super(TouchDialog, self).close()
-        #if self.sender().objectName()=="confirmbut": self.confbutclicked=True
         
         # TXT windows are always fullscreen
     def exec_(self):
-        if platform.machine()[0:3] == "arm":
+        if platform.machine()[0:3] == "arm" and not DEV:
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
