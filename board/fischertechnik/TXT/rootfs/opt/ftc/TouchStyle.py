@@ -4,7 +4,7 @@
 # additional functionality to communicate with the app launcher and
 # the like
 
-TouchStyle_version = 1.4
+TouchStyle_version = 1.5
 
 import struct, os, platform, socket
 from PyQt4.QtCore import *
@@ -13,7 +13,24 @@ from PyQt4.QtGui import *
 # enable special features for the Fischertechnik TXT
 # The TXT can be detected by the presence of /etc/fw-ver.txt
 TXT = os.path.isfile("/etc/fw-ver.txt")
+# check for Fischertechnik community firmware app development settings
 DEV = os.path.isfile("/etc/ft-cfw-dev.txt")
+
+DEV_ORIENTATION="PORTRAIT"
+
+if DEV:
+    # versuche, die dev config zu lesen
+    try:
+        dcfile=open("/etc/ft-cfw-dev.txt","r")
+        for line in dcfile:
+            if not ("#" in line):
+                if "orientation" in line and "landscape" in line:
+                    DEV_ORIENTATION="LANDSCAPE"
+        dcfile.close()
+    except:
+        pass
+        
+        
 
 INPUT_EVENT_DEVICE = None
 
@@ -38,11 +55,13 @@ if 'SCREEN' in os.environ:
     WIN_WIDTH = int(w)
     WIN_HEIGHT = int(h)
 else:
-    WIN_WIDTH = 240
-    WIN_HEIGHT = 320
-    # uncomment for testing purposes on PC to set landscape mode
-    #WIN_WIDTH = 320
-    #WIN_HEIGHT = 240
+    if DEV_ORIENTATION == "LANDSCAPE":
+        WIN_WIDTH = 320
+        WIN_HEIGHT = 240
+    else:
+        WIN_WIDTH = 240
+        WIN_HEIGHT = 320
+
 
 
 # background thread to monitor power button event device
