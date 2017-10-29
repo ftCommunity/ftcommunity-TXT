@@ -4,7 +4,7 @@ nav-pos: 3
 ---
 # ROBOPro mit der Community-Firmware verwenden
 
-ROBOPro-Programme kannst du mit der Community-Firmware verwenden, indem du mit der "FT-GUI"-App die originale Benutzeroberfläche von Fischertechnik startest.
+ROBOPro-Programme kannst du mit der Community-Firmware verwenden, indem du auf dem TXT mit der "FT-GUI"-App die originale Benutzeroberfläche von Fischertechnik startest.
 Ein kurzer Druck auf den "**ON/OFF**"-Schalter (_eine Sekunde oder kürzer_) bringt
 dich zurück zum Hauptbildschirm der Community-Firmware.
 
