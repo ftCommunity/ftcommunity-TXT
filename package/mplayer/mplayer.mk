@@ -224,12 +224,6 @@ else
 MPLAYER_CONF_OPTS += --disable-gif
 endif
 
-# We intentionally don't pass --enable-pulse, to let the
-# autodetection find which library to link with.
-ifeq ($(BR2_PACKAGE_PULSEAUDIO),y)
-MPLAYER_DEPENDENCIES += pulseaudio
-endif
-
 # We intentionally don't pass --enable-librtmp to let autodetection
 # find which library to link with.
 ifeq ($(BR2_PACKAGE_RTMPDUMP),y)
@@ -374,11 +368,11 @@ define MPLAYER_CONFIGURE_CMDS
 endef
 
 define MPLAYER_BUILD_CMDS
-	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)
+	$(MAKE) -C $(@D)
 endef
 
 define MPLAYER_INSTALL_TARGET_CMDS
-	$(TARGET_MAKE_ENV) $(MAKE) DESTDIR=$(TARGET_DIR) -C $(@D) install
+	$(MAKE) DESTDIR=$(TARGET_DIR) -C $(@D) install
 endef
 
 $(eval $(generic-package))

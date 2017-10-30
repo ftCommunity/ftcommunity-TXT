@@ -8,10 +8,9 @@ config BR2_PACKAGE_QT5CANVAS3D
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
 
-	  Qt Canvas 3D module provides a way to make WebGL-like
-	  3D drawing calls from Qt Quick JavaScript.
+	  This package corresponds to the qt5canvas3d module.
 
-	  http://doc.qt.io/qt-5/qtcanvas3d-index.html
+	  http://qt.io
 
 comment "qt5canvas3d needs an OpenGL-capable backend"
 	depends on !BR2_PACKAGE_QT5_GL_AVAILABLE

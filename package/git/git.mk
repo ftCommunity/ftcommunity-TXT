@@ -4,16 +4,12 @@
 #
 ################################################################################
 
-GIT_VERSION = 2.11.1
+GIT_VERSION = 2.9.1
 GIT_SOURCE = git-$(GIT_VERSION).tar.xz
 GIT_SITE = https://www.kernel.org/pub/software/scm/git
-GIT_LICENSE = GPLv2, LGPLv2.1+
+GIT_LICENSE = GPLv2 LGPLv2.1+
 GIT_LICENSE_FILES = COPYING LGPL-2.1
 GIT_DEPENDENCIES = zlib host-gettext
-
-ifeq ($(BR2_PACKAGE_GETTEXT),y)
-GIT_DEPENDENCIES += gettext
-endif
 
 ifeq ($(BR2_PACKAGE_OPENSSL),y)
 GIT_DEPENDENCIES += openssl
@@ -23,8 +19,8 @@ else
 GIT_CONF_OPTS += --without-openssl
 endif
 
-ifeq ($(BR2_PACKAGE_PCRE),y)
-GIT_DEPENDENCIES += pcre
+ifeq ($(BR2_PACKAGE_PERL),y)
+GIT_DEPENDENCIES += perl
 GIT_CONF_OPTS += --with-libpcre
 else
 GIT_CONF_OPTS += --without-libpcre

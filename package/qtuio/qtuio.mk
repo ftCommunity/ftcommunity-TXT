@@ -32,7 +32,7 @@ endef
 ifeq ($(BR2_QTUIO_EXAMPLES),y)
 define QTUIO_BUILD_EXAMPLES
 	for example in $(QTUIO_EXAMPLES) ; do \
-		$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/examples/$${example} || exit 1; \
+		$(MAKE) -C $(@D)/examples/$${example} || exit 1; \
 	done
 endef
 endif

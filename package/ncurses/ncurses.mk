@@ -8,6 +8,7 @@ NCURSES_VERSION = 5.9
 NCURSES_SITE = $(BR2_GNU_MIRROR)/ncurses
 NCURSES_INSTALL_STAGING = YES
 NCURSES_DEPENDENCIES = host-ncurses
+NCURSES_PROGS = clear infocmp tabs tic toe tput tset
 NCURSES_LICENSE = MIT with advertising clause
 NCURSES_LICENSE_FILES = README
 NCURSES_CONFIG_SCRIPTS = ncurses$(NCURSES_LIB_SUFFIX)$(NCURSES_ABI_VERSION)-config
@@ -49,6 +50,11 @@ else
 NCURSES_CONF_OPTS += --without-gpm
 endif
 
+NCURSES_LIBS-y = ncurses
+NCURSES_LIBS-$(BR2_PACKAGE_NCURSES_TARGET_MENU) += menu
+NCURSES_LIBS-$(BR2_PACKAGE_NCURSES_TARGET_PANEL) += panel
+NCURSES_LIBS-$(BR2_PACKAGE_NCURSES_TARGET_FORM) += form
+
 NCURSES_TERMINFO_FILES = \
 	a/ansi \
 	l/linux \
@@ -67,36 +73,38 @@ NCURSES_TERMINFO_FILES = \
 ifeq ($(BR2_PACKAGE_NCURSES_WCHAR),y)
 NCURSES_CONF_OPTS += --enable-widec
 NCURSES_LIB_SUFFIX = w
-NCURSES_LIBS = ncurses menu panel form
 
 define NCURSES_LINK_LIBS_STATIC
-	$(foreach lib,$(NCURSES_LIBS:%=lib%), \
-		ln -sf $(lib)$(NCURSES_LIB_SUFFIX).a $(STAGING_DIR)/usr/lib/$(lib).a
+	$(foreach lib,$(NCURSES_LIBS-y:%=lib%), \
+		ln -sf $(lib)$(NCURSES_LIB_SUFFIX).a $(1)/usr/lib/$(lib).a
 	)
 	ln -sf libncurses$(NCURSES_LIB_SUFFIX).a \
-		$(STAGING_DIR)/usr/lib/libcurses.a
+		$(1)/usr/lib/libcurses.a
 endef
 
 define NCURSES_LINK_LIBS_SHARED
-	$(foreach lib,$(NCURSES_LIBS:%=lib%), \
-		ln -sf $(lib)$(NCURSES_LIB_SUFFIX).so $(STAGING_DIR)/usr/lib/$(lib).so
+	$(foreach lib,$(NCURSES_LIBS-y:%=lib%), \
+		ln -sf $(lib)$(NCURSES_LIB_SUFFIX).so $(1)/usr/lib/$(lib).so
 	)
 	ln -sf libncurses$(NCURSES_LIB_SUFFIX).so \
-		$(STAGING_DIR)/usr/lib/libcurses.so
+		$(1)/usr/lib/libcurses.so
 endef
 
 define NCURSES_LINK_PC
-	$(foreach pc,$(NCURSES_LIBS), \
+	$(foreach pc,$(NCURSES_LIBS-y), \
 		ln -sf $(pc)$(NCURSES_LIB_SUFFIX).pc \
-			$(STAGING_DIR)/usr/lib/pkgconfig/$(pc).pc
+			$(1)/usr/lib/pkgconfig/$(pc).pc
 	)
 endef
 
+NCURSES_LINK_TARGET_LIBS = \
+	$(if $(BR2_STATIC_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_STATIC,$(TARGET_DIR));) \
+	$(if $(BR2_SHARED_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_SHARED,$(TARGET_DIR)))
 NCURSES_LINK_STAGING_LIBS = \
-	$(if $(BR2_STATIC_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_STATIC);) \
-	$(if $(BR2_SHARED_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_SHARED))
+	$(if $(BR2_STATIC_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_STATIC,$(STAGING_DIR));) \
+	$(if $(BR2_SHARED_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_SHARED,$(STAGING_DIR)))
 
-NCURSES_LINK_STAGING_PC = $(call NCURSES_LINK_PC)
+NCURSES_LINK_STAGING_PC = $(call NCURSES_LINK_PC,$(STAGING_DIR))
 
 NCURSES_CONF_OPTS += --enable-ext-colors
 NCURSES_ABI_VERSION = 6
@@ -119,26 +127,41 @@ endif
 # ncurses breaks with parallel build, but takes quite a while to
 # build single threaded. Work around it similar to how Gentoo does
 define NCURSES_BUILD_CMDS
-	$(TARGET_MAKE_ENV) $(MAKE1) -C $(@D) DESTDIR=$(STAGING_DIR) sources
+	$(MAKE1) -C $(@D) DESTDIR=$(STAGING_DIR) sources
 	rm -rf $(@D)/misc/pc-files
-	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) DESTDIR=$(STAGING_DIR)
+	$(MAKE) -C $(@D) DESTDIR=$(STAGING_DIR)
 endef
 
-ifeq ($(BR2_PACKAGE_NCURSES_TARGET_PROGS),y)
-define NCURSES_TARGET_SYMLINK_RESET
-	ln -sf tset $(TARGET_DIR)/usr/bin/reset
-endef
-NCURSES_POST_INSTALL_TARGET_HOOKS += NCURSES_TARGET_SYMLINK_RESET
-endif
-
-define NCURSES_TARGET_CLEANUP_TERMINFO
-	$(RM) -rf $(TARGET_DIR)/usr/share/terminfo $(TARGET_DIR)/usr/share/tabset
-	$(foreach t,$(NCURSES_TERMINFO_FILES), \
-		$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/share/terminfo/$(t) \
-			$(TARGET_DIR)/usr/share/terminfo/$(t)
+ifneq ($(BR2_STATIC_LIBS),y)
+define NCURSES_INSTALL_TARGET_LIBS
+	$(foreach lib,$(NCURSES_LIBS-y:%=lib%), \
+		cp -dpf $(NCURSES_DIR)/lib/$(lib)$(NCURSES_LIB_SUFFIX).so* \
+			$(TARGET_DIR)/usr/lib/
 	)
 endef
-NCURSES_POST_INSTALL_TARGET_HOOKS += NCURSES_TARGET_CLEANUP_TERMINFO
+endif
+
+ifeq ($(BR2_PACKAGE_NCURSES_TARGET_PROGS),y)
+define NCURSES_INSTALL_TARGET_PROGS
+	$(foreach prog,$(NCURSES_PROGS), \
+		$(INSTALL) -m 0755 $(NCURSES_DIR)/progs/$(prog) \
+			$(TARGET_DIR)/usr/bin/$(prog)
+	)
+	ln -sf tset $(TARGET_DIR)/usr/bin/reset
+endef
+endif
+
+define NCURSES_INSTALL_TARGET_CMDS
+	mkdir -p $(TARGET_DIR)/usr/lib
+	$(NCURSES_INSTALL_TARGET_LIBS)
+	$(NCURSES_LINK_TARGET_LIBS)
+	$(NCURSES_INSTALL_TARGET_PROGS)
+	ln -snf /usr/share/terminfo $(TARGET_DIR)/usr/lib/terminfo
+	$(foreach terminfo,$(NCURSES_TERMINFO_FILES),\
+		$(INSTALL) -D -m 0644 $(STAGING_DIR)/usr/share/terminfo/$(terminfo) \
+			$(TARGET_DIR)/usr/share/terminfo/$(terminfo)
+	)
+endef # NCURSES_INSTALL_TARGET_CMDS
 
 #
 # On systems with an older version of tic, the installation of ncurses hangs
@@ -146,8 +169,8 @@ NCURSES_POST_INSTALL_TARGET_HOOKS += NCURSES_TARGET_CLEANUP_TERMINFO
 # ourselves, and use that during installation.
 #
 define HOST_NCURSES_BUILD_CMDS
-	$(HOST_MAKE_ENV) $(MAKE1) -C $(@D) sources
-	$(HOST_MAKE_ENV) $(MAKE) -C $(@D)/progs tic
+	$(MAKE1) -C $(@D) sources
+	$(MAKE) -C $(@D)/progs tic
 endef
 
 HOST_NCURSES_CONF_OPTS = \

@@ -5,6 +5,7 @@
 ################################################################################
 
 EVTEST_VERSION = 1.33
+EVTEST_SOURCE = evtest-$(EVTEST_VERSION).tar.gz
 EVTEST_SITE = http://cgit.freedesktop.org/evtest/snapshot
 EVTEST_LICENSE = GPLv2+
 EVTEST_LICENSE_FILES = COPYING

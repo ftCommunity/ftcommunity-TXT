@@ -6,8 +6,6 @@ config BR2_PACKAGE_QT5WEBCHANNEL
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
 
-	  Qt WebChannel enables peer-to-peer communication between
-	  a server (QML/C++ application) and a client
-	  (HTML/JavaScript or QML application).
+	  This package corresponds to the qt5webchannel module.
 
-	  http://doc.qt.io/qt-5/qtwebchannel-index.html
+	  http://qt.io

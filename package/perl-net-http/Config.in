@@ -2,6 +2,6 @@ config BR2_PACKAGE_PERL_NET_HTTP
 	bool "perl-net-http"
 	select BR2_PACKAGE_PERL_URI
 	help
-	  Low-level HTTP connection (client)
+	  The `Net::HTTP' class is a low-level HTTP client.
 
-	  https://github.com/libwww-perl/Net-HTTP
+	  http://github.com/libwww-perl/net-http

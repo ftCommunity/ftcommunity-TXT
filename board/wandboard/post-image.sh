@@ -13,3 +13,5 @@ genimage \
   --outputpath "${BINARIES_DIR}" \
   --config "${GENIMAGE_CFG}"
 
+RET=${?}
+exit ${RET}

@@ -5,7 +5,6 @@ config BR2_PACKAGE_QT5XMLPATTERNS
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
 
-	  The Qt XML Patterns module provides support for XPath,
-	  XQuery, XSLT, and XML Schema validation.
+	  This package corresponds to the qt5xmlpatterns module.
 
-	  http://doc.qt.io/qt-5/qtxmlpatterns-index.html
+	  http://qt.io

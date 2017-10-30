@@ -4,7 +4,8 @@
 #
 ################################################################################
 
-EXPEDITE_VERSION = ffa005ea3de26b4219f32c285cb1665bb1366163
+# efl-1.15 branch
+EXPEDITE_VERSION = 3ce8b3f1451700f9a2da60c2e717c644220e2449
 EXPEDITE_SITE = http://git.enlightenment.org/tools/expedite.git
 EXPEDITE_SITE_METHOD = git
 EXPEDITE_LICENSE = BSD-2c

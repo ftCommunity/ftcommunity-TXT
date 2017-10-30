@@ -4,9 +4,8 @@
 #
 ################################################################################
 
-LIBENCA_VERSION = 1.19
-LIBENCA_SITE = http://dl.cihar.com/enca
-LIBENCA_SOURCE = enca-$(LIBENCA_VERSION).tar.xz
+LIBENCA_VERSION = 1.16
+LIBENCA_SITE = $(call github,nijel,enca,$(LIBENCA_VERSION))
 LIBENCA_INSTALL_STAGING = YES
 LIBENCA_LICENSE = GPLv2
 LIBENCA_LICENSE_FILES = COPYING

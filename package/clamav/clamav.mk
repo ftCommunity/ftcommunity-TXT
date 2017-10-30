@@ -26,7 +26,6 @@ CLAMAV_CONF_OPTS = \
 	--with-dbdir=/var/lib/clamav \
 	--with-openssl=$(STAGING_DIR)/usr \
 	--with-zlib=$(STAGING_DIR)/usr \
-	--disable-zlib-vcheck \
 	--disable-rpath \
 	--disable-clamav \
 	--disable-fanotify \

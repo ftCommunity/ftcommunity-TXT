@@ -6,7 +6,6 @@ config BR2_PACKAGE_QT5SVG
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
 
-	  Qt SVG provides classes for rendering and displaying SVG
-	  drawings in widgets and on other paint devices.
+	  This package corresponds to the qt5svg module.
 
-	  http://doc.qt.io/qt-5/qtsvg-index.html
+	  http://qt.io

@@ -14,14 +14,14 @@ DRBD_UTILS_CONF_OPTS = --with-distro=generic --without-manual
 
 ifeq ($(BR2_INIT_SYSTEMD),y)
 DRBD_UTILS_CONF_OPTS += --with-initscripttype=systemd
-DRBD_UTILS_DEPENDENCIES += systemd
+DRDB_UTILS_DEPENDENCIES += systemd
 else
 DRBD_UTILS_CONF_OPTS += --with-initscripttype=sysv
 endif
 
 ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 DRBD_UTILS_CONF_OPTS += --with-udev=yes
-DRBD_UTILS_DEPENDENCIES += udev
+DRDB_UTILS_DEPENDENCIES += udev
 else
 DRBD_UTILS_CONF_OPTS += --with-udev=no
 endif

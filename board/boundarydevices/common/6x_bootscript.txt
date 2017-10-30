@@ -92,12 +92,14 @@ fi
 
 setenv bootargs "${bootargs} console=${console},115200 vmalloc=400M consoleblank=0 rootwait fixrtc"
 
+bpart=1
+
 if test "sata" = "${dtype}" ; then
-	setenv bootargs "${bootargs} root=/dev/sda${bootpart}" ;
+	setenv bootargs "${bootargs} root=/dev/sda${bpart}" ;
 elif test "usb" = "${dtype}" ; then
-	setenv bootargs "${bootargs} root=/dev/sda${bootpart}" ;
+	setenv bootargs "${bootargs} root=/dev/sda${bpart}" ;
 else
-	setenv bootargs "${bootargs} root=/dev/mmcblk${disk}p${bootpart}"
+	setenv bootargs "${bootargs} root=/dev/mmcblk${disk}p${bpart}"
 fi
 
 if itest.s "x" != "x${disable_giga}" ; then

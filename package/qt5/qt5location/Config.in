@@ -5,8 +5,6 @@ config BR2_PACKAGE_QT5LOCATION
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
 
-	  The Qt Location API helps you create viable mapping
-	  solutions using the data available from some of the
-	  popular location services.
+	  This package corresponds to the qt5location module.
 
-	  http://doc.qt.io/qt-5/qtlocation-index.html
+	  http://qt.io

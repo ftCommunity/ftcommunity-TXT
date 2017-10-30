@@ -4,8 +4,6 @@
 #
 ################################################################################
 
-# When bumping the version to a new upstream release, be sure to remove
-# the ldconfig hack, below.
 USTR_VERSION = 1.0.4
 USTR_SOURCE = ustr-$(USTR_VERSION).tar.bz2
 USTR_SITE = http://www.and.org/ustr/$(USTR_VERSION)
@@ -25,8 +23,7 @@ USTR_INSTALL_STAGING = YES
 # 'all-shared' to the default 'all' rule.
 USTR_MAKE_OPTS = all all-shared
 
-USTR_CONF_OPTS += LDCONFIG=/bin/true
-HOST_USTR_CONF_OPTS += LDCONFIG=/bin/true
+USTR_MAKE_OPTS += LDCONFIG=/bin/true
 
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))

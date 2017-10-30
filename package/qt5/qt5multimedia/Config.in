@@ -8,9 +8,6 @@ config BR2_PACKAGE_QT5MULTIMEDIA
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
 
-	  The Qt Multimedia module provides a rich feature set that
-	  enables you to easily take advantage of a platform's multimedia
-	  capabilities such as media playback and the use of camera and
-	  radio devices.
+	  This package corresponds to the qt5multimedia module.
 
-	  http://doc.qt.io/qt-5/multimediaoverview.html
+	  http://qt.io

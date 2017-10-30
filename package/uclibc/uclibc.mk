@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-UCLIBC_VERSION = 1.0.22
+UCLIBC_VERSION = 1.0.17
 UCLIBC_SOURCE = uClibc-ng-$(UCLIBC_VERSION).tar.xz
 UCLIBC_SITE = http://downloads.uclibc-ng.org/releases/$(UCLIBC_VERSION)
 UCLIBC_LICENSE = LGPLv2.1+
@@ -113,9 +113,10 @@ define UCLIBC_ARM_ABI_CONFIG
 	$(call KCONFIG_ENABLE_OPT,CONFIG_ARM_EABI,$(@D)/.config)
 endef
 
-# Thumb1 build is broken with threads with old gcc versions (< 4.8). Since
-# all cores supporting Thumb1 also support ARM, we use ARM code in this case.
-ifeq ($(BR2_GCC_VERSION_4_8_X)$(BR2_ARM_INSTRUCTIONS_THUMB)$(BR2_TOOLCHAIN_HAS_THREADS),yyy)
+# Thumb1 build is broken with threads with old gcc versions (4.7 and
+# 4.8). Since all cores supporting Thumb1 also support ARM, we use ARM
+# code in this case.
+ifeq ($(BR2_GCC_VERSION_4_7_X)$(BR2_GCC_VERSION_4_8_X):$(BR2_ARM_INSTRUCTIONS_THUMB)$(BR2_TOOLCHAIN_HAS_THREADS),y:yy)
 UCLIBC_EXTRA_CFLAGS += -marm
 endif
 
@@ -163,10 +164,10 @@ define UCLIBC_MIPS_ABI_CONFIG
 	$(call KCONFIG_ENABLE_OPT,$(UCLIBC_MIPS_ABI),$(@D)/.config)
 endef
 
-UCLIBC_MIPS_NAN = CONFIG_MIPS_NAN_$(call qstrip,$(BR2_UCLIBC_MIPS_NAN))
-define UCLIBC_MIPS_NAN_CONFIG
-	$(SED) '/CONFIG_MIPS_NAN_.*/d' $(@D)/.config
-	$(call KCONFIG_ENABLE_OPT,$(UCLIBC_MIPS_NAN),$(@D)/.config)
+UCLIBC_MIPS_ISA = CONFIG_MIPS_ISA_$(call qstrip,$(BR2_UCLIBC_MIPS_ISA))
+define UCLIBC_MIPS_ISA_CONFIG
+	$(SED) '/CONFIG_MIPS_ISA_.*/d' $(@D)/.config
+	$(call KCONFIG_ENABLE_OPT,$(UCLIBC_MIPS_ISA),$(@D)/.config)
 endef
 endif # mips
 
@@ -246,6 +247,14 @@ define UCLIBC_ENDIAN_CONFIG
 	$(call KCONFIG_DISABLE_OPT,ARCH_WANTS_BIG_ENDIAN,$(@D)/.config)
 endef
 endif
+
+#
+# Largefile
+#
+
+define UCLIBC_LARGEFILE_CONFIG
+	$(call KCONFIG_ENABLE_OPT,UCLIBC_HAS_LFS,$(@D)/.config)
+endef
 
 #
 # MMU
@@ -418,7 +427,7 @@ define UCLIBC_KCONFIG_FIXUP_CMDS
 	$(UCLIBC_ARM_NO_CONTEXT_FUNCS)
 	$(UCLIBC_M68K_BINFMT_FLAT)
 	$(UCLIBC_MIPS_ABI_CONFIG)
-	$(UCLIBC_MIPS_NAN_CONFIG)
+	$(UCLIBC_MIPS_ISA_CONFIG)
 	$(UCLIBC_SH_TYPE_CONFIG)
 	$(UCLIBC_SPARC_TYPE_CONFIG)
 	$(UCLIBC_POWERPC_TYPE_CONFIG)
@@ -437,6 +446,16 @@ define UCLIBC_KCONFIG_FIXUP_CMDS
 	$(UCLIBC_SHARED_LIBS_CONFIG)
 endef
 
+ifeq ($(BR2_UCLIBC_INSTALL_TEST_SUITE),y)
+define UCLIBC_BUILD_TEST_SUITE
+	$(MAKE) -C $(@D) \
+		$(UCLIBC_MAKE_FLAGS) \
+		TEST_INSTALLED_UCLIBC=1 \
+		UCLIBC_ONLY=1 \
+		test_compile test_gen
+endef
+endif
+
 define UCLIBC_BUILD_CMDS
 	$(MAKE) -C $(@D) $(UCLIBC_MAKE_FLAGS) headers
 	$(MAKE) -C $(@D) $(UCLIBC_MAKE_FLAGS)
@@ -444,6 +463,14 @@ define UCLIBC_BUILD_CMDS
 		PREFIX=$(HOST_DIR) \
 		HOSTCC="$(HOSTCC)" hostutils
 endef
+
+ifeq ($(BR2_UCLIBC_INSTALL_TEST_SUITE),y)
+define UCLIBC_INSTALL_TEST_SUITE
+	mkdir -p $(TARGET_DIR)/root/uClibc
+	cp -rdpf $(@D)/test $(TARGET_DIR)/root/uClibc
+	find $(TARGET_DIR)/root/uClibc -name \*.o -exec rm {} \;
+endef
+endif
 
 ifeq ($(BR2_UCLIBC_INSTALL_UTILS),y)
 define UCLIBC_INSTALL_UTILS_TARGET
@@ -463,6 +490,8 @@ define UCLIBC_INSTALL_TARGET_CMDS
 		RUNTIME_PREFIX=/ \
 		install_runtime
 	$(UCLIBC_INSTALL_UTILS_TARGET)
+	$(UCLIBC_BUILD_TEST_SUITE)
+	$(UCLIBC_INSTALL_TEST_SUITE)
 	$(UCLIBC_INSTALL_LDSO_SYMLINKS)
 endef
 
