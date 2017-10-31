@@ -24,7 +24,7 @@ Eine minimale Anwendung sieht so aus:
 {% include examples/python/tutorial-1/test.py %}
 ```
 
-Speichere diese Datei unter [`test.py`](../../../media/examples/python/tutorial-1/test.py).
+Speichere diese Datei unter ```test.py```. Du findest sie auch hier: [`test.py`](../../../media/examples/python/tutorial-1/test.py).
 
 **Erkärung:**
 Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket TouchStyle) abgeleitete Klasse, die ein Fenster mit dem Titel "Test" bereitstellt, solange die Anwendung läuft.
@@ -54,7 +54,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
  * **author** ist der Autor.
  * **url** ist für einen Link zu einer Webseite vorgesehen, zu der man über das Webinterface gelangen kann.
 
-Speichere diese Datei als [`manifest`](../../../media/examples/python/tutorial-1/manifest).
+Speichere diese Datei als ```manifest```. Du findest ein Beispiel hier: [`manifest`](../../../media/examples/python/tutorial-1/manifest).
 
 # Das Icon
 
@@ -72,7 +72,7 @@ Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwending sind:
  * "manifest", die Anwendungseigenschaften
  * "icon.png", das Icon
 
-Um diese Datein auf den TXT zu bringen, musst du ein ZIP-Archiv erstellen (_z.B. mit [7-Zip](http://www.7-zip.de/download.html)_). Alle 3 Datein **müssen** im Hauptordner liegen, da sie der TXT sonst **nicht** findet! 
+Um diese Datein auf den TXT zu bringen, musst du ein ZIP-Archiv erstellen (_z.B. mit [7-Zip](http://www.7-zip.de/download.html)_). Alle 3 Datein **müssen** im Hauptordner des Zip-Archives liegen, da sie der TXT sonst **nicht** findet. 
 
 
 # Hochladen zum TXT

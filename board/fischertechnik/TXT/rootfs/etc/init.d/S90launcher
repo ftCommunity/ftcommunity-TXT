@@ -4,9 +4,17 @@
 NAME=launcher
 PIDFILE=/var/run/$NAME.pid
 
-[ -r /etc/default/launcher ] && . /etc/default/launcher
-
-USER=$(whoami)
+if [ -r /etc/default/launcher ]; then
+  while read line ; do
+    case "$line" in
+      "SCREEN_ROTATION=0") SCREEN_ROTATION=0 ;;
+      "SCREEN_ROTATION=90") SCREEN_ROTATION=90 ;;
+      "SCREEN_ROTATION=180") SCREEN_ROTATION=180 ;;
+      "SCREEN_ROTATION=270") SCREEN_ROTATION=270 ;;
+      *) echo "Ignoring unknown configuration entry: $line" ;;
+    esac
+  done < /etc/default/launcher
+fi
 
 DISPLAY="Transformed:Rot${SCREEN_ROTATION:-0}"
 # SECURITY NOTE: Enabling the builtin VNC server

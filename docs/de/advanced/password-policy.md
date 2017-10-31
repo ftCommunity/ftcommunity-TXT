@@ -5,15 +5,15 @@ nav-pos: 2
 # Benutzer, Passwörter und "Root"-Zugriff auf dem TXT
 
 ## Auslieferungszustand der Benutzer
-Standartmässig kommt die Community-Firmware mit zwei Benutzern: **ftc** und **root** . (*Und ROBOPro, aber nur für Kompabilitätszwecke!*)
+Standardmässig kommt die Community-Firmware mit zwei Benutzern: **ftc** und **root**. (*Und ROBOPro, aber nur für Kompabilitätszwecke!*)
 
 - Benutzer ftc hat **kein Passwort**
 - Benutzer root ist **deaktiviert**
 
 ## Die "Zwei-Wege" Authentifizierung 
-Die Community-Firmware (*ab Version 0.9.3*) zeigt einen Dialog, um zu bestätigen das der Netzwerkzugriff von dem aktiven Nutzer stammt.
+Die Community-Firmware (*ab Version 0.9.3*) zeigt einen Dialog, um zu bestätigen, dass der Netzwerkzugriff von dem aktiven Nutzer stammt.
 
-D.h. dass der Bildschirm frei bleiben muss um per [SSH](../programming/python/tutorial-2.md) auf den TXT zugreifen zu können!
+D.h. dass der Bildschirm frei bleiben muss, um per [SSH](../programming/python/tutorial-2.md) auf den TXT zugreifen zu können!
 
 (*Um diese Aktionen zu vermeiden musst du ein Passwort setzen. Siehe unten!*)
 
@@ -26,7 +26,7 @@ Dafür musst du von einem SSH-Clienten eine Verbindung zum TXT mit dem **"ftc"-B
 
 (*Erklärung: Befehl Benutzer@IP-Adresse*)
 
-**Kein** Passwort wird benötigt! Du musst nur auf dem **Bildschirm bestätigen** dass es sich um **deine Anfrage** handelt!
+**Kein** Passwort wird benötigt! Du musst nur auf dem **Bildschirm bestätigen**, dass es sich um **deine Anfrage** handelt!
 
 1. Zuerst muss ein Passwort für den "ftc"-Benutzer gesetzt werden! 
 - Das geht mit: `sudo passwd ftc`
