@@ -10,5 +10,6 @@ PYTHON_JSONSCHEMA_SITE = https://pypi.python.org/packages/58/0d/c816f5ea5adaf129
 PYTHON_JSONSCHEMA_SETUP_TYPE = setuptools
 PYTHON_JSONSCHEMA_LICENSE = MIT
 PYTHON_JSONSCHEMA_LICENSE_FILES = COPYING json/LICENSE
+PYTHON_JSONSCHEMA_DEPENDENCIES = host-python-vcversioner
 
 $(eval $(python-package))

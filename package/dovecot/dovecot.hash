@@ -1,2 +1,2 @@
-# Locally computed
-sha256	d8d9f32c846397f7c22749a84c5cf6f59c55ff7ded3dc9f07749a255182f9667	dovecot-2.2.25.tar.gz
+# Locally computed after checking signature
+sha256 ccfa9ffb7eb91e9e87c21c108324b911250c9ffa838bffb64b1caafadcb0f388  dovecot-2.2.29.1.tar.gz

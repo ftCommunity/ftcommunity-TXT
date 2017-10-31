@@ -37,12 +37,11 @@ endif
 # also need ncurses.
 HOST_GDB_DEPENDENCIES = host-expat host-ncurses
 
-# Starting with gdb 7.10, gdb wants to re-generate its documentation.
-# We were trying to avoid that by patching the Makefiles, but it wasn't
-# working in all situations. So, we simply add a dependency on
-# host-texinfo in all case.
-GDB_DEPENDENCIES += host-texinfo
-HOST_GDB_DEPENDENCIES += host-texinfo
+# Disable building documentation
+GDB_MAKE_OPTS += MAKEINFO=true
+GDB_INSTALL_TARGET_OPTS += MAKEINFO=true DESTDIR=$(TARGET_DIR) install
+HOST_GDB_MAKE_OPTS += MAKEINFO=true
+HOST_GDB_INSTALL_OPTS += MAKEINFO=true install
 
 # Apply the Xtensa specific patches
 XTENSA_CORE_NAME = $(call qstrip, $(BR2_XTENSA_CORE_NAME))
@@ -68,13 +67,6 @@ GDB_DISABLE_BINUTILS_CONF_OPTS = \
 	--disable-ld \
 	--disable-gas
 
-# Starting with gdb 7.11, the bundled gnulib tries to use
-# rpl_gettimeofday (gettimeofday replacement) due to the code being
-# unable to determine if the replacement function should be used or
-# not when cross-compiling with uClibc or musl as C libraries. So use
-# gl_cv_func_gettimeofday_clobber=no to not use rpl_gettimeofday,
-# assuming musl and uClibc have a properly working gettimeofday
-# implementation.
 GDB_CONF_ENV = \
 	ac_cv_type_uintptr_t=yes \
 	gt_cv_func_gettext_libintl=yes \
@@ -84,8 +76,20 @@ GDB_CONF_ENV = \
 	bash_cv_must_reinstall_sighandlers=no \
 	bash_cv_func_sigsetjmp=present \
 	bash_cv_have_mbstate_t=yes \
-	gdb_cv_func_sigsetjmp=yes \
-	gl_cv_func_gettimeofday_clobber=no
+	gdb_cv_func_sigsetjmp=yes
+
+# Starting with gdb 7.11, the bundled gnulib tries to use
+# rpl_gettimeofday (gettimeofday replacement) due to the code being
+# unable to determine if the replacement function should be used or
+# not when cross-compiling with uClibc or musl as C libraries. So use
+# gl_cv_func_gettimeofday_clobber=no to not use rpl_gettimeofday,
+# assuming musl and uClibc have a properly working gettimeofday
+# implementation. It needs to be passed to GDB_CONF_ENV to build
+# gdbserver only but also to GDB_MAKE_ENV, because otherwise it does
+# not get passed to the configure script of nested packages while
+# building gdbserver with full debugger.
+GDB_CONF_ENV += gl_cv_func_gettimeofday_clobber=no
+GDB_MAKE_ENV = gl_cv_func_gettimeofday_clobber=no
 
 # The shared only build is not supported by gdb, so enable static build for
 # build-in libraries with --enable-static.
@@ -100,6 +104,19 @@ GDB_CONF_OPTS = \
 	--without-included-gettext \
 	--disable-werror \
 	--enable-static
+
+# When gdb is built as C++ application for ARC it segfaults at runtime
+# So we pass --disable-build-with-cxx config option to force gdb not to
+# be built as C++ app.
+ifeq ($(BR2_arc),y)
+GDB_CONF_OPTS += --disable-build-with-cxx
+endif
+
+# gdb 7.12+ by default builds with a C++ compiler, which doesn't work
+# when we don't have C++ support in the toolchain
+ifneq ($(BR2_INSTALL_LIBSTDCPP),y)
+GDB_CONF_OPTS += --disable-build-with-cxx
+endif
 
 ifeq ($(BR2_PACKAGE_GDB_TUI),y)
 GDB_CONF_OPTS += --enable-tui
@@ -172,6 +189,7 @@ HOST_GDB_CONF_OPTS = \
 	--enable-threads \
 	--disable-werror \
 	--without-included-gettext \
+	--with-curses \
 	$(GDB_DISABLE_BINUTILS_CONF_OPTS)
 
 ifeq ($(BR2_PACKAGE_HOST_GDB_TUI),y)

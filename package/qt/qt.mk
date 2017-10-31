@@ -15,9 +15,6 @@ QT_VERSION_MAJOR = 4.8
 QT_VERSION = $(QT_VERSION_MAJOR).7
 QT_SOURCE = qt-everywhere-opensource-src-$(QT_VERSION).tar.gz
 QT_SITE = http://download.qt-project.org/official_releases/qt/$(QT_VERSION_MAJOR)/$(QT_VERSION)
-# Patch fixing ALSA detection. Taken from Qt5, but applies fine to
-# Qt4.
-QT_PATCH = https://github.com/qtproject/qtbase/commit/b8f98d956501dfa4ce03a137f15d404930a56066.patch
 QT_DEPENDENCIES = host-pkgconf
 QT_INSTALL_STAGING = YES
 
@@ -505,7 +502,7 @@ endef
 endif
 
 define QT_CONFIGURE_CMDS
-	-[ -f $(@D)/Makefile ] && $(MAKE) -C $(@D) confclean
+	-[ -f $(@D)/Makefile ] && $(TARGET_MAKE_ENV) $(MAKE) -C $(@D) confclean
 	$(QT_CONFIGURE_IPV6)
 	$(QT_CONFIGURE_CONFIG_FILE)
 	# Fix compiler path
@@ -527,7 +524,7 @@ define QT_CONFIGURE_CMDS
 		PKG_CONFIG_SYSROOT_DIR="$(STAGING_DIR)" \
 		PKG_CONFIG="$(PKG_CONFIG_HOST_BINARY)" \
 		PKG_CONFIG_PATH="$(STAGING_DIR)/usr/lib/pkgconfig:$(PKG_CONFIG_PATH)" \
-		$(QT_CONFIGURE_ENV) \
+		$(TARGET_MAKE_ENV) \
 		MAKEFLAGS="$(MAKEFLAGS) -j$(PARALLEL_JOBS)" ./configure \
 		$(if $(VERBOSE),-verbose,-silent) \
 		-force-pkg-config \
@@ -632,7 +629,7 @@ endef
 # remove the sysroot path from them, since pkg-config already adds it
 # automatically.
 define QT_INSTALL_STAGING_CMDS
-	$(MAKE) -C $(@D) install
+	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) install
 	mkdir -p $(HOST_DIR)/usr/bin
 	mv $(addprefix $(STAGING_DIR)/usr/bin/,$(QT_HOST_PROGRAMS)) $(HOST_DIR)/usr/bin
 	ln -sf $(STAGING_DIR)/usr/mkspecs $(HOST_DIR)/usr/mkspecs
