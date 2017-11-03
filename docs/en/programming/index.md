@@ -11,4 +11,4 @@ With the community firmware, you can program your Fischertechnik models in diffe
 
 * Or you can write [Python](python) programs that use the ftrobopy library to access the I/O ports of your TXT
 
-* And of course, [ROBOPro](../../de/programming/robopro.md) can be used as well, just as with the original firmware
+* And of course, [ROBOPro](../../de/programming/robopro.md) can be used as well, just as with the original firmware. Don't forget to start the app FT-GUI on your TXT zu enable the connection between ROBOPro and the TXT.

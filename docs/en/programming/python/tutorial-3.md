@@ -7,7 +7,7 @@ nav-pos: 3
 The previous tutorials have shown how to get started with an app ([Programming Python: The First App](tutorial-1.md)) and how to ease development
 ([Programming Python: Development](tutorial-2.md)). This part will show how to interact with a model.
 
-The code for this tutorial can be found in the [apps repository](https://github.com/ftCommunity/ftcommunity-apps/tree/master/packages/app_tutorial_3).
+The code for this tutorial can be found in [Github](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/docs/_includes/examples/python/tutorial-3).
 
 ## Including the necessary libraries
 
@@ -20,7 +20,7 @@ The community firmware already ships with the [ftrobopy module](https://github.c
 
 Runnng this app on the TXT as decribed in Tutorial #1 will hopefully look similar (except the app name of course). If it does and no error message is being displayed then the app has successfully connected itself to the sperate server process running on the TXT providing access to the TXTs inputs and outputs.
 
-We use a QLabel for the output of the error message. You can learn more about this e.g. in the [PyQt turorials](http://www.tutorialspoint.com/pyqt/index.htm). There's even one page explaining the [usage of the QLabel](http://www.tutorialspoint.com/pyqt/pyqt_qlabel_widget.htm). The examples from the tutorial don't exacly match what we are doing here since they are meant to run on a regular PC and don't use the TXT styled windows. Most of the differences are limited to the main application and the main window. When it comes to the usage of widgets only very few differences exist. E.g. the QLabel itself works the same on the PC and on the TXT.
+We use a QLabel for the output of the error message. You can learn more about this e.g. in the [PyQt tutorials](http://www.tutorialspoint.com/pyqt/index.htm). There's even one page explaining the [usage of the QLabel](http://www.tutorialspoint.com/pyqt/pyqt_qlabel_widget.htm). The examples from the tutorial don't exacly match what we are doing here since they are meant to run on a regular PC and don't use the TXT styled windows. Most of the differences are limited to the main application and the main window. When it comes to the usage of widgets only very few differences exist. E.g. the QLabel itself works the same on the PC and on the TXT.
 
 ## Controlling an output
 
@@ -62,7 +62,7 @@ With this app the light will change state whenever you press the button on scree
 
 # Running the app on a PC
 
-TXT apps can also be run on a PC as explained in [Programming Python: Development](tutorial-2.md). This is even possible with an app like this making use of the TXTs inputs and outputs. The ftrobopy module was actually written for this use case. All you need to do is to put the `ftrobopy.py` file to the same location where you placed the `TxtStyle.py` in the first tutorial.
+TXT apps can also be run on a PC as explained in [Programming Python: Development](tutorial-2.md). This is even possible with an app like this making use of the TXTs inputs and outputs. The ftrobopy module was actually written for this use case. All you need to do is to put the `ftrobopy.py` file to the same location where you placed the `TouchStyle.py` in the earlier tutorial.
 
 Now we only need to tell the app to connect from the PC to the TXT to control its IOs. In order to do so replace this line in your program:
 

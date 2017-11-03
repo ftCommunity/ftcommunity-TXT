@@ -86,9 +86,9 @@ else # umask / $(CURDIR) / $(O)
 all:
 
 # Set and export the version string
-export BR2_VERSION := 2017.02.1
+export BR2_VERSION := 2017.02.7
 # Actual time the release is cut (for reproducible builds)
-BR2_VERSION_EPOCH = 1491392000
+BR2_VERSION_EPOCH = 1509216000
 
 # Save running make version since it's clobbered by the make package
 RUNNING_MAKE_VERSION := $(MAKE_VERSION)
@@ -480,6 +480,8 @@ include Makefile.legacy
 
 include package/Makefile.in
 include support/dependencies/dependencies.mk
+
+PACKAGES += $(DEPENDENCIES_HOST_PREREQ)
 
 include toolchain/*.mk
 include toolchain/*/*.mk
