@@ -675,7 +675,7 @@ class TouchAuxPicButton(QAbstractButton):
         
     """
     def __init__(self, pixmap, parent=None):
-        super(PicButton, self).__init__(parent)
+        super(TouchAuxPicButton, self).__init__(parent)
         self.pixmap = pixmap
 
     def paintEvent(self, event):
