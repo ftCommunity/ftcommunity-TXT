@@ -669,7 +669,7 @@ def run_program(rcmd):
 class TouchAuxPicButton(QAbstractButton):
     """
         Provides an image button for PyQT Layouts
-        
+         
         button = TouchAuxPicButton(pixmap:QPixmap, parent:class=None)
         
         
