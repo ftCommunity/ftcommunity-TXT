@@ -219,12 +219,22 @@ define QT5BASE_CONFIGURE_CONFIG_FILE
 endef
 endif
 
+QT5BASE_ARCH_CONFIG_FILE = $(@D)/mkspecs/devices/linux-buildroot-g++/arch.conf
+ifeq ($(BR2_TOOLCHAIN_HAS_LIBATOMIC)$(BR2_PACKAGE_QT5_VERSION_LATEST),yy)
+# Qt 5.8 needs atomics, which on various architectures are in -latomic
+define QT5BASE_CONFIGURE_ARCH_CONFIG
+	printf 'LIBS += -latomic\n' >$(QT5BASE_ARCH_CONFIG_FILE)
+endef
+endif
+
 define QT5BASE_CONFIGURE_CMDS
 	$(INSTALL) -m 0644 -D $(QT5BASE_PKGDIR)/qmake.conf \
 		$(@D)/mkspecs/devices/linux-buildroot-g++/qmake.conf
 	$(INSTALL) -m 0644 -D $(QT5BASE_PKGDIR)/qplatformdefs.h \
 		$(@D)/mkspecs/devices/linux-buildroot-g++/qplatformdefs.h
 	$(QT5BASE_CONFIGURE_CONFIG_FILE)
+	touch $(QT5BASE_ARCH_CONFIG_FILE)
+	$(QT5BASE_CONFIGURE_ARCH_CONFIG)
 	(cd $(@D); \
 		$(TARGET_MAKE_ENV) \
 		PKG_CONFIG="$(PKG_CONFIG_HOST_BINARY)" \
