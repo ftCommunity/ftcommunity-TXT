@@ -153,7 +153,7 @@ class TouchTitle(QLabel):
 class TouchBaseWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
-        if platform.machine()[0:3] == "arm":
+        if platform.machine()[0:3] == "arm" and not DEV:
             size = QApplication.desktop().screenGeometry()
             self.setFixedSize(size.width(), size.height())
         else:
