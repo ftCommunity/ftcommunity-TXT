@@ -4,7 +4,7 @@
 # additional functionality to communicate with the app launcher and
 # the like
 
-TouchStyle_version = 1.5
+TouchStyle_version = 1.6
 
 import struct, os, platform, socket
 from PyQt4.QtCore import *
@@ -19,6 +19,7 @@ DEV = os.path.isfile("/etc/ft-cfw-dev.txt")
 DEV_ORIENTATION="PORTRAIT"
 
 if DEV:
+    TXT = False
     # versuche, die dev config zu lesen
     try:
         dcfile=open("/etc/ft-cfw-dev.txt","r")
