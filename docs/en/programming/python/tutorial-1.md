@@ -106,7 +106,7 @@ To get these installed on the TXT they'll need to be put into a ZIP
 archive. Any program like WinZIP should work. All three files should be
 in the toplevel of the ZIP and not e.g. in some subfolder.
 
-A prepared archive of our little demo app is also [available](https://github.com/ftCommunity/ftcommunity-apps/raw/master/packages/app_tutorial_1.zip)
+A prepared archive of our little demo app is also [available](https://github.com/ftCommunity/ftcommunity-TXT/raw/44dd2e2903880e5927a188c49f623cbcc83e3a3e/docs/_includes/examples/python/tutorial-1/test.zip)
 
 # Upload it to the TXT
 
