@@ -74,6 +74,8 @@ Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwending sind:
 
 Um diese Datein auf den TXT zu bringen, musst du ein ZIP-Archiv erstellen (_z.B. mit [7-Zip](http://www.7-zip.de/download.html)_). Alle 3 Datein **müssen** im Hauptordner des Zip-Archives liegen, da sie der TXT sonst **nicht** findet. 
 
+Das fertige ZIP-Archiv gibt es [hier](https://github.com/ftCommunity/ftcommunity-TXT/raw/44dd2e2903880e5927a188c49f623cbcc83e3a3e/docs/_includes/examples/python/tutorial-1/test.zip)
+
 
 # Hochladen zum TXT
 
