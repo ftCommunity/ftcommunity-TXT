@@ -8,7 +8,9 @@ Dieses Tutorial soll den Einstieg erleichtern und die Grundschritte erklären.
 
 Eine Anwendung besteht aus **3** Teilen:
 
- * Das **Programm**. Dies ist normalerweise ein Python-Skript. Es könnte aber auch jede beliebige andere Programmiersprache sein. Da [Python](https://www.python.org) der Standard für die TXT-Programmierung ist, bezieht dieses Tutorial sich ausschließlich darauf!
+ * Das **Programm**. Dies ist normalerweise ein Python-Skript. Es könnte aber auch jede beliebige andere Programmiersprache sein. Da [Python](https://www.python.org) der Standard für die TXT-Programmierung ist, bezieht dieses Tutorial sich ausschließlich darauf! **Wichtige Hinweise:**
+    * Zum Einrücken des Codes werden Leerzeichen empfohlen. Es ist in Python3 nicht erlaubt, Leerzeichen und Tabulatoren zu mischen.
+    * Das Zeilenende von Python-Code für die CFW wird durch ein einfaches Line-Feed-Zeichen (LF, ASCII-Code 10) markiert. Du musst darauf achten, dass der Editor, den du verwendest, in der Lage ist, den Code mit dem korrekten Zeilenende-Zeichen abzuspeichern.
 
  * Ein **Manifest**. Das ist eine kleine Datei, die den Programmnamen, Autor und weitere Informationen enthält.
 
@@ -43,7 +45,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
  * **icon** ist der Name des Icons. Normalerweise heißt es "icon.png".
  * **desc** ist eine kurze Beschreibung (_aktuell nur in der Weboberfläche verwendet_).
  * **exec** ist der Name des Skripts (_Im Beispiel "Test.py"_).
- * **uuid** ist eine [eindeutige identifikationsnummer](https://de.wikipedia.org/wiki/Universally_Unique_Identifier), die am TXT verwendet wird, damit es keine Konfusionen zwischen Anwendungsdaten gibt. UUIDs können auch Online generiert werden., z.B. [hier](https://www.famkruithof.net/uuid/uuidgen).
+ * **uuid** ist eine [eindeutige identifikationsnummer](https://de.wikipedia.org/wiki/Universally_Unique_Identifier), die am TXT verwendet wird, damit es keine Konfusionen zwischen Anwendungsdaten gibt. UUIDs können auch Online generiert werden., z.B. [hier](https://www.famkruithof.net/uuid/uuidgen). Die UUID wird auch verwendet, um das Verzeichnis für die App auf dem TXT zu erzeugen. Du musst für jeden App eine eigenne ID verwenden.
  * **managed** ist aktuell unbenutzt (_sollte aber trotzdem auf "**yes**" gesetzt werden._). Aktuell gibt es nur an, ob eine Benutzeroberfläche vorhanden ist. (_Später kann damit das Framework angegeben werden_).
  * **version** ist die Versionsnummer der Anwendung.
  * **firmware** ist die Versionsnummer der Firmware, für die die Anwendung getestet wurde.
