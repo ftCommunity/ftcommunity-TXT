@@ -546,10 +546,10 @@ class TouchAuxRequestInteger(TouchDialog):
         self.actval.setText(str(self.dial.value()))
                 
     def on_select(self):
-        self.close()
         self.result = self.sender().text()
         if self.result=="": self.result=self.button        
-     
+        self.close()
+    
     def exec_(self):
         TouchDialog.exec_(self)
         print(self.result)
