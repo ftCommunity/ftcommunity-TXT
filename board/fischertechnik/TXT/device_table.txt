@@ -8,6 +8,7 @@
 #
 # <name>                                <type>  <mode>  <uid>   <gid>   <major> <minor> <start> <inc>   <count>
 /opt/ftc/apps                           d       755     1001    1001    -       -       -       -       -
+/etc/default/launcher                   f       644     1001    1001    -       -       -       -       -
 /rom                                    d       755     0       0       -       -       -       -       -
 /opt/fischertechnik                     r       755     1000    1000    -       -       -       -       -
 /media/sdcard                           d       755     0       0       -       -       -       -       -
@@ -17,3 +18,4 @@
 /sbin/unix_chkpwd                       r      4755     0       0       -       -       -       -       -
 /etc/network/interfaces                 f       666     0       0       -       -       -       -       -
 /etc/locale                             f       666     0       0       -       -       -       -       -
+/etc/netreq_permissions                 f       666     0       0       -       -       -       -       -

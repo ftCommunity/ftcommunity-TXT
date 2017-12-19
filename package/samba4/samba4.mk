@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-SAMBA4_VERSION = 4.5.7
+SAMBA4_VERSION = 4.5.15
 SAMBA4_SITE = https://download.samba.org/pub/samba/stable
 SAMBA4_SOURCE = samba-$(SAMBA4_VERSION).tar.gz
 SAMBA4_INSTALL_STAGING = YES
@@ -30,6 +30,10 @@ SAMBA4_CONF_OPTS += --enable-cups
 SAMBA4_DEPENDENCIES += cups
 else
 SAMBA4_CONF_OPTS += --disable-cups
+endif
+
+ifeq ($(BR2_PACKAGE_DBUS),y)
+SAMBA4_DEPENDENCIES += dbus
 endif
 
 ifeq ($(BR2_PACKAGE_DBUS)$(BR2_PACKAGE_AVAHI_DAEMON),yy)

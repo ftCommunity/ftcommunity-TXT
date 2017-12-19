@@ -1,0 +1,5 @@
+config BR2_PACKAGE_PYTHON_FTTXPY
+  bool "libroboint"
+  select BR2_PACKAGE_PYTHON_PYUDEV
+  help
+    Install Python-fttxpy

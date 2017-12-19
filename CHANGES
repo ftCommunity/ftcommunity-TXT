@@ -1,3 +1,172 @@
+2017.02.8, Released November 27th, 2017
+
+	Important / security related fixes.
+
+	Qt: 5.6 version updated to 5.6.3.
+
+	Reproducible: Do not override SOURCE_DATE_EPOCH if already set
+	in the environment.
+
+	Updated/fixed packages: apr, apr-util, arqp-standalone,
+	collectd, dvb-apps, ffmpeg, google-breakpad, gstreamer,
+	imagemagick, libfastjson, libglib2, libpjsip, libplist,
+	localedef, luajit, mesa3d, openssh, openssl, postgresql,
+	python3, python-pyqt5, qt5base, qt5canvas3d, qt5connectivity,
+	qt5declarative, qt5engineio, qt5graphicaleffects,
+	qt5imageformats, qt5location, qt5multimedia, qt5quickcontrols,
+	qt5quickcontrols2, qt5script, qt5sensors, qt5serialbus,
+	qt5serialport, qt5svg, qt5tools, qt5webchannel, qt5webkit,
+	qt5websockets, qt5x11extras, qt5xmlpatterns, quagga, ruby,
+	samba4, snmppp, ti-gfx, vboot-utils, webkitgtk, wireshark,
+	xapp_xdriinfo.
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	10326: mesa3d package fails to build when BR2_SHARED_STATIC_LIBS=y
+	10361: python3 python-config script generates invalid includes
+	10501: host-localedef fails to compile on Ubuntu 17.10
+
+2017.02.7, Released October 28th, 2017
+
+	Important / security related fixes.
+
+	Webkitgtk bumped to the 2.18.x series, fixing a large number
+	of security issues.
+
+	Defconfigs: wandboard: Correct rootfs offset
+
+	Toolchain: Linaro toolchains updated to 2017.08 release,
+	fixing a number of issues. Musl: fix for CVE-2017-15650.
+
+	Updated/fixed packages: busybox, bzip2, dnsmasq, git, go,
+	hostapd, irssi, iucode-tool, lame, libcurl, libffi, libnspr,
+	libnss, nodejs, openssh, openvpn, qemu, qt, redis, sdl2,
+	webkitgtk, wget, wpa_supplicant, xen, xlib_libXfont,
+	xlib_libXfont2, xserver_xorg-server
+
+2017.02.6, Released September 24th, 2017
+
+	Important / security related fixes.
+
+	Cmake: Ensure correct pkg-config is used when building host
+	packages
+
+	fs/iso9660: Ensure files from earlier builds are not included.
+
+	Updated/fixed packages: apache, bcusdk, bind, binutils,
+	bluez5_utils, botan, cmake, connman, dbus, dialog, e2fsprogs,
+	faad2, fakeroot, ffmpeg, file, flashrom, gcc, gd, gdb,
+	gdk-pixbuf, git, gnupg, gpsd, grub2, gst1-plugins-bad,
+	imagemagick, iostat, iucode-tool, jack2, libarchive, libcurl,
+	libgcrypt, libidn, libphidget, librsync, librsvg, libsoup,
+	libxml2, linux-tools, lua, mariadb, mbedtls, mediastreamer,
+	minidlna, netplug, nss-pam-ldapd, nvidia-driver, openjpeg,
+	postgresql, proxychains-ng, python-libconfig,
+	python-service-identity, qt, rpcbind, ruby, samba4, squashfs,
+	squid, strongswan, subversion, supervisor, sysvinit, tcpdump,
+	tor, transmission, unrar, valgrind, vim, webkitgtk, whois,
+	xen, zmqpp
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#10141: Squashfs extended attribute failures
+	#10261: Grub2 fails to build for x86_64
+	#10276: BR2_PACKAGE_LINUX_TOOLS_GPIO fails for MIPS with...
+
+2017.02.5, Released July 27th, 2017
+
+	Important / security related fixes.
+
+	Webkitgtk bumped to the 2.16.x series, fixing a large number
+	of security issues.
+
+	host-aespipe compile fix for Debian/Gentoo/Ubuntu toolchains
+	which default to PIE mode.
+
+	Updated/fixed packages: aespipe, apache, bind, binutils,
+	ccache, collectd, efibootmgr, efivar, expat, ffmpeg, gcc,
+	heimdal, iproute2, irssi, libglib2, libmemcached, libosip2,
+	libtirpc, libxml-parser-perl, linux-fusion, linux-zigbee,
+	mpg123, nodejs, orc, pcre, php, pulseaudio,
+	python-setproctitle, qt5base, rpi-firmware, samba4, syslinux,
+	systemd, spice, tiff, webkitgtk, x265, xen,
+	xserver_xorg-server, xvisor
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#10061: gcc5.4 buildroot toolchain for powerpc libsanitizer...
+
+2017.02.4, Released July 4th, 2017
+
+	Important / security related fixes.
+
+	Update support/scripts/scancpan to use METACPAN v1 API as v0
+	has been shutdown.
+
+	Update support/scripts/mkusers to handle setups where
+	/etc/shadow is a symlink.
+
+	External toolchain: Don't create musl dynamic loader symlink
+	for static builds.
+
+	Setlocalversion: Correct detection of mercurial revisions for
+	non-tagged versions.
+
+	Updated/fixed packages: apache, automake, bind, botan, c-ares,
+	dhcp, expat, fcgiwrap, gcc, gdb, gesftpserver, glibc, gnutls,
+	gst1-plugins-bad, imagemagick, imx-uuc, intltool, iperf,
+	ipsec-tools, irssi, libgcrypt, libmad, libnl, mosquitto,
+	mpg123, ncurses, nodejs, ntp, openssh, openvpn, qt5base,
+	qt5multimedia, rtl8821au, socat, spice, systemd, tor, tslib,
+	vlc, x264, xserver_xorg-server
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9976: License file for package 'rtl8821au' incorrect
+
+2017.02.3, Released June 2nd, 2017
+
+	Important / security related fixes.
+
+	Download: <pkg>-source-check fixed for packages from git.
+
+	External toolchain: musl dynamic linker symlink for mips-sf
+	corrected.
+
+	Updated/fixed packages: armadillo, audiofile, bash,
+	bluez_utils, cppcms, dbus, dhcp, dropbear, efibootmgr, efl,
+	elfutils, faketime, fbgrab, flashrom, ftop, gdb, git,
+	google-breakpad, gpsd, hans, kvm-unit-tests, kyua, libev,
+	libmicrohttpd, libminiupnpc, libtasn1, libubox, ltp-testsuite,
+	lua, madplay, mariadb, mono, mosquitto, mxml, ntp,
+	nvidia-driver, openblas, openvpn, oracle-mysql, picocom, popt,
+	postgresql, pulseview, qt5base, qwt, rabbitmq-c, redis,
+	rpcbind, rtmpdump, samba4, strongswan, sudo, vlc
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9796: source-check broken for Git downloads
+	#9871: fbgrab 1.3 won't build with BR2_REPRODUCIBLE set
+
+2017.02.2, Released May 1st, 2017
+
+	Important / security related fixes.
+
+	Use HTTPS for the Codesourcery external toolchains as the HTTP
+	URLs no longer work.
+
+	Updated/fixed packages: bind, busybox, dovecot, freetype,
+	ghostscript, glibc, granite, hiredis, icu, imagemagick,
+	gst-plugins-base, gst1-plugins-base, libcroco, libcurl, libnl,
+	libnspr, libnss, libsamplerate, libsndfile, libunwind,
+	minicom, mplayer, mpv, nodejs, python-django, python-pyyaml,
+	python-web2py, samba4, syslinux, systemd, tiff, trinity,
+	uboot, wireshark, xen
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9791: Python searches for packages in the user site directory
+
 2017.02.1, Released April 4th, 2017
 
 	Important / security related fixes.

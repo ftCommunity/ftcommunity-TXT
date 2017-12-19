@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 #
 import sys, time, os, shlex
-import numpy, cv2
+import numpy
+try:
+    import cv2
+except:
+    print("no opencv")
+
 from subprocess import *
 from TouchStyle import *
 from threading import Timer
@@ -18,15 +23,15 @@ local = os.path.dirname(os.path.realpath(__file__)) + "/auxicon/"
 
 keys_tab = [ "A-O", "P-Z", "0-9" ]
 keys_upper = [
-    ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","Aa" ],
-    ["P","Q","R","S","T","U","V","W","X","Y","Z",".",","," ","_","Aa" ],
-    ["0","1","2","3","4","5","6","7","8","9","+","-","*","/","#","$" ]
-]
+        ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","Aa" ],
+        ["P","Q","R","S","T","U","V","W","X","Y","Z",".",","," ","_","Aa" ],
+        ["=","!",'"',"§","$","%","&","/","(",")","*","_","'","°",">","Aa" ]
+    ]
 keys_lower = [
-    ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","Aa" ],
-    ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
-    ["0","1","2","3","4","5","6","7","8","9","+","-","*","/","#","$" ]
-]
+        ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","Aa" ],
+        ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
+        ["0","1","2","3","4","5","6","7","8","9","+","-","#","^","<","Aa" ]
+    ]
 
 class TouchAuxMessageBox(TouchMessageBox): pass
 
@@ -46,6 +51,7 @@ class TouchAuxMultibutton(TouchDialog):
         msg.setText(text:str)           Optional text above the button list
         msg.setButtons(items:str[])     Array of str, contains the button text ["Button one","Button two",...]
                                         Empty intermediate cells will be interpreted as a separator bar
+        msg.setColumnSplit(count:int)   sets the maximum number of buttons for the first column (in landscape oriented screens)
         msg.leftAlignButtons()          Align the button Text to the left instead of center
         msg.setTextSize(size:int)       Sets the font size for the message text (1..4, 1 is smallest, default is 3)
         msg.setBtnTextSize(size:int)    Sets the font size for the button text (1..4, 1 is smallest, default is 3)
@@ -64,6 +70,7 @@ class TouchAuxMultibutton(TouchDialog):
         self.items=["Okay"]
         self.textSize=3
         self.btnTextSize=3
+        self.csplit=4
         self.leftAlign=False
         
     def setText(self,text):
@@ -72,6 +79,9 @@ class TouchAuxMultibutton(TouchDialog):
     def setButtons(self,items):
         self.items=items
            
+    def setColumnSplit(self, count):
+        self.csplit=count
+        
     def leftAlignButtons(self):
         self.leftAlign=True
     
@@ -89,6 +99,13 @@ class TouchAuxMultibutton(TouchDialog):
         
     def exec_(self):
         self.layout=QVBoxLayout()
+        
+        # orientation
+        w=self.width()
+        h=self.height()
+        
+        split=False
+        if w>h: split=True  #querformat
         
         # the message
         if self.text:
@@ -109,6 +126,13 @@ class TouchAuxMultibutton(TouchDialog):
         
         self.layout.addStretch()
         
+        if split:
+            box=QHBoxLayout()
+            box1=QVBoxLayout()
+            box2=QVBoxLayout()
+        
+        c=0
+        
         for b in self.items:
             k=QPushButton(b)
             if self.btnTextSize==4:
@@ -128,7 +152,20 @@ class TouchAuxMultibutton(TouchDialog):
                 k.setDisabled(True)
                 k.setMaximumHeight(6)
                 
-            self.layout.addWidget(k)
+            if c<self.csplit and split:
+                box1.addWidget(k)
+            elif c>=self.csplit and split:
+                box2.addWidget(k)
+            else:
+                self.layout.addWidget(k)
+            c+=1
+        
+        if split:
+            box1.addStretch()
+            box2.addStretch()
+            box.addLayout(box1)
+            box.addLayout(box2)
+            self.layout.addLayout(box)
         
         if TouchStyle_version >=1.3:
            self.setCancelButton()
@@ -509,10 +546,10 @@ class TouchAuxRequestInteger(TouchDialog):
         self.actval.setText(str(self.dial.value()))
                 
     def on_select(self):
-        self.close()
         self.result = self.sender().text()
         if self.result=="": self.result=self.button        
-     
+        self.close()
+    
     def exec_(self):
         TouchDialog.exec_(self)
         print(self.result)
@@ -632,13 +669,13 @@ def run_program(rcmd):
 class TouchAuxPicButton(QAbstractButton):
     """
         Provides an image button for PyQT Layouts
-        
+         
         button = TouchAuxPicButton(pixmap:QPixmap, parent:class=None)
         
         
     """
     def __init__(self, pixmap, parent=None):
-        super(PicButton, self).__init__(parent)
+        super(TouchAuxPicButton, self).__init__(parent)
         self.pixmap = pixmap
 
     def paintEvent(self, event):
@@ -654,6 +691,10 @@ class TouchAuxPicButton(QAbstractButton):
 class TouchAuxKeyboard(TouchDialog):
     def __init__(self,title,strg,parent):
         TouchDialog.__init__(self, title, parent)
+        
+        w=self.width()
+        h=self.height()
+        
         self.strg=strg
         self.confbutpressed=False
         
@@ -701,7 +742,10 @@ class TouchAuxKeyboard(TouchDialog):
                     but.clicked.connect(self.key_pressed)
 
                 but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                page.grid.addWidget(but,cnt/4,cnt%4)
+                if w<h:
+                    page.grid.addWidget(but,cnt/4,cnt%4)
+                else:
+                    page.grid.addWidget(but,cnt/8,cnt%8)
                 cnt+=1
 
             page.setLayout(page.grid)
@@ -712,7 +756,9 @@ class TouchAuxKeyboard(TouchDialog):
         self.layout.addWidget(self.tab)
 
         self.centralWidget.setLayout(self.layout)
-        if strg.isnumeric(): self.tab.setCurrentIndex(2)
+        if strg.isnumeric() or (strg[1:].isnumeric() and strg[0:1]=="-"): 
+            self.tab.setCurrentIndex(2)
+            self.caps_changed()
 
     def key_erase(self):
         self.line.setText(self.line.text()[:-1]) 

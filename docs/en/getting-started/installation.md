@@ -6,12 +6,11 @@ nav-title: Installation
 * A means to extract files from a ZIP-archive to the microSD-card
 
 # Installation
-1. Upgrade the Standard-Firmware to the latest Version 4.2.4
-You can find the update to RoboPro 4.2.4 (which will also update the TXT) here:
-[http://www.fischertechnik.de/en/ResourceImage.aspx?raid=10275](http://www.fischertechnik.de/en/ResourceImage.aspx?raid=10275)
+1. Upgrade the standard firmware to the latest Version 4.2.4
+You can find the update to RoboPro 4.2.4 (which will also update the TXT) 
+[here at the official Fischertechnik site](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/02-demoversion-robopro-english.ashx)
 
-2. Enable booting from MicroSD-card (in Fischertechnik-terminology: "Activation Bootloader"). Please follow the official guide which is available here:
-[http://www.fischertechnik.de/ResourceImage.aspx?raid=10278](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278)
+2. Enable booting from MicroSD-card (in Fischertechnik terminology: "Activation Bootloader"). Please follow the official guide which is also available [at the official Fischertechnik site](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/txt-controller/documents/activation_bootloaders_english.ashx)
 
 3. Download the latest version of the ftcommunity-TXT-firmware here (at the very bottom of the page):
 [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest). At the time of writing this was "ftcommunity-txt-0.9.3.zip". Copy all three files contained therein to the microSD-card (which should be formatted with FAT32. If you don't know what that means and your card has 16GB or less: don't worry, you're set already)

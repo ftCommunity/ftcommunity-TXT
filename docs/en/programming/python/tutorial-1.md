@@ -14,7 +14,10 @@ An app consists of at least three files:
    script in any other language supported by the TXT. Since
    [python](https://www.python.org) has become the de-facto standard
    for software written for the TXT this tutorial will also use the
-   python language
+   python language.
+   **Please note:**
+   * Spaces are the preferred indentation method in Python 3. Python 3 disallows mixing the use of tabs and spaces for indentation.
+   * The line endings for Python code for CFW must be a single Line-Feed (LF), ASCII-Code 10 character. If you use Windows for writing program code, please make sure that your editor is able to save the code with the correct file endings.
 
  * A manifest file. This is a small text file containing additonal
    information about the App like its display name, its author and the
@@ -64,7 +67,7 @@ The mandatory fields are name, icon, desc, exec, uuid and managed.
  * **exec** is the name of the executable. In this example it refers
    to our test.py python script.
  * **uuid** is a unique id used to identify this app. You can generate
-   one for your app e.g. online with services like [this](https://www.famkruithof.net/uuid/uuidgen). The uuid identifies an app, so all versions of an app must use the same uuid. The uuid is also used to generate the apps' unique directory on the TXT.
+   one for your app e.g. online with services like [this](https://www.famkruithof.net/uuid/uuidgen). The uuid identifies an app, so all versions of an app must use the same uuid. The uuid is also used to generate the apps' unique directory on the TXT. Make sure that each app has its own unique id.
  * **managed** is currently unused and should be set to yes. This tells
    the launcher that the app has a Qt GUI. In the future this will
    allow the launcher to support apps using a different GUI toolkit.
@@ -106,7 +109,7 @@ To get these installed on the TXT they'll need to be put into a ZIP
 archive. Any program like WinZIP should work. All three files should be
 in the toplevel of the ZIP and not e.g. in some subfolder.
 
-A prepared archive of our little demo app is also [available](https://github.com/ftCommunity/ftcommunity-apps/raw/master/packages/app_tutorial_1.zip)
+A prepared archive of our little demo app is also [available](https://github.com/ftCommunity/ftcommunity-TXT/raw/44dd2e2903880e5927a188c49f623cbcc83e3a3e/docs/_includes/examples/python/tutorial-1/test.zip).
 
 # Upload it to the TXT
 

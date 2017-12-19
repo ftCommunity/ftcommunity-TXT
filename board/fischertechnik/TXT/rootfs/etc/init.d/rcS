@@ -17,10 +17,12 @@ fi
 
 # count scripts to be executed
 SPLASH_MAX=0
+SPLASH_LAST=""
 for i in /etc/init.d/S??* ;do
      # Ignore dangling symlinks (if any).
      [ ! -f "$i" ] && continue
      SPLASH_MAX=$((SPLASH_MAX+1))
+     SPLASH_LAST="$i"
 done
 
 # calculate the step size for the progress bar
@@ -36,7 +38,13 @@ for i in /etc/init.d/S??* ;do
      [ ! -f "$i" ] && continue
 
      SPLASH=$((SPLASH+SPLASH_STEP))
-     psplash-write "PROGRESS $SPLASH"
+
+     if [ "$i" == "$SPLASH_LAST" ] ; then
+        psplash-write "PROGRESS 100"
+        psplash-write "QUIT"
+     else
+       psplash-write "PROGRESS $SPLASH"
+     fi
 
      case "$i" in
 	*.sh)
@@ -53,20 +61,3 @@ for i in /etc/init.d/S??* ;do
 	    ;;
     esac
 done
-
-# make sure progress bar ends at 100%
-psplash-write "PROGRESS 100"
-psplash-write "QUIT"
-
-# launch ftc gui
-export PYTHONPATH=/opt/ftc
-export QWS_MOUSE_PROTO=Tslib:/dev/input/event0
-export QWS_KEYBOARD=""
-# SECURITY NOTE: Enabling the builtin VNC server
-# gives everyone with a network connection to
-# your TXT unrestricted access to all CFW features,
-# exactly as if they were sitting directly in front of it.
-# ENABLE VNC AT YOUR OWN RISK by uncommenting the next line
-#export QWS_DISPLAY="multi: LinuxFb:/dev/fb0:0 VNC:0"
-export QWS_SIZE=240x320
-su ftc -c "/opt/ftc/launcher.py -qws" &

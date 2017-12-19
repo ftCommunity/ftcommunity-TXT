@@ -9,9 +9,9 @@ nav-title: Installation
 
 # Installation
 
-1. Zunächst musst du die Standardfirmware des TXT auf Version 4.2.4 upgraden (_das geht mit RoboPro_). Die aktuelle Version von RoboPro findest du hier: [http://www.fischertechnik.de/ResourceImage.aspx?raid=10274](http://www.fischertechnik.de/ResourceImage.aspx?raid=10274)
+1. Zunächst musst du die Standardfirmware des TXT auf Version 4.2.4 upgraden (_das geht mit RoboPro_). Die aktuelle Version von RoboPro findest du [hier bei Fischertechnik](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/01-update-robopro-424.ashx)
 
-1. Anschließend musst du den Bootloader freischalten, wie in der Anleitung von Fischertechnik erklärt: [http://www.fischertechnik.de/ResourceImage.aspx?raid=10278](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278)
+1. Anschließend musst du den Bootloader freischalten, wie in der [Anleitung von Fischertechnik](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/txt-controller/documents/freischaltung_des_bootloaders_deutsch.ashx) erklärt.
 
 1. Danach lädst du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.3.zip"_)
 

@@ -8,7 +8,9 @@ Dieses Tutorial soll den Einstieg erleichtern und die Grundschritte erklären.
 
 Eine Anwendung besteht aus **3** Teilen:
 
- * Das **Programm**. Dies ist normalerweise ein Python-Skript. Es könnte aber auch jede beliebige andere Programmiersprache sein. Da [Python](https://www.python.org) der Standard für die TXT-Programmierung ist, bezieht dieses Tutorial sich ausschließlich darauf!
+ * Das **Programm**. Dies ist normalerweise ein Python-Skript. Es könnte aber auch jede beliebige andere Programmiersprache sein. Da [Python](https://www.python.org) der Standard für die TXT-Programmierung ist, bezieht dieses Tutorial sich ausschließlich darauf! **Wichtige Hinweise:**
+    * Zum Einrücken des Codes werden Leerzeichen empfohlen. Es ist in Python3 nicht erlaubt, Leerzeichen und Tabulatoren zu mischen.
+    * Das Zeilenende von Python-Code für die CFW wird durch ein einfaches Line-Feed-Zeichen (LF, ASCII-Code 10) markiert. Du musst darauf achten, dass der Editor, den du verwendest, in der Lage ist, den Code mit dem korrekten Zeilenende-Zeichen abzuspeichern.
 
  * Ein **Manifest**. Das ist eine kleine Datei, die den Programmnamen, Autor und weitere Informationen enthält.
 
@@ -24,7 +26,7 @@ Eine minimale Anwendung sieht so aus:
 {% include examples/python/tutorial-1/test.py %}
 ```
 
-Speichere diese Datei unter [`test.py`](../../../media/examples/python/tutorial-1/test.py).
+Speichere diese Datei unter ```test.py```. Du findest sie auch hier: [`test.py`](../../../media/examples/python/tutorial-1/test.py).
 
 **Erkärung:**
 Dieses Programm definiert eine von TouchApplication (importiert aus dem Paket TouchStyle) abgeleitete Klasse, die ein Fenster mit dem Titel "Test" bereitstellt, solange die Anwendung läuft.
@@ -43,7 +45,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
  * **icon** ist der Name des Icons. Normalerweise heißt es "icon.png".
  * **desc** ist eine kurze Beschreibung (_aktuell nur in der Weboberfläche verwendet_).
  * **exec** ist der Name des Skripts (_Im Beispiel "Test.py"_).
- * **uuid** ist eine [eindeutige identifikationsnummer](https://de.wikipedia.org/wiki/Universally_Unique_Identifier), die am TXT verwendet wird, damit es keine Konfusionen zwischen Anwendungsdaten gibt. UUIDs können auch Online generiert werden., z.B. [hier](https://www.famkruithof.net/uuid/uuidgen).
+ * **uuid** ist eine [eindeutige identifikationsnummer](https://de.wikipedia.org/wiki/Universally_Unique_Identifier), die am TXT verwendet wird, damit es keine Konfusionen zwischen Anwendungsdaten gibt. UUIDs können auch Online generiert werden., z.B. [hier](https://www.famkruithof.net/uuid/uuidgen). Die UUID wird auch verwendet, um das Verzeichnis für die App auf dem TXT zu erzeugen. Du musst für jeden App eine eigenne ID verwenden.
  * **managed** ist aktuell unbenutzt (_sollte aber trotzdem auf "**yes**" gesetzt werden._). Aktuell gibt es nur an, ob eine Benutzeroberfläche vorhanden ist. (_Später kann damit das Framework angegeben werden_).
  * **version** ist die Versionsnummer der Anwendung.
  * **firmware** ist die Versionsnummer der Firmware, für die die Anwendung getestet wurde.
@@ -54,7 +56,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
  * **author** ist der Autor.
  * **url** ist für einen Link zu einer Webseite vorgesehen, zu der man über das Webinterface gelangen kann.
 
-Speichere diese Datei als [`manifest`](../../../media/examples/python/tutorial-1/manifest).
+Speichere diese Datei als ```manifest```. Du findest ein Beispiel hier: [`manifest`](../../../media/examples/python/tutorial-1/manifest).
 
 # Das Icon
 
@@ -72,7 +74,9 @@ Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwending sind:
  * "manifest", die Anwendungseigenschaften
  * "icon.png", das Icon
 
-Um diese Datein auf den TXT zu bringen, musst du ein ZIP-Archiv erstellen (_z.B. mit [7-Zip](http://www.7-zip.de/download.html)_). Alle 3 Datein **müssen** im Hauptordner liegen, da sie der TXT sonst **nicht** findet! 
+Um diese Datein auf den TXT zu bringen, musst du ein ZIP-Archiv erstellen (_z.B. mit [7-Zip](http://www.7-zip.de/download.html)_). Alle 3 Datein **müssen** im Hauptordner des Zip-Archives liegen, da sie der TXT sonst **nicht** findet. 
+
+Das fertige ZIP-Archiv gibt es [hier](https://github.com/ftCommunity/ftcommunity-TXT/raw/44dd2e2903880e5927a188c49f623cbcc83e3a3e/docs/_includes/examples/python/tutorial-1/test.zip)
 
 
 # Hochladen zum TXT
@@ -89,11 +93,11 @@ Nach der Installation ist die Anwendung sichtbar!
 
 ![tut1_img7.png](../../../en/programming/python/tut1_img7.png)    
         
-So sieht die Ausgabe des Programms auf dem TXT aus:
+So sieht die Ausgabe der Anwendung auf dem TXT aus:
 
 ![tut1_img10.png](../../../en/programming/python/tut1_img10.png)       
 
-Sie ist jetzt auch im Webinterface zu sehen:
+Die Anwendung ist jetzt auch im Webinterface zu sehen:
 
 ![tut1_img8.png](../../../en/programming/python/tut1_img8.png)
 
