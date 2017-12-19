@@ -5,7 +5,7 @@
 ################################################################################
 
 FT_TXT_SND_CAT_VERSION = 1.0.0
-FT_TXT_SND_CAT_SITE = $(call github,ftCommunity,ft_bt_remote_server,$(FT_TXT_SND_CAT_VERSION))
+FT_TXT_SND_CAT_SITE = $(call github,ftCommunity,txt_snd_cat,$(FT_TXT_SND_CAT_VERSION))
 FT_TXT_SND_CAT_LICENSE = GPLv3+
 FT_TXT_SND_CAT_INSTALL_STAGING = NO
 
