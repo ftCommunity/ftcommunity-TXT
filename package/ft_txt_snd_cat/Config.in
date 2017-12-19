@@ -1,0 +1,6 @@
+config BR2_PACKAGE_FT_TXT_SND_CAT
+	bool "ft_txt_snd_cat"
+  help
+	    Play audio through ft TXT SPI speakers
+
+			https://github.com/ftCommunity/txt_snd_cat
