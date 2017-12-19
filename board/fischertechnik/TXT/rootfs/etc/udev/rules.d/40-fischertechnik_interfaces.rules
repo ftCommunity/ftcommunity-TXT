@@ -1,0 +1,14 @@
+#Rule for Robo Interface
+ATTR{idVendor}=="146a", ATTR{idProduct}=="0001", SUBSYSTEMS=="usb", ACTION=="add", MODE="0660", GROUP="gpio"
+#Rule for Robo Extension
+ATTR{idVendor}=="146a", ATTR{idProduct}=="0002", SUBSYSTEMS=="usb", ACTION=="add", MODE="0660", GROUP="gpio"
+#Rule for RF Data Link
+ATTR{idVendor}=="146a", ATTR{idProduct}=="0003", SUBSYSTEMS=="usb", ACTION=="add", MODE="0660", GROUP="gpio"
+#Rule for Robo Connect Box
+ATTR{idVendor}=="146a", ATTR{idProduct}=="0001", SUBSYSTEMS=="usb", ACTION=="add", MODE="0660", GROUP="gpio"
+#Rule for Robo LT Controller
+ATTR{idVendor}=="146a", ATTR{idProduct}=="000a", SUBSYSTEMS=="usb", ACTION=="add", MODE="0660", GROUP="gpio"
+#Rule for Robo TX Controller
+ATTRS{idVendor}=="221d", ATTRS{idProduct}=="1000", SUBSYSTEMS=="usb", ACTION=="add", RUN+="/sbin/modprobe ftdi_sio" RUN+="/bin/sh -c 'echo 221d 1000 > /sys/bus/usb-serial/drivers/ftdi_sio/new_id'"
+#Rule to attach btsmart controller to ftdi driver
+ACTION=="add", ATTRS{idVendor}=="221d", ATTRS{idProduct}=="0005", RUN+="/sbin/modprobe ftdi_sio" RUN+="/bin/sh -c 'echo 221d 0005 > /sys/bus/usb-serial/drivers/ftdi_sio/new_id'"

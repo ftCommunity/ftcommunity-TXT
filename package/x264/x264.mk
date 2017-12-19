@@ -4,13 +4,13 @@
 #
 ################################################################################
 
-X264_VERSION = 3b70645597bea052d2398005bc723212aeea6875
+X264_VERSION = 97eaef2ab82a46d13ea5e00270712d6475fbe42b
 X264_SITE = git://git.videolan.org/x264.git
 X264_LICENSE = GPLv2+
 X264_DEPENDENCIES = host-pkgconf
 X264_LICENSE_FILES = COPYING
 X264_INSTALL_STAGING = YES
-X264_CONF_OPTS = --disable-avs
+X264_CONF_OPTS = --disable-avs --disable-lavf --disable-swscale
 
 ifeq ($(BR2_i386)$(BR2_x86_64),y)
 # yasm needed for assembly files

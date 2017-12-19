@@ -3,6 +3,7 @@
 #
 import sys, os, socket
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 appdir = os.path.dirname(os.path.realpath(__file__))
 
@@ -16,9 +17,9 @@ class LanguageWindow(TouchWindow):
         TouchWindow.closeEvent(self, evt)
         self.closed.emit()
 
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         locale_str = self.locale_read()
         # nothing found in /etc/locale. Try to work with anything
@@ -56,7 +57,6 @@ class FtcGuiApplication(TouchApplication):
         self.w.closed.connect(self.closed)
 
         self.w.show()
-        self.exec_()        
 
     def translation_load(self, str):
         if str != None: self.locale = QLocale(str)
@@ -176,4 +176,13 @@ class FtcGuiApplication(TouchApplication):
             self.locale_write(loc)
             
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)
+

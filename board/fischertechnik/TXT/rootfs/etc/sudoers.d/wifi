@@ -1,4 +1,4 @@
 ## Permissions for ftc access to programs required
 ## for wifi setup
 
-ftc     ALL = NOPASSWD: /usr/sbin/wpa_cli, /sbin/udhcpc
+ftc     ALL = NOPASSWD: /usr/sbin/wpa_cli, /sbin/udhcpc, /usr/bin/killall -SIGUSR1 udhcpc

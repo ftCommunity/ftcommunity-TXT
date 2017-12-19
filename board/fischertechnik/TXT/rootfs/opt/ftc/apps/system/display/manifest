@@ -1,0 +1,14 @@
+[app]
+name: Display
+category: System
+author: Richard Kunze &lt;richard.kunze@web.de&gt;
+icon: icon.png
+desc: Display settings
+exec: display.py
+managed: launcher-plugin
+uuid: ce3e3a3e-2641-42e6-92ed-f15e49ceea29
+
+[de]
+name: Display
+desc: Bildschirm-Einstellungen
+

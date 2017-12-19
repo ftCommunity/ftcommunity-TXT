@@ -1,0 +1,61 @@
+#!/bin/sh
+
+
+NAME=launcher
+PIDFILE=/var/run/$NAME.pid
+
+if [ -r /etc/default/launcher ]; then
+  while read line ; do
+    case "$line" in
+      "SCREEN_ROTATION=0") SCREEN_ROTATION=0 ;;
+      "SCREEN_ROTATION=90") SCREEN_ROTATION=90 ;;
+      "SCREEN_ROTATION=180") SCREEN_ROTATION=180 ;;
+      "SCREEN_ROTATION=270") SCREEN_ROTATION=270 ;;
+      *) echo "Ignoring unknown configuration entry: $line" ;;
+    esac
+  done < /etc/default/launcher
+fi
+
+DISPLAY="Transformed:Rot${SCREEN_ROTATION:-0}"
+# SECURITY NOTE: Enabling the builtin VNC server
+# gives everyone with a network connection to
+# your TXT unrestricted access to all CFW features,
+# exactly as if they were sitting directly in front of it.
+# ENABLE VNC AT YOUR OWN RISK by uncommenting the next line
+#export DISPLAY="multi: ${DISPLAY} VNC:0"
+
+start() {
+        printf "Starting $NAME: "
+        start-stop-daemon --start -c ftc --background --make-pidfile --pidfile $PIDFILE \
+              --exec /usr/bin/env \
+                     PYTHONPATH=/opt/ftc \
+                     QWS_MOUSE_PROTO=Tslib:/dev/input/event0 \
+                     QWS_KEYBOARD="" \
+                     QWS_DISPLAY="$DISPLAY" \
+                     /opt/ftc/launcher.py \
+              -- -qws \
+              && echo "OK" || echo "FAIL"
+}
+
+stop() {
+        printf "Stopping $NAME: "
+        start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE \
+                && echo "OK" || echo "FAIL"
+	rm -f $PIDFILE
+}
+
+case "$1" in
+        start)
+                start
+                ;;
+        stop)
+                stop
+                ;;
+        restart)
+                stop
+                start
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart}"
+                exit 1
+esac

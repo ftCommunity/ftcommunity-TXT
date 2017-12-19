@@ -1,0 +1,5 @@
+config BR2_PACKAGE_PYTHON_LIBROBOINT
+  bool "pylibroboint"
+  depends on BR2_PACKAGE_LIBROBOINT
+  help
+    Python module for libroboint

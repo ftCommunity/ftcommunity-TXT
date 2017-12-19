@@ -52,7 +52,7 @@ def unzip_uploaded_file(zip_name, appbase):
     print("Unpacking " + zip_name + "<br/>")
 
     if not zipfile.is_zipfile(zip_name):
-        return False, "Not a valid zip file"
+        return False, "Not a valid zip file", ""
 
     fh = open(zip_name, 'rb')
     z = zipfile.ZipFile(fh)
@@ -107,7 +107,7 @@ if ok:
     manifestfile = appdir + "/manifest"
     if os.path.isfile(manifestfile):
         manifest = configparser.RawConfigParser()
-        manifest.read(manifestfile)
+        manifest.read_file(open(manifestfile, "r", encoding="utf8"))
 
         # get various fields from manifest
         executable = appdir + "/" + manifest.get('app', 'exec')

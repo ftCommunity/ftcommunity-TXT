@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-WGET_VERSION = 1.18
-WGET_SOURCE = wget-$(WGET_VERSION).tar.xz
+WGET_VERSION = 1.19.2
+WGET_SOURCE = wget-$(WGET_VERSION).tar.lz
 WGET_SITE = $(BR2_GNU_MIRROR)/wget
 WGET_DEPENDENCIES = host-pkgconf
 WGET_LICENSE = GPLv3+
@@ -17,26 +17,24 @@ WGET_DEPENDENCIES += busybox
 endif
 
 ifeq ($(BR2_PACKAGE_GNUTLS),y)
-WGET_CONF_OPTS += \
-	--with-ssl=gnutls \
-	--with-libgnutls-prefix=$(STAGING_DIR)
+WGET_CONF_OPTS += --with-ssl=gnutls
 WGET_DEPENDENCIES += gnutls
-endif
-
-ifeq ($(BR2_PACKAGE_OPENSSL),y)
-WGET_CONF_OPTS += --with-ssl=openssl --with-libssl-prefix=$(STAGING_DIR)
+else ifeq ($(BR2_PACKAGE_OPENSSL),y)
+WGET_CONF_OPTS += --with-ssl=openssl
 WGET_DEPENDENCIES += openssl
+else
+WGET_CONF_OPTS += --without-ssl
 endif
 
 ifeq ($(BR2_PACKAGE_UTIL_LINUX_LIBUUID),y)
 WGET_DEPENDENCIES += util-linux
 endif
 
-# --with-ssl is default
-ifneq ($(BR2_PACKAGE_GNUTLS),y)
-ifneq ($(BR2_PACKAGE_OPENSSL),y)
-WGET_CONF_OPTS += --without-ssl
-endif
+ifeq ($(BR2_PACKAGE_ZLIB),y)
+WGET_CONF_OPTS += --with-zlib
+WGET_DEPENDENCIES += zlib
+else
+WGET_CONF_OPTS += --without-zlib
 endif
 
 $(eval $(autotools-package))

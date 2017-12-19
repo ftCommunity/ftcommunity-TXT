@@ -1,0 +1,4 @@
+## Permissions for ftc access to programs required
+## for BT Control Set server setup
+
+ftc     ALL = NOPASSWD: /usr/bin/ft_bt_remote_start.sh, /usr/bin/ft_bt_remote_server, /bin/pkill -SIGINT ft_bt_remote_server

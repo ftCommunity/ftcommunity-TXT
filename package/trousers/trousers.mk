@@ -5,7 +5,6 @@
 ##############################################################
 
 TROUSERS_VERSION = 0.3.13
-TROUSERS_SOURCE = trousers-$(TROUSERS_VERSION).tar.gz
 TROUSERS_SITE = http://downloads.sourceforge.net/project/trousers/trousers/$(TROUSERS_VERSION)
 TROUSERS_LICENSE = BSD-3c
 TROUSERS_LICENSE_FILES = LICENSE
@@ -16,6 +15,10 @@ TROUSERS_DEPENDENCIES = host-pkgconf openssl
 
 ifeq ($(BR2_PACKAGE_LIBICONV),y)
 TROUSERS_DEPENDENCIES += libiconv
+endif
+
+ifeq ($(BR2_arc770d)$(BR2_arc750d),y)
+TROUSERS_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -mno-compact-casesi"
 endif
 
 # The TrouSerS build system attempts to create the tss user and group

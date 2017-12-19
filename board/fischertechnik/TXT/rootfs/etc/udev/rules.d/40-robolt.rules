@@ -1,1 +1,0 @@
-ATTRS{idVendor}=="146a", ATTRS{idProduct}=="000a", SUBSYSTEMS=="usb", ACTION=="add", MODE="0600", GROUP="gpio"

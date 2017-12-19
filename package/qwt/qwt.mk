@@ -41,6 +41,12 @@ else
 QWT_CONFIG += -e 's/^.*QWT_CONFIG.*QwtOpenGL.*$$/\# QWT_CONFIG += QwtOpenGL/'
 endif
 
+ifeq ($(BR2_STATIC_LIBS),y)
+QWT_CONFIG += -e 's/^.*QWT_CONFIG.*QwtDll.*$$/\# QWT_CONFIG += QwtDll/'
+else
+QWT_CONFIG += -e 's/^.*QWT_CONFIG.*QwtDll.*$$/QWT_CONFIG += QwtDll/'
+endif
+
 define QWT_CONFIGURE_CMDS
 	$(SED) $(QWT_CONFIG) $(@D)/qwtconfig.pri
 	(cd $(@D); $(TARGET_MAKE_ENV) $(QWT_QMAKE))
@@ -54,13 +60,13 @@ endef
 # that when building with qmake, -L$(STAGING_DIR)/usr/lib is used and
 # not -L/usr/lib.
 define QWT_INSTALL_STAGING_CMDS
-	$(MAKE) -C $(@D) install INSTALL_ROOT=$(STAGING_DIR)
+	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) install INSTALL_ROOT=$(STAGING_DIR)
 	$(SED) "s%QWT_INSTALL_PREFIX = .*%QWT_INSTALL_PREFIX = $(STAGING_DIR)/usr%" \
 		$(STAGING_DIR)/usr/mkspecs/features/qwtconfig.pri
 endef
 
 define QWT_INSTALL_TARGET_CMDS
-	$(MAKE) -C $(@D) install INSTALL_ROOT=$(TARGET_DIR)
+	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) install INSTALL_ROOT=$(TARGET_DIR)
 	rm -Rf $(TARGET_DIR)/usr/mkspecs
 endef
 

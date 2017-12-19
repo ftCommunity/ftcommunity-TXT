@@ -4,11 +4,16 @@
 #
 ################################################################################
 
-OPENCV3_VERSION = 3.1.0
-OPENCV3_SITE = $(call github,itseez,opencv,$(OPENCV3_VERSION))
+OPENCV3_VERSION = 3.2.0
+OPENCV3_SITE = $(call github,opencv,opencv,$(OPENCV3_VERSION))
 OPENCV3_INSTALL_STAGING = YES
 OPENCV3_LICENSE = BSD-3c
 OPENCV3_LICENSE_FILES = LICENSE
+
+# Uses __atomic_fetch_add_4
+ifeq ($(BR2_TOOLCHAIN_HAS_LIBATOMIC),y)
+OPENCV3_CONF_OPTS += -DCMAKE_CXX_FLAGS="$(TARGET_CXXFLAGS) -latomic"
+endif
 
 # OpenCV component options
 OPENCV3_CONF_OPTS += \
@@ -303,10 +308,7 @@ OPENCV3_CONF_OPTS += -DWITH_TIFF=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_OPENCV3_WITH_V4L),y)
-OPENCV3_CONF_OPTS += \
-	-DWITH_LIBV4L=$(if $(BR2_PACKAGE_LIBV4L),ON,OFF) \
-	-DWITH_V4L=ON
-OPENCV3_DEPENDENCIES += $(if $(BR2_PACKAGE_LIBV4L),libv4l)
+OPENCV3_CONF_OPTS += -DWITH_LIBV4L=OFF -DWITH_V4L=ON
 else
 OPENCV3_CONF_OPTS += -DWITH_V4L=OFF -DWITH_LIBV4L=OFF
 endif

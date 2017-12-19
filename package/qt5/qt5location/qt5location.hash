@@ -1,2 +1,5 @@
-# Hash from: http://download.qt.io/official_releases/qt/5.6/5.6.1-1/submodules/qtlocation-opensource-src-5.6.1-1.tar.xz.mirrorlist
-sha256 c9cc21ba3dd3f13376a175b092256403589a52c7851603dbfe1e15d5d9bac457 qtlocation-opensource-src-5.6.1-1.tar.xz
+# Hash from: https://download.qt.io/official_releases/qt/5.6/5.6.3/submodules/qtlocation-opensource-src-5.6.3.tar.xz.mirrorlist
+sha256 b7a81c58cc331fb15bea8fba21d3c9a59f6dc6ad2e4855e30a14ce59a2af1466 qtlocation-opensource-src-5.6.3.tar.xz
+
+# Hash from: http://download.qt.io/official_releases/qt/5.8/5.8.0/submodules/qtlocation-opensource-src-5.8.0.tar.xz
+sha256 48a1e39ed989f0133aeacaa379e9c3958ec9b08c043626bba503619891d21abb  qtlocation-opensource-src-5.8.0.tar.xz

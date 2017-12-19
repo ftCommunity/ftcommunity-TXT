@@ -1,0 +1,8 @@
+config BR2_PACKAGE_FT_BT_REMOTE_SERVER
+	bool "ft_bt_remote_server"
+	help
+	  The ft_bt_remote_server allows to use the fischertechnik
+	  remote control sender unit from the BT Control Set as a
+	  joystick under Linux.
+
+	  https://github.com/ftCommunity/ft_bt_remote_server

@@ -5,7 +5,7 @@
 ################################################################################
 
 # When updating the version, please also update mesa3d-headers
-MESA3D_VERSION = 12.0.1
+MESA3D_VERSION = 13.0.4
 MESA3D_SOURCE = mesa-$(MESA3D_VERSION).tar.xz
 MESA3D_SITE = ftp://ftp.freedesktop.org/pub/mesa/$(MESA3D_VERSION)
 MESA3D_LICENSE = MIT, SGI, Khronos
@@ -21,6 +21,12 @@ MESA3D_DEPENDENCIES = \
 	host-flex \
 	expat \
 	libdrm
+
+# Disable static, otherwise configure will fail with: "Cannot enable both static
+# and shared."
+ifeq ($(BR2_SHARED_STATIC_LIBS),y)
+MESA3D_CONF_OPTS += --disable-static
+endif
 
 # The Sourcery MIPS toolchain has a special (non-upstream) feature to
 # have "compact exception handling", which unfortunately breaks with
@@ -39,13 +45,6 @@ MESA3D_CONF_OPTS += --with-sha1=libgcrypt
 else ifeq ($(BR2_PACKAGE_LIBSHA1),y)
 MESA3D_DEPENDENCIES += libsha1
 MESA3D_CONF_OPTS += --with-sha1=libsha1
-endif
-
-ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
-MESA3D_DEPENDENCIES += udev
-MESA3D_CONF_OPTS += --disable-sysfs
-else
-MESA3D_CONF_OPTS += --enable-sysfs
 endif
 
 ifeq ($(BR2_PACKAGE_XORG7),y)
@@ -86,6 +85,8 @@ MESA3D_DRI_DRIVERS-$(BR2_PACKAGE_MESA3D_DRI_DRIVER_I915)   += i915
 MESA3D_DRI_DRIVERS-$(BR2_PACKAGE_MESA3D_DRI_DRIVER_I965)   += i965
 MESA3D_DRI_DRIVERS-$(BR2_PACKAGE_MESA3D_DRI_DRIVER_NOUVEAU) += nouveau
 MESA3D_DRI_DRIVERS-$(BR2_PACKAGE_MESA3D_DRI_DRIVER_RADEON) += radeon
+# Vulkan Drivers
+MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_INTEL)   += intel
 
 ifeq ($(BR2_PACKAGE_MESA3D_GALLIUM_DRIVER),)
 MESA3D_CONF_OPTS += \
@@ -109,14 +110,18 @@ endif
 ifeq ($(BR2_PACKAGE_XLIB_LIBXXF86VM),y)
 MESA3D_DEPENDENCIES += xlib_libXxf86vm
 endif
-# libGL is only provided for a full xorg stack
-ifeq ($(BR2_PACKAGE_XORG7),y)
-MESA3D_PROVIDES += libgl
-endif
 MESA3D_CONF_OPTS += \
 	--enable-shared-glapi \
 	--enable-driglx-direct \
 	--with-dri-drivers=$(subst $(space),$(comma),$(MESA3D_DRI_DRIVERS-y))
+endif
+
+ifeq ($(BR2_PACKAGE_MESA3D_VULKAN_DRIVER),)
+MESA3D_CONF_OPTS += \
+	--without-vulkan-drivers
+else
+MESA3D_CONF_OPTS += \
+	--with-vulkan-drivers=$(subst $(space),$(comma),$(MESA3D_VULKAN_DRIVERS-y))
 endif
 
 # APIs
@@ -134,6 +139,17 @@ MESA3D_CONF_OPTS += --enable-opengl --enable-dri
 # libva and mesa3d have a circular dependency
 # we do not need libva support in mesa3d, therefore disable this option
 MESA3D_CONF_OPTS += --disable-va
+
+# libGL is only provided for a full xorg stack
+ifeq ($(BR2_PACKAGE_XORG7),y)
+MESA3D_PROVIDES += libgl
+else
+define MESA3D_REMOVE_OPENGL_HEADERS
+	rm -rf $(STAGING_DIR)/usr/include/GL/
+endef
+
+MESA3D_POST_INSTALL_STAGING_HOOKS += MESA3D_REMOVE_OPENGL_HEADERS
+endif
 
 ifeq ($(BR2_PACKAGE_MESA3D_OPENGL_EGL),y)
 MESA3D_PROVIDES += libegl
@@ -165,6 +181,13 @@ MESA3D_PROVIDES += libgles
 MESA3D_CONF_OPTS += --enable-gles1 --enable-gles2
 else
 MESA3D_CONF_OPTS += --disable-gles1 --disable-gles2
+endif
+
+ifeq ($(BR2_PACKAGE_LM_SENSORS),y)
+MESA3D_CONF_OPTS += --enable-lmsensors
+MESA3D_DEPENDENCIES += lm-sensors
+else
+MESA3D_CONF_OPTS += --disable-lmsensors
 endif
 
 # Avoid automatic search of llvm-config

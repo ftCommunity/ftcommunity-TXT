@@ -1,0 +1,4 @@
+## Permissions for ftc access to programs required
+## for changing display settings
+
+ftc     ALL = NOPASSWD: /usr/bin/ts_calibrate, /etc/init.d/S90launcher restart

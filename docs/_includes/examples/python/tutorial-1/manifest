@@ -1,0 +1,12 @@
+[app]
+name: Test
+category: Tests
+author: Joe Developer
+icon: icon.png
+desc: TXT app tutorial #1
+url: http://cfw.ftcommunity.de/ftcommunity-TXT/en/programming/python/tutorial-1.html
+exec: test.py
+managed: yes
+uuid: 191fe5a6-313b-4083-af65-d1ad7fd6d281
+version: 1.0
+firmware: 0.9

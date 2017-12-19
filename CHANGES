@@ -1,29 +1,605 @@
-2016.08.1, Released September 21st, 2016
+2017.02.8, Released November 27th, 2017
 
-	Fix potential entire root filesystem removal in the external
-	toolchain handling. This would trigger if (and only if) the
-	following conditions are met:
+	Important / security related fixes.
 
-	- The user has selected a "known toolchain profile", such as a
-	  Linaro toolchain, a Sourcery CodeBench toolchain etc. People
-	  using "custom toolchain profile" are not affected.
+	Qt: 5.6 version updated to 5.6.3.
 
-	- The user has enabled BR2_TOOLCHAIN_EXTERNAL_PREINSTALLED=y
-	  to indicate that the toolchain is already locally available
-	  (as opposed to having Buildroot download and extract the
-	  toolchain)
+	Reproducible: Do not override SOURCE_DATE_EPOCH if already set
+	in the environment.
 
-	- The user has left BR2_TOOLCHAIN_EXTERNAL_PATH empty, because
-	  his toolchain is directly available through the PATH
-	  environment variable. When BR2_TOOLCHAIN_EXTERNAL_PATH is
-	  non-empty, Buildroot will do something silly (remove the
-	  toolchain contents), but that are limited to the toolchain
-	  itself.
+	Updated/fixed packages: apr, apr-util, arqp-standalone,
+	collectd, dvb-apps, ffmpeg, google-breakpad, gstreamer,
+	imagemagick, libfastjson, libglib2, libpjsip, libplist,
+	localedef, luajit, mesa3d, openssh, openssl, postgresql,
+	python3, python-pyqt5, qt5base, qt5canvas3d, qt5connectivity,
+	qt5declarative, qt5engineio, qt5graphicaleffects,
+	qt5imageformats, qt5location, qt5multimedia, qt5quickcontrols,
+	qt5quickcontrols2, qt5script, qt5sensors, qt5serialbus,
+	qt5serialport, qt5svg, qt5tools, qt5webchannel, qt5webkit,
+	qt5websockets, qt5x11extras, qt5xmlpatterns, quagga, ruby,
+	samba4, snmppp, ti-gfx, vboot-utils, webkitgtk, wireshark,
+	xapp_xdriinfo.
 
-	When such conditions are met, Buildroot will run "rm -rf /*"
-	due to TOOLCHAIN_EXTERNAL_INSTALL_DIR being empty.
+	Issues resolved (http://bugs.buildroot.org):
 
-2016.08, Released Septermber 1st, 2016
+	10326: mesa3d package fails to build when BR2_SHARED_STATIC_LIBS=y
+	10361: python3 python-config script generates invalid includes
+	10501: host-localedef fails to compile on Ubuntu 17.10
+
+2017.02.7, Released October 28th, 2017
+
+	Important / security related fixes.
+
+	Webkitgtk bumped to the 2.18.x series, fixing a large number
+	of security issues.
+
+	Defconfigs: wandboard: Correct rootfs offset
+
+	Toolchain: Linaro toolchains updated to 2017.08 release,
+	fixing a number of issues. Musl: fix for CVE-2017-15650.
+
+	Updated/fixed packages: busybox, bzip2, dnsmasq, git, go,
+	hostapd, irssi, iucode-tool, lame, libcurl, libffi, libnspr,
+	libnss, nodejs, openssh, openvpn, qemu, qt, redis, sdl2,
+	webkitgtk, wget, wpa_supplicant, xen, xlib_libXfont,
+	xlib_libXfont2, xserver_xorg-server
+
+2017.02.6, Released September 24th, 2017
+
+	Important / security related fixes.
+
+	Cmake: Ensure correct pkg-config is used when building host
+	packages
+
+	fs/iso9660: Ensure files from earlier builds are not included.
+
+	Updated/fixed packages: apache, bcusdk, bind, binutils,
+	bluez5_utils, botan, cmake, connman, dbus, dialog, e2fsprogs,
+	faad2, fakeroot, ffmpeg, file, flashrom, gcc, gd, gdb,
+	gdk-pixbuf, git, gnupg, gpsd, grub2, gst1-plugins-bad,
+	imagemagick, iostat, iucode-tool, jack2, libarchive, libcurl,
+	libgcrypt, libidn, libphidget, librsync, librsvg, libsoup,
+	libxml2, linux-tools, lua, mariadb, mbedtls, mediastreamer,
+	minidlna, netplug, nss-pam-ldapd, nvidia-driver, openjpeg,
+	postgresql, proxychains-ng, python-libconfig,
+	python-service-identity, qt, rpcbind, ruby, samba4, squashfs,
+	squid, strongswan, subversion, supervisor, sysvinit, tcpdump,
+	tor, transmission, unrar, valgrind, vim, webkitgtk, whois,
+	xen, zmqpp
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#10141: Squashfs extended attribute failures
+	#10261: Grub2 fails to build for x86_64
+	#10276: BR2_PACKAGE_LINUX_TOOLS_GPIO fails for MIPS with...
+
+2017.02.5, Released July 27th, 2017
+
+	Important / security related fixes.
+
+	Webkitgtk bumped to the 2.16.x series, fixing a large number
+	of security issues.
+
+	host-aespipe compile fix for Debian/Gentoo/Ubuntu toolchains
+	which default to PIE mode.
+
+	Updated/fixed packages: aespipe, apache, bind, binutils,
+	ccache, collectd, efibootmgr, efivar, expat, ffmpeg, gcc,
+	heimdal, iproute2, irssi, libglib2, libmemcached, libosip2,
+	libtirpc, libxml-parser-perl, linux-fusion, linux-zigbee,
+	mpg123, nodejs, orc, pcre, php, pulseaudio,
+	python-setproctitle, qt5base, rpi-firmware, samba4, syslinux,
+	systemd, spice, tiff, webkitgtk, x265, xen,
+	xserver_xorg-server, xvisor
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#10061: gcc5.4 buildroot toolchain for powerpc libsanitizer...
+
+2017.02.4, Released July 4th, 2017
+
+	Important / security related fixes.
+
+	Update support/scripts/scancpan to use METACPAN v1 API as v0
+	has been shutdown.
+
+	Update support/scripts/mkusers to handle setups where
+	/etc/shadow is a symlink.
+
+	External toolchain: Don't create musl dynamic loader symlink
+	for static builds.
+
+	Setlocalversion: Correct detection of mercurial revisions for
+	non-tagged versions.
+
+	Updated/fixed packages: apache, automake, bind, botan, c-ares,
+	dhcp, expat, fcgiwrap, gcc, gdb, gesftpserver, glibc, gnutls,
+	gst1-plugins-bad, imagemagick, imx-uuc, intltool, iperf,
+	ipsec-tools, irssi, libgcrypt, libmad, libnl, mosquitto,
+	mpg123, ncurses, nodejs, ntp, openssh, openvpn, qt5base,
+	qt5multimedia, rtl8821au, socat, spice, systemd, tor, tslib,
+	vlc, x264, xserver_xorg-server
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9976: License file for package 'rtl8821au' incorrect
+
+2017.02.3, Released June 2nd, 2017
+
+	Important / security related fixes.
+
+	Download: <pkg>-source-check fixed for packages from git.
+
+	External toolchain: musl dynamic linker symlink for mips-sf
+	corrected.
+
+	Updated/fixed packages: armadillo, audiofile, bash,
+	bluez_utils, cppcms, dbus, dhcp, dropbear, efibootmgr, efl,
+	elfutils, faketime, fbgrab, flashrom, ftop, gdb, git,
+	google-breakpad, gpsd, hans, kvm-unit-tests, kyua, libev,
+	libmicrohttpd, libminiupnpc, libtasn1, libubox, ltp-testsuite,
+	lua, madplay, mariadb, mono, mosquitto, mxml, ntp,
+	nvidia-driver, openblas, openvpn, oracle-mysql, picocom, popt,
+	postgresql, pulseview, qt5base, qwt, rabbitmq-c, redis,
+	rpcbind, rtmpdump, samba4, strongswan, sudo, vlc
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9796: source-check broken for Git downloads
+	#9871: fbgrab 1.3 won't build with BR2_REPRODUCIBLE set
+
+2017.02.2, Released May 1st, 2017
+
+	Important / security related fixes.
+
+	Use HTTPS for the Codesourcery external toolchains as the HTTP
+	URLs no longer work.
+
+	Updated/fixed packages: bind, busybox, dovecot, freetype,
+	ghostscript, glibc, granite, hiredis, icu, imagemagick,
+	gst-plugins-base, gst1-plugins-base, libcroco, libcurl, libnl,
+	libnspr, libnss, libsamplerate, libsndfile, libunwind,
+	minicom, mplayer, mpv, nodejs, python-django, python-pyyaml,
+	python-web2py, samba4, syslinux, systemd, tiff, trinity,
+	uboot, wireshark, xen
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9791: Python searches for packages in the user site directory
+
+2017.02.1, Released April 4th, 2017
+
+	Important / security related fixes.
+
+	Fix a variable clashing issue in the mkusers script with
+	internal bash variables.
+
+	Improve external toolchain version detection.
+
+	Correct permissions for /dev/pts/ptmx when systemd is used
+	with recent glibc versions.
+
+	Fix python module name clash for graph-depends.
+
+	Fakeroot now links against libacl to fix issues on
+	distributions using acls.
+
+	Ensure that the git download infrastructure creates GNU format
+	tar files.
+
+	br2-external: Improve error reporting.
+
+	Updated/fixed packages: acl, apr, audiofile, busybox, cairo,
+	dbus-cpp, dbus-glib, dbus-triggerd, domoticz, elfutils,
+	fakeroot, filemq, fmc, gdb, git, gnutls, gst-ffmpeg,
+	gst1-plygins-bad, harfbuzz, htop, imagemagick, jasper, libcec,
+	libiio, libplatform, librsvg, libselinux, libsidplay2, libsoc,
+	libwebsockets, libxkbcommon, linux-firmware, logrotate,
+	lpt-testsuite, lttng-libust, mariadb, mbedtls, memcached,
+	mesa3d, mpd, mplayer, nbd, ncftp, ntp, openssh, opentyrian,
+	pcre, perl-gd, python, qt5base, rpi-userland, rpm, samba4,
+	skalibs, slang, sngrep, squashfs, syslog-ng, taglib,
+	tcpreplay, tor, upmpdcli, wget, wireshark,
+	xdriver_xf86-video-vmware, xlib_libXv, zmqpp
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9456: mkusers script bash errors
+
+2017.02, Released February 28th, 2017
+
+	Minor fixes, mainly fixing autobuilder issues.
+
+	Don't use cmake 3.7.x from the build host as it is also
+	affected by the RPATH handling issues, and instead build our
+	own if needed.
+
+	Updated/fixed packages: assimp, classpath, genimage, mplayer,
+	mpv, openocd, python-libconfig, qt5base, qt5quickcontrols,
+	vlc, xterm
+
+2017.02-rc3, Released February 26th, 2017
+
+	Fixes all over the tree.
+
+	Cmake reverted to version 3.6.3 to workaround regressions
+	related to RPATH handling.
+
+	Updated/fixed packages: bctoolbox, berkeleydb, binutils,
+	btrfs-progs, classpath, directfb, glibc, gstreamer1,
+	gst1-plugins-{base,good,bad,ugly}, gst1-libav,
+	gst1-rtsp-server, gst1-validate, gst-omx, htop, libcurl,
+	libepoxy, libimxvpuapi, libpcap, libuv, ncurses, openssh,
+	oracle-mysql, poco, python, qt5base, qt5webkit, sslh, synergy,
+	trousers, uclibc-ng-test, util-linux, vlc, xfsprogs
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9251: Shared C++ libraries for Microblaze results in Segmentation...
+	#9456: mkusers script bash errors
+	#9506: Collectd 5.7.0 fails to build with libcrypt
+	#9581: VagrantFile provisioning step fails due to issue with grub-pc
+	#9586: usbmount: usbmount slows down the system... to a state of...
+	#9616: CMake host packages cannot provide CONF_ENV
+	#9641: Need raptor package installed in staging
+	#9671: stunnel build error
+
+2017.02-rc2, Released February 20th, 2017
+
+	Fixes all over the tree.
+
+	Support for SOURCE_DATE_EPOCH in the toolchain wrapper for
+	older gcc versions for reproducible builds has been
+	(temporarily) reverted because of licensing compatiblity
+	concerns.
+
+	Defconfigs: SD card generation fix for the Udoo Neo board
+
+	Infrastructure to handle .lz compressed tarballs added, and
+	affected packages updated to use it.
+
+	Updated/fixed packages: bctoolbox, bind, canelloni,
+	cbootimage, ccache, classpath, cups, dbus, ddrescue, directfb,
+	ed, erlang, gcc, gdb, glmark2, gstreamer, gstreamer1, hiredis,
+	kmod, kmsxx, lcdapi, libasplib, libgpiod, libnss, libraw,
+	libv4l, mesa3d-headers, mosquitto, mpd, mpv, musl, ntfs-3g,
+	ocrad, openswan, postgresql, qt5base, qt5quickcontrols, redis,
+	riemann-c-client, samba4, sunxi-mali, tcping, trousers,
+	uclibc, util-linux, vim, wavpack, wget, wiringpi, xfsprogs,
+	xserver_xorg-server
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#8941: Valgrind fails to build with stack protection turned on
+	#9291: perl: SysV message queues not configured, even if available
+	#9651: libxcb-1.12 built Error
+	#9656: util-linux: schedutils doesn't build on target w/o enabl...
+	#9666: qt5quickcontrols install fails
+
+2017.02-rc1, Released February 11th, 2017
+
+	Fixes all over the tree and new features.
+
+	Infrastructure:
+
+	  - numerous improvements to support reproducible builds
+
+	  - new waf-package package infrastructure to support packages
+	    that use the Waf build system. 6 packages converted to
+	    this infrastructure.
+
+	  - add option <pkg>_PREFER_INSTALLER to the perl package
+	    infrastructure
+
+	Architecture:
+
+	  - add support for the OpenRISC CPU architecture
+
+	  - merge description of the ARM and ARM64 options, and add
+	    support for selecting a specific ARM64 core
+
+	Toolchain:
+
+	  - major rework of the external toolchain support. It is now
+	    split into several packages, one per external toolchain,
+	    and a common infrastructure.
+
+	  - important fix for musl to prevent a conflict between musl
+	    and kernel headers (fixes the build of numerous packages
+	    with musl)
+
+	  - uClibc-ng bumped to 1.0.22, and therefore enable uClibc
+	    for ARM64, mips32r6 and mips64r6
+
+	  - add gdb 7.12.1, and switch to gdb 7.11 as the default
+
+	  - Linaro toolchains updated to 2016.11, ARC toolchain
+	    components updated to arc-2016.09, MIPS Codescape
+	    toolchains bumped to 2016.05-06, CodeSourcery AMD64 and
+	    NIOS2 toolchains bumped
+
+	  - remove Analog Devices toolchain for the Blackfin
+	    architecture, remove pre-built musl toolchains from
+	    musl.codu.org
+
+	New defconfigs: Freescale i.MX23EVK, Qemu OpenRISC emulation,
+	Qemu NIOS2 emulation, Grinn chiliBoard, Freescale i.MX6Q
+	SabreSD, BeagleBoard X15, OrangePi One, ARC HS38 HAPS
+
+	New packages: angular-websocket, aubio, bctoolbox, darkhttpd,
+	ddrescue, easydbus, fakedate, git-crypt, hiredis, ifenslave,
+	jsmn, libgpiod, libgsm, linux-syscall-support, mariadb, mimic,
+	nginx-dav-ext, nmon, opkg-utils, policycoreutils,
+	pru-software-support, python-arrow, python-attrs,
+	python-babel, python-bitstring, python-chardet,
+	python-constantly, python-flask-babel, python-gunicorn,
+	python-incremental, python-jsonschema, python-logbook,
+	python-markdown2, python-mbstrdecoder, python-mutagen,
+	python-pathpy, python-pudb, python-pyqrcode,
+	python-pytablereader, python-setuptools-scm, python-sh,
+	python-toml, python-vcversioner, python-whoosh,
+	raspberrypi-usbboot, riemann-c-client, rtl8723bs, skalibs,
+	sslh, sngrep, ti-cgt-pru, uclibc-ng-test, udpxy, uhttpd,
+	upower, ustream-ssl, waf, xlib_libXfont2
+
+	Removed packages: perl-db-file, snowball-hdmiservice,
+	snowball-init
+
+	Tooling: addition of a test-pkg script to help contributors
+	build test their package.
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#8946: Valgrind fails to build with stack protection turned on
+	#9461: odroidc2 - toolchain Linaro AArch64 2016.11 compile error
+	#9466: VIM_REMOVE_DOCS removes rgb.txt
+	#9486: xorg-server 1.19 fails to compile for glibc with systemd init (x86_64)
+	#9501: eudev fails to build with older kernel headers
+	#9526: Embedded NPM fails to start with "no such file or directory" error
+	#9541: Platform drivers autoloading from info in device tree does not work
+	#9546: seems BR2_PACKAGE_RPI_FIRMWARE_INSTALL_DTB_OVERLAYS do nothing
+	#9551: Coreutils fails to build target src/src_libsinglebin_pinky_a-pinky.o
+	#9566: [kmod] Compilation fails with uclibc
+	#9571: buildroot fails while building opencv for arm64 platform
+	#9576: External tree with BR 2016.11 does not work anymore
+	#9606: xorg-server cannot build for ARM target
+
+2016.11.2, Released January 25th, 2017
+
+	Important / security related fixes.
+
+	A fix for BR2_EXTERNAL trees referenced using relative paths,
+	which broke in 2016.11.
+
+	Updated/fixed packages: bind, docker-engine, gd, gnutls, go,
+	imagemagick, irssi, libpng, libvncserver, musl, opus, php,
+	php-imagick, rabbitmq-server, runc, wireshark,
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9576: External tree with BR 2016.11 does not work anymore
+
+2016.11.1, Released December 29th, 2016
+
+	Important / security related fixes.
+
+	Updated/fixed packages: apache, cryptopp, docker-engine,
+	dovecot, exim, gdk-pixbuf, libcurl, libupnp, links, monit,
+	nodejs, openssh, php, python, python-bottle, samba4, squid,
+	uboot, vim, wireshark, xorg-server uboot
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9466: VIM_REMOVE_DOCS removes rgb.txt
+
+2016.11, Released November 30th, 2016
+
+	Minor fixes.
+
+	Updated/fixed packages: bzip2, gcc, jasper, sane-backends,
+	uboot, uclibc
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9451: packages/postgresql/postgresql.mk contains wrong POST...
+
+2016.11-rc3, Released November 28th, 2016
+
+	Fixes all over the tree, including a number of security fixes.
+
+	The move from fakeroot to pseudo unfortunately brought a
+	number of issues.  The SELinux issue described in #9386 which
+	triggered the move to pseudo has been investigated further and
+	a workaround implemented and the pseudo changes reverted.
+
+	Linux kernel: update default to 4.8.11.
+
+	Defconfigs: Updates/fixes for imx28ek, mx6udoo, imx6ulpico,
+	olimex a20 olinuxino lime mali, roseapplepi, synopsis aarch64
+	vdk, axs101, axs103 and hs38 smd vdk.
+
+	Updated/fixed packages: autossh, chrony, dosfstools,
+	dtv-scan-tables, e2fsprogs, gcc, gdb, gnuchess, gnuradio,
+	gpsd, gst1-plugins-bad, gst1-plugins-good, imagemagick,
+	kvm-unit-tests, libfribi, libuv, mesa3d, mpfr, mplayer, mpv,
+	ntp, ola, olsr, openblas, openjpeg, openssh, postgresql,
+	ptpd2python3, qemu, qextserialport, qt5base, quagga, xqwt,
+	taskd, tiff, tremor, trousers, udisks, uclibc, wireshark,
+	xapp_xload, xenomai, xmlstarlet
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#9386: ubinize fails with or without custom config
+	#9431: A misspelling
+	#9446: make raspberrypi3_defconfig compilation failure
+
+2016.11-rc2, Released November 13th, 2016
+
+	Fixes all over the tree.
+
+	Architecture: add support for MIPS XBurst cores; remove MIPS
+	support for M5100 cores.
+
+	Updated/fixed packages: mesa3d, lttng-babeltrace, tinyalsa, pseudo,
+	czmq, libxml2, makedevs, binutils, kvm-unit-tests, libnss, privoxy,
+	qemu, ser2net, net-tools, ffmpeg, assimp, libmpeg2, ccache, mpv,
+	libxslt, python, python3, php, valgrind, guile, domoticz, efl,
+	jasper, kvmtool, go, wget, sane-backends, weston, tinymembench,
+	strace, openjpeg, lcms2, quota.
+
+	Linux kernel: update default to 4.8.7.
+
+	CMake support: fix cmake wrapper to properly pass NDEBUG flag.
+
+	Filesystems: use a wrapper to pseudo, to better mimick the behaviour
+	of fakeroot; makedevs no longer breaks of the destination already
+	exists and is of the correct type/major/minor.
+
+	Defconfigs: a few legacy and broken defconfigs have been removed
+	because they now fail to build: kb9202_defconfig, mini2440_defconfig,
+	freescale_p2020ds, qmx6, calao*, atmel_sama5d4ek. Other defconfigs
+	have been updated: nanopi-neo, olimex_a20_olinuxino_lime_mali,
+	armadeus_apf51, armadeus_apf28, freescale_imx31_3stack, ci20,
+	olimex_a20_olinuxino_lime2, atmel_at91sam9260eknf,
+	atmel_at91sam9rlek, atmel_at91sam9g20dfc, atmel_at91sam9g45m10ek,
+	atmel_sama5d3xek.
+
+2016.11-rc1, Released November 3rd, 2016
+
+	Fixes all over the tree and new features.
+
+	It is now possible to specify multiple BR2_EXTERNAL
+	directories. The required files in a BR2_EXTERNAL directory
+	have changed to accomodate this feature. Refer to the
+	documentation for details of how to update them. External
+	trees now have a name and a description. Also, it is possible
+	to override a defconfig in the external tree.
+
+	The default skeleton now uses UID 65534 for the "nobody"
+	user instead of UID 99, like most distros do. See
+	https://lwn.net/Articles/695478/ for a complete discussion.
+	Programs and configuration files that explicitly refer to UID
+	99 will have to be updated.
+
+	When the build environment already has a suitable cmake version
+	(3.1 or later), that one will be used instead of building
+	host-cmake. This can speed up the build significantly.
+
+	The ExtUtils::MakeMaker perl module is now required in the
+	build environment.
+
+	An additional check is done during the build that files are
+	not installed in the output directory within the output
+	directory. This happens e.g. when the target directory is
+	contained both in --prefix and in DESTDIR. The build will
+	terminate with an error message that specifies which package
+	and which file caused the failure.
+
+	The concept of "deprecated packages" and the BR2_DEPRECATED
+	option have been removed. Instead, packages are removed
+	immediately. Packages are only removed when they don't work
+	for some reason. If you still need a removed package and
+	you have a solution for the problem(s) that caused the
+	removal, please contribute it.
+
+	Architecture: support for sh64 removed, improved support for
+	MIPS core selection.
+
+	Toolchain: support for musl powerpc64le, mips64 and mipsr6
+	toolchains, ARC toolchain components updates, gcc 6.x series
+	bumped to 6.2.0, default binutils version switched to 2.26,
+	default gcc version switched to gcc 5.x, Linaro toolchains
+	updated, uclibc-ng bumped to 1.0.19. GCC is now always built
+	with TLS support. Checking of unsafe compiler options (that
+	point to host directories) has been extended with -isystem,
+	-idirafter and -iquote.
+
+	Package infrastructure: new variable $(PKG)_DL_OPTS, addition
+	of <pkg>-show-rdepends to list reverse dependencies, and
+	<pkg>-graph-rdepends to graph reverse dependencies. Linux tools
+	are now in a separate linux-tools package instead of in the
+	kernel build. Fakeroot has been replaced by pseudo.
+
+	CMake support: the toolchainfile.cmake file now provides a
+	definition of the CMAKE_BUILD_TYPE variable. The
+	toolchainfile.cmake also no longer forces the compiler/linker
+	flags defined by Buildroot.
+
+	New defconfigs: WaRP7, Solidrun's MX6 Cubox/Hummingboard,
+	TS-4900, Grinn's liteBoard, Udoo MX6Q/DL, Qemu ARM noMMU,
+	BeagleBone Qt5 demo, Digilent Zybo, FriendlyARM Nanopi NEO.
+
+	New packages: arm-trusted-firmware, amd-catalyst, atop, aufs,
+	aufs-util, fwts, gst1-rtsp-server, libglob, libite, mfgtools,
+	mksh, motion, paho-mqtt-c, php-amqp, pseudo, python-couchdb,
+	python-crcmod, python-cssutils, python-docutils,
+	python-futures, python-mwclient, python-mwscrape,
+	python-mwscrape2slob, python-pyelftools, python-pyicu,
+	python-pylru, python-pyqt5, python-requests-toolbelt,
+	python-simpleaudio, python-slob, rabbitmq-server, shapelib,
+	vdr, vdr-plugin-vnsiserver, vexpress-firmware, xvisor, iio and
+	gpio linux tools.
+
+	Removed packages: binutils 2.24, fakeroot, gcc 4.7, ipkg,
+	kodi-addon-xvdr, libgail, sstrip, torsmo, webkit, webkitgtk24,
+	wvdial, wvstreams.
+
+	Documentation: the list of packages that was present in the
+	Buildroot manual has been removed.
+
+	Legal info: the "licenses.txt" file that concatenates all
+	license texts is no longer generated - it was not considered
+	useful. The manifest.csv contains an empty cell instead of
+	"not saved" when no license file is available.
+
+	Other: addition of a DEVELOPERS file listing developers taking
+	care of packages or architectures.
+
+	Issues resolved (http://bugs.buildroot.org):
+
+	#7802: host-python build hangs compiling getbuildinfo.o
+	#8206: mplayer uses host xorg development files
+	#8516: mkcubiecard.sh uses outdated sfdisk switch -D
+	#8536: Building sudo with PAM results in unusable sudo
+	#8646: check-host-rpath script returns false positives when rpath
+	       contains symlink
+	#8696: xdriver_xf86-input-mouse install header files in target
+	       directory
+	#8811: rp-pppoe - generated scripts commands use HOST pathnames,
+	       not necessarily TARGET
+	#8846: Orphaned/missing toolchain borks eclipse plugin
+	#8856: python tornado runtime wasn't met on buildroot 2016.02
+	#8901: gcc failes to build if fortran is enabled
+	#8916: LDFLAGS pass to openssh
+	#8941: "ls" of an NFSv4 share only works when pumped through strace
+	#8946: Valgrind fails to build with stack protection turned on
+	#9021: Kodi - Broken: Illegal instruction (core dumped)
+	#9096: rootfs.ubi not created
+	#9111: glibc 2.23: libmvec.so not copied
+	#9176: minnowboard : USB not mounted
+	#9196: raspberry pi 3 default build seem broken
+	#9201: Permission denied make: *** [core-dependencies] Error 126 in
+	       Buildroot-2015.08.1
+	#9216: log4cpp package build fails to build within install
+	#9221: Kodi needs "Python .py and .pyc support" otherwise it crashes when
+	       pressing buttons.
+	#9229: Firefly boot fails with: "failed to find part:boot"
+	#9256: [Config file] New device: Odroid-U2/U3
+	#9296: Buildroot Fails on applying patches
+	#9301: U-boot fails to build with default zynq_zed_defconfig configuration
+	#9316: U-boot fails to build if libssl-dev is not installed
+	#9321: Vanilla libcrypt++ v5.6.3 doesn't allow to work Nvidia Tegra's
+	       flash utility (tegrarcm)
+	#9326: Odroid-C2 build results in non-bootable image
+	#9336: Improve iconv support for external toolchain based builds
+	#9356: gdb package
+	#9366: no link rootfs.ext4 -> rootfs.ext2
+	#9371: openssl: download failes with "Only allow downloads from primary
+	       download site" + local server
+	#9381: check-host-rpath issues
+	#9386: ubinize fails with or without custom config
+
+2016.08, Released September 1st, 2016
 
 	Minor fixes.
 

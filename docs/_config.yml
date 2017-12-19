@@ -1,0 +1,29 @@
+repository: ftCommunity/ftcommunity-TXT
+gems:
+  - jekyll-github-metadata
+  - jekyll-optional-front-matter
+  - jekyll-relative-links
+  - jekyll-titles-from-headings
+
+kramdown:
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
+
+languages: [ "en", "de" ]
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+  - scope:
+      path: "de/programming/brickly"
+    values:
+      edit-repository-url: "https://github.com/EstherMi/ft-brickly-userguide"
+      edit-repository-path: "/de/brickly/"
+      translate-repository-path: "/{{language}}/brickly/"
+  - scope:
+      path: "de/programming/brickly/index.md"
+    values:
+      nav-pos: 0
