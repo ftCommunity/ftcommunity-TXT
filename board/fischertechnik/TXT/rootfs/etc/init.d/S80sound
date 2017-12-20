@@ -7,7 +7,7 @@ start() {
         printf "Starting $NAME: "
         modprobe snd-aloop pcm_substreams=1
         killall arecord
-        arecord -c1 -fS8 -r22050 -traw -D plug:asnoop | txt_snd_cat &
+        arecord -c1 -fS8 -r22050 -traw -D plug:asnoop 2>/dev/null | txt_snd_cat &
         echo "OK"
 }
 
