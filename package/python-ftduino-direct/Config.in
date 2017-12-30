@@ -1,5 +1,6 @@
 config BR2_PACKAGE_PYTHON_FTDUINO_DIRECT
 	bool "python-ftduino-direct"
+	select BR2_PACKAGE_PYTHON_SERIAL
 	help
 	  Python interface for the Till Harbaum's ftduino
 
