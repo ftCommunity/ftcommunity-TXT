@@ -1,5 +1,6 @@
 config BR2_PACKAGE_PYTHON_FTROBOPY
 	bool "python-ftrobopy"
+	select BR2_PACKAGE_PYTHON_SERIAL
 	help
 	  Python interface for the Fischertechnik ROBOTICS TXT Controller
 
