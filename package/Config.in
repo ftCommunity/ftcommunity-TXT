@@ -386,7 +386,6 @@ endmenu
 	source "package/fmtools/Config.in"
 	source "package/freescale-imx/Config.in"
 	source "package/ft_bt_remote_server/Config.in"
-	source "package/ft_txt_snd_cat/Config.in"
 	source "package/fxload/Config.in"
 	source "package/gadgetfs-test/Config.in"
 	source "package/gpm/Config.in"
