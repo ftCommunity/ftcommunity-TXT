@@ -1,4 +1,3 @@
-# v1.0.6
 #
 # Kommandos fuer ftduino.comm :
 #
@@ -33,9 +32,16 @@ import serial
 import serial.tools.list_ports
 import time
 
+FTDUINO_DIRECT_PYTHON_VERSION = "1.0.7"
+
+FTDUINO_VIRGIN_VIDPID="1c40:0537"
 FTDUINO_VIDPID="1c40:0538"
 
-__all__ = ["ftduino_scan", "ftduino_find_by_name", "ftduino"]
+__all__ = ["ftduino_scan", "ftduino_find_by_name", "ftduino", "getLibVersion"]
+
+def getLibVersion():
+    return FTDUINO_DIRECT_PYTHON_VERSION
+    
 
 def ftduino_scan():
     #   scannt nach ftduinos und gibt eine Liste zurueck, die den device-pfad und die vom ftduino zurueckgemeldete ID beinhaltet
@@ -43,6 +49,18 @@ def ftduino_scan():
     #
     devices = []
     for dev in serial.tools.list_ports.grep("vid:pid="+FTDUINO_VIDPID):
+        try:
+            o = serial.Serial(dev[0], 115200, timeout=0.1, writeTimeout = 0.1)
+            time.sleep(0.25)
+            o.flushInput()
+            o.flushOutput()
+            o.write("ftduino_id_get\n".encode("utf-8"))
+            n=o.readline().decode("utf-8")[:-2]
+            o.close()
+            devices.append([dev[0], n])
+        except:
+            devices.append([dev[0], ""])
+    for dev in serial.tools.list_ports.grep("vid:pid="+FTDUINO_VIRGIN_VIDPID):
         try:
             o = serial.Serial(dev[0], 115200, timeout=0.1, writeTimeout = 0.1)
             time.sleep(0.25)
