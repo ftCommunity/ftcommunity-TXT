@@ -32,7 +32,7 @@ import serial
 import serial.tools.list_ports
 import time
 
-FTDUINO_DIRECT_PYTHON_VERSION = "1.0.7"
+FTDUINO_DIRECT_PYTHON_VERSION = "1.0.8"
 
 FTDUINO_VIRGIN_VIDPID="1c40:0537"
 FTDUINO_VIDPID="1c40:0538"
@@ -116,7 +116,8 @@ class ftduino(object):
             self.ftduino.write(command.encode("utf-8"))
             data = self.ftduino.readline()
             if data:
-                return data.decode("utf-8")[:-2]
+                if len(data.decode("utf-8"))>2: return data.decode("utf-8")[:-2]
+                return "Fail"
             else: 
                 return "Fail"
         except:
