@@ -1,0 +1,1 @@
+KERNEL=="spidev*", RUN="/bin/sh -c 'chgrp -R root /dev/spidev*'"
