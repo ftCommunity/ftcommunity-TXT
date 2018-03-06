@@ -4,7 +4,7 @@
 # additional functionality to communicate with the app launcher and
 # the like
 
-TouchStyle_version = 1.6
+TouchStyle_version = 1.7
 
 import struct, os, platform, socket
 from PyQt4.QtCore import *
@@ -142,6 +142,7 @@ class TouchTitle(QLabel):
         self.confbut = QPushButton(self)
         self.confbut.setObjectName("confirmbut")
         self.confbut.move(8,self.height()/2-20)
+        self.confbut.setDefault(True)
         self.confbut.clicked.connect(self.parent.close)
         return self.confbut
     
