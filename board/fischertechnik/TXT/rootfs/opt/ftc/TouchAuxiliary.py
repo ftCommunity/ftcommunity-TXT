@@ -19,19 +19,6 @@ except:
     print("aux: TouchStyle_version not found!")
     TouchStyle_version=0
 
-local = os.path.dirname(os.path.realpath(__file__)) + "/auxicon/"
-
-keys_tab = [ "A-O", "P-Z", "0-9" ]
-keys_upper = [
-        ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","Aa" ],
-        ["P","Q","R","S","T","U","V","W","X","Y","Z",".",","," ","_","Aa" ],
-        ["=","!",'"',"§","$","%","&","/","(",")","*","_","'","°",">","Aa" ]
-    ]
-keys_lower = [
-        ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","Aa" ],
-        ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
-        ["0","1","2","3","4","5","6","7","8","9","+","-","#","^","<","Aa" ]
-    ]
 
 class TouchAuxMessageBox(TouchMessageBox): pass
 
@@ -688,108 +675,32 @@ class TouchAuxPicButton(QAbstractButton):
     def changePixmap(self,np:QPixmap):
        self.pixmap=np
 
-class TouchAuxKeyboard(TouchDialog):
-    def __init__(self,title,strg,parent):
-        TouchDialog.__init__(self, title, parent)
-        
-        w=self.width()
-        h=self.height()
+class TouchAuxKeyboard(TouchKeyboard):
+    def __init__(self, title, strg, parent):
+        TouchKeyboard.__init__(self, parent)
         
         self.strg=strg
-        self.confbutpressed=False
+        self.titlebar.setText(title)
+        self.line.setText(strg)
+        self.text_changed[str].connect(self.gotText)
+        self.result=strg
         
-        if TouchStyle_version >= 1.3:
-            confirmbutton = self.addConfirm()
-            confirmbutton.clicked.connect(self.on_confirmbutton)
-            self.setCancelButton()
-        
-        self.caps = True
-
-        self.layout = QVBoxLayout()
-
-        edit = QWidget()
-        edit.hbox = QHBoxLayout()
-        edit.hbox.setContentsMargins(0,0,0,0)
-
-        self.line = QLineEdit(strg)
-        self.line.setReadOnly(True)
-        self.line.setAlignment(Qt.AlignCenter)
-        edit.hbox.addWidget(self.line)
-        but = QPushButton(" ")
-        but.setObjectName("osk_erase")
-        but.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        but.clicked.connect(self.key_erase)
-        edit.hbox.addWidget(but)
-
-        edit.setLayout(edit.hbox)
-        self.layout.addWidget(edit)
-
-        self.tab = QTabWidget()
-
-        for a in range(3):
-            page = QWidget()
-            page.grid = QGridLayout()
-            page.grid.setContentsMargins(0,0,0,0)
-
-            cnt = 0
-            for i in keys_upper[a]:
-                if i == "Aa":
-                    but = QPushButton()
-                    but.setObjectName("osk_caps")
-                    but.clicked.connect(self.caps_changed)
-                else:
-                    but = QPushButton(i)
-                    but.clicked.connect(self.key_pressed)
-
-                but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-                if w<h:
-                    page.grid.addWidget(but,cnt/4,cnt%4)
-                else:
-                    page.grid.addWidget(but,cnt/8,cnt%8)
-                cnt+=1
-
-            page.setLayout(page.grid)
-            self.tab.addTab(page, keys_tab[a])
-
-        self.tab.tabBar().setExpanding(True);
-        self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding);
-        self.layout.addWidget(self.tab)
-
-        self.centralWidget.setLayout(self.layout)
-        if strg.isnumeric() or (strg[1:].isnumeric() and strg[0:1]=="-"): 
+        try:
+            dummy=int(strg)
             self.tab.setCurrentIndex(2)
-            self.caps_changed()
-
-    def key_erase(self):
-        self.line.setText(self.line.text()[:-1]) 
-
-    def key_pressed(self):
-        self.line.setText(self.line.text() + self.sender().text())
-
-        # user pressed the caps button. Exchange all button texts
-    def caps_changed(self):
-        self.caps = not self.caps
-        if self.caps:  keys = keys_upper
-        else:          keys = keys_lower
-
-        # exchange all characters
-        for i in range(self.tab.count()):
-            gw = self.tab.widget(i)
-            gl = gw.layout()
-            for j in range(gl.count()):
-                w = gl.itemAt(j).widget()
-                if keys[i][j] != "Aa":
-                    w.setText(keys[i][j]);
-    
-    def on_confirmbutton(self):
-        self.confbutpressed=True
+        except:
+            pass
+        
+    def gotText(self, string):
+        self.result=string
         
     def exec_(self):
-        TouchDialog.exec_(self)
-        if self.confbutpressed: return self.line.text()
-        else:
-            if TouchStyle_version>1.3: return self.strg 
-            else: return self.line.text()
+        TouchKeyboard.exec_(self)
+        return self.result
+    
+    def close(self):
+        TouchKeyboard.close(self)
+        
 
 if __name__ == "__main__":
     print("This is a python3 module containing stuff for ft TXT programming based on the TouchStyle UI\n")
