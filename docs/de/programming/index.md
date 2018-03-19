@@ -9,7 +9,7 @@ Mit der Community-Firmware kannst du deine Fischertechnik-Modelle je nach deinen
 
 * Als Anfänger arbeitest du am einfachsten mit der graphischen Programmierumgebung [Brickly](brickly).
 
-* Direkt auf dem TXT kannst du schnelle Modelle ziemlich einfach mit [startIDE](startide) programmieren.
+* Direkt auf dem TXT kannst du einfachere Modelle ziemlich schnell mit [startIDE](startide) programmieren.
 
 * Du kannst auch in der Programmiersprache  [Python](python) Programme schreiben, die über das Modul ftrobopy die Ein- und Ausgänge deines TXT ansteuern.
 
