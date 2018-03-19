@@ -78,7 +78,7 @@ Some optional fields are also used:
 
  * **category** is used to group apps in the launcher
  * **author** gives information about the developer of this app
- * **url** can be used to link to a web page. This will then be acccesible through the TXTs web interface.
+ * **url** can be used to link to a web page describing the app.
  * **set** optionally refers to the Fischertechnik set related to a model the app can be used for. E.g. `524328 ROBOTICS TXT Discovery Set`
  * **model** optionally refers to the english model name from the set. E.g. `Pedestrian Light`
 

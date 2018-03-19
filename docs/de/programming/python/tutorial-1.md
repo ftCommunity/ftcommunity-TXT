@@ -54,7 +54,8 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
 
  * **category** wird benutzt, um die Anwendungen zu Ordnern zusammenzufassen.
  * **author** ist der Autor.
- * **url** ist für einen Link zu einer Webseite vorgesehen, zu der man über das Webinterface gelangen kann.
+ * **url** ist für den Link zu einer Homepage der App vorgesehen.
+
 
 Speichere diese Datei als ```manifest```. Du findest ein Beispiel hier: [`manifest`](../../../media/examples/python/tutorial-1/manifest).
 
@@ -68,7 +69,7 @@ Ein Beispiel kannst du [hier](../../../en/programming/python/icon.png) finden.
 
 # Verpacken
 
-Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwending sind:
+Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwendig sind:
 
  * "Test.py", das Programm
  * "manifest", die Anwendungseigenschaften

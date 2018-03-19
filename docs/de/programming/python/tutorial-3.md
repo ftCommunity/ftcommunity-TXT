@@ -9,7 +9,7 @@ Den Quellcode für die Beispiele aus diesem Tutorial findest du in [Github](http
 
 ## Die benötigten Bibliotheken einbinden
 
-Die Community-Firmware enthält das [Modult ftrobopy](https://github.com/ftrobopy/ftrobopy), das die Anbindung von Python an die Fischertechnik-spezifischen Ein- und Ausgänge des TXT ermöglicht. Das Modul kann einfach in das Programm aus Tutorial #1 eingefügt werden: 
+Die Community-Firmware enthält das [Modul ftrobopy](https://github.com/ftrobopy/ftrobopy), das die Anbindung von Python an die Fischertechnik-spezifischen Ein- und Ausgänge des TXT ermöglicht. Das Modul kann einfach in das Programm aus Tutorial #1 eingefügt werden: 
 
 
 ```
