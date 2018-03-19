@@ -55,6 +55,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
  * **category** wird benutzt, um die Anwendungen zu Ordnern zusammenzufassen.
  * **author** ist der Autor.
  * **url** ist für den Link zu einer Homepage der App vorgesehen.
+ * **html** ist die Startdatei für das Webinterface der App, z.B index.html.
 
 
 Speichere diese Datei als ```manifest```. Du findest ein Beispiel hier: [`manifest`](../../../media/examples/python/tutorial-1/manifest).

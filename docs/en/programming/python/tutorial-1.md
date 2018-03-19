@@ -79,6 +79,7 @@ Some optional fields are also used:
  * **category** is used to group apps in the launcher
  * **author** gives information about the developer of this app
  * **url** can be used to link to a web page describing the app.
+  * **html** gives the name of the start file of the app's web interface on the TXT, e.g. index.html.
  * **set** optionally refers to the Fischertechnik set related to a model the app can be used for. E.g. `524328 ROBOTICS TXT Discovery Set`
  * **model** optionally refers to the english model name from the set. E.g. `Pedestrian Light`
 
