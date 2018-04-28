@@ -4,9 +4,10 @@
 #
 ################################################################################
 
-TI_UIM_VERSION = a75f45be2d5c74fc1dd913d08afc30f09a230aa9
-TI_UIM_SITE = git://git.ti.com/ti-bt/uim.git
-TI_UIM_LICENSE = GPLv2+
+TI_UIM_VERSION = a0236bc252e6484835ce266ae4a50b361f6a902d
+TI_UIM_SITE = $(call github,96boards,uim,$(TI_UIM_VERSION))
+TI_UIM_LICENSE = GPL-2.0+
+TI_UIM_LICENSE_FILES = uim.h
 
 define TI_UIM_BUILD_CMDS
 	$(MAKE) -C $(@D) $(TARGET_CONFIGURE_OPTS)

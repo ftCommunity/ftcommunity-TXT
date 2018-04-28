@@ -10,7 +10,7 @@ LIBPHIDGET_SITE = https://www.phidgets.com/downloads/phidget21/libraries/linux/l
 LIBPHIDGET_DEPENDENCIES = libusb
 LIBPHIDGET_CONF_OPTS = --disable-ldconfig
 LIBPHIDGET_INSTALL_STAGING = YES
-LIBPHIDGET_LICENSE = LGPLv3
+LIBPHIDGET_LICENSE = LGPL-3.0
 LIBPHIDGET_LICENSE_FILES = COPYING
 
 $(eval $(autotools-package))

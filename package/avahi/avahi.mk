@@ -4,16 +4,9 @@
 #
 ################################################################################
 
-#
-# This program is free software; you can redistribute it
-# and/or modify it under the terms of the GNU Lesser General
-# Public License as published by the Free Software Foundation
-# either version 2.1 of the License, or (at your option) any
-# later version.
-
-AVAHI_VERSION = 0.6.32
+AVAHI_VERSION = 0.7
 AVAHI_SITE = https://github.com/lathiat/avahi/releases/download/v$(AVAHI_VERSION)
-AVAHI_LICENSE = LGPLv2.1+
+AVAHI_LICENSE = LGPL-2.1+
 AVAHI_LICENSE_FILES = LICENSE
 AVAHI_INSTALL_STAGING = YES
 
@@ -84,7 +77,7 @@ AVAHI_CONF_OPTS = \
 	--disable-gtk \
 	--disable-gtk3 \
 	--disable-gdbm \
-	--disable-pygtk \
+	--disable-pygobject \
 	--disable-mono \
 	--disable-monodoc \
 	--disable-stack-protector \
@@ -97,8 +90,8 @@ AVAHI_CONF_OPTS = \
 	--with-autoipd-group=avahi
 
 AVAHI_DEPENDENCIES = \
-	$(if $(BR2_NEEDS_GETTEXT_IF_LOCALE),gettext) host-intltool \
-	host-pkgconf host-gettext
+	host-intltool host-pkgconf \
+	$(TARGET_NLS_DEPENDENCIES)
 
 AVAHI_CFLAGS = $(TARGET_CFLAGS)
 
@@ -168,7 +161,7 @@ endif
 
 AVAHI_CONF_ENV += CFLAGS="$(AVAHI_CFLAGS)"
 
-AVAHI_MAKE_OPTS += $(if $(BR2_NEEDS_GETTEXT_IF_LOCALE),LIBS=-lintl)
+AVAHI_MAKE_OPTS += LIBS=$(TARGET_NLS_LIBS)
 
 define AVAHI_USERS
 	avahi -1 avahi -1 * - - -

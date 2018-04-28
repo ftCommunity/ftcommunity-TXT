@@ -4,10 +4,10 @@
 #
 ################################################################################
 
-VLC_VERSION = 2.2.6
-VLC_SITE = http://get.videolan.org/vlc/$(VLC_VERSION)
+VLC_VERSION = 2.2.8
+VLC_SITE = https://get.videolan.org/vlc/$(VLC_VERSION)
 VLC_SOURCE = vlc-$(VLC_VERSION).tar.xz
-VLC_LICENSE = GPLv2+, LGPLv2.1+
+VLC_LICENSE = GPL-2.0+, LGPL-2.1+
 VLC_LICENSE_FILES = COPYING COPYING.LIB
 VLC_DEPENDENCIES = host-pkgconf
 VLC_AUTORECONF = YES
@@ -61,7 +61,7 @@ VLC_CONF_OPTS += \
 	--disable-mfx \
 	--disable-vdpau \
 	--disable-addonmanagermodules \
-	--enable-run-as-root \
+	--enable-run-as-root
 
 # Uses __atomic_fetch_add_4
 ifeq ($(BR2_TOOLCHAIN_HAS_LIBATOMIC),y)
@@ -281,9 +281,9 @@ else
 VLC_CONF_OPTS += --disable-theora
 endif
 
-ifeq ($(BR2_PACKAGE_LIBUPNP),y)
+ifeq ($(BR2_PACKAGE_LIBUPNP)$(BR2_PACKAGE_LIBUPNP18),y)
 VLC_CONF_OPTS += --enable-upnp
-VLC_DEPENDENCIES += libupnp
+VLC_DEPENDENCIES += $(if $(BR2_PACKAGE_LIBUPNP),libupnp,libupnp18)
 else
 VLC_CONF_OPTS += --disable-upnp
 endif
@@ -359,9 +359,9 @@ endif
 ifeq ($(BR2_PACKAGE_QT_GUI_MODULE),y)
 VLC_CONF_OPTS += --enable-qt
 VLC_CONF_ENV += \
-	ac_cv_path_MOC=$(HOST_DIR)/usr/bin/moc \
-	ac_cv_path_RCC=$(HOST_DIR)/usr/bin/rcc \
-	ac_cv_path_UIC=$(HOST_DIR)/usr/bin/uic
+	ac_cv_path_MOC=$(HOST_DIR)/bin/moc \
+	ac_cv_path_RCC=$(HOST_DIR)/bin/rcc \
+	ac_cv_path_UIC=$(HOST_DIR)/bin/uic
 VLC_DEPENDENCIES += qt
 else
 VLC_CONF_OPTS += --disable-qt

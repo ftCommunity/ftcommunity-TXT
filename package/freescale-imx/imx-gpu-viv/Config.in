@@ -4,13 +4,13 @@ comment "imx-gpu-viv needs a glibc toolchain with armhf enabled"
 
 config BR2_PACKAGE_IMX_GPU_VIV
 	bool "imx-gpu-viv"
-	select BR2_PACKAGE_HAS_LIBEGL
-	select BR2_PACKAGE_HAS_LIBGLES
-	select BR2_PACKAGE_HAS_LIBOPENVG
 	# Pre-built binaries only available for ARM EABIhf
 	depends on BR2_ARM_EABIHF
 	# Library binaries are linked against libc.so.6
 	depends on BR2_TOOLCHAIN_USES_GLIBC
+	select BR2_PACKAGE_HAS_LIBEGL
+	select BR2_PACKAGE_HAS_LIBGLES
+	select BR2_PACKAGE_HAS_LIBOPENVG
 	help
 	  Userspace libraries for Vivante GPU on i.MX6 platforms
 
@@ -60,28 +60,12 @@ config BR2_PACKAGE_PROVIDES_LIBGLES
 config BR2_PACKAGE_PROVIDES_LIBOPENVG
 	default "imx-gpu-viv"
 
-config BR2_PACKAGE_IMX_GPU_VIV_APITRACE
-	bool "install apitrace tools"
-	select BR2_PACKAGE_IMX_GPU_VIV_G2D
-	select BR2_PACKAGE_LIBPNG
-	help
-	  Copy the apitrace tool to the target. Apitrace consists
-	  of a set of tools to trace, replay and/or inspect OpenGL,
-	  OpenGL ES APIs calls
-
-	  http://apitrace.github.io/
-
 config BR2_PACKAGE_IMX_GPU_VIV_EXAMPLES
 	bool "install examples"
 	help
 	  Copy the Vivante examples to the target.
 
 	  Warning: examples take approximately 150 MB of disk space.
-
-config BR2_PACKAGE_IMX_GPU_VIV_G2D
-	bool "install G2D libraries"
-	help
-	  Copy the GPU2D libraries to the target.
 
 config BR2_PACKAGE_IMX_GPU_VIV_GMEM_INFO
 	bool "install gmem_info tool"

@@ -4,10 +4,10 @@
 #
 ################################################################################
 
-LTP_TESTSUITE_VERSION = 20170116
+LTP_TESTSUITE_VERSION = 20180118
 LTP_TESTSUITE_SOURCE = ltp-full-$(LTP_TESTSUITE_VERSION).tar.xz
 LTP_TESTSUITE_SITE = https://github.com/linux-test-project/ltp/releases/download/$(LTP_TESTSUITE_VERSION)
-LTP_TESTSUITE_LICENSE = GPLv2, GPLv2+
+LTP_TESTSUITE_LICENSE = GPL-2.0, GPL-2.0+
 LTP_TESTSUITE_LICENSE_FILES = COPYING
 
 # Do not enable Open POSIX testsuite as it doesn't cross-compile
@@ -40,6 +40,13 @@ else
 LTP_TESTSUITE_CONF_ENV += ac_cv_lib_cap_cap_compare=no
 endif
 
+# No explicit enable/disable options
+ifeq ($(BR2_PACKAGE_NUMACTL),y)
+LTP_TESTSUITE_DEPENDENCIES += numactl
+else
+LTP_TESTSUITE_CONF_ENV += have_numa_headers=no
+endif
+
 # ltp-testsuite uses <fts.h>, which isn't compatible with largefile
 # support.
 LTP_TESTSUITE_CFLAGS = $(filter-out -D_FILE_OFFSET_BITS=64,$(TARGET_CFLAGS))
@@ -58,6 +65,9 @@ LTP_TESTSUITE_CONF_ENV += \
 	LIBS="$(LTP_TESTSUITE_LIBS)" \
 	SYSROOT="$(STAGING_DIR)"
 
+# Required by patch 0002-numa-Fix-numa-v2-detection-for-cross-compilation.patch
+LTP_TESTSUITE_AUTORECONF = YES
+
 # Requires uClibc fts and bessel support, normally not enabled
 ifeq ($(BR2_TOOLCHAIN_USES_UCLIBC),y)
 define LTP_TESTSUITE_REMOVE_UNSUPPORTED
@@ -68,5 +78,12 @@ endef
 LTP_TESTSUITE_POST_PATCH_HOOKS += LTP_TESTSUITE_REMOVE_UNSUPPORTED
 endif
 
+# ldd command build system tries to build a shared library unconditionally.
+ifeq ($(BR2_STATIC_LIBS),y)
+define LTP_TESTSUITE_REMOVE_LDD
+	rm -rf $(@D)/testcases/commands/ldd
+endef
+LTP_TESTSUITE_POST_PATCH_HOOKS += LTP_TESTSUITE_REMOVE_LDD
+endif
 
 $(eval $(autotools-package))

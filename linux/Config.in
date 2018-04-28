@@ -26,7 +26,26 @@ choice
 	prompt "Kernel version"
 
 config BR2_LINUX_KERNEL_LATEST_VERSION
-	bool "Latest version (4.9.13)"
+	bool "Latest version (4.15)"
+
+config BR2_LINUX_KERNEL_LATEST_CIP_VERSION
+	bool "Latest CIP SLTS version (v4.4.112-cip18)"
+	help
+	  CIP launched in the spring of 2016 to address the needs of
+	  organizations in industries such as power generation and
+	  distribution, water, oil and gas, transportation, building
+	  automation and more for reliable and secure Linux-based
+	  embedded systems that can be sustained over a period of
+	  10 to as many as 60 years.
+	  The project's goal is to provide an open source base layer
+	  of industrial-grade software that permits the use and
+	  implementation of software building blocks that meet
+	  these requirements.
+
+	  The CIP community plans to maintain 4.4 for security and
+	  bug fixes for more than 10 years.
+
+	  https://www.cip-project.org
 
 config BR2_LINUX_KERNEL_CUSTOM_VERSION
 	bool "Custom version"
@@ -97,7 +116,8 @@ endif
 
 config BR2_LINUX_KERNEL_VERSION
 	string
-	default "4.9.13" if BR2_LINUX_KERNEL_LATEST_VERSION
+	default "4.15.16" if BR2_LINUX_KERNEL_LATEST_VERSION
+	default "v4.4.112-cip18" if BR2_LINUX_KERNEL_LATEST_CIP_VERSION
 	default BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE \
 		if BR2_LINUX_KERNEL_CUSTOM_VERSION
 	default "custom" if BR2_LINUX_KERNEL_CUSTOM_TARBALL
@@ -167,9 +187,6 @@ config BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES
 # Binary format
 #
 
-config BR2_LINUX_KERNEL_UBOOT_IMAGE
-	bool
-
 choice
 	prompt "Kernel binary format"
 	default BR2_LINUX_KERNEL_ZIMAGE if BR2_arm || BR2_armeb
@@ -179,15 +196,15 @@ config BR2_LINUX_KERNEL_UIMAGE
 	depends on BR2_arc || BR2_arm || BR2_armeb || BR2_bfin || \
 		   BR2_powerpc || BR2_powerpc64 || BR2_powerpc64le || \
 		   BR2_sh || BR2_mips || BR2_mipsel || \
-		   BR2_mips64 || BR2_mips64el
-	select BR2_LINUX_KERNEL_UBOOT_IMAGE
+		   BR2_mips64 || BR2_mips64el || BR2_xtensa
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS
 
 config BR2_LINUX_KERNEL_APPENDED_UIMAGE
 	bool "uImage with appended DT"
 	depends on BR2_arm || BR2_armeb
 	select BR2_LINUX_KERNEL_DTS_SUPPORT
 	select BR2_LINUX_KERNEL_APPENDED_DTB
-	select BR2_LINUX_KERNEL_UBOOT_IMAGE
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS
 
 config BR2_LINUX_KERNEL_BZIMAGE
 	bool "bzImage"
@@ -212,14 +229,14 @@ config BR2_LINUX_KERNEL_APPENDED_ZIMAGE
 config BR2_LINUX_KERNEL_CUIMAGE
 	bool "cuImage"
 	depends on BR2_powerpc
-	select BR2_LINUX_KERNEL_UBOOT_IMAGE
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS
 	select BR2_LINUX_KERNEL_DTS_SUPPORT
 	select BR2_LINUX_KERNEL_DTB_IS_SELF_BUILT
 
 config BR2_LINUX_KERNEL_SIMPLEIMAGE
 	bool "simpleImage"
 	depends on BR2_microblaze
-	select BR2_LINUX_KERNEL_UBOOT_IMAGE
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS
 	select BR2_LINUX_KERNEL_DTS_SUPPORT
 	select BR2_LINUX_KERNEL_DTB_IS_SELF_BUILT
 
@@ -230,7 +247,7 @@ config BR2_LINUX_KERNEL_IMAGE
 config BR2_LINUX_KERNEL_LINUX_BIN
 	bool "linux.bin"
 	depends on BR2_microblaze
-	select BR2_LINUX_KERNEL_UBOOT_IMAGE
+	select BR2_PACKAGE_HOST_UBOOT_TOOLS
 
 config BR2_LINUX_KERNEL_VMLINUX_BIN
 	bool "vmlinux.bin"
@@ -267,7 +284,7 @@ endchoice
 choice
 	prompt "Kernel compression format"
 	help
-	  This selection will just ensure that the correct host tools are build.
+	  This selection will just ensure that the correct host tools are built.
 	  The actual compression for the kernel should be selected in the
 	  kernel configuration menu.
 
@@ -346,40 +363,19 @@ config BR2_LINUX_KERNEL_DTB_IS_SELF_BUILT
 config BR2_LINUX_KERNEL_APPENDED_DTB
 	bool
 
-choice
-	prompt "Device tree source"
-	default BR2_LINUX_KERNEL_USE_INTREE_DTS
-
-config BR2_LINUX_KERNEL_USE_INTREE_DTS
-	bool "Use a device tree present in the kernel."
-	help
-	  Use a device tree source distributed with
-	  the kernel sources. The dts files are located
-	  in the arch/<arch>/boot/dts folder.
-
-config BR2_LINUX_KERNEL_USE_CUSTOM_DTS
-	bool "Use a custom device tree file"
-	help
-	  Use a custom device tree file, i.e, a device
-	  tree file that does not belong to the kernel
-	  source tree.
-endchoice
-
 config BR2_LINUX_KERNEL_INTREE_DTS_NAME
-	string "Device Tree Source file names"
-	depends on BR2_LINUX_KERNEL_USE_INTREE_DTS
+	string "In-tree Device Tree Source file names"
 	help
-	  Name of the device tree source file, without
+	  Name of in-tree device tree source file, without
 	  the trailing .dts. You can provide a list of
 	  dts files to build, separated by spaces.
 
 config BR2_LINUX_KERNEL_CUSTOM_DTS_PATH
-	string "Device Tree Source file paths"
-	depends on BR2_LINUX_KERNEL_USE_CUSTOM_DTS
+	string "Out-of-tree Device Tree Source file paths"
 	help
-	  Path to the device tree source files. You can
-	  provide a list of dts paths to copy and build,
-	  separated by spaces.
+	  Path to to out-of-tree device tree source files.
+	  You can provide a list of dts paths to copy and
+	  build, separated by spaces.
 
 endif
 
@@ -394,6 +390,32 @@ config BR2_LINUX_KERNEL_INSTALL_TARGET
 	  Note that this option also installs the Device Tree Blobs to
 	  /boot if DTBs have been generated by the kernel build
 	  process.
+
+config BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL
+	bool "Needs host OpenSSL"
+	help
+	  Some Linux kernel configuration options (such as
+	  CONFIG_SYSTEM_TRUSTED_KEYRING) require building a host
+	  program called extract-cert, which itself needs
+	  OpenSSL. Enabling this option will ensure host-openssl gets
+	  built before the Linux kernel.
+
+	  Enable this option if you get a Linux kernel build failure
+	  such as "scripts/extract-cert.c:21:25: fatal error:
+	  openssl/bio.h: No such file or directory".
+
+config BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF
+	bool "Needs host libelf"
+	help
+	  Some Linux kernel configuration options (such as
+	  CONFIG_UNWINDER_ORC) require building a host program that
+	  needs libelf. Enabling this option will ensure host-elfutils
+	  (which provides libelf) gets built before the Linux kernel.
+
+	  Enable this option if you get a Linux kernel build failure
+	  such as "Cannot generate ORC metadata for
+	  CONFIG_UNWINDER_ORC=y, please install libelf-dev,
+	  libelf-devel or elfutils-libelf-devel".
 
 # Linux extensions
 source "linux/Config.ext.in"

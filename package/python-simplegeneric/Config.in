@@ -2,6 +2,6 @@ config BR2_PACKAGE_PYTHON_SIMPLEGENERIC
 	bool "python-simplegeneric"
 	help
 	  Simple generic functions (similar to Python's own len(),
-	  pickle.dump(), etc.).
+	  pickle.dump(), etc.)
 
-	  http://cheeseshop.python.org/pypi/simplegeneric
+	  https://pypi.python.org/pypi/simplegeneric

@@ -1,9 +1,10 @@
 config BR2_PACKAGE_PYTHON_TRAITLETS
 	bool "python-traitlets"
-	select BR2_PACKAGE_PYTHON_IPYTHON_GENUTILS # runtime
-	select BR2_PACKAGE_PYTHON_SIX # runtime
-	select BR2_PACKAGE_PYTHON_DECORATOR # runtime
+	select BR2_PACKAGE_PYTHON_ENUM34 if BR2_PACKAGE_PYTHON # runtime
+	select BR2_PACKAGE_PYTHON_SIX  # runtime
+	select BR2_PACKAGE_PYTHON_IPYTHON_GENUTILS  # runtime
+	select BR2_PACKAGE_PYTHON_DECORATOR  # runtime
 	help
-	  Traitlets Python config system.
+	  A configuration system for Python applications.
 
-	  http://ipython.org
+	  https://pypi.python.org/pypi/traitlets

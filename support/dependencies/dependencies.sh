@@ -29,6 +29,18 @@ if test -n "$LD_LIBRARY_PATH" ; then
 	fi
 fi;
 
+# PATH should not contain a newline, otherwise it fails in spectacular ways
+# as soon as PATH is referenced in a package rule
+case "${PATH}" in
+(*"
+"*)	printf "\n"
+	# Break the '\n' sequence, or a \n is printed (which is not what we want).
+	printf "Your PATH contains a newline (%sn) character.\n" "\\"
+	printf "This doesn't work. Fix you PATH.\n"
+	exit 1
+	;;
+esac
+
 # sanity check for CWD in PATH. Having the current working directory
 # in the PATH makes the toolchain build process break.
 # try not to rely on egrep..
@@ -188,7 +200,7 @@ if grep ^BR2_NEEDS_HOST_UTF8_LOCALE=y $BR2_CONFIG > /dev/null; then
 		echo "You need locale support on your build machine to build a toolchain supporting locales"
 		exit 1 ;
 	fi
-	if ! locale -a | grep -q -i utf8$ ; then
+	if ! locale -a | grep -q -i -E 'utf-?8$' ; then
 		echo
 		echo "You need at least one UTF8 locale to build a toolchain supporting locales"
 		exit 1 ;
@@ -237,6 +249,14 @@ if grep -q ^BR2_HOSTARCH_NEEDS_IA32_COMPILER=y $BR2_CONFIG ; then
 		echo "For other distributions, refer to their documentation."
 		exit 1
 	fi
+
+	if ! echo "int main(void) {}" | g++ -m32 -x c++ - -o /dev/null 2>/dev/null; then
+		echo
+		echo "Your Buildroot configuration needs a compiler capable of building 32 bits binaries."
+		echo "If you're running a Debian/Ubuntu distribution, install the g++-multilib package."
+		echo "For other distributions, refer to their documentation."
+		exit 1
+	fi
 fi
 
 # Check that the Perl installation is complete enough for Buildroot.
@@ -266,5 +286,10 @@ if [ -n "$missing_perl_modules" ] ; then
 		printf "\t $pm\n"
 	done
 	echo
+	exit 1
+fi
+
+if ! python -c "import argparse" > /dev/null 2>&1 ; then
+	echo "Your Python installation is not complete enough: argparse module is missing"
 	exit 1
 fi

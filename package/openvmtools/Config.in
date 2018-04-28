@@ -14,10 +14,11 @@ config BR2_PACKAGE_OPENVMTOOLS
 
 	  http://open-vm-tools.sourceforge.net/
 
-	  ICU locales, Xerces, and X11 tools are currently not supported.
+	  ICU locales, Xerces, and X11 tools are currently not
+	  supported.
 
-	  NOTE: Support for vmblock-fuse will be enabled in openvmtools if the
-		libfuse package is selected.
+	  NOTE: Support for vmblock-fuse will be enabled in
+	  openvmtools if the libfuse package is selected.
 
 if BR2_PACKAGE_OPENVMTOOLS
 
@@ -33,11 +34,11 @@ comment "procps support needs BR2_PACKAGE_BUSYBOX_SHOW_OTHERS"
 
 config BR2_PACKAGE_OPENVMTOOLS_PAM
 	bool "PAM support"
-	select BR2_PACKAGE_LINUX_PAM
 	# linux-pam needs locale and wchar, but we already have this
 	# dependency on the main symbol, above.
 	depends on !BR2_STATIC_LIBS
 	depends on !BR2_TOOLCHAIN_USES_MUSL # linux-pam
+	select BR2_PACKAGE_LINUX_PAM
 	help
 	  Support for PAM in openvmtools
 

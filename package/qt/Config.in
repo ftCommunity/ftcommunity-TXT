@@ -3,7 +3,7 @@ comment "qt needs a toolchain w/ C++, threads"
 	depends on !BR2_INSTALL_LIBSTDCPP || !BR2_TOOLCHAIN_HAS_THREADS
 
 menuconfig BR2_PACKAGE_QT
-	bool "Qt"
+	bool "Qt (obsolete)"
 	depends on BR2_USE_MMU # fork
 	depends on BR2_INSTALL_LIBSTDCPP
 	depends on BR2_TOOLCHAIN_HAS_THREADS
@@ -23,8 +23,8 @@ choice
 config BR2_PACKAGE_QT_EMBEDDED
 	bool "Qt embedded"
 	help
-	  The embedded Qt installation targets embedded systems without X.org.
-	  Provides backends for framebuffer.
+	  The embedded Qt installation targets embedded systems
+	  without X.org. Provides backends for framebuffer.
 	  If unsure, say Y.
 
 comment "Qt standard (X11) not available (need X.org)"
@@ -33,7 +33,6 @@ comment "Qt standard (X11) not available (need X.org)"
 config BR2_PACKAGE_QT_X11
 	bool "Qt standard (X11)"
 	depends on BR2_PACKAGE_XORG7
-	depends on !BR2_TOOLCHAIN_HAS_BINUTILS_BUG_19405 # Qt GUI module
 	select BR2_PACKAGE_FONTCONFIG
 	select BR2_PACKAGE_XLIB_LIBXI
 	select BR2_PACKAGE_XLIB_LIBX11
@@ -45,8 +44,8 @@ config BR2_PACKAGE_QT_X11
 	select BR2_PACKAGE_QT_SYSTEMFREETYPE
 	select BR2_PACKAGE_QT_GUI_MODULE
 	help
-	  The standard Qt installation provides X.org backend. If you don't want to
-	  use X.org, say N.
+	  The standard Qt installation provides X.org backend. If you
+	  don't want to use X.org, say N.
 
 endchoice
 
@@ -57,7 +56,6 @@ config BR2_PACKAGE_QT_DEBUG
 
 config BR2_PACKAGE_QT_DEMOS
 	bool "Compile and install Qt demos (with code)"
-	depends on !BR2_TOOLCHAIN_HAS_BINUTILS_BUG_19405 # Qt GUI module
 	select BR2_PACKAGE_QT_GUI_MODULE
 	help
 	  If unsure, say N.
@@ -71,7 +69,6 @@ config BR2_PACKAGE_QT_TRANSLATION_FILES
 
 config BR2_PACKAGE_QT_EXAMPLES
 	bool "Compile and install Qt examples (with code)"
-	depends on !BR2_TOOLCHAIN_HAS_BINUTILS_BUG_19405 # Qt GUI module
 	select BR2_PACKAGE_QT_GUI_MODULE
 	help
 	  If unsure, say N.
@@ -86,29 +83,19 @@ config BR2_PACKAGE_QT_SHARED
 	depends on !BR2_STATIC_LIBS
 	help
 	  Create and use shared Qt libraries.
-	  If you have multiple programs that depend on Qt or intend to use
-	  plugins, say Y.
+	  If you have multiple programs that depend on Qt or intend to
+	  use plugins, say Y.
 
 config BR2_PACKAGE_QT_STATIC
 	bool "Static Library"
 	help
 	  Create and use static Qt libraries.
-	  If you don't have multiple programs on the target that depends on
-	  Qt, then this will save you quite some of storage space.
+	  If you don't have multiple programs on the target that
+	  depends on Qt, then this will save you quite some of storage
+	  space.
 	  If unsure, say Y.
 
 endchoice
-
-config BR2_PACKAGE_QT_LICENSE_APPROVED
-	bool "Approve free license"
-	help
-	  Select this if you approve one of the available free licenses for the
-	  Qt4 library.
-	  By doing this you will not be asked while the library is compiled.
-	  Please read and understand the license terms before approving this.
-
-	  LGPL v2.1: http://doc.trolltech.com/4.5/lgpl.html
-	  GPL  v3.0: http://doc.trolltech.com/4.5/gpl.html
 
 config BR2_PACKAGE_QT_CONFIG_FILE
 	string "Config file"
@@ -128,21 +115,17 @@ config BR2_PACKAGE_QT_QT3SUPPORT
 	depends on BR2_PACKAGE_QT_GUI_MODULE
 	select BR2_PACKAGE_QT_SQL_MODULE
 	help
-	  Turns on support for older Qt3. This will create an additional
-	  library with proxy code and increase the space required on target.
-	  If unsure say n.
+	  Turns on support for older Qt3. This will create an
+	  additional library with proxy code and increase the space
+	  required on target.  If unsure say n.
 
 config BR2_PACKAGE_QT_GUI_MODULE
 	bool "Gui Module"
-	depends on !BR2_TOOLCHAIN_HAS_BINUTILS_BUG_19405 # nios2 Binutils 2.25.1 bug
-	select BR2_PACKAGE_QT_NETWORK
 	default y
+	select BR2_PACKAGE_QT_NETWORK
 	help
-	  Turns on support for Gui applications. If your board doesn't have
-	  video output, or you don't require Qt GUI, say n.
-
-comment "Qt Gui Module needs a toolchain not affected by Binutils bug 19405"
-	depends on BR2_TOOLCHAIN_HAS_BINUTILS_BUG_19405
+	  Turns on support for Gui applications. If your board doesn't
+	  have video output, or you don't require Qt GUI, say n.
 
 if BR2_PACKAGE_QT_GUI_MODULE
 
@@ -184,6 +167,14 @@ config BR2_PACKAGE_QT_PIXEL_DEPTH_32
 endmenu
 
 menu "Fonts"
+
+config BR2_PACKAGE_QT_FONT_TRUETYPE
+	bool "dejavu/vera"
+	default y
+	depends on BR2_PACKAGE_QT_QTFREETYPE || BR2_PACKAGE_QT_SYSTEMFREETYPE
+
+comment "dejavu/vera fonts need freetype support"
+	depends on !BR2_PACKAGE_QT_QTFREETYPE && !BR2_PACKAGE_QT_SYSTEMFREETYPE
 
 config BR2_PACKAGE_QT_FONT_MICRO
 	bool "micro"
@@ -258,8 +249,8 @@ config BR2_PACKAGE_QT_NOJPEG
 	  Disable JPEG support
 
 config BR2_PACKAGE_QT_SYSTEMJPEG
-	select BR2_PACKAGE_JPEG
 	bool "System libjpeg"
+	select BR2_PACKAGE_JPEG
 	help
 	  Link against system libjpeg
 
@@ -338,9 +329,9 @@ endif
 
 config BR2_PACKAGE_QT_PHONON
 	bool "Phonon Module"
+	default y
 	depends on BR2_PACKAGE_GSTREAMER
 	select BR2_PACKAGE_GST_PLUGINS_BASE
-	default y
 	help
 	  Build the Phonon module. Support for different audio/video
 	  formats can be configured at the GStreamer package.
@@ -358,9 +349,9 @@ config BR2_PACKAGE_QT_PHONON_BACKEND
 
 config BR2_PACKAGE_QT_OPENGL
 	bool "OpenGL support"
+	default y
 	depends on (BR2_PACKAGE_HAS_LIBGL && BR2_PACKAGE_QT_X11) || \
 		   (BR2_PACKAGE_HAS_LIBEGL && BR2_PACKAGE_HAS_LIBGLES)
-	default y
 	help
 	  This option enables OpenGL support.
 
@@ -396,9 +387,9 @@ endif
 
 config BR2_PACKAGE_QT_DBUS
 	bool "DBus Module"
-	select BR2_PACKAGE_DBUS
 	depends on BR2_TOOLCHAIN_HAS_THREADS # dbus
 	depends on BR2_USE_MMU # dbus
+	select BR2_PACKAGE_DBUS
 	help
 	  Build the Qt DBus module.
 
@@ -428,8 +419,8 @@ config BR2_PACKAGE_QT_MULTIMEDIA
 config BR2_PACKAGE_QT_AUDIO_BACKEND
 	bool "QtMultimedia Audio backend"
 	depends on BR2_PACKAGE_QT_MULTIMEDIA
-	select BR2_PACKAGE_ALSA_LIB
 	depends on BR2_TOOLCHAIN_HAS_THREADS # alsa-lib
+	select BR2_PACKAGE_ALSA_LIB
 	help
 	  Build the ALSA audio backend into QtMultimedia
 
@@ -449,17 +440,14 @@ config BR2_PACKAGE_QT_NETWORK
 
 config BR2_PACKAGE_QT_ARCH_SUPPORTS_WEBKIT
 	bool
-	depends on BR2_TOOLCHAIN_HAS_SYNC_4
 	# see src/3rdparty/webkit/Source/JavaScriptCore/wtf/Platform.h
 	# see http://lists.busybox.net/pipermail/buildroot/2014-November/112605.html
 	default y if BR2_arc || BR2_arm || BR2_armeb || BR2_i386 || BR2_microblazeel || \
 		BR2_microblazebe || BR2_mips || BR2_mipsel || \
 		(BR2_mips64 || BR2_mips64el) && !BR2_MIPS_NABI32 || BR2_powerpc || \
-		BR2_powerpc64 || BR2_powerpc64le || BR2_x86_64
-	# The CodeSourcery SuperH toolchain fails to build Webkit,
-	# with an assertion failure in binutils.
-	default y if (BR2_sh4 || BR2_sh4eb || BR2_sh4a || BR2_sh4aeb) && \
-		!BR2_TOOLCHAIN_EXTERNAL_CODESOURCERY_SH
+		BR2_powerpc64 || BR2_powerpc64le || BR2_x86_64 || \
+		BR2_sh4 || BR2_sh4eb || BR2_sh4a || BR2_sh4aeb
+	depends on BR2_TOOLCHAIN_HAS_SYNC_4
 
 config BR2_PACKAGE_QT_WEBKIT
 	bool "WebKit Module"
@@ -505,19 +493,19 @@ config BR2_PACKAGE_QT_OPENSSL
 
 config BR2_PACKAGE_QT_ARCH_SUPPORTS_SCRIPT
 	bool
-	depends on BR2_TOOLCHAIN_HAS_SYNC_4
 	# see http://lists.busybox.net/pipermail/buildroot/2014-November/112605.html
 	default y if BR2_arc || BR2_arm || BR2_armeb || BR2_aarch64 || BR2_i386 || \
 		BR2_microblazeel || BR2_microblazebe || BR2_mips || BR2_mipsel || \
 		BR2_mips64 || BR2_mips64el || BR2_nios2 || BR2_powerpc || \
 		BR2_powerpc64 || BR2_powerpc64le || BR2_sh4 || BR2_sh4eb || \
 		BR2_sh4a || BR2_sh4aeb || BR2_x86_64
+	depends on BR2_TOOLCHAIN_HAS_SYNC_4
 
 config BR2_PACKAGE_QT_SCRIPT
 	bool "Script Module"
+	default y
 	depends on BR2_PACKAGE_QT_ARCH_SUPPORTS_SCRIPT
 	depends on BR2_TOOLCHAIN_HAS_THREADS_NPTL # needs pthread_getattr_np()
-	default y
 	help
 	  Build the Qt Script module.
 	  if unsure, say y.

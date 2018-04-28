@@ -1,4 +1,3 @@
-# From https://ssl.icu-project.org/files/icu4c/57.1/icu4c-src-58_2.md5
-md5	fac212b32b7ec7ab007a12dff1f3aea1	icu4c-58_2-src.tgz
-# Calculated based on the hash above
-sha256	2b0a4410153a9b20de0e20c7d8b66049a72aef244b53683d0d7521371683da0c	icu4c-58_2-src.tgz
+# From http://download.icu-project.org/files/icu4c/60.1/SHASUM512.txt
+sha512 a6798f70add1b3bac2197a49e09a0bb636279af7019ce572f63a30ab713e09657ee9d9b20aac7ea806fbb84667ca2eca981411e5053b47c3c705aa496a669233  icu4c-60_1-src.tgz
+sha256 24c771ce37201a3ab604852e47d10d21595d0493269dd6c8a5e567e998e18c00  LICENSE
