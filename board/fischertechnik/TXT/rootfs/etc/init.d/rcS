@@ -7,7 +7,7 @@ echo 0 > /proc/sys/kernel/randomize_va_space
 echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
 
 # load ftc splash image. Use FT colors for progress bar
-psplash -n -f /etc/ftc-logo.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
+psplash -n --filename /etc/ftc-logo.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
 
 # load locale if present
 if [ -r /etc/locale ]; then

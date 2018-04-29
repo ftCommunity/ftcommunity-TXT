@@ -1,16 +1,48 @@
---- psplash.orig/psplash.c	2014-10-31 16:24:47.000000000 +0100
-+++ psplash-14c8f7b705de944beb4de3f296506d80871e410f/psplash.c	2016-03-02 11:42:21.456995767 +0100
-@@ -25,6 +25,9 @@
+--- psplash.orig/psplash.c	2016-06-05 23:14:59.000000000 +0200
++++ psplash-5b3c1cc28f5abdc2c33830150b48b278cc4f7bca/psplash.c	2018-04-29 15:17:44.726214920 +0200
+@@ -25,6 +25,11 @@
  #include "psplash-bar-img.h"
  #include "radeon-font.h"
  
 +int YPos = -1;
 +unsigned long BarCol=0xFFFFFFFF;
++unsigned long BarBkCol=0xFFFFFFFF;
++unsigned long BkCol=0xFFFFFFFF;
 +
  #define SPLIT_LINE_POS(fb)                                  \
  	(  (fb)->height                                     \
  	 - ((  PSPLASH_IMG_SPLIT_DENOMINATOR                \
-@@ -73,7 +76,11 @@
+@@ -51,13 +56,28 @@
+ 
+   /* Clear */
+ 
+-  psplash_fb_draw_rect (fb, 
++  if(BkCol == 0xFFFFFFFF)
++   psplash_fb_draw_rect (fb, 
+ 			0, 
+ 			SPLIT_LINE_POS(fb) - h, 
+ 			fb->width,
+ 			h,
+ 			PSPLASH_BACKGROUND_COLOR);
++  else {
++            uint8 r,g,b;
++            
++            b = (uint8)(BkCol & 0x000000FF);
++            g = (uint8)((BkCol >> 8) & 0x000000FF);
++            r = (uint8)((BkCol >> 16) & 0x000000FF);
+ 
++   psplash_fb_draw_rect (fb, 
++			0, 
++			SPLIT_LINE_POS(fb) - h, 
++			fb->width,
++			h,
++			r, g, b);
++  }  
++ 
+   psplash_fb_draw_text (fb,
+ 			(fb->width-w)/2, 
+ 			SPLIT_LINE_POS(fb) - h,
+@@ -73,28 +93,84 @@
  
    /* 4 pix border */
    x      = ((fb->width  - BAR_IMG_WIDTH)/2) + 4 ;
@@ -23,11 +55,27 @@
    width  = BAR_IMG_WIDTH - 8; 
    height = BAR_IMG_HEIGHT - 8;
  
-@@ -83,8 +90,21 @@
-       psplash_fb_draw_rect (fb, x + barwidth, y, 
+   if (value > 0)
+     {
+       barwidth = (CLAMP(value,0,100) * width) / 100;
+-      psplash_fb_draw_rect (fb, x + barwidth, y, 
++      if(BarBkCol == 0xFFFFFFFF)
++       psplash_fb_draw_rect (fb, x + barwidth, y, 
      			width - barwidth, height,
  			PSPLASH_BAR_BACKGROUND_COLOR);
 -      psplash_fb_draw_rect (fb, x, y, barwidth,
++      else {
++            uint8 r,g,b;
++            
++            b = (uint8)(BarBkCol & 0x000000FF);
++            g = (uint8)((BarBkCol >> 8) & 0x000000FF);
++            r = (uint8)((BarBkCol >> 16) & 0x000000FF);
++       psplash_fb_draw_rect (fb, x + barwidth, y, 
++    			width - barwidth, height,
++			r, g, b);
++      }
++      
++      			
 +			
 +      if(BarCol == 0xFFFFFFFF)			
 +       psplash_fb_draw_rect (fb, x, y, barwidth,
@@ -35,9 +83,9 @@
 +       else {
 +            uint8 r,g,b;
 +            
-+            b = BarCol & 0x000000FF;
-+            g = (BarCol >> 8) & 0x000000FF;
-+            r = (BarCol >> 16) & 0x000000FF;
++            b = (uint8)(BarCol & 0x000000FF);
++            g = (uint8)((BarCol >> 8) & 0x000000FF);
++            r = (uint8)((BarCol >> 16) & 0x000000FF);
 +       psplash_fb_draw_rect (fb, x, y, barwidth,
 +			    height, r, g, b);
 +            
@@ -46,60 +94,103 @@
      }
    else
      {
-@@ -207,11 +227,16 @@
- int 
- main (int argc, char** argv) 
- {
-+  char 	FileName[250];
-+  
-   char      *tmpdir;
-   int        pipe_fd, i = 0, angle = 0, ret = 0;
+       barwidth = (CLAMP(-value,0,100) * width) / 100;
+-      psplash_fb_draw_rect (fb, x, y, 
++
++
++      if(BarBkCol == 0xFFFFFFFF)
++       psplash_fb_draw_rect (fb, x, y, 
+     			width - barwidth, height,
+ 			PSPLASH_BAR_BACKGROUND_COLOR);
+-      psplash_fb_draw_rect (fb, x + width - barwidth,
++      else {
++            uint8 r,g,b;
++            
++            b = (uint8)(BarBkCol & 0x000000FF);
++            g = (uint8)((BarBkCol >> 8) & 0x000000FF);
++            r = (uint8)((BarBkCol >> 16) & 0x000000FF);
++       psplash_fb_draw_rect (fb, x, y, 
++    			width - barwidth, height,
++			r, g, b);
++      }
++
++
++      if(BarCol == 0xFFFFFFFF)
++       psplash_fb_draw_rect (fb, x + width - barwidth,
+ 			    y, barwidth, height,
+ 			    PSPLASH_BAR_COLOR);
++      else {
++            uint8 r,g,b;
++            
++            b = (uint8)(BarCol & 0x000000FF);
++            g = (uint8)((BarCol >> 8) & 0x000000FF);
++            r = (uint8)((BarCol >> 16) & 0x000000FF);
++       psplash_fb_draw_rect (fb, x + width - barwidth,
++			    y, barwidth, height,
++			    r, g, b);
++      }			    
+     }
+ 
+   DBG("value: %i, width: %i, barwidth :%i\n", value, 
+@@ -209,6 +285,9 @@
    PSplashFB *fb;
    bool       disable_console_switch = FALSE;
-   
-+  
+ 
++  char 	  FileName[250];
 +  memset(FileName, 0, sizeof(FileName));
-+  
++
    signal(SIGHUP, psplash_exit);
    signal(SIGINT, psplash_exit);
    signal(SIGQUIT, psplash_exit);
-@@ -230,10 +255,33 @@
- 	  angle = atoi(argv[i]);
- 	  continue;
- 	}
-+      if (!strcmp(argv[i],"-y") || !strcmp(argv[i],"--YPos"))
-+        {
-+	  if (++i >= argc) goto fail;
-+	  YPos = atoi(argv[i]);
-+	  continue;
-+	}
+@@ -233,10 +312,46 @@
+         fbdev_id = atoi(argv[i]);
+         continue;
+       }
++    if (!strcmp(argv[i],"-y") || !strcmp(argv[i],"--YPos"))
++      {
++        if (++i >= argc) goto fail;
++        YPos = atoi(argv[i]);
++        continue;
++      }
 +
-+      if (!strcmp(argv[i],"--BarCol"))
-+        {
-+	  if (++i >= argc) goto fail;
-+	  sscanf(argv[i],"%X", &BarCol);
-+	  continue;
-+	}
++    if (!strcmp(argv[i],"--BarCol"))
++      {
++        if (++i >= argc) goto fail;
++        sscanf(argv[i],"%lX", &BarCol);
++        continue;
++      }
++
++    if (!strcmp(argv[i],"--BarBkCol"))
++      {
++ 	    if (++i >= argc) goto fail;
++ 	    sscanf(argv[i],"%lX", &BarBkCol);
++ 	    continue;
++ 	  }
++
++    if (!strcmp(argv[i],"--BkCol"))
++      {
++        if (++i >= argc) goto fail;
++        sscanf(argv[i],"%lX", &BkCol);
++ 	    continue;
++ 	  }
 +      
-+      if (!strcmp(argv[i],"-f") || !strcmp(argv[i],"--filename"))
-+        {
-+	  if (++i >= argc) goto fail;
-+	  sprintf(FileName, argv[i]);
-+	  angle = atoi(argv[i]);
-+	  continue;
-+	}
-       
++    if (!strcmp(argv[i],"--filename"))
++      {
++        if (++i >= argc) goto fail;
++        sprintf(FileName, argv[i]);
++        angle = atoi(argv[i]);
++        continue;
++      }
+ 
      fail:
        fprintf(stderr, 
--	      "Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>]\n", 
-+	      "Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>] [-f|--filename] [-y|--YPos]\n"
-+	      "\t\t [--BarCol]\n"
-+	      , 
- 	      argv[0]);
+               "Usage: %s [-n|--no-console-switch][-a|--angle <0|90|180|270>][-f|--fbdev <0..9>]\n", 
++              "\t\t [-y|--YPos <pos>][--filename <filename>][--BarCol <col>][--BarBkCol <col>][--BkCol <col>]\n",
+               argv[0]);
        exit(-1);
-     }
-@@ -271,11 +319,12 @@
    }
+@@ -275,11 +390,12 @@
+     }
  
    /* Clear the background with #ecece1 */
 -  psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
@@ -114,7 +205,7 @@
  			 (fb->width  - POKY_IMG_WIDTH)/2, 
  #if PSPLASH_IMG_FULLSCREEN
  			 (fb->height - POKY_IMG_HEIGHT)/2,
-@@ -288,11 +337,17 @@
+@@ -292,21 +408,29 @@
  			 POKY_IMG_BYTES_PER_PIXEL,
  			 POKY_IMG_ROWSTRIDE,
  			 POKY_IMG_RLE_PIXEL_DATA);
@@ -126,14 +217,19 @@
 +  }
  
    /* Draw progress bar border */
-   psplash_fb_draw_image (fb, 
+-  psplash_fb_draw_image (fb, 
++  if ( BkCol == 0xFFFFFFFF)
++   psplash_fb_draw_image (fb, 
  			 (fb->width  - BAR_IMG_WIDTH)/2, 
 -			 SPLIT_LINE_POS(fb),
 +			 (YPos < 0)?SPLIT_LINE_POS(fb):YPos, 
  			 BAR_IMG_WIDTH,
  			 BAR_IMG_HEIGHT,
  			 BAR_IMG_BYTES_PER_PIXEL,
-@@ -302,7 +357,7 @@
+ 			 BAR_IMG_ROWSTRIDE,
+ 			 BAR_IMG_RLE_PIXEL_DATA);
+ 
++ 
    psplash_draw_progress (fb, 0);
  
  #ifdef PSPLASH_STARTUP_MSG

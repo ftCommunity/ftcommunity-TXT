@@ -29,11 +29,11 @@ umount /newroot
 
 # Hide cursor and show splash screen
 echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
-psplash -n -f /ftc-firstboot.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
+psplash -n --filename /ftc-firstboot.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
 
 fail() {
   psplash-write "QUIT"
-  psplash -n -f /ftc-firstboot-failed.png -y 212 --BarCol FF0000 --BarBkCol 347ECC --BkCol 000000 &
+  psplash -n --filename /ftc-firstboot-failed.png -y 212 --BarCol FF0000 --BarBkCol 347ECC --BkCol 000000 &
   psplash-write "PROGRESS 100"
   psplash-write "QUIT"
   exit 1
