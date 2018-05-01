@@ -16,7 +16,7 @@ Index: PyQt-x11-gpl-4.11.3/configure-ng.py
 ===================================================================
 --- PyQt-x11-gpl-4.11.3.orig/configure-ng.py
 +++ PyQt-x11-gpl-4.11.3/configure-ng.py
-@@ -672,10 +672,6 @@ int main(int argc, char **argv)
+@@ -675,10 +675,6 @@ int main(int argc, char **argv)
          if cmd is None:
              error("Failed to determine the detail of your Qt installation. Try again using the --verbose flag to see more detail about the problem.")
  

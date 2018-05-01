@@ -4,9 +4,9 @@
 #
 ################################################################################
 
-PYTHON_PYQT_VERSION = 4.11.3
-PYTHON_PYQT_SOURCE = PyQt-x11-gpl-$(PYTHON_PYQT_VERSION).tar.gz
-PYTHON_PYQT_SITE = http://downloads.sourceforge.net/project/pyqt/PyQt4/PyQt-$(PYTHON_PYQT_VERSION)
+PYTHON_PYQT_VERSION = 4.12.1
+PYTHON_PYQT_SOURCE = PyQt4_gpl_x11-$(PYTHON_PYQT_VERSION).tar.gz
+PYTHON_PYQT_SITE = https://downloads.sourceforge.net/project/pyqt/PyQt4/PyQt-$(PYTHON_PYQT_VERSION)
 PYTHON_PYQT_LICENSE = GPL-2.0 or GPL-3.0
 PYTHON_PYQT_LICENSE_FILES = LICENSE.GPL2 LICENSE.GPL3
 
