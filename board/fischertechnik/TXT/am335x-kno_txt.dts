@@ -574,8 +574,9 @@
 	tsc {
 		ti,wires = <4>;
 		ti,x-plate-resistance = <200>;
-		ti,coordinate-readouts = <5>;
+		ti,coordinate-readouts = <7>;
 		ti,wire-config = <0x00 0x11 0x22 0x33>;
+        ti,charge-delay = <0x20000>;
 	};
 };
 
