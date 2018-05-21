@@ -18,9 +18,8 @@ cp /newroot/usr/lib/libfuse.so.2 \
    /newroot/usr/lib/libz.so.1 \
    /newroot/lib/libm.so.6 \
    /lib
-cp /newroot/usr/sbin/mount.posixovl \
-   /newroot/sbin/mkfs.fat \
-   /newroot/usr/sbin/mke2fs \
+cp /newroot/sbin/mkfs.fat \
+   /newroot/sbin/mke2fs \
    /newroot/usr/bin/psplash \
    /newroot/usr/bin/psplash-write \
    /newroot/usr/bin/fbv \
@@ -44,42 +43,15 @@ progress() {
   echo $2
 }
 
-# back up files from old simple layout if there are any
-mkdir /backup || fail
-mount.posixovl -H /media/sdcard/boot -- -o allow_other || fail
-if [ -d /media/sdcard/boot/config/etc ]; then
-  tar cf - -C /media/sdcard/boot/config/etc . | gzip > /backup/etc.tar.gz || fail
-fi
-progress 5 "backup etc"
-if [ -f /media/sdcard/boot/config/net/wpa.wlan0.conf ]; then
-  cp /media/sdcard/boot/config/net/wpa.wlan0.conf /backup || fail
-fi
-progress 10 "backup wpa.wlan0.conf"
-if [ -d /media/sdcard/boot/apps ]; then 
-  tar cf - -C /media/sdcard/boot/apps . | gzip > /backup/user-apps.tar.gz || fail
-fi
-progress 15 "backup user apps"
-if [ -d /media/sdcard/boot/data ]; then
-  tar cf - -C /media/sdcard/boot/data . | gzip > /backup/home-ftc.tar.gz || fail
-fi
-progress 20 "backup /home/ftc"
-if [ -d /media/sdcard/boot/robopro ]; then
-  tar cf - -C /media/sdcard/boot/robopro . | gzip > /backup/robopro-apps.tar.gz || fail
-fi
-progress 25 "backup robopro apps"
-if [ -d /media/sdcard/boot/rootfs.conf ]; then 
-  cp /media/sdcard/boot/rootfs.conf /backup || fail
-fi
-progress 30 "backup rootfs.conf"
 # back up system files
+mkdir /backup
 cp /media/sdcard/boot/uImage /backup || fail
-progress 35 "backup uImage"
+progress 10 "backup uImage"
 cp /media/sdcard/boot/am335x-kno_txt.dtb /backup || fail
-progress 40 "backup am335x-kno_txt.dtb"
+progress 15 "backup am335x-kno_txt.dtb"
 cp /media/sdcard/boot/rootfs.img /backup || fail
 progress 45 "backup rootfs.img"
 # umount posix-overlay and underlying FAT FS
-umount /media/sdcard/boot || fail
 umount /media/sdcard/boot || fail
 
 # repartition the SD card
@@ -118,39 +90,17 @@ if [ -f /backup/rootfs.conf ]; then
   cp /backup/rootfs.conf /media/sdcard/boot || fail
 fi
 umount /media/sdcard/boot || fail
-progress 80 "restore partition 1 complete"
+progress 95 "restore partition 1 complete"
 
 mount -t ext4 /dev/mmcblk0p2 /media/sdcard/data || fail
 mkdir -p /media/sdcard/data/overlay/etc/ || fail
 mkdir -p /media/sdcard/data/overlay/.workdir/etc || fail
 chmod go-rwx /media/sdcard/data/overlay/ || fail 
-if [ -f /backup/etc.tar.gz ] ; then
-  gzip -cd /backup/etc.tar.gz | tar xf - -C /media/sdcard/data/overlay/etc/ || fail
-fi
-if [ -f /backup/wpa.wlan0.conf ] ; then
-  mkdir -p /media/sdcard/data/overlay/etc/network || fail
-  cp /backup/wpa.wlan0.conf /media/sdcard/data/overlay/etc/network || fail
-fi
-progress 85 "restore /etc"
-
 mkdir -p /media/sdcard/data/home/ftc/apps || fail
 chown -R 1001:1001 /media/sdcard/data/home/ftc || fail
-if [ -f /backup/home-ftc.tar.gz ]; then
-  gzip -cd /backup/home-ftc.tar.gz | tar xf - -C /media/sdcard/data/home/ftc || fail
-fi
-if [ -f /backup/user-apps.tar.gz ]; then
-  gzip -cd /backup/user-apps.tar.gz | tar xf - -C /media/sdcard/data/home/ftc/apps || fail
-fi
-progress 90 "restore /home/ftc and user apps"
-
 mkdir -p /media/sdcard/data/home/ROBOPro/ROBOProFiles || fail
 chown -R 1000:1000 /media/sdcard/data/home/ROBOPro || fail
-if [ -f /backup/robopro-apps.tar.gz ]; then
-  gzip -cd /backup/robopro-apps.tar.gz | tar xf - -C /media/sdcard/data/home/ROBOPro/ROBOProFiles || fail
-fi
-progress 95 "restore ROBOPro apps"
-
 umount /media/sdcard/data || fail
 
-progress 100 "restore complete"
+progress 100 "finished"
 psplash-write "QUIT"
