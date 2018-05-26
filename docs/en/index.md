@@ -18,4 +18,4 @@ The installation happens in four simple steps:
 1. Copy the contents of the [community firmware ZIP archive](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/v0.9.3/ftcommunity-txt-0.9.3.zip) onto your sd card
 1. Insert the sd card into your TXT and switch it on!
 
-More information can be found [in our wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki/%5BEN%5D-Tutorial%3A-Setting-up-the-ftcommunity-TXT-Firmware) and in the [fischertechnik community forum](https://forum.ftcommunity.de/viewforum.php?f=33).
+More information can be found in [the installation guide](getting-started/installation.html) and in the [fischertechnik community forum](https://forum.ftcommunity.de/viewforum.php?f=33).
