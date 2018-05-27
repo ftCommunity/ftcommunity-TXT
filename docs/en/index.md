@@ -1,7 +1,7 @@
 # What is this?
 
 ![fischertechnik TXT](../media/booting-CFW.png){:.right}
-The **community firmware** is a free and modern operating system for your [**fischertechnik TXT**](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/). Heavily extended internet connectivity including an own app store as well as the ability to control and program models via PC, tablet or smart phone make your TXT fit for the future.
+The **community firmware** is a free and modern operating system for your [**fischertechnik TXT**](https://www.fischertechnik.de/en/products/playing/robotics/522429-robotics-txt-controller). Heavily extended internet connectivity including an own app store as well as the ability to control and program models via PC, tablet or smart phone make your TXT fit for the future.
 
 And best of all: You don't even have to open or modify your TXT for this because the **community firmware** is installed onto sd card and can that way be removed at any time.
 

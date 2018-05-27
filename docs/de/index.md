@@ -1,7 +1,7 @@
 # Was ist das?
 
 ![fischertechnik TXT](../media/booting-CFW.png){:.right}
-Die **Community-Firmware** ist ein freies und modernes Betriebssystem für deinen [**fischertechnik TXT**](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/). Stark erweiterte Internet-Fähigkeiten inklusive eigenem App-Store sowie die Steuerung und Programmierung von Modellen über PC, Tablet oder Smartphone machen deinen TXT fit für die Zukunft.
+Die **Community-Firmware** ist ein freies und modernes Betriebssystem für deinen [**fischertechnik TXT**](https://www.fischertechnik.de/de-de/produkte/spielen/robotics/522429-robotics-txt-controller). Stark erweiterte Internet-Fähigkeiten inklusive eigenem App-Store sowie die Steuerung und Programmierung von Modellen über PC, Tablet oder Smartphone machen deinen TXT fit für die Zukunft.
 
 **Und das Beste**: Du musst Deinen TXT dafür **nicht öffnen oder verändern**, denn die **Community-Firmware** wird auf SD-Karte installiert und kann so jederzeit wieder entfernt werden.
 
