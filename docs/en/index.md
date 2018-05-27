@@ -8,7 +8,7 @@ And best of all: You don't even have to open or modify your TXT for this because
 # It's so simple!
 
 You need:
-* your [**fischertechnik TXT**](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/)
+* your [**fischertechnik TXT**](https://www.fischertechnik.de/en/products/playing/robotics/522429-robotics-txt-controller)
 * a micro sd card with 2 to 32GB capacity
 
 The installation happens in four simple steps:

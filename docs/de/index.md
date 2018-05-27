@@ -8,7 +8,7 @@ Die **Community-Firmware** ist ein freies und modernes Betriebssystem für deine
 # So einfach geht es!
 
 Du brauchst:
-* deinen [**fischertechnik TXT**](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/)
+* deinen [**fischertechnik TXT**](https://www.fischertechnik.de/de-de/produkte/spielen/robotics/522429-robotics-txt-controller)
 * eine MicroSD-Karte mit 2 bis 32GB Kapazität
 
 Die Installation erfolgt in vier einfachen Schritten:
