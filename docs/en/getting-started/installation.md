@@ -19,4 +19,4 @@ You can find the update to RoboPro 4.2.4 (which will also update the TXT)
 
   ![Bootupscreen](https://raw.githubusercontent.com/ftCommunity/ftcommunity-TXT/master/board/fischertechnik/TXT/rootfs/etc/ftc-logo.png)
 
-The first startup will take a while (subsequently, the boot process will be a little faster). 
+The first startup will take a while, because the SD-Card needs to be initialized first. Subsequently, the boot process will be a little faster). 

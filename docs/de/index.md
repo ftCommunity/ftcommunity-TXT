@@ -19,4 +19,4 @@ Die Installation erfolgt in vier einfachen Schritten:
   1. Stecke die MicroSD-Karte in deinen TXT und schalte ihn ein!
 
 Jetzt kannst du verschiedene Apps nutzen und mit [Brickly](programming/brickly), [Python](programming/python) und [ROBOPro](programming/robopro.md) deinen TXT programmieren.
-Weitere Informationen findest du in der [Installations Anleitung](http://cfw.ftcommunity.de/ftcommunity-TXT/de/getting-started/installation.html) und im [fischertechnik Community Forum](https://forum.ftcommunity.de/viewforum.php?f=33).
+Weitere Informationen findest du in der [Installations Anleitung](getting-started/installation.html) und im [fischertechnik Community Forum](https://forum.ftcommunity.de/viewforum.php?f=33).
