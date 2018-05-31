@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-PYTHON_FTROBOPY_VERSION = 23e46bc73e705ff38a2f3a3976b1d0ee4882e6f4
+PYTHON_FTROBOPY_VERSION = ddffddd3e02c908bba89dd5c68ecae659d765612
 PYTHON_FTROBOPY_SITE = $(call github,ftrobopy,ftrobopy,$(PYTHON_FTROBOPY_VERSION))
 PYTHON_FTROBOPY_LICENSE = MIT
 PYTHON_FTROBOPY_LICENSE_FILES = LICENSE
