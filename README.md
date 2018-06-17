@@ -6,31 +6,22 @@ Please use the [installation quide](http://cfw.ftcommunity.de/ftcommunity-TXT/en
 
 ## What is this and why would i want this?
 
-The [Fischertechnik TXT controller](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-309/usetemplate-2_column_pano/) is a Linux driven computerized brick for the Fischertechnik construction toy.
+The [Fischertechnik TXT controller](https://www.fischertechnik.de/en/products/playing/robotics/522429-robotics-txt-controller) is a Linux driven computerized brick for the Fischertechnik construction toy.
 
 ![TXT](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg)
 
 The Fischertechnik TXT comes pre-installed with a Linux based firmware. This firmware is slightly outdated
 (the base system consist of parts which are all at least two years old) and doesn't make full use of the
-hardware capabilities of the TXT. At the time of writing the original TXT firmware doesn't even allow to use
-the built-in WLAN capabilities to connect to your home WiFi.
+hardware capabilities of the TXT.
 
 The community firmware aims to change this. It replaces the entire system with much newer components including 
 an updated Linux kernel and updates for all system components. Furthermore it provides a fresh user interface
-and focusses on connectivity in general. It can connect to your home WiFi as well as e.g. via USB to your Lego WeDo
-bricks, other [Fischertechnik Components](http://www.fischertechnik.de/desktopdefault.aspx/tabid-21/39_read-3/usetemplate-2_column_pano/) and much more.
+and focusses on connectivity in general. It can connect to your home WiFi, to other Fischertechnik Components, to custom made controllers like [ftDuino](https://github.com/harbaum/ftduino), to foreign parts like e.g. Lego WeDo
+bricks, and much more.
 
-The community firmware doesn't replace the built-in original firmware. Instead it's installed on a regular micro-SD card
+The community firmware doesn't replace the built-in original firmware. Instead it is installed on a regular micro-SD card
 and provides a means to leave the original untouched which being used. Simply pull out the SD card containing the
 community firmware to bring your TXT back into factory state.
-
-There are still limitations which are due to the fact that some vendor
-specific closed source core components have not yet been replaced by
-open components. Especially compatibility to the original RoboPro
-software used to program and control the TXT from a PC is limited. The
-firmware community aims to restore full compatibility as well as
-moving beyond the RoboPro capabilities by providing support for additional 
-programming environments like e.g. [Snap! or Scratch](https://en.wikipedia.org/wiki/Scratch_%28programming_language%29)
 
 ## (German) Forum 
 
@@ -76,50 +67,13 @@ will build the entire root file system and the kernel and place the resulting fi
 ## Prepare SD Card
 You need an empty micro SD card for the ftcommunity firmware.
 
-The ftcommunity firmware supports two different SD card layouts:
-* simple layout: Everything is stored on a single FAT partition, the linux root file system is read-only and resides in an image file on the FAT partition. This is the recommended setup for most users.
-* advanced layout: The linux root file system is read-write and stored on a separate partition. This is the recommended layout for developers.
-
-In both layouts, user installed apps and persistent settings are stored on the FAT partition.
-
-### Simple Layout
-Make sure that the first partition on the SD card is formatted as FAT (most fresh SD cards should already have this layout). Then copy the files `output/images/uImage`, `output/images/am335x-kno_txt.dtb` and `output/images/rootfs.img` to the SD card.
-
-### Advanced Layout
-Create two partitions on the SD card. Both partitions should have a size of at least 100 MB, the recommended setup is to reserve ca. 200-500 MB for the second partition and allocate most space to the first partition. Format the first partition as `FAT` and the second partition as `ext4`.
-
-The following commands will do this on a linux system where the SD card slot is named `/dev/mmcblk0`. *Make sure this is really the empty SD card, the following commands will destroy all data on `/dev/mmcblk0`*:
-
-```
-parted /dev/mmcblk0 mklabel msdos
-parted -a optimal /dev/mmcblk0 -- mkpart primary fat32 1MB -300MB
-parted -a optimal /dev/mmcblk0 -- mkpart primary ext2 -300MB 100%
-parted /dev/mmcblk0 set 1 boot on
-mkfs.vfat -n BOOT /dev/mmcblk0p1
-mkfs.ext4 -L ROOT /dev/mmcblk0p2
-```
-
-Now, copy the files `output/images/uImage` and `output/images/am335x-kno_txt.dtb` to the first partition of the SD card:
-```
-mount /dev/mmcblk0p1 /mnt
-cp output/images/uImage output/images/am335x-kno_txt.dtb /mnt/
-umount /mnt
-```
-
-Finally, unpack `output/images/rootfs.tar` to the second partition on the SD card:
-```
-mount /dev/mmcblk0p2 /mnt
-tar xvf output/images/rootfs.tar -C /mnt/
-umount /mnt
-```
-
-Note: On most linux systems, you will need to run all of these commands as root.
+Make sure that the SD card contains only ond partition, and that this is formatted as FAT32 (most fresh SD cards should already have this layout). Then copy the files `output/images/uImage`, `output/images/am335x-kno_txt.dtb` and `output/images/rootfs.img` to the SD card.
 
 # Step 2: Configure the TXT to boot from SD card
 
 Make sure you are running at least version [4.2.4 of the official firmware](http://www.fischertechnik.de/home/downloads/Computing.aspx). You then only need to follow the [instructions provided by Fischertechnik](http://www.fischertechnik.de/ResourceImage.aspx?raid=10278).
 
-More details and a brief set of english instructions can be found in our [Wiki](https://github.com/ftCommunity/ftcommunity-TXT/wiki/Preparing-the-TXT-controller).
+More details and a brief set of instructions can be found in our [web site](https://cfw.ftcommunity.de/ftcommunity-TXT/en/getting-started/).
 
 # Run the ftcommunity firmware
 
@@ -131,7 +85,7 @@ You can log in to the TXT either via [serial console](https://github.com/ftCommu
 
 In both cases, the user name is "ftc". By default, the *ftc* user can log in without a password. It is strongly recommended to set a password for the *ftc* user when you first log in.
 
-After setting a password, the *ftc* user may use `sudo` to execute commands as root.
+The *ftc* user may use `sudo` to execute commands as root.
 
 # Switch back to original firmware
 
