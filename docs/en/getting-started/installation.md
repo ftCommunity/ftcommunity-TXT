@@ -13,7 +13,7 @@ You can find the update to RoboPro 4.2.4 (which will also update the TXT)
 2. Enable booting from MicroSD-card (in Fischertechnik terminology: "Activation Bootloader"). Please follow the official guide which is also available [at the official Fischertechnik site](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/txt-controller/documents/activation_bootloaders_english.ashx)
 
 3. Download the latest version of the ftcommunity-TXT-firmware here (at the very bottom of the page):
-[https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest). At the time of writing this was "ftcommunity-txt-0.9.3.zip". Copy all three files contained therein to the microSD-card (which should be formatted with FAT32. If you don't know what that means and your card has 16GB or less: don't worry, you're set already)
+[https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest). At the time of writing this was "ftcommunity-txt-0.9.4.zip". Copy all three files contained therein to the microSD-card (which should be formatted with FAT32. If you don't know what that means and your card has 16GB or less: don't worry, you're set already)
 
 4. Insert the microSD in the TXT and power it up. After a short time the yellow loading indicator should show up as well as the text "community edition" at the bottom half of the screen.
 
