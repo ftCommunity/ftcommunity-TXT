@@ -13,7 +13,7 @@ nav-title: Installation
 
 1. Anschließend musst du den Bootloader freischalten, wie in der [Anleitung von Fischertechnik](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/txt-controller/documents/freischaltung_des_bootloaders_deutsch.ashx) erklärt.
 
-1. Danach lädst du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.3.zip"_)
+1. Danach lädst du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.4.zip"_)
 
 1. Du packst das Archiv aus und kopierst die drei enthaltenen Dateien auf eine FAT32 formatierte MicroSD-Karte.
 
