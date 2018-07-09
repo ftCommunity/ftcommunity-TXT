@@ -21,4 +21,17 @@ nav-title: Installation
 
  ![Bootupscreen](https://raw.githubusercontent.com/ftCommunity/ftcommunity-TXT/master/board/fischertechnik/TXT/rootfs/etc/ftc-logo.png)
 
- (_Der erste Start kann eine Weile dauern, weil die Karte erst initialisiert wird. Spätere Starts gehen dann etwas schneller._)
+Der erste Start kann eine Weile dauern, weil die Karte erst initialisiert wird. Spätere Starts gehen dann etwas schneller.
+
+ 
+# Aktualisierung
+
+ 
+ Um eine SD-Karte auf die neueste Version der CFW zu aktualisieren, entnimmst du sie dem TXT und steckst sie in den SD-Leser deines Computers. Jetzt ersetzt du die folgenden drei Dateien mit der aktuellen Version:
+
+    uImage
+    am335x-kno_txt.dtb
+    rootfs.img
+    
+Apps und Daten, die sich schon auf der SD-Karte befinden, bleiben erhalten.
+

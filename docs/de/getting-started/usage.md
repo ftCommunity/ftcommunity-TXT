@@ -1,7 +1,7 @@
 ---
-nav-title: Einführung GUI
+nav-title: Anwendung
 ---
-# Community-Firmware benutzen
+# Die Community-Firmware benutzen
 
 Nach dem Start siehst du den Startbildschirm der Community-Firmware mit seinen Ordnern und runden App-Icons:
 
@@ -39,3 +39,11 @@ Die Netzwerkeinstellungen werden auf der MicroSD-Karte gespeichert, und der TXT 
 Die Community-Firmware stellt eine Weboberfäche zur Verfügung, mit der man im Browser die auf dem TXT installierten Apps starten und verwalten kann. Um auf die Weboberfäche zuzugreifen, gibst du `http://IP-Adresse` in die Addresszeile des Browsers ein. Dabei ist "IP-Adresse" die IP-Adresse des TXT. Die IP-Addresse wird angezeigt, wenn du die Statuszeile des Startbildschirm antippst.
 
 Im Beispiel oben ist die IP-Addresse `192.168.0.30`, d.h. du würdest im Browser `http://192.168.0.30` eingeben, um das Web-Interface zu starten. (Achtung: dein TXT hat höchstwahrscheinlich eine andere IP-Addresse.)
+
+# Store
+
+Im Ordner "System" befindet sich die **Store**-App. Wenn dein TXT über WLAN mit dem Internet verbunden ist, kannst du damit Apps vom cfw-Server installieren und aktualisieren.
+
+![About](../../media/store.png "Screenshot  der 'Store'-App")
+
+Dazu wählst du eine App aus der Liste aus, indem du den Eintrag in der Liste antippst. Du erhälst eine kurze Beschreibung. Über das **Drei-Balken-Symbol** oben rechts und **Installieren** kannst du diese App installieren. In der Liste ist die App jetzt mit einem grünen Häkchen markiert. Eine veraltete App wird in der Liste mit einem Ausrufezeichen dargestellt. Du kannst sie auf die neuere Version aktualiesieren, wenn du im Beschreibungsfenster der App **Aktualisieren** auswählst. Schließlich kannst du im Beschreibungsfenster eine ausgewählte App auch wieder deinstallieren.
