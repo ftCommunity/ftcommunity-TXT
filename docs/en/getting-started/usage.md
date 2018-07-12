@@ -1,5 +1,6 @@
 ---
 nav-title: Usage
+nav-pos: 2
 ---
 # Using the community firmware GUI
 
@@ -31,7 +32,7 @@ Pressing the hardware "on/off" button for two seconds or more will shut down the
 
 You can use the "WiFi" app to set up a connection to your local WiFi network. 
 
-Connection settings are automatically persisted on the SD card, and the TXT will automatically reconnect to a known WiFi network on the next boot. If the TXT is connected to a WiFi network, a small WiFi symbol will be shown in the 
+Connection settings are automatically persisted on the SD card, and the TXT will automatically reconnect to a known WiFi network on the next boot. If the TXT is connected to a WiFi network, a small WiFi symbol will be shown in the upper left corner
 
 # Accessing the web interface
 

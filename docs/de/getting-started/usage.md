@@ -1,5 +1,6 @@
 ---
 nav-title: Anwendung
+nav-pos: 2
 ---
 # Die Community-Firmware benutzen
 

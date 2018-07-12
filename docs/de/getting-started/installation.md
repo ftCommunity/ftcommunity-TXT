@@ -1,5 +1,6 @@
 ---
 nav-title: Installation
+nav-pos: 1
 ---
 # Voraussetzungen
 
@@ -27,7 +28,7 @@ Der erste Start kann eine Weile dauern, weil die Karte erst initialisiert wird. 
 # Aktualisierung
 
  
- Um eine SD-Karte auf die neueste Version der CFW zu aktualisieren, entnimmst du sie dem TXT und steckst sie in den SD-Leser deines Computers. Jetzt ersetzt du die folgenden drei Dateien mit der aktuellen Version:
+ Um eine SD-Karte auf die neueste Version der CFW zu aktualisieren, entnimmst du sie dem TXT und steckst sie in den SD-Leser deines Computers. Jetzt ersetzt du die folgenden drei Dateien mit der aktuellen Version, die du aus dem heruntergeladenem Archiv auspackst:
 
     uImage
     am335x-kno_txt.dtb

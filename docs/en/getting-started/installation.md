@@ -1,5 +1,6 @@
 ---
 nav-title: Installation
+nav-pos: 1
 ---
 # Prerequisites: 
 * A microSD-Card (microSD or microSDHC, i.e. up to 32GB; please be aware that microSDXC will not work). Size really doesn't matter; the system needs less than 100MB, so even a card with 512 MB would suffice)
