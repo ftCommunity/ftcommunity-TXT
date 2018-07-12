@@ -7,7 +7,7 @@ Die serielle Konsole des TXT kann mit einem USB-auf-TTL-Adapter angezeigt werden
 Im Prinzip sollte jeder gängige Adapter funktionieren, wichtig ist nur, dass der
 Adapter mit einem Pegel von 3.3V arbeitet. 
 
-**Achrung:** vor der ersten Benutzung des Adapters unbedingt prüfen, dass zwischen GND <-> RX und 
+**Achtung:** vor der ersten Benutzung des Adapters unbedingt prüfen, dass zwischen GND <-> RX und 
 GND <-> TX tatsächlich nur 3.3V anliegen. Ein Adapter mit 5V kann den TXT irreparabel beschädigen!
 
 Die EXT-Schnittstelle des Controllers ist wie folgt belegt:
