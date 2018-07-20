@@ -25,7 +25,7 @@ Nach dem Start der App kannst du auswählen, ob der Bildschirm um 0 ° (Standard
 
 Danach wird die neue Kalibrierung übernommen.
 
-Wenn hier etwas schief läuft, kann es passieren, dass du den Touchscreen nicht mehr verwenden kannst. Dann musst du dich über SSH direkt auf dem TXT einloggen und die ursprüngliche Konfiguration wieder zurückschreiben. Ein Passwort brauchst du dafür nicht, nur ein SSH-Client (unter Windows z.B. Putty) und die IP-Adresse deines TXT.
+Wenn hier etwas schief läuft, kann es passieren, dass du den Touchscreen nicht mehr verwenden kannst. Dann musst du dich über SSH direkt auf dem TXT einloggen und die ursprüngliche Konfiguration wieder zurückschreiben. Ein Passwort brauchst du dafür nicht, nur einen SSH-Client (unter Windows z.B. Putty) und die IP-Adresse deines TXT.
 
     ssh ftc@192.168.0.12
     sudo cp /media/sdcard/root/etc/pointercal /etc/pointercal
