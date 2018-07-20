@@ -2,6 +2,8 @@
 nav-title: Apps
 nav-pos: 3
 ---
+Für die Arbeit mit der CFW gibt es bereits zahlreiche Apps, die je nach Zweck in verschiedene Ordner einsortiert sind.
+
 # Ordner "System"
 
 In diesem Ordner finden sich nützliche Apps, die bereits in die CFW integriert sind.
@@ -17,6 +19,19 @@ Mit der CFW Bluetooth app kannst du den TXT mit dem Transmitter des BT Conrol Se
 ## Display
 
 Mit dieser App kannst Du die Bildschirmdarstellung drehen und den Touchscreen kalibrieren, so dass die Druckereignisse genauer mit der richtigen Position verarbeitet werden.
+Nach dem Start der App kannst du auswählen, ob der Bildschirm um 0 ° (Standardausrichtung), 90 ° (Querformat, gegen den Uhrzeigersinn gedreht), 180 ° (auf den Kopf gestellt) oder 270 ° (Querformat, im Uhrzeigersinn gedreht) ausgerichtet werden soll. Nach Druck auf "Touchscreen kalibrieren" erscheinen nacheinander an verschiedenen Stellen Fadenkreuze, die du sorgfältig und möglichst genau (ggf. mit einem Stift) drückst.
+
+![Display](../../media/touchscreencalibration.png "App zur Kalibrierung des Touchscreen")
+
+Danach wird die neue Kalibrierung übernommen.
+
+Wenn hier etwas schief läuft, kann es passieren, dass du den Touchscreen nicht mehr verwenden kannst. Dann musst du dich über SSH direkt auf dem TXT einloggen und die ursprüngliche Konfiguration wieder zurückschreiben. Ein Passwort brauchst du dafür nicht, nur ein SSH-Client (unter Windows z.B. Putty) und die IP-Adresse deines TXT.
+
+    ssh ftc@192.168.0.12
+    sudo cp /media/sdcard/root/etc/pointercal /etc/pointercal
+    
+Damit wird die Standardkalibrierung wieder eingerichtet und du kannst nach einem Neustart den Touchscreen wieder benutzen. Den Zugriff über SSH musst du allerdings auf dem Touchscreen des TXT erlauben. Wenn die Kalibrierung also soweit abweicht, dass du den OK-Button dafür nicht mehr treffen kannst, musst du im Notfall die CFW neu installieren.   
+
 
 ## FT-GUI
 
