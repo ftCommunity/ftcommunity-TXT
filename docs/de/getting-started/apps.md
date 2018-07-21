@@ -30,7 +30,7 @@ Wenn hier etwas schief läuft, kann es passieren, dass du den Touchscreen nicht 
     ssh ftc@192.168.0.12
     sudo cp /media/sdcard/root/etc/pointercal /etc/pointercal
     
-Damit wird die Standardkalibrierung wieder eingerichtet und du kannst nach einem Neustart den Touchscreen wieder benutzen. Den Zugriff über SSH musst du allerdings auf dem Touchscreen des TXT erlauben. Wenn die Kalibrierung also soweit abweicht, dass du den OK-Button dafür nicht mehr treffen kannst, musst du im Notfall die CFW neu installieren.   
+Damit wird die Standardkalibrierung wieder eingerichtet und du kannst nach einem Neustart den Touchscreen wieder benutzen. Den Zugriff über SSH musst du allerdings auf dem Touchscreen des TXT erlauben. Wenn die Kalibrierung also soweit abweicht, dass du den OK-Button dafür nicht mehr treffen kannst, musst du im Notfall die CFW neu installieren (auf einer neuen oder neupartitionierten und -formatierten SD-Karte).   
 
 
 ## FT-GUI
