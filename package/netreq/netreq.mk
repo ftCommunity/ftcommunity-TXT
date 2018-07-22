@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-NETREQ_SITE = ./package/netreq
+NETREQ_SITE = $(BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH)/package/netreq
 NETREQ_SITE_METHOD = local
 NETREQ_DEPENDENCIES = libnetfilter_queue
 
