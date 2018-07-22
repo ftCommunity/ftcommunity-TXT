@@ -1,8 +1,0 @@
-config BR2_PACKAGE_LIBROBOINT
-  bool "libroboint"
-  select BR2_PACKAGE_LIBUSB
-  select BR2_PACKAGE_LIBUSB_COMPAT
-  select BR2_PACKAGE_BINUTILS
-  select BR2_PACKAGE_BINUTILS_TARGET 
-  help
-    Install libroboint

@@ -1,3 +1,6 @@
 [submodule "docs/_brickly"]
 	path = docs/_brickly
 	url = https://github.com/EstherMi/ft-brickly-userguide.git
+[submodule "buildroot"]
+	path = buildroot
+	url = https://github.com/buildroot/buildroot

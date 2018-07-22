@@ -1,7 +1,0 @@
-config BR2_PACKAGE_PYTHON_WEDO
-	bool "python-wedo"
-        select BR2_PACKAGE_PYTHON_PYUSB
-	help
-	  Python interface for the Lego WeDo hub
-
-	  https://github.com/itdaniher/WeDoMore
