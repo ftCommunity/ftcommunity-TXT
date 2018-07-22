@@ -32,16 +32,20 @@ Most discussions around the community firmware take place in the [FTCommunity fo
 See [the getting started guide](https://cfw.ftcommunity.de/ftcommunity-TXT/en/getting-started/) for instructions on how to install and use the community firmware.
 
 # Build the firmware from source
+Jump into the buildroot tree:
+```
+cd buildroot
+```
 Load the configuration for the TXT by typing:
 
 ```
-make fischertechnik_TXT_defconfig
+BR2_EXTERNAL=.. make fischertechnik_TXT_defconfig
 ```
 
 Afterwards a single
 
 ```
-make
+BR2_EXTERNAL=.. make
 ```
 
 will build the entire root file system and the kernel and place the resulting files in the `output/images` directory.
