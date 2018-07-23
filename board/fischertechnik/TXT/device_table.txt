@@ -7,8 +7,6 @@
 # apps still belong to root and thus cannot be touched by ftc
 #
 # <name>                                <type>  <mode>  <uid>   <gid>   <major> <minor> <start> <inc>   <count>
-/opt/ftc/apps                           d       755     1001    1001    -       -       -       -       -
-/etc/default/launcher                   f       644     1001    1001    -       -       -       -       -
 /rom                                    d       755     0       0       -       -       -       -       -
 /opt/fischertechnik                     r       755     1000    1000    -       -       -       -       -
 /media/sdcard                           d       755     0       0       -       -       -       -       -

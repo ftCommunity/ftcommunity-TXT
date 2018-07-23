@@ -1,6 +1,6 @@
 menu "TouchUI system apps"
+  depends on BR2_PACKAGE_TOUCHUI
   config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS
-    #depends on BR2_TOUCHUI
     bool "TouchUI system apps"
 
   menu "Preset lists"
