@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_SEMANTIC_VERSION
+	bool "python-semantic-version"
+	depends on BR2_PACKAGE_PYTHON || BR2_PACKAGE_PYTHON3
+	help
+	  Semantic version in Python
+
+	  https://pypi.python.org/pypi/semantic_version
