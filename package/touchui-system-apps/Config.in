@@ -1,0 +1,47 @@
+menu "TouchUI system apps"
+  config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS
+    #depends on BR2_TOUCHUI
+    bool "TouchUI system apps"
+
+  menu "Preset lists"
+    depends on BR2_PACKAGE_TOUCHUI_SYSTEM_APPS
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_PRESET_TXT
+      bool "fischertechnik TXT Controller"
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_ABOUT
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_BLUETOOTH
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_DISPLAY
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_FTGUI
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_LANGUAGE
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_NETWORK
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_STORE
+      select BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_WLAN
+  endmenu
+
+  menu "Manual Choose List"
+    depends on BR2_PACKAGE_TOUCHUI_SYSTEM_APPS
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_ABOUT
+      bool "About"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_BLUETOOTH
+      bool "Bluetooth"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_DISPLAY
+      bool "Display"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_FTGUI
+      bool "ft-GUI"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_LANGUAGE
+      bool "Language"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_NETWORK
+      bool "Network"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_STORE
+      bool "Store"
+
+    config BR2_PACKAGE_TOUCHUI_SYSTEM_APPS_WLAN
+      bool "WLAN"
+  endmenu
+endmenu
