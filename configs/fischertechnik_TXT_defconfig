@@ -1,3 +1,6 @@
+# buildroot
+BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH)/patches"
+
 # architecture
 BR2_arm=y
 BR2_cortex_a8=y
