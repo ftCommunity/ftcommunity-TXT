@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-TOUCHUI_VERSION = b0b8d9d9b9451e7a7b5f75631eb74cd9329de4fd
+TOUCHUI_VERSION = b9105d1bf191e23bcc89de677aef5061bb3a2f0d
 TOUCHUI_SITE = $(call github,ski7777,TouchUI,$(TOUCHUI_VERSION))
 TOUCHUI_DEPENDENCIES = qt python-pyqt
 TOUCHUI_LICENSE = GPL-3.0
@@ -31,6 +31,7 @@ define TOUCHUI_INSTALL_TARGET_CMDS
 			$(INSTALL) -D -m 0755 $(@D)/support/TouchUI.initd $(TARGET_DIR)/etc/init.d/$(BR2_PACKAGE_TOUCHUI_INITD_NAME); \
 		fi \
 	fi
+	$(INSTALL) -D -m 0755 $(@D)/support/launcher-msg $(TARGET_DIR)/bin/launcher-msg
 endef
 
 define TOUCHUI_PERMISSIONS
