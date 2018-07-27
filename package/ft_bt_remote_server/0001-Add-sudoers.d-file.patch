@@ -1,0 +1,23 @@
+From 8d488112438c6b072abff53a4f4082692c1e2b96 Mon Sep 17 00:00:00 2001
+From: Raphael Jacob <r.jacob2002@gmail.com>
+Date: Fri, 27 Jul 2018 19:11:55 +0200
+Subject: [PATCH 1/1] Add sudoers.d file
+
+---
+ ft_bt_remote_server.sudoersd | 4 ++++
+ 1 file changed, 4 insertions(+)
+ create mode 100644 ft_bt_remote_server.sudoersd
+
+diff --git a/ft_bt_remote_server.sudoersd b/ft_bt_remote_server.sudoersd
+new file mode 100644
+index 0000000..69f8429
+--- /dev/null
++++ b/ft_bt_remote_server.sudoersd
+@@ -0,0 +1,4 @@
++## Permissions for ftc access to programs required
++## for BT Control Set server setup
++
++ftc     ALL = NOPASSWD: /usr/bin/ft_bt_remote_start.sh, /usr/bin/ft_bt_remote_server, /bin/pkill -SIGINT ft_bt_remote_server
+-- 
+2.18.0
+

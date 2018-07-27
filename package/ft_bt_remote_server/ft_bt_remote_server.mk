@@ -17,6 +17,7 @@ endef
 define FT_BT_REMOTE_SERVER_INSTALL_TARGET_CMDS
         $(INSTALL) -D -m 755 $(@D)/ft_bt_remote_start.sh $(TARGET_DIR)/usr/bin
         $(INSTALL) -D -m 755 $(@D)/src/ft_bt_remote_server $(TARGET_DIR)/usr/bin
+				$(INSTALL) -D -m 0755 $(@D)/ft_bt_remote_server.sudoersd $(TARGET_DIR)/etc/sudoers.d/ft_bt_remote_server
 endef
 
 $(eval $(generic-package))
