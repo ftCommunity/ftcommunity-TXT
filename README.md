@@ -45,7 +45,7 @@ BR2_EXTERNAL=.. make fischertechnik_TXT_defconfig
 Afterwards a single
 
 ```
-BR2_EXTERNAL=.. make
+make
 ```
 
 will build the entire root file system and the kernel and place the resulting files in the `output/images` directory.
