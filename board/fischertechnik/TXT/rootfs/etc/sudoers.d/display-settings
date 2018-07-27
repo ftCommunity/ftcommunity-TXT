@@ -1,5 +1,0 @@
-## Permissions for ftc access to programs required
-## for changing display settings
-
-Defaults!/usr/bin/ts_calibrate env_keep=TSLIB_TSDEVICE
-ftc     ALL = NOPASSWD: /usr/bin/ts_calibrate, /etc/init.d/S90launcher restart

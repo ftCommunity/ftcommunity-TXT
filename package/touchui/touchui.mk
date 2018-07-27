@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-TOUCHUI_VERSION = b9105d1bf191e23bcc89de677aef5061bb3a2f0d
+TOUCHUI_VERSION = 190827e49b6ae5279b5e9b0bcf9cb5b772278e06
 TOUCHUI_SITE = $(call github,ski7777,TouchUI,$(TOUCHUI_VERSION))
 TOUCHUI_DEPENDENCIES = qt python-pyqt
 TOUCHUI_LICENSE = GPL-3.0
@@ -32,6 +32,7 @@ define TOUCHUI_INSTALL_TARGET_CMDS
 		fi \
 	fi
 	$(INSTALL) -D -m 0755 $(@D)/support/launcher-msg $(TARGET_DIR)/bin/launcher-msg
+	$(INSTALL) -D -m 0755 $(@D)/support/display-settings.sudoersd $(TARGET_DIR)/etc/sudoers.d/display-settings
 endef
 
 define TOUCHUI_PERMISSIONS
