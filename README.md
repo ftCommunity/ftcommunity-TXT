@@ -32,21 +32,15 @@ Most discussions around the community firmware take place in the [FTCommunity fo
 See [the getting started guide](https://cfw.ftcommunity.de/ftcommunity-TXT/en/getting-started/) for instructions on how to install and use the community firmware.
 
 # Build the firmware from source
-Load the configuration for the TXT by typing:
-
-```
-make fischertechnik_TXT_defconfig
-```
-
-Afterwards a single
+In the toplevel directory, type
 
 ```
 make
 ```
 
-will build the entire root file system and the kernel and place the resulting files in the `output/images` directory.
+This will build the entire root file system and the kernel and place the resulting files in the `buildroot/output/images` directory.
 
-After the build has finished, copy the files `output/images/uImage`, `output/images/am335x-kno_txt.dtb` and `output/images/rootfs.img` to an empty, FAT32 formatted SD card.
+After the build has finished, copy the files `buildroot/output/images/uImage`, `buildroot/output/images/am335x-kno_txt.dtb` and `buildroot/output/images/rootfs.img` to an empty, FAT32 formatted SD card.
 
 # Switch back to original firmware
 

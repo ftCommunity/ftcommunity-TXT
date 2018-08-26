@@ -2,8 +2,8 @@
 TARGET=$1
 # copy additional rootfs contents
 echo "Adding additional rootfs content ..."
-cp -af --remove-destination board/fischertechnik/TXT/rootfs/* $TARGET/
-cp -af docs/favicon.ico $TARGET/var/www/
+cp -af --remove-destination $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/board/fischertechnik/TXT/rootfs/* $TARGET/
+cp -af $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/docs/favicon.ico $TARGET/var/www/
 # disable writing log files. On SD card we actually have the space for this, so we can leave this on
 # mv $TARGET/etc/init.d/S01logging $TARGET/etc/init.d/M01logging||echo "Logging already turned off!"
 # check if user provides custom content
@@ -19,9 +19,9 @@ rm -f "$TARGET/etc/init.d/S93-am335x-pm-firmware-load"
 # if we are building from git but the tag part of the version 
 # number from git does not match the base version in 
 # board/fischertechnik/TXT/rootfs/etc/fw-ver.txt
-GIT_VERSION=$(git describe --tags --match='v*' 2>/dev/null)
+GIT_VERSION=$(git -C $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH describe --tags --match='v*' 2>/dev/null)
 if [ -n "$GIT_VERSION" ] ; then
-  BASE_VERSION=$(cat board/fischertechnik/TXT/rootfs/etc/fw-ver.txt)
+  BASE_VERSION=$(cat $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/board/fischertechnik/TXT/rootfs/etc/fw-ver.txt)
   if [[ "${GIT_VERSION}" == "v${BASE_VERSION}"* ]] ; then
     echo "${GIT_VERSION#v}" > $TARGET/etc/fw-ver.txt
   elif [ "${BASE_VERSION#*-}" = "rc" ]; then
