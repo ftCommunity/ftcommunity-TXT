@@ -13,10 +13,10 @@ Du brauchst:
 
 Die Installation erfolgt in vier einfachen Schritten:
 
-  1. Stelle sicher, dass du mindestens [RoboPro Version 4.2.4](http://www.fischertechnik.de/ResourceImage.aspx?raid=10274) verwendest.
+  1. Stelle sicher, dass du mindestens [RoboPro Version 4.2.4](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/robo-pro/documents/update-robopro.ashx) verwendest.
   1. Schalte den Bootloader Deines TXT entsprechend der [offiziellen fischertechnik-Anleitung](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/txt-controller/documents/freischaltung_des_bootloaders_deutsch.ashx) frei.
-  1. Entpacke die drei im [Community-Firmware-ZIP-Archiv](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/v0.9.3/ftcommunity-txt-0.9.3.zip) enthaltenen Dateien auf deine MicroSD-Karte.
+  1. Entpacke die drei im [Community-Firmware-ZIP-Archiv](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/v0.9.4/ftcommunity-txt-0.9.4.zip) enthaltenen Dateien auf deine MicroSD-Karte.
   1. Stecke die MicroSD-Karte in deinen TXT und schalte ihn ein!
 
 Jetzt kannst du verschiedene Apps nutzen und mit [Brickly](programming/brickly), [Python](programming/python) und [ROBOPro](programming/robopro.md) deinen TXT programmieren.
-Weitere Informationen findest du in der [Installations Anleitung](http://cfw.ftcommunity.de/ftcommunity-TXT/de/getting-started/installation.html) und im [fischertechnik Community Forum](https://forum.ftcommunity.de/viewforum.php?f=33).
+Weitere Informationen findest du in der [Installations Anleitung](getting-started/installation.html) und im [fischertechnik Community Forum](https://forum.ftcommunity.de/viewforum.php?f=33).

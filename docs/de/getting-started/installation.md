@@ -1,5 +1,6 @@
 ---
 nav-title: Installation
+nav-pos: 1
 ---
 # Voraussetzungen
 
@@ -13,7 +14,7 @@ nav-title: Installation
 
 1. Anschließend musst du den Bootloader freischalten, wie in der [Anleitung von Fischertechnik](https://www.fischertechnik.de/-/media/fischertechnik/fite/service/downloads/robotics/txt-controller/documents/freischaltung_des_bootloaders_deutsch.ashx) erklärt.
 
-1. Danach lädst du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.3.zip"_)
+1. Danach lädst du hier [https://github.com/ftCommunity/ftcommunity-TXT/releases/latest](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) das ZIP-Archiv mit der Community-Firmware herunter (_der Link steht unten auf der Seite, aktuell ist die Datei "ftcommunity-txt-0.9.4.zip"_)
 
 1. Du packst das Archiv aus und kopierst die drei enthaltenen Dateien auf eine FAT32 formatierte MicroSD-Karte.
 
@@ -21,4 +22,17 @@ nav-title: Installation
 
  ![Bootupscreen](https://raw.githubusercontent.com/ftCommunity/ftcommunity-TXT/master/board/fischertechnik/TXT/rootfs/etc/ftc-logo.png)
 
- (_Der erste Start kann eine Weile dauern, spätere Starts gehen dann etwas schneller._)
+Der erste Start kann eine Weile dauern, weil die Karte erst initialisiert wird. Spätere Starts gehen dann etwas schneller.
+
+ 
+# Aktualisierung
+
+ 
+ Um eine SD-Karte auf die neueste Version der CFW zu aktualisieren, entnimmst du sie dem TXT und steckst sie in den SD-Leser deines Computers. Jetzt ersetzt du die folgenden drei Dateien mit der aktuellen Version, die du aus dem heruntergeladenem Archiv auspackst:
+
+    uImage
+    am335x-kno_txt.dtb
+    rootfs.img
+    
+Apps und Daten, die sich schon auf der SD-Karte befinden, bleiben erhalten.
+

@@ -14,3 +14,5 @@ zu verbinden, wählst du in ROBOPro für die IP-Addresse "Andere/manuell" aus un
 gibst die IP-Addresse des TXT im Textfeld an.
 
 **Achtung:** In der CFW-GUI musst du die "FT-GUI"-App starten, um mit ROBOPro vom PC auf den TXT zugreifen zu können. Sonst kann der TXT keine Verbindung von außen entgegen nehmen.
+
+**Achtung:** Nach einem Update von RoboPro und/oder der Original-Firmware laufen RoboPRO-Binaries, die mit der CFW geladen wurden und sich daher auf der SD-Karte befinden, nicht mehr und müssen manuell ersetzt werden.

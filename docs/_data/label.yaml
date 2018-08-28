@@ -5,8 +5,11 @@ language:
   en: "English"
   de: "Deutsch"
 maintained_by:
-  en: "Maintained by the fischertechnik community"
-  de: "Erstellt von der fischertechnik community"
+  en: "Maintained by the fischertechnik community on GitHub"
+  de: "Erstellt von der fischertechnik community auf GitHub"
+community:
+  en: "Website of the fischertechnik community"
+  de: "Website der fischertechnik community"
 home:
   de: "Startseite"
   en: "Home"

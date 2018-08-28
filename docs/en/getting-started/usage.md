@@ -1,15 +1,16 @@
 ---
 nav-title: Usage
+nav-pos: 2
 ---
 # Using the community firmware GUI
 
-When the TXT is done booting, you should see the launcher with its circular icons:
+When the TXT is done booting, you should see the launcher with its menu folder and its circular icons:
 
-![Launcher](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/txt_cw.jpg "example image with other apps")
+![Launcher](../../media/txt_cw.jpg "example image with other apps")
 
 The black status bar at the top of the launcher displays the current time and some symbols that show if the TXT ist connected to a network and other system information. Tapping on the status bar displays some more details:
  
-![Launcher](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/launcher-with-info-menu.png "launcher with system info details")
+![Launcher](../../media/launcher-with-info-menu.png "launcher with system info details")
 
 Tapping in the blurry area below the info display takes you back to the launcher.
 
@@ -17,11 +18,11 @@ If more than nine apps are installed on the TXT, you can scroll forward through 
 
 Finally, tapping one of the circular app icons will start the corresponding app &mdash; in this example, the "About" app that displays some information about the community firmware:
  
-![About](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/about.png "screenshot of the 'about' app")
+![About](../../media/about.png "screenshot of the 'about' app")
 
 Some apps &mdash; like the about app &mdash; provide additional options that can be accessed by tapping the "three bars" symbol to the left of the title bar:
 
-![About](https://raw.githubusercontent.com/wiki/ftCommunity/ftcommunity-TXT/about-with-menu.png "screenshot of the 'about' app with ")
+![About](../../media/about-with-menu.png "screenshot of the 'about' app with open menu")
 
 Tapping the "x" to the right of the title bar or a short press (one second or less) of the hardware "on/off" button will stop the app and take you back to the launcher screen.
 
@@ -31,7 +32,7 @@ Pressing the hardware "on/off" button for two seconds or more will shut down the
 
 You can use the "WiFi" app to set up a connection to your local WiFi network. 
 
-Connection settings are automatically persisted on the SD card, and the TXT will automatically reconnect to a known WiFi network on the next boot. If the TXT is connected to a WiFi network, a small WiFi symbol will be shown in the 
+Connection settings are automatically persisted on the SD card, and the TXT will automatically reconnect to a known WiFi network on the next boot. If the TXT is connected to a WiFi network, a small WiFi symbol will be shown in the upper left corner
 
 # Accessing the web interface
 
