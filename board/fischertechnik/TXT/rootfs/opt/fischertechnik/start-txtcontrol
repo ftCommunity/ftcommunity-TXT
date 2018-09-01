@@ -19,24 +19,24 @@ kill_txtcontrol() {
 
 case "$1" in
   start|start-service)
-    touch /rom/run/txtcontrol-service
+    touch /run/txtcontrol-service
     start_txtcontrol
     ;;
   stop-service)
-    rm -f /rom/run/txtcontrol-service
+    rm -f /run/txtcontrol-service
     kill_txtcontrol
     ;;
   start-main)
-    touch /rom/run/txtcontrol-app
+    touch /run/txtcontrol-app
     start_txtcontrol
     ;;
   stop-main)
-    rm -f /rom/run/txtcontrol-app
+    rm -f /run/txtcontrol-app
     kill_txtcontrol
     ;;
   stop)
-    rm -f /rom/run/txtcontrol-app
-    rm -f /rom/run/txtcontrol-service
+    rm -f /run/txtcontrol-app
+    rm -f /run/txtcontrol-service
     kill_txtcontrol
     ;;
   restart)
