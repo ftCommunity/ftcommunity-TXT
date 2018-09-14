@@ -11,10 +11,9 @@ buildroot/Makefile:
 buildroot/.config:
 	BR2_EXTERNAL=.. make -C buildroot fischertechnik_TXT_defconfig
 
-version := $(shell cat buildroot/output/target/etc/fw-ver.txt)
-zipfile := ftcommunity-txt-$(version).zip
-imagedir := buildroot/output/images
-
 release:
+	$(eval version := $(shell cat buildroot/output/target/etc/fw-ver.txt))
+	$(eval zipfile := ftcommunity-txt-$(version).zip)
+	$(eval imagedir := buildroot/output/images)
 	rm -f $(zipfile)
 	zip -j $(zipfile) $(imagedir)/am335x-kno_txt.dtb $(imagedir)/rootfs.img $(imagedir)/uImage
