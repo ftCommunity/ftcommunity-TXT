@@ -8,11 +8,9 @@ buildroot/Makefile:
 buildroot/.config:
 	BR2_EXTERNAL=.. make -C buildroot fischertechnik_TXT_defconfig
 
-zipdir = build
-
 release:
 	$(eval version := $(shell cat buildroot/output/target/etc/fw-ver.txt))
-	$(eval zipfile := $(zipdir)/ftcommunity-txt-$(version).zip)
+	$(eval zipfile := build/ftcommunity-txt-$(version).zip)
 	$(eval imagedir := buildroot/output/images)
 	if [ ! -f $(imagedir)/rootfs.img ]; then make; fi
 	mkdir -p $(zipdir)
