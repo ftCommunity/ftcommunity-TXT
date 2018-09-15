@@ -8,7 +8,7 @@ case $(cat /rom/etc/sysversion)  in
     [0123].*|4.[0123].*|4.4.[012]*)
         # normal reboot hangs on firmware versions  < 4.4.3
         # workaround: set a short rtc wakeup timer and power off instead
-        echo +15 > /sys/class/rtc/rtc0/wakealarm
+        echo +15 > /sys/class/rtc/rtc1/wakealarm
         exec /bin/busybox poweroff
         ;;
     *)
