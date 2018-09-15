@@ -4,5 +4,5 @@ if [ "$(whoami)" != "root" ]; then
   exit 1
 fi
 /bin/launcher-msg "Rebooting..."
-echo +15 > /sys/class/rtc/rtc0/wakealarm
+echo +15 > /sys/class/rtc/rtc1/wakealarm
 exec /bin/busybox poweroff
