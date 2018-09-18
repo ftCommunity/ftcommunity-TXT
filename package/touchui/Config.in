@@ -1,0 +1,51 @@
+comment "Enable Qt to enable TouchUI"
+  depends on !BR2_PACKAGE_QT
+comment "Enable Qt/JPEG Support to enable TouchUI"
+  depends on BR2_PACKAGE_QT_NOJPEG
+comment "Enable Qt/PNG Support to enable TouchUI"
+  depends on BR2_PACKAGE_QT_NOPNG
+
+config BR2_PACKAGE_TOUCHUI
+  bool "TouchUI"
+  depends on BR2_PACKAGE_QT
+  depends on BR2_PACKAGE_QT_SYSTEMJPEG
+  depends on BR2_PACKAGE_QT_SYSTEMPNG
+  select BR2_PACKAGE_QT_LICENSE_APPROVED
+  select BR2_PACKAGE_QT_ARCH_SUPPORTS_WEBKIT
+  select BR2_PACKAGE_QT_ARCH_SUPPORTS_SCRIPT
+  select BR2_PACKAGE_QT_OPENSSL
+  select BR2_PACKAGE_QT_KEYBOARD_TTY
+  select BR2_PACKAGE_QT_MOUSE_TSLIB
+  select BR2_PACKAGE_QT_MOUSE_NO_QWS_CURSOR
+  select BR2_PACKAGE_QT_GFX_TRANSFORMED
+  select BR2_PACKAGE_PYTHON_PYQT
+  select BR2_PACKAGE_PYTHON_PYQT_ARCH_USES_QREAL_FLOAT
+  help
+    TouchUI is a simple desktop environment
+    It can handle apps and plugins
+
+  config BR2_PACKAGE_TOUCHUI_INITD_ENABLE
+    depends on BR2_PACKAGE_TOUCHUI
+    bool "add to init.d"
+    default y
+
+  if BR2_PACKAGE_TOUCHUI_INITD_ENABLE
+    config BR2_PACKAGE_TOUCHUI_INITD_NAME
+      string "init.d filename"
+      default S90touchui
+  endif
+
+  config BR2_PACKAGE_TOUCHUI_USER
+    depends on BR2_PACKAGE_TOUCHUI
+    string "username for touchui and user apps folder"
+
+  config BR2_PACKAGE_TOUCHUI_VNC_SUPPORT
+    depends on BR2_PACKAGE_TOUCHUI
+    bool "VNC SERVER (disabled by default)"
+    select BR2_PACKAGE_QT_GFX_VNC
+    select BR2_PACKAGE_QT_GFX_MULTISCREEN
+
+  comment "Enable VNC server only if you have a firewall which prevents it from beeing use without authentication"
+  config BR2_PACKAGE_TOUCHUI_VNC_ENABLE
+    depends on BR2_PACKAGE_TOUCHUI_VNC_SUPPORT
+    bool "VNC server autostart"
