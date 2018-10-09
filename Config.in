@@ -1,4 +1,5 @@
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/ft_bt_remote_server/Config.in"
+source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/libroboint/Config.in"
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/netreq/Config.in"
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-ftrobopy/Config.in"
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-fttxpy/Config.in"
