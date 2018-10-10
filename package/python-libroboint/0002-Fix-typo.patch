@@ -1,0 +1,25 @@
+From bf3785b53ea81a4c0c0c5a7835487f95eb61e777 Mon Sep 17 00:00:00 2001
+From: Raphael Jacob <r.jacob2002@gmail.com>
+Date: Tue, 9 Oct 2018 11:45:55 +0200
+Subject: [PATCH] Fix typo
+
+---
+ robointerface.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/robointerface.py b/robointerface.py
+index 01bb6a0..2e70989 100644
+--- a/robointerface.py
++++ b/robointerface.py
+@@ -99,7 +99,7 @@ class _FT_TRANSFER_AREA(Structure):
+                 ("MPWM_Update", c_ubyte),
+                 ("TransferAktiv", c_ubyte),
+                 ("rsvd11", c_ubyte*3),
+-                ("BudModules", c_ubyte),
++                ("BusModules", c_ubyte),
+                 ("SlotModule1", c_ubyte),
+                 ("SlotModule2", c_ubyte),
+                 ("rsvd12", c_ubyte*7),
+-- 
+2.19.1
+
