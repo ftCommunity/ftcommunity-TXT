@@ -1,0 +1,5 @@
+config BR2_PACKAGE_PYTHON_FTIFPY
+  bool "libroboint"
+  select BR2_PACKAGE_PYTHON_LIBROBOINT
+  help
+    Install Python-ftifpy
