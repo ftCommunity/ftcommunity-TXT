@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-PYTHON_FTIFPY_VERSION = 1.0.0
+PYTHON_FTIFPY_VERSION = 1.0.1
 PYTHON_FTIFPY_SITE = $(call github,ski7777,ftifpy,$(PYTHON_FTIFPY_VERSION))
 PYTHON_FTIFPY_LICENSE = GPL-3.0
 PYTHON_FTIFPY_DEPENDENCIES = python-libroboint
