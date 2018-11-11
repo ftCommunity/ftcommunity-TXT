@@ -99,7 +99,7 @@ $ export TXT_IP=192.168.7.2
 
 You can even place this into the `.bashrc` file in your home directory so you don't have to care at all anymore. The same app will run on the TXT and on your PC.
 
-Before executing the app on your PC, you have to start the FT-GUI on your TXT. 
+**Before executing the app on your PC, you have to start the FT-GUI on your TXT.**
 
 The whole program now looks like this:
 ```

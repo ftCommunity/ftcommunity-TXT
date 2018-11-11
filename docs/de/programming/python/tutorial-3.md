@@ -100,7 +100,7 @@ $ export TXT_IP=192.168.7.2
 ```
 
 Unter Linux kannst du diesen Befehl in der Datei `.bashrc` in deinem Home-Verzeichnis setzen, so dass du dich in Zukunft nicht mehr darum kümmern musst. 
-Die App läuft jetzt auf dem TXT und auf dem PC. Wenn du die App auf dem PC ausführen willst, musst du auf deinem TXT die App FT-GUI starten.
+Die App läuft jetzt auf dem TXT und auf dem PC. **Wenn du die App auf dem PC ausführen willst, musst du auf deinem TXT die App FT-GUI starten.**
 Das vollständige Programm sieht jetzt so aus:
 
 ```
