@@ -2,7 +2,7 @@
 
 ## Quick start
 
-Please use the [installation quide](http://cfw.ftcommunity.de/ftcommunity-TXT/en/getting-started/installation.html) or the [Deutsche Kurzanleitung (installation guide in german)](http://cfw.ftcommunity.de/ftcommunity-TXT/de/getting-started/installation.html) for a quick start. More infos can be found on the [web site](http://cfw.ftcommunity.de/)
+Please use the [installation guide](http://cfw.ftcommunity.de/ftcommunity-TXT/en/getting-started/installation.html) or the [Deutsche Kurzanleitung (installation guide in german)](http://cfw.ftcommunity.de/ftcommunity-TXT/de/getting-started/installation.html) for a quick start. More infos can be found on the [web site](http://cfw.ftcommunity.de/)
 
 ## What is this and why would I want this?
 
