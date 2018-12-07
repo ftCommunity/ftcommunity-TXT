@@ -34,19 +34,6 @@
 	};
 
 
-	kim {
-		compatible = "kim";
-		nshutdown_gpio = <97>;  /* Bank3, pin1 */
-		dev_name = "/dev/ttyO3";
-		flow_cntrl = <1>;
-		baud_rate = <3000000>;
-	};
-
-	btwilink {
-		compatible = "btwilink";
-	};
-
-
 	gpio_buttons: gpio_buttons@0 {
 		compatible = "gpio-keys";
 		#address-cells = <1>;
