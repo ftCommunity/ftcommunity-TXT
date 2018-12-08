@@ -561,9 +561,10 @@
 	pinctrl-0 = <&mmc3_pins_default &wlan_pins>;
 	pinctrl-1 = <&mmc3_pins_sleep &wlan_pins>;
 
+	non-removable;
 	ti,non-removable;
 	ti,needs-special-hs-handling;
-	/*cap-power-off-card;*/
+	cap-power-off-card;
 	keep-power-in-suspend;
 	wlcore: wlcore@0 {
 		compatible = "ti,wl1831";
