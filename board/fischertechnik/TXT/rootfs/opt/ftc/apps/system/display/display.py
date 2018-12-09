@@ -41,6 +41,9 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.calibrate = QPushButton(QCoreApplication.translate("main", "Calibrate\ntouchscreen"))
         self.calibrate.clicked.connect(self.on_calibrate_touchscreen)
         self.vbox.addWidget(self.calibrate)
+        self.savecalibration = QPushButton(QCoreApplication.translate("main", "Save\ncalibration"))
+        self.savecalibration.clicked.connect(self.on_unset_reset_calibration_flag)
+        self.vbox.addWidget(self.savecalibration)
         self.mainWindow.show()
 
     def on_calibrate_touchscreen(self):
