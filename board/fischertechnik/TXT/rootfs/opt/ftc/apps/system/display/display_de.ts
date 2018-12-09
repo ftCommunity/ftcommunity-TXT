@@ -11,12 +11,12 @@ touchscreen</source>
 kalibrieren</translation>
     </message>
     <message>
-        <location filename="display.py" line="54"/>
+        <location filename="display.py" line="57"/>
         <source>Activating new touchscreen calibration...</source>
         <translation>Übernehme neue Touchscreen-Kalibrierung...</translation>
     </message>
     <message>
-        <location filename="display.py" line="61"/>
+        <location filename="display.py" line="64"/>
         <source>Rotating screen to %i...</source>
         <translation>Bildschirm wird gedreht (%i°)...</translation>
     </message>
@@ -46,19 +46,26 @@ kalibrieren</translation>
         <translation>Bildschirm</translation>
     </message>
     <message>
-        <location filename="display.py" line="94"/>
+        <location filename="display.py" line="97"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="display.py" line="93"/>
+        <location filename="display.py" line="96"/>
         <source>Do you really want to save the current touchscreen calibration?</source>
         <translation>Möchten Siedie neue Kalibrierung wirklich speichern? </translation>
     </message>
     <message>
-        <location filename="display.py" line="97"/>
+        <location filename="display.py" line="100"/>
         <source>No</source>
         <translation>Nein</translation>
+    </message>
+    <message>
+        <location filename="display.py" line="44"/>
+        <source>Save
+calibration</source>
+        <translation>Kalibrierung
+Speichern</translation>
     </message>
 </context>
 </TS>
