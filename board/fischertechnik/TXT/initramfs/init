@@ -16,7 +16,7 @@ mount -t devtmpfs devtmpfs /dev
 mkdir -p /dev/pts
 mkdir -p /dev/shm
 
-if ! [ -b /dev/mmcblk0p2 ] ; then
+if ! [ -b /dev/mmcblk1p2 ] ; then
   if ! /repartition-sd-card ; then
      echo "failed to repartition the SD card. Dropping to a shell"
      exec /bin/sh
@@ -24,8 +24,8 @@ if ! [ -b /dev/mmcblk0p2 ] ; then
 fi
 
 # mount SD card partitions.
-mount -t vfat /dev/mmcblk0p1 /media/sdcard/boot -o dmask=022,fmask=133,flush
-mount -t ext4 /dev/mmcblk0p2 /media/sdcard/data
+mount -t vfat /dev/mmcblk1p1 /media/sdcard/boot -o dmask=022,fmask=133,flush
+mount -t ext4 /dev/mmcblk1p2 /media/sdcard/data
 mount -t squashfs /media/sdcard/boot/rootfs.img /media/sdcard/root -o loop,ro
 
 ROM_VERSION=$(cat /media/sdcard/root/etc/fw-ver.txt)

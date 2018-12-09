@@ -9,8 +9,6 @@ case "$1" in
   start)
 	printf "Starting bluetooth: "
         if [ -f $ENABLE_FLAG ]; then
-	    uim &
-	    modprobe btwilink
 	    bluetoothd
 	    hciconfig hci0 up piscan
 	    echo "OK"
@@ -23,8 +21,6 @@ case "$1" in
         if [ -f $ENABLE_FLAG ]; then
 	    hciconfig hci0 down
 	    killall bluetoothd
-	    killall uim
-	    rmmod btwilink
 	    echo "OK"
 	else
 	    echo "SERVICE DISABLED"
