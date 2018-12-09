@@ -49,6 +49,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.mainWindow = TouchBaseWidget()
         self.mainWindow.show()
         old_window.close()
+        subprocess.run(["sudo", "/sbin/set-touchscreen-calibration-reset-flag"])
         subprocess.run(["sudo", "TSLIB_TSDEVICE=/dev/input/event0", "/usr/bin/ts_calibrate"])
         self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
