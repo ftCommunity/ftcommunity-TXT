@@ -83,6 +83,21 @@ class DisplaySettingsPlugin(LauncherPlugin):
     def do_restart_launcher(self):
         subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])
 
+    def unset_reset_calibration_flag(self):
+        subprocess.run(["sudo", "/sbin/unset-touchscreen-calibration-reset-flag"])
+
+    def on_unset_reset_calibration_flag(self):
+        msg = TouchMessageBox(QCoreApplication.translate("main", "Save"))
+        msg.addConfirm()
+        msg.setCancelButton()
+        msg.setText(QCoreApplication.translate("main", "Do you really want to save the current touchscreen calibration?"))
+        msg.setPosButton(QCoreApplication.translate("main", "Save"))
+        msg.setNegButton(QCoreApplication.translate("main", "No"))
+        success, text = msg.exec_()
+        if success == False or text == QCoreApplication.translate("main", "No"):
+            return
+        self.unset_reset_calibration_flag()
+
 
 if __name__ == "__main__":
     class FtcGuiApplication(TouchApplication):
