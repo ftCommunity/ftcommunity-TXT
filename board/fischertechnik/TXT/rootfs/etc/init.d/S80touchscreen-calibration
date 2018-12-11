@@ -1,7 +1,7 @@
 #!/bin/sh
 
 start() {
-  if [ ! -f /etc/reset-touchscreen-calibration ]; then
+  if [ -f /etc/reset-touchscreen-calibration ]; then
     cp /media/sdcard/root/etc/pointercal /etc/pointercal
     rm /etc/reset-touchscreen-calibration
   fi

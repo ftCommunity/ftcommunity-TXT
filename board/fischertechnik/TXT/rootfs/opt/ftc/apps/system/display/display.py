@@ -90,7 +90,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         subprocess.run(["sudo", "/sbin/unset-touchscreen-calibration-reset-flag"])
 
     def on_unset_reset_calibration_flag(self):
-        msg = TouchMessageBox(QCoreApplication.translate("main", "Save"))
+        msg = TouchMessageBox(QCoreApplication.translate("main", "Save"), self.mainWindow)
         msg.addConfirm()
         msg.setCancelButton()
         msg.setText(QCoreApplication.translate("main", "Do you really want to save the current touchscreen calibration?"))
