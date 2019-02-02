@@ -7,7 +7,7 @@ nav-pos: 1
 
 Du brauchst ein paar Dinge, um die Community-Firmware erstellen zu können.
 
-## Benötigt:
+## Benötigt wird:
 1.  Ein Linux-System mit mindestens 20GB freiem Speicherplatz (*sowie einen schnellen CPU und eine schnelle Internetverbindung*)
 
     (***Die folgende Anleitung basiert auf Ubuntu, sollte jedoch auch auf anderen Distributionen funktionieren***).
