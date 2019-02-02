@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_FTFRAMEWORK
+	bool "python-ftframework"
+	depends on BR2_PACKAGE_PYTHON3
+	select BR2_PACKAGE_PYTHON_TWISTED
+	help
+		This framework is designed for controlling big fischertehnik models with multiple computers.
+		https://github.com/ski7777/ftframework
