@@ -52,7 +52,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.mainWindow = TouchBaseWidget()
         self.mainWindow.show()
         old_window.close()
-        subprocess.run(["sudo", "calibrate-touchscreen", "calibrate"])
+        subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "calibrate"])
         self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
     def on_change_orientation(self, index):
@@ -86,7 +86,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])
 
     def unset_reset_calibration_flag(self):
-        subprocess.run(["sudo", "/bin/calibrate-touchscreen", "commit"])
+        subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "commit"])
 
     def on_unset_reset_calibration_flag(self):
         msg = TouchMessageBox(QCoreApplication.translate("main", "Save"), self.mainWindow)
