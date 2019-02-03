@@ -1,0 +1,32 @@
+#!/bin/sh
+
+calibrate() {
+	sudo TSLIB_TSDEVICE=/dev/input/event0 /usr/bin/ts_calibrate
+	/sbin/set-touchscreen-calibration-reset-flag
+}
+
+commit() {
+	/sbin/unset-touchscreen-calibration-reset-flag
+}
+
+reset() {
+	cp /media/sdcard/root/etc/pointercal /etc/pointercal
+	commit
+}
+
+case "$1" in
+        calibrate)
+                calibrate
+                ;;
+        commit)
+                commit
+                ;;
+
+        reset)
+                reset
+                ;;
+
+        *)
+                echo "Usage: $0 {calibrate|commit|reset}"
+                exit 1
+esac
