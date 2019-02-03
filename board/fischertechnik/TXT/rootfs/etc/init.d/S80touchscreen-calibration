@@ -1,7 +1,7 @@
 #!/bin/sh
 
 start() {
-  if [ -f /home/ftc/.reset-touchscreen-calibration ]; then
+  if [ -f /etc/.reset-touchscreen-calibration ]; then
     calibrate-touchscreen reset
   fi
 }
