@@ -52,7 +52,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.mainWindow = TouchBaseWidget()
         self.mainWindow.show()
         old_window.close()
-        subprocess.run(["sudo", "/sbin/set-touchscreen-calibration-reset-flag"])
+        subprocess.run(["/sbin/set-touchscreen-calibration-reset-flag"])
         subprocess.run(["sudo", "TSLIB_TSDEVICE=/dev/input/event0", "/usr/bin/ts_calibrate"])
         self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
@@ -87,7 +87,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])
 
     def unset_reset_calibration_flag(self):
-        subprocess.run(["sudo", "/sbin/unset-touchscreen-calibration-reset-flag"])
+        subprocess.run(["/sbin/unset-touchscreen-calibration-reset-flag"])
 
     def on_unset_reset_calibration_flag(self):
         msg = TouchMessageBox(QCoreApplication.translate("main", "Save"), self.mainWindow)

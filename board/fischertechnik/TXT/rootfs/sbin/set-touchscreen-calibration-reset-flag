@@ -1,2 +1,2 @@
 #!/bin/sh
-touch /etc/reset-touchscreen-calibration
+touch /home/ftc/.reset-touchscreen-calibration
