@@ -26,6 +26,14 @@ case "$1" in
                 reset
                 ;;
 
+        is-uncommitted)
+                if [ -f /home/ftc/.reset-touchscreen-calibration ]; then
+                    exit 0;
+                 else
+                    exit 1;
+                 fi
+                 ;;
+
         *)
                 echo "Usage: $0 {calibrate|commit|reset}"
                 exit 1
