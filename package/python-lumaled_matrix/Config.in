@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_LUMALED_MATRIX
+	bool "python-lumaled_matrix"
+	select BR2_PACKAGE_PYTHON_LUMACORE # runtime
+	help
+	  A library to drive a MAX7219 LED serializer (using SPI) and
+	  WS2812 NeoPixels (using DMA).
+
+	  https://github.com/rm-hull/luma.led_matrix

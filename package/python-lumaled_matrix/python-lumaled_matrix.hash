@@ -1,0 +1,5 @@
+# md5, sha256 from https://pypi.org/pypi/luma.led_matrix/json
+md5	196bdc8a247db14da18be05b84aeb5b4  luma.led_matrix-1.1.1.tar.gz
+sha256	275c3f3d286da157327aabf6653350d3bb365ea21140544ce62ed4985b96120a  luma.led_matrix-1.1.1.tar.gz
+# Locally computed sha256 checksums
+sha256	0e73ce77e7f847de0cf335bd8f3a20be0acf0c198149a05b1a112203961c26c4  LICENSE.rst

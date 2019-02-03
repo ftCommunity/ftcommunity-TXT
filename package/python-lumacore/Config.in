@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_LUMACORE
+	bool "python-lumacore"
+	select BR2_PACKAGE_PYTHON_PILLOW # runtime
+	select BR2_PACKAGE_PYTHON_SMBUS2 # runtime
+	help
+	  A component library to support SBC display drivers.
+
+	  https://github.com/rm-hull/luma.core
