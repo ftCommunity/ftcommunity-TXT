@@ -2,15 +2,15 @@
 
 calibrate() {
 	sudo TSLIB_TSDEVICE=/dev/input/event0 /usr/bin/ts_calibrate
-	/sbin/set-touchscreen-calibration-reset-flag
+	touch /home/ftc/.reset-touchscreen-calibration
 }
 
 commit() {
-	/sbin/unset-touchscreen-calibration-reset-flag
+	rm -f /home/ftc/.reset-touchscreen-calibration
 }
 
 reset() {
-	cp -f /media/sdcard/root/etc/pointercal /etc/pointercal
+	sudo reset-touchscreen-calibration
 	commit
 }
 

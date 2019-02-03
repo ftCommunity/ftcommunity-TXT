@@ -1,0 +1,2 @@
+#!/bin/sh
+cp -f /media/sdcard/root/etc/pointercal /etc/pointercal
