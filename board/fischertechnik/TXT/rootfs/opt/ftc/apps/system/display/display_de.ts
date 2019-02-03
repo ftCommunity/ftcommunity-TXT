@@ -53,7 +53,7 @@ kalibrieren</translation>
     <message>
         <location filename="display.py" line="96"/>
         <source>Do you really want to save the current touchscreen calibration?</source>
-        <translation>Möchten Siedie neue Kalibrierung wirklich speichern? </translation>
+<translation>Möchten Sie die neue Kalibrierung wirklich speichern? </translation>
     </message>
     <message>
         <location filename="display.py" line="100"/>
