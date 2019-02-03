@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de" sourcelanguage="en">
+<TS version="2.0" language="de" sourcelanguage="en">
 <context>
     <name>main</name>
     <message>
@@ -11,12 +11,12 @@ touchscreen</source>
 kalibrieren</translation>
     </message>
     <message>
-        <location filename="display.py" line="53"/>
+        <location filename="display.py" line="57"/>
         <source>Activating new touchscreen calibration...</source>
         <translation>Übernehme neue Touchscreen-Kalibrierung...</translation>
     </message>
     <message>
-        <location filename="display.py" line="60"/>
+        <location filename="display.py" line="64"/>
         <source>Rotating screen to %i...</source>
         <translation>Bildschirm wird gedreht (%i°)...</translation>
     </message>
@@ -44,6 +44,28 @@ kalibrieren</translation>
         <location filename="display.py" line="19"/>
         <source>Display</source>
         <translation>Bildschirm</translation>
+    </message>
+    <message>
+        <location filename="display.py" line="97"/>
+        <source>Save</source>
+        <translation>Speichern</translation>
+    </message>
+    <message>
+        <location filename="display.py" line="96"/>
+        <source>Do you really want to save the current touchscreen calibration?</source>
+<translation>Möchten Sie die neue Kalibrierung wirklich speichern? </translation>
+    </message>
+    <message>
+        <location filename="display.py" line="100"/>
+        <source>No</source>
+        <translation>Nein</translation>
+    </message>
+    <message>
+        <location filename="display.py" line="44"/>
+        <source>Save
+calibration</source>
+        <translation>Kalibrierung
+Speichern</translation>
     </message>
 </context>
 </TS>

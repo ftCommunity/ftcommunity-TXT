@@ -41,6 +41,9 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.calibrate = QPushButton(QCoreApplication.translate("main", "Calibrate\ntouchscreen"))
         self.calibrate.clicked.connect(self.on_calibrate_touchscreen)
         self.vbox.addWidget(self.calibrate)
+        self.savecalibration = QPushButton(QCoreApplication.translate("main", "Save\ncalibration"))
+        self.savecalibration.clicked.connect(self.on_unset_reset_calibration_flag)
+        self.vbox.addWidget(self.savecalibration)
         self.mainWindow.show()
 
     def on_calibrate_touchscreen(self):
@@ -49,7 +52,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.mainWindow = TouchBaseWidget()
         self.mainWindow.show()
         old_window.close()
-        subprocess.run(["sudo", "TSLIB_TSDEVICE=/dev/input/event0", "/usr/bin/ts_calibrate"])
+        subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "calibrate"])
         self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
     def on_change_orientation(self, index):
@@ -81,6 +84,21 @@ class DisplaySettingsPlugin(LauncherPlugin):
 
     def do_restart_launcher(self):
         subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])
+
+    def unset_reset_calibration_flag(self):
+        subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "commit"])
+
+    def on_unset_reset_calibration_flag(self):
+        msg = TouchMessageBox(QCoreApplication.translate("main", "Save"), self.mainWindow)
+        msg.addConfirm()
+        msg.setCancelButton()
+        msg.setText(QCoreApplication.translate("main", "Do you really want to save the current touchscreen calibration?"))
+        msg.setPosButton(QCoreApplication.translate("main", "Save"))
+        msg.setNegButton(QCoreApplication.translate("main", "No"))
+        success, text = msg.exec_()
+        if success == False or text == QCoreApplication.translate("main", "No"):
+            return
+        self.unset_reset_calibration_flag()
 
 
 if __name__ == "__main__":
