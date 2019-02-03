@@ -10,7 +10,7 @@ commit() {
 }
 
 reset() {
-	cp /media/sdcard/root/etc/pointercal /etc/pointercal
+	cp -f /media/sdcard/root/etc/pointercal /etc/pointercal
 	commit
 }
 
