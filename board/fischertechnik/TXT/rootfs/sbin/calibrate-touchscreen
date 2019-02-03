@@ -5,13 +5,13 @@ calibrate() {
 	touch /etc/.reset-touchscreen-calibration
 }
 
-commit() {
+unsetflag() {
 	rm -f /home/ftc/.reset-touchscreen-calibration
 }
 
 reset() {
 	cp -f /media/sdcard/root/etc/pointercal /etc/pointercal
-	commit
+	unsetflag
 }
 
 case "$1" in
@@ -19,7 +19,7 @@ case "$1" in
                 calibrate
                 ;;
         commit)
-                commit
+                unsetflag
                 ;;
 
         reset)
