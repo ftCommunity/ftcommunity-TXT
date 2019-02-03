@@ -2,4 +2,4 @@
 ## for changing display settings
 
 Defaults!/usr/bin/ts_calibrate env_keep=TSLIB_TSDEVICE
-ftc     ALL = NOPASSWD: /usr/bin/ts_calibrate, /etc/init.d/S90launcher restart, /sbin/set-touchscreen-calibration-reset-flag, /sbin/unset-touchscreen-calibration-reset-flag
+ftc     ALL = NOPASSWD: /usr/bin/ts_calibrate, /etc/init.d/S90launcher restart, /sbin/set-touchscreen-calibration-reset-flag
