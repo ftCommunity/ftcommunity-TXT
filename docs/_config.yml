@@ -1,3 +1,4 @@
+url: https://cfw.ftcommunity.de
 repository: ftCommunity/ftcommunity-TXT
 gems:
   - jekyll-github-metadata

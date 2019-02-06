@@ -1,22 +1,38 @@
 ---
 layout: postprocess-kramdown
 ---
+{% assign edit-repository-url = page.edit-repository-url | default: site.github.repository_url %}
+{% assign edit-repository-path-default = "/docs" | append: page.dir %}
+{% assign edit-repository-path = page.edit-repository-path | default: edit-repository-path-default %}
+{% capture lang %}{{ page.url | slice: 1, 2 }}{% endcapture %}
+{% capture path %}{{ page.url | slice: 4, 100000 }}{% endcapture %}
+{% assign label = site.data.label %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ lang }}">
   <head>
     <title>fischertechnik TXT community firmware</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{{site.baseurl}}/favicon.ico" type="image/x-icon"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{site.baseurl}}/apple-touch-icon.png">
+    <meta property="og:image" content="{{ site.url }}{{site.baseurl}}/preview.jpg">
     <link rel="stylesheet" href="{{site.baseurl}}/css/screen.css" type="text/css" media="screen" />
+    <link rel="manifest" href="{{site.baseurl}}/pwa/manifest_{{ lang }}.json">
+    <link href="{{site.baseurl}}/pwa/splashscreens/iphone5_splash.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/iphone6_splash.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/iphoneplus_splash.png" media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/iphonex_splash.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/iphonexr_splash.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/iphonexsmax_splash.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/ipad_splash.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/ipadpro1_splash.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/ipadpro3_splash.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <link href="{{site.baseurl}}/pwa/splashscreens/ipadpro2_splash.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <meta name="msapplication-config" content="{{site.baseurl}}/ieconfig.xml" />
+    <meta name="description" content="{{ label.description[lang] }}" />
+    <meta name="theme-color" content="#448acc">
   </head>
-  <body lang="{{ lang }}">
-    {% assign edit-repository-url = page.edit-repository-url | default: site.github.repository_url %}
-    {% assign edit-repository-path-default = "/docs" | append: page.dir %}
-    {% assign edit-repository-path = page.edit-repository-path | default: edit-repository-path-default %}
-    {% capture lang %}{{ page.url | slice: 1, 2 }}{% endcapture %}
-    {% capture path %}{{ page.url | slice: 4, 100000 }}{% endcapture %}
-    {% assign label = site.data.label %}
+  <body>
     <header>
       <div id="nav-toggle-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
@@ -25,7 +41,7 @@ layout: postprocess-kramdown
       </div>
       <div class="fork-me-wrapper">
         <div class="fork-me">
-          <a class="fork-me-link" href="{{ site.github.repository_url }}">
+          <a class="fork-me-link" href="{{ site.github.repository_url }}" aria-label="Fork me on GitHub">
             <span class="fork-me-text">Fork me on GitHub</span>
           </a>
         </div>
@@ -106,5 +122,16 @@ layout: postprocess-kramdown
         <span id="footerTxt3">{{ label.edit_page[lang] }}</span>
       </a>
     </footer>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('{{site.baseurl}}/sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
