@@ -6,7 +6,7 @@ calibrate() {
 }
 
 unsetflag() {
-	rm -f /home/ftc/.reset-touchscreen-calibration
+	rm -f /etc/.reset-touchscreen-calibration
 }
 
 reset() {
@@ -27,7 +27,7 @@ case "$1" in
                 ;;
 
         is-uncommitted)
-                if [ -f /home/ftc/.reset-touchscreen-calibration ]; then
+                if [ -f /etc/.reset-touchscreen-calibration ]; then
                     exit 0;
                  else
                     exit 1;
