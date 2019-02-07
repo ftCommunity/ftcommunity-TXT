@@ -14,7 +14,7 @@ Du brauchst:
 Die Installation erfolgt in vier einfachen Schritten:
 
   1. Stelle sicher, dass du mindestens RoboPro Version 4.2.4 verwendest. Wir empfehlen die aktuelle Version 4.4.4.
-  1. Stelle deinen TXt so ein, dass er von einer SD-Karte booten kann.
+  1. Stelle deinen TXT so ein, dass er von einer SD-Karte booten kann.
   1. Entpacke die drei im [Community-Firmware-ZIP-Archiv](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/latest) enthaltenen Dateien auf deine MicroSD-Karte.
   1. Stecke die MicroSD-Karte in deinen TXT und schalte ihn ein!
 
