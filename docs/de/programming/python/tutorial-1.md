@@ -44,7 +44,7 @@ Das Manifest ist eine Textdatei mit den **Eigenschaften** der Anwendung:
  * **name** ist der Name der Anwendung, der im Launcher und in der Weboberfläche verwendet wird (_5-15 Zeichen lang_).
  * **icon** ist der Name des Icons. Normalerweise heißt es "icon.png".
  * **desc** ist eine kurze Beschreibung (_aktuell nur in der Weboberfläche verwendet_).
- * **exec** ist der Name des Skripts (_Im Beispiel "Test.py"_).
+ * **exec** ist der Name des Skripts (_Im Beispiel "test.py"_).
  * **uuid** ist eine [eindeutige identifikationsnummer](https://de.wikipedia.org/wiki/Universally_Unique_Identifier), die am TXT verwendet wird, damit es keine Konfusionen zwischen Anwendungsdaten gibt. UUIDs können auch Online generiert werden., z.B. [hier](https://www.famkruithof.net/uuid/uuidgen). Die UUID wird auch verwendet, um das Verzeichnis für die App auf dem TXT zu erzeugen. Du musst für jeden App eine eigenne ID verwenden.
  * **managed** ist aktuell unbenutzt (_sollte aber trotzdem auf "**yes**" gesetzt werden._). Aktuell gibt es nur an, ob eine Benutzeroberfläche vorhanden ist. (_Später kann damit das Framework angegeben werden_).
  * **version** ist die Versionsnummer der Anwendung.
@@ -72,7 +72,7 @@ Ein Beispiel kannst du [hier](../../../en/programming/python/icon.png) finden.
 
 Jetzt hast du die drei Dateien, die für eine TXT-App unbedingt notwendig sind:
 
- * "Test.py", das Programm
+ * "test.py", das Programm
  * "manifest", die Anwendungseigenschaften
  * "icon.png", das Icon
 
