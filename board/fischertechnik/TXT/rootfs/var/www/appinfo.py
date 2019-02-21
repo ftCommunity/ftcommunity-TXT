@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-
 import configparser
 import cgi
-import sys, os, pwd, getpass, socket
+import os, pwd, getpass, socket
 
 print("Content-Type: text/html")
 print("")
@@ -34,12 +33,21 @@ finally:
 arguments = cgi.FieldStorage()
 manifestfile = arguments['manifest'].value
 
+
 def find_owner(filename):
     return pwd.getpwuid(os.stat(filename).st_uid).pw_name
 
-def app_get(manifest, name):
+
+def app_get(manifest, name, default=None):
+    """Returns the value of ``ConfigParser.get('app', name)`` or ``default``.
+
+    :param manifest: configparser.RawConfigParser instance.
+    :param str name: Name of the key.
+    :param default: Default value to return (default: ``None``)
+    :return: Either the value of the key in section "app" or the ``default`` value.
+    """
     if not manifest.has_option('app', name):
-        return None
+        return default
     return manifest.get('app', name)
 
 if os.path.isfile(manifestfile):
@@ -52,11 +60,10 @@ if os.path.isfile(manifestfile):
     name = os.path.join(os.path.basename(group_dir), os.path.basename(app_dir))
     appname = manifest.get('app', 'name')
     description = manifest.get('app', 'desc')
+    iconname = 'icon.png'
     if manifest.has_option('app', 'icon'):
         iconname = os.path.join( "apps", name, manifest.get('app', 'icon'))
-    else:
-        iconname = "icon.png"
-    category = manifest.get('app', 'category')
+    category = app_get(manifest, 'category')
     executable = manifest.get('app', 'exec')
     is_running =  name + "/" + executable == current_executable
     author = app_get(manifest, 'author')
@@ -70,7 +77,6 @@ if os.path.isfile(manifestfile):
     preinstalled = find_owner(manifestfile) != getpass.getuser()
 
     print('<h2>Application details</h2>')
-
     print('<table align="center">')
     print('<tr><td align="center"><img src="' + iconname + '"/></td></tr>')
     print('<tr><td align="center">' + appname + '</td></tr>')
@@ -81,14 +87,13 @@ if os.path.isfile(manifestfile):
     print('<table align="center">')
     if author:
         print('<tr><td><b>Author:</b></td><td>', author, '</td></tr>')
-    print('<tr><td><b>Category:</b></td><td>', category, '</td></tr>')
+    if category is not None:
+        print('<tr><td><b>Category:</b></td><td>', category, '</td></tr>')
     print('<tr><td><b>Description:</b></td><td>', description, '</td></tr>')
-
     print('</table>')
 
     if is_running:
         print('<h2><font color="lightgreen">This app is currently running</font></h2>')
-
     print('<h2>Actions</h2>')
     print('<table align="center">')
 
@@ -103,9 +108,9 @@ if os.path.isfile(manifestfile):
         print('<tr><td><a href="' + stop_url + '">' + 'Stop this application on the TXT' + '</a></td></tr>')
 
     if url:
-        print('<tr><td><a href="'+url+'">' + 'Get more application info' + '</a></td></tr>')
+        print('<tr><td><a href="'+ url +'">' + 'Get more application info' + '</a></td></tr>')
     if html:
-        print('<tr><td><a href="'+html_path+'">' + 'Open local application pages' + '</a></td></tr>')
+        print('<tr><td><a href="'+ html_path +'">' + 'Open local application pages' + '</a></td></tr>')
 
     # only offer to delete apps that were not preinstalled
     # print "Users", find_owner(manifestfile), getpass.getuser(), "<br>"
