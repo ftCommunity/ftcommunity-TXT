@@ -87,7 +87,7 @@ if os.path.isfile(manifestfile):
     print('<table align="center">')
     if author:
         print('<tr><td><b>Author:</b></td><td>', author, '</td></tr>')
-    if category is not None:
+    if category:
         print('<tr><td><b>Category:</b></td><td>', category, '</td></tr>')
     print('<tr><td><b>Description:</b></td><td>', description, '</td></tr>')
     print('</table>')
