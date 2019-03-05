@@ -123,7 +123,11 @@ class HciConfig(ExecThread):
 
 class ServiceEnable(ExecThread):
     def __init__(self, enable):
-        cmd = "sudo /etc/init.d/S60bluetooth "
+        # check for txt init script
+        if os.path.exists("/etc/init.d/S60bluetooth"):
+            cmd = "sudo /etc/init.d/S60bluetooth "
+        else:
+            cmd = "sudo /etc/init.d/bluetooth "
         if enable: cmd += "enable"
         else:      cmd += "disable"        
         super(ServiceEnable,self).__init__(cmd, True)
