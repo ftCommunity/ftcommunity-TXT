@@ -12,7 +12,8 @@ from PyQt4.QtGui import *
 
 # enable special features for the Fischertechnik TXT
 # The TXT can be detected by the presence of /etc/fw-ver.txt
-TXT = os.path.isfile("/etc/fw-ver.txt")
+# Since the TX-Pi hasn't a hardware button, TXT MUST be ``False`` for the TX-Pi
+TXT = os.path.isfile("/etc/fw-ver.txt") and not os.path.isfile('/etc/tx-pi')
 # check for Fischertechnik community firmware app development settings
 DEV = os.path.isfile("/etc/ft-cfw-dev.txt")
 

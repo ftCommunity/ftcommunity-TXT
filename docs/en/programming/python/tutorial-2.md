@@ -29,6 +29,11 @@ $ export PYTHONPATH=/opt/ftc
 $ /opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py
 ```
 
+Note to TX-Pi users: If you get an error "cannot connect to X server", you need to run the following command in advance:
+```
+export DISPLAY=:0.0
+```
+
 Again the path is derived from the UUID in the manifest file of your app.
 
 You'll then see the error messages and debug output on the remote shell.
