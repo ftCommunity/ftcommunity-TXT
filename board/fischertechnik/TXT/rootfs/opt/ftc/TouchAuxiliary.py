@@ -686,7 +686,7 @@ class TouchAuxKeyboard(TouchKeyboard):
         self.result=strg
         
         try:
-            dummy=int(strg)
+            dummy = float(strg.split(";")[0])
             self.tab.setCurrentIndex(2)
         except:
             pass
