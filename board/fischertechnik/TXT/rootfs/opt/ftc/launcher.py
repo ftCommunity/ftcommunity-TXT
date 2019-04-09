@@ -501,10 +501,9 @@ class AppList(list):
                 name = "~" + self[0]["category"]
             else:
                 # escape reserved characters
-                name = self[0]["name"]
-                name = name.replace("&", "&amp;")
-                name = name.replace("~", "&tilda;")
-                name = name.replace("/", "&slash;")
+                name = self[0]["name"].replace("&", "&amp;") \
+                                      .replace("~", "&tilda;") \
+                                      .replace("/", "&slash;")
             path = self[0]["apps"].getPath() + "/" + name
         else:
             path = ""
@@ -723,7 +722,6 @@ class AppPopup(QFrame):
     def on_remove_and_delete(self):
         self.close()
         if self.app_move_one_folder_up():
-            appicon = self.parent()
             icongrid = self.parent().parent()
             if icongrid.apps.parent_folder and "parent" in icongrid.apps.parent_folder:
                 # remove the now empty folder
