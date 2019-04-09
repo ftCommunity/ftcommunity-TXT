@@ -6,8 +6,8 @@
 # (c) 2016-2017 by Till Harbaum
 
 import configparser, datetime
-import sys, os, subprocess, threading
-import socketserver, select, time, locale
+import sys, os, subprocess
+import select, time, locale
 import platform
 import xml.etree.ElementTree as ET
 
@@ -461,7 +461,8 @@ class AppList(list):
         # the locale file
         list.sort(self, key=self.key_name_sort)
 
-    def key_name_sort(self, value):
+    @staticmethod
+    def key_name_sort(value):
         # folders are always "in front" of apps and the "up" folder is
         # always first
         if "exec" in value:
@@ -509,7 +510,8 @@ class AppList(list):
             path = ""
         return path
 
-    def filename(self):
+    @staticmethod
+    def filename():
         return os.path.join(os.path.expanduser("~"), ".launcher.xml")
     
     # export this whole list into an xml file
