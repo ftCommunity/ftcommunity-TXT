@@ -539,7 +539,7 @@ class TouchAuxRequestInteger(TouchDialog):
     
     def exec_(self):
         TouchDialog.exec_(self)
-        print(self.result)
+
         if self.result==self.button: return True, self.dial.value()
         return False, self.initvalue
       
