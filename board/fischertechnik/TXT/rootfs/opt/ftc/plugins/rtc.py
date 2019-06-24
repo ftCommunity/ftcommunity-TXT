@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 # plugin checking for RTC interrupts. Keep quiet if there were none
 
-from PyQt4.QtCore import QCoreApplication
+try:
+    from PyQt5.QtCore import QCoreApplication
+except:
+    from PyQt4.QtCore import QCoreApplication
+
 import os
 
 IRQ_SRC = "tps65910-rtc"

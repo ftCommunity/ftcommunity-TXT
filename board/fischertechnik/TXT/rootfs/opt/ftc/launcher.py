@@ -13,9 +13,19 @@ import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, TouchKeyboard, \
     TXT, BUTTON_THREAD, IS_ARM
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtNetwork import *
+
+# try to prefer PyQt5/Qt5
+try:
+    from PyQt5.QtCore import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtNetwork import *
+    QT5 = True
+except:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    from PyQt4.QtNetwork import *
+    QT5 = False
 
 PLUGINS_DIR = "plugins"
 
@@ -258,7 +268,7 @@ class TouchTopWidget(QWidget):
         self.setLayout(self.top_layout)
         # on arm (TXT), connect to the power button monitor thread
         if BUTTON_THREAD:
-            self.connect(BUTTON_THREAD, SIGNAL("power_button_released()"), self.on_power_button)
+            BUTTON_THREAD.power_button_released.connect(self.on_power_button)
 
     def on_power_button(self):
         # only react if no app is currently running
@@ -840,7 +850,7 @@ class IconGrid(QWidget):
     """The main icon grid
     """
     launch = pyqtSignal(str)
-    open_folder = pyqtSignal(list)
+    open_folder = pyqtSignal(AppList)
 
     def __init__(self, apps):
         super(IconGrid, self).__init__()
@@ -964,12 +974,9 @@ class TcpServer(QTcpServer):
     def addConnection(self):
         clientConnection = self.nextPendingConnection()
         self.connections.append(clientConnection)
-        self.connect(clientConnection, SIGNAL("readyRead()"),
-                self.receiveMessage)
-        self.connect(clientConnection, SIGNAL("disconnected()"), 
-                self.removeConnection)
-        self.connect(clientConnection, SIGNAL("error()"), 
-                self.socketError)
+        clientConnection.readyRead.connect(self.receiveMessage)
+        clientConnection.disconnected.connect(self.removeConnection)
+        clientConnection.error.connect(self.socketError)
 
     def receiveMessage(self):
         # check clients for data

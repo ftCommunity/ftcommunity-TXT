@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 # ethernet link monitoring plugin
 
-from PyQt4.QtCore import QCoreApplication
+try:
+    from PyQt5.QtCore import QCoreApplication
+except:
+    from PyQt4.QtCore import QCoreApplication
+
 import fcntl, socket, struct
 
 def name():
