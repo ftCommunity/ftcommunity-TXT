@@ -9,7 +9,12 @@ import sys, os, io, time
 import configparser, zipfile, shutil
 import semantic_version
 from pathlib import Path
-from PyQt4.QtNetwork import *
+
+try:
+    from PyQt5.QtNetwork import *
+except:
+    from PyQt4.QtNetwork import *
+
 import xml.etree.ElementTree as ET
 
 from TouchStyle import *
