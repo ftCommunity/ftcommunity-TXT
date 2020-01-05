@@ -15,7 +15,7 @@ Die Installation erfolgt in vier einfachen Schritten:
 
   1. Stelle sicher, dass du mindestens RoboPro Version 4.2.4 verwendest. Wir empfehlen die aktuelle Version 4.4.4.
   1. Stelle deinen TXT so ein, dass er von einer SD-Karte booten kann.
-  1. Entpacke die drei im [Community-Firmware-ZIP-Archiv](https://github.com/ftCommunity/ftcommunity-TXT/releases/download/latest) enthaltenen Dateien auf deine MicroSD-Karte.
+  1. Entpacke die drei im [Community-Firmware-ZIP-Archiv](https://github.com/ftCommunity/ftcommunity-TXT/releases/latest) enthaltenen Dateien auf deine MicroSD-Karte.
   1. Stecke die MicroSD-Karte in deinen TXT und schalte ihn ein!
 
 Jetzt kannst du verschiedene Apps nutzen und mit [Brickly](programming/brickly), [Python](programming/python) und [ROBOPro](programming/robopro.md) deinen TXT programmieren.
