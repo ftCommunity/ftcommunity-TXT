@@ -21,18 +21,14 @@ IFACE = "wlan0"
 
 encr = [ "OPEN", "WEP", "WPA", "WPA2" ];
 
-keys_tab = [ "A-O", "P-Z", "0-9" ]
-keys_upper = [
-    ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","Aa" ],
-    ["P","Q","R","S","T","U","V","W","X","Y","Z",".",","," ","_","Aa" ],
-    ["0","1","2","3","4","5","6","7","8","9","+","-","*","/","#","$" ]
-]
-keys_lower = [
-    ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","Aa" ],
-    ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
-    ["0","1","2","3","4","5","6","7","8","9","+","-","*","/","#","$" ]
-]
-
+COUNTRIES = {
+    "Germany": "DE",
+    "United States": "US",
+    "Britain (UK)": "GB",
+    "Netherlands": "NL",
+    "France": "FR"
+}
+    
 def run_program(rcmd):
     """
     Runs a program, and it's paramters (e.g. rcmd="ls -lh /var/www")
@@ -63,13 +59,14 @@ def run_program(rcmd):
             print( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] ))
             return response_stdout
 
-def get_networks(iface, retry=10):
+def get_networks(iface, retry=2):
     """
     Grab a list of wireless networks within range, and return a list of dicts describing them.
     """
     while retry > 0:
         if "OK" in run_program("sudo wpa_cli -i %s scan" % iface):
             networks=[]
+            time.sleep(0.5)
             r = run_program("sudo wpa_cli -i %s scan_result" % iface).strip()
             if "bssid" in r and len ( r.split("\n") ) >1 :
                 for line in r.split("\n")[1:]:
@@ -77,8 +74,13 @@ def get_networks(iface, retry=10):
                     ss = " ".join(line.split()[4:]) #Hmm, dirty
                     networks.append( {"bssid":b, "freq":fr, "sig":s, "ssid":ss, "flag":f} )
                 return networks
+#        else:
+#            print("SCAN did not return ok, trying setting the country to DE ...")
+#            run_program("sudo wpa_cli -i %s set country DE" % iface)
+#            run_program("sudo wpa_cli -i %s save_config" % iface)
+#            run_program("sudo rfkill unblock wifi")
+            
         retry-=1
-        time.sleep(0.5)
 
 def connect_to_network(_iface, _ssid, _type, _pass=None):
     """
@@ -113,6 +115,10 @@ def check4dhcp(_iface):
         except IOError: # proc has already terminated
             continue
     return False
+
+def set_country(_iface, country):
+    run_program("sudo wpa_cli -i %s set country %s" % (_iface, country))
+    run_program("sudo wpa_cli -i %s save_config" % _iface)
 
 def run_dhcp(_iface):
     # ask udhcpc to obtain a fresh address if it's already runnung. Start it otherwise
@@ -193,6 +199,13 @@ class FtcGuiPlugin(LauncherPlugin):
 
         self.mainWindow = WlanWindow(self, QCoreApplication.translate("Main", "WLAN"))
 
+        menu = self.mainWindow.addMenu()
+        submenu = menu.addMenu(QCoreApplication.translate("Main","Set Country"))
+        for i in COUNTRIES:
+            entry = submenu.addAction(i)
+            entry.setData( COUNTRIES[i] )
+            entry.triggered.connect(self.on_set_country)
+
         self.vbox = QVBoxLayout()
 
         self.networks = []
@@ -219,6 +232,10 @@ class FtcGuiPlugin(LauncherPlugin):
             # only one ssid returned: This sure has no duplicate
             elif len(networks_dup) > 0:
                 self.networks.append(networks_dup[0])
+        else:
+            # this will be reached if the network scan totally failed since
+            # e.g. the wifi card is disabled (kill switch)
+            pass
         
         self.ssids_w = QComboBox()
         if self.networks:
@@ -267,6 +284,9 @@ class FtcGuiPlugin(LauncherPlugin):
         self.key.setFocus()
         self.mainWindow.show()
 
+    def on_set_country(self, x):
+        set_country(IFACE, self.sender().data())
+        
     def on_update_status(self, ssid):
         if self.connected_ssid != ssid:
             self.connected_ssid = ssid
