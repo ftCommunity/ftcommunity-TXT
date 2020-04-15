@@ -29,6 +29,7 @@ class SmallLabel(QLabel):
     def __init__(self, str, parent=None):
         super(SmallLabel, self).__init__(str, parent)
         self.setObjectName("smalllabel")
+        self.setWordWrap(True)
 
 class VersionWidget(QWidget):
     def __init__(self,title,str,parent=None):
@@ -41,9 +42,9 @@ class VersionWidget(QWidget):
 class VersionsDialog(TxtDialog):
     def str_from_file(self, fname):
         try:
-            return open(fname).readline().strip()
+            return open(fname).readline().rstrip("\0").strip()
         except:
-            return "???"
+            return None
 
     def __init__(self,title,parent):
         TxtDialog.__init__(self, title, parent)
@@ -52,14 +53,21 @@ class VersionsDialog(TxtDialog):
 
         # add various version info
         vbox = QVBoxLayout()
+
+        # ---------- Raspberry Pi version ----------
+        if self.str_from_file("/sys/firmware/devicetree/base/model"):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "System"),
+                                         self.str_from_file("/sys/firmware/devicetree/base/model")))
         
         # -------- firmware version ------------
-        vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Firmware"),
-                                     self.str_from_file(VERSION_FILE)))
+        if self.str_from_file(VERSION_FILE):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Firmware"),
+                                         self.str_from_file(VERSION_FILE)))
 
         # --------- kernel version -----------
-        vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Linux"),
-                                     self.str_from_file("/proc/version").split()[2]))
+        if self.str_from_file("/proc/version"):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Linux"),
+                                         self.str_from_file("/proc/version").split()[2]))
 
         # --------- python version ----------
         py_ver_str = ""
@@ -115,7 +123,7 @@ class AboutPlugin(LauncherPlugin):
         
         # and add some text
         self.txt = QLabel(QCoreApplication.translate("FtcGuiApplication",
-                                                     "Fischertechnik TXT firmware "
+                                                     "Firmware for fischertechnik - "
                                                      "community edition"))
         self.txt.setObjectName("smalllabel")
         self.txt.setWordWrap(True)
@@ -124,7 +132,7 @@ class AboutPlugin(LauncherPlugin):
 
         self.vbox.addStretch()
 
-        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016 the ft:community"))
+        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2020 the ft:community"))
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)
