@@ -58,6 +58,10 @@ class VersionsDialog(TxtDialog):
         if self.str_from_file("/sys/firmware/devicetree/base/model"):
             vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "System"),
                                          self.str_from_file("/sys/firmware/devicetree/base/model")))
+
+        if self.str_from_file("/etc/tx-pi-ver.txt"):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "TX-Pi Version"),
+                                         self.str_from_file("/etc/tx-pi-ver.txt")))
         
         # -------- firmware version ------------
         if self.str_from_file(VERSION_FILE):
