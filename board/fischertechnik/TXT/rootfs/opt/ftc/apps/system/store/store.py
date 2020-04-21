@@ -7,8 +7,10 @@
 
 import sys, os, io, time
 import configparser, zipfile, shutil
-import semantic_version
+import semantic_version, subprocess
 from pathlib import Path
+
+from TouchStyle import *
 
 try:
     from PyQt5.QtNetwork import *
@@ -17,7 +19,6 @@ except:
 
 import xml.etree.ElementTree as ET
 
-from TouchStyle import *
 from launcher import LauncherPlugin
 
 FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
@@ -34,6 +35,9 @@ GITHUB_URL = "https://raw.githubusercontent.com/%s/%%s/packages/"
 # directory were the user installed apps are located
 APPBASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 USERAPPBASE = os.path.join(APPBASE, "user")
+
+# on the TX-Pi the store can use apt-get to install dependencies
+APT_GET = "/usr/bin/apt-get"
 
 def get_category_name(code):
     category_map = {
@@ -323,6 +327,24 @@ class PackageLoader(NetworkAccessManager):
         print("Making executable: " + executable)
         os.chmod(executable, 0o744)
 
+        # handling for apt dependencies
+        if manifest.has_option('app', 'depends'):
+            print("Manifest contains dependencies. Installing them")
+            if os.path.isfile(APT_GET):
+                # assemble apt-get command
+                cmd = ["sudo", "apt-get", "-y", "install" ]
+                # split comma seperated dependencies into a space seperated list
+                # and append list to command
+                cmd.extend(manifest.get('app', 'depends').split(","))
+                try:
+                    subprocess.run(cmd, check=True)
+                except Exception as e:
+                    print("Error running apt-get:", str(e))
+                    return((False, "Error running apt-get: "+str(e)))
+            else:
+                print("Unable to install dependencies: Missing apt-get ...")
+                return((False, "Missing apt-get"))
+        
         print("done")
         return((True,""))
 
@@ -394,7 +416,8 @@ class AppDialog(TouchDialog):
                    "firmware": QCoreApplication.translate("AppInfo", "Firmware"),
                    "set":      QCoreApplication.translate("AppInfo", "Set"),
                    "model":    QCoreApplication.translate("AppInfo", "Model"),
-                   "category": QCoreApplication.translate("AppInfo", "Category")
+                   "category": QCoreApplication.translate("AppInfo", "Category"),
+                   "depends":  QCoreApplication.translate("AppInfo", "Dependencies")
                }
         if id in labels:
             return labels[id]
@@ -566,6 +589,7 @@ class PackageListLoader(NetworkAccessManager):
                 append_parameter(packages, app, 'author', None, appparms)
                 append_parameter(packages, app, 'version', None, appparms)
                 append_parameter(packages, app, 'firmware', None, appparms)
+                append_parameter(packages, app, 'depends', None, appparms)
 
                 # if the app has a firmware spec, check if it matches the
                 # current firmware and only append the app if it does
