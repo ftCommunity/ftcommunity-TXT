@@ -9,6 +9,7 @@ import sys, os
 import socket
 import io
 import cgitb
+import subprocess
 cgitb.enable()
 
 print("Content-Type: text/html")
@@ -115,6 +116,19 @@ if ok:
         print("Making executable: " + executable + "<br/>")
         os.chmod(executable, 0o744)
 
+        # check for dependecies
+        if manifest.has_option('app', 'depends') and os.path.isfile("/usr/bin/apt-get"):
+            print("Installing dependencies: "+manifest.get('app', 'depends')+"<br/>")
+            # assemble apt-get command
+            cmd = ["sudo", "apt-get", "-q", "-y", "install" ]
+            # split comma seperated dependencies into a space seperated list
+            # and append list to command
+            cmd.extend(manifest.get('app', 'depends').split(","))
+            try:
+                subprocess.run(cmd, check=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=os.setsid)
+            except Exception as e:
+                print("Error running apt-get:", str(e), "<br/>")
+        
     # finally send gui a request to refresh its icons
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
