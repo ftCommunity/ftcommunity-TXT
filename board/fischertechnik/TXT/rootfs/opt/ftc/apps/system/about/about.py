@@ -102,7 +102,7 @@ class AboutPlugin(LauncherPlugin):
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "about_"))
+        translator.load(self.locale(), os.path.join(path, "about_"))
         self.installTranslator(translator)
         
         # create the empty main window
