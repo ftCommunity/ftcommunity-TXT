@@ -38,16 +38,12 @@ This creates a new directory named ftcommunity-TXT in the current (=home) direct
 Change to this directory:  
 ``````````cd ftcommunity-TXT``````````
 
-Now prepare the build process:  
-``````````make fischertechnik_TXT_defconfig``````````  
-(this should take only minute or so) 
-
 Now start the actual build process  
 ``````````make  ``````````
 (on first run this will take several hours, depending on CPU and download speed)
 
 Attention: Internet access is required permanently during the build process as further files (several gigabytes) have to be downloaded.  
-If you intend to do an offline build and just want to download all sources previously selected via ``make fischertechnik_TXT_defconfig`` then use  
+If you intend to do an offline build and just want to download all sources then use  
 ``make source  ``  
 before the actual ``make  ``  
 
