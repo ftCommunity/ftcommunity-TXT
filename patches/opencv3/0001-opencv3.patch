@@ -1,0 +1,12 @@
+--- imgwarp.bak.cpp	2018-08-28 14:58:21.000000000 +0200
++++ imgwarp.cpp	2020-05-12 18:11:40.681232264 +0200
+@@ -663,7 +663,8 @@
+         cval[k] = saturate_cast<T>(_borderValue[k & 3]);
+ 
+     unsigned width1 = std::max(ssize.width-1, 0), height1 = std::max(ssize.height-1, 0);
+-    CV_Assert( ssize.area() > 0 );
++    // See issue #173 <https://github.com/ftCommunity/ftcommunity-TXT/issues/173>
++    //CV_Assert( ssize.area() > 0 );
+ #if CV_SIMD128
+     if( _src.type() == CV_8UC3 )
+         width1 = std::max(ssize.width-2, 0);
