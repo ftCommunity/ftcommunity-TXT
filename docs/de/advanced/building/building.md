@@ -56,11 +56,6 @@ Um den Prozess zu beschleunigen, kannst du den Build-Prozess starten, indem du d
 ``````````BR2_JLEVEL=$(($(nproc)+1)) make``````````  
 anstelle des einfachen “make” startest.
 
-### Nebenbemerkung - Fehlende i2c-Tools
-Bei meinem ersten Versuch ist der Build-Prozess fehlgeschlagen, weil i2c-tools-3.1.2.tar.bz2 nicht erhalten werden konnte. Wenn das geschieht, wird der Buildprozess beendet. Du kannst dann versuchen, die Datei manuell herunterzuladen:  
-``````````cd ~/ftcommunity-TXT/dl``````````  
-``````````wget http://sources.buildroot.net/i2c-tools-3.1.2.tar.bz2``````````
-
 Starte anschließend den Build-Prozess neu - er wird dort fortgesetzt, wo er aufgehört hat:
 ``````````cd ~/ftcommunity-TXT``````````  
 ``````````make  ``````````

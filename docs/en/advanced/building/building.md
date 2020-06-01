@@ -56,11 +56,6 @@ To speed up the process, you can run the build process by starting the actual bu
 ``````````BR2_JLEVEL=$(($(nproc)+1)) make``````````  
 instead of the plain “make”.
 
-### Side remark – Missing i2c-tools
-On my first attempt the build process failed because i2c-tools-3.1.2.tar.bz2 could not be obtained. If this happens, the build process stops. You can then try to download the file manually:  
-``````````cd ~/ftcommunity-TXT/dl``````````  
-``````````wget http://sources.buildroot.net/i2c-tools-3.1.2.tar.bz2``````````
-
 Then start the build process anew – it will pick up where it left off:  
 ``````````cd ~/ftcommunity-TXT``````````  
 ``````````make  ``````````
