@@ -45,7 +45,7 @@ Now start the actual build process
 Attention: Internet access is required permanently during the build process as further files (several gigabytes) have to be downloaded.  
 If you intend to do an offline build and just want to download all sources then use  
 ``make source  ``  
-before the actual ``make  ``  
+in directory ``buildroot`` before the actual ``make`` in the main directory.
 
 ### Side remark – Speeding up the build process
 To speed up the process, you can run the build process by starting the actual build process with  

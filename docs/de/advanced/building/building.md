@@ -45,7 +45,7 @@ Starte nun den Build-Prozess
 Achtung: Der Internetzugang ist während des Buildprozesses permanent erforderlich, da weitere Dateien (mehrere Gigabyte) heruntergeladen werden müssen.
 Wenn du einen Offline-Build erstellen möchtest, verwende
 ``make source  ``  
-vor dem eigentlichen ``make  ``  
+im Ordner ``buildroot`` vor dem eigentlichen ``make`` im Hauptordner.  
 
 ### Nebenbemerkung - Den Build-Prozess beschleunigen
 Um den Prozess zu beschleunigen, kannst du den Build-Prozess starten, indem du den eigentlichen Build-Prozess mit
