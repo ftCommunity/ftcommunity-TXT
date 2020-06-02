@@ -38,18 +38,14 @@ Dies erstellt ein neues Verzeichnis mit dem Namen ftcommunity-TXT im aktuellen V
 Wechsle in dieses Verzeichnis:
 ``````````cd ftcommunity-TXT``````````
 
-Bereite jetzt den Build-Prozess vor:
-``````````make fischertechnik_TXT_defconfig``````````  
-(Das sollte nur eine Minute dauern) 
-
-Starte nun den eigentlichen Build-Prozess
+Starte nun den Build-Prozess
 ``````````make  ``````````
 (Beim ersten Lauf dauert dies mehrere Stunden, abhängig von der CPU- und der Download-Geschwindigkeit)
 
 Achtung: Der Internetzugang ist während des Buildprozesses permanent erforderlich, da weitere Dateien (mehrere Gigabyte) heruntergeladen werden müssen.
-Wenn du einen Offline-Build erstellen möchten und nur alle zuvor über ``make fischertechnik_TXT_defconfig`` ausgewählten Quellen herunterladen möchten, verwende
+Wenn du einen Offline-Build erstellen möchtest, verwende
 ``make source  ``  
-vor dem eigentlichen ``make  ``  
+im Ordner ``buildroot`` vor dem eigentlichen ``make`` im Hauptordner.  
 
 ### Nebenbemerkung - Den Build-Prozess beschleunigen
 Um den Prozess zu beschleunigen, kannst du den Build-Prozess starten, indem du den eigentlichen Build-Prozess mit
