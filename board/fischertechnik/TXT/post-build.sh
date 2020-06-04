@@ -1,8 +1,5 @@
 #!/bin/bash
 TARGET=$1
-# copy additional rootfs contents
-echo "Adding additional rootfs content ..."
-cp -af --remove-destination $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/board/fischertechnik/TXT/rootfs/* $TARGET/
 cp -af $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/docs/favicon.ico $TARGET/var/www/
 # disable writing log files. On SD card we actually have the space for this, so we can leave this on
 # mv $TARGET/etc/init.d/S01logging $TARGET/etc/init.d/M01logging||echo "Logging already turned off!"
