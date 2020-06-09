@@ -1,16 +1,8 @@
 #!/bin/bash
 TARGET=$1
-# copy additional rootfs contents
-echo "Adding additional rootfs content ..."
-cp -af --remove-destination $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/board/fischertechnik/TXT/rootfs/* $TARGET/
 cp -af $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/docs/favicon.ico $TARGET/var/www/
 # disable writing log files. On SD card we actually have the space for this, so we can leave this on
 # mv $TARGET/etc/init.d/S01logging $TARGET/etc/init.d/M01logging||echo "Logging already turned off!"
-# check if user provides custom content
-if [ "$FTC_TXT_CUSTOM" != "" ]; then
-    echo "Adding user specific content from $FTC_TXT_CUSTOM ..."
-    cp -af $FTC_TXT_CUSTOM/* $TARGET/
-fi
 # Remove obsolete PM firmware load script
 rm -f "$TARGET/etc/init.d/S93-am335x-pm-firmware-load"
 # Try to generate a detailed firmware version number from git.
