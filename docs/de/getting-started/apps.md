@@ -14,7 +14,7 @@ In dieser kleinen App finden sich Daten zu der aktuellen Version der CFW und der
 
 ## Bluetooth
 
-Mit der CFW Bluetooth app kannst du den TXT mit dem Transmitter des BT Conrol Sets oder mit der Bluetooth Control App aud einem Smartphone verbinden. 
+Mit der CFW Bluetooth app kannst du den TXT mit dem Transmitter des BT Conrol Sets oder mit der Bluetooth Control App auf einem Smartphone verbinden. 
 
 ## Display
 
@@ -55,7 +55,7 @@ Mit dieser App werden die WLAN-Parameter eingestellt.
 
 # Apps im Store
 
-Du kannst hier eine App aus der Liste auswählen und erhälst eine kurze Beschreibung, die auch Autor, Kategorie, die nötige Firmware-Version und und die aktuelle Versionsnummer der App enthält. Mit dem Menü-Icon oben links erhälst du einen Button "Installieren", mit dem du die ausgewählte App installieren kannst. Für jede Kategorie wird ein eigener Ordner angelegt.
+Du kannst hier eine App aus der Liste auswählen und erhälst eine kurze Beschreibung, die auch Autor, Kategorie, die nötige Firmware-Version und und die aktuelle Versionsnummer der App enthält. Mit dem Menü-Icon oben links erhältst du einen Button "Installieren", mit dem du die ausgewählte App installieren kannst. Für jede Kategorie wird ein eigener Ordner angelegt.
 
 ## 3Dprint
 
