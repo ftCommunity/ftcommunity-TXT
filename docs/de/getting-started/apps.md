@@ -14,7 +14,7 @@ In dieser kleinen App finden sich Daten zu der aktuellen Version der CFW und der
 
 ## Bluetooth
 
-Mit der CFW Bluetooth app kannst du den TXT mit dem Transmitter des BT Conrol Sets oder mit der Bluetooth Control App auf einem Smartphone verbinden. 
+Mit der CFW Bluetooth App kannst du den TXT mit dem Transmitter des BT Control Sets oder mit der Bluetooth Control App auf einem Smartphone verbinden. 
 
 ## Display
 
@@ -92,10 +92,6 @@ Leider funktioniert diese App momentan nicht.
 ## TXTShow
 
 Eine App zum Fotografieren mit der TXT-Kamera und zur Verwaltung der Fotos.
-
-## ft:db
-
-Zur Suche in der [ft:db](https://ft-datenbank.de/). Setzt Internet-Zugriff voraus.
 
 ## ftDuinoIO
 
