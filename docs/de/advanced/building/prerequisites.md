@@ -8,11 +8,11 @@ nav-pos: 1
 Du brauchst ein paar Dinge, um die Community-Firmware erstellen zu können.
 
 ## Benötigt wird:
-1.  Ein Linux-System mit mindestens 20GB freiem Speicherplatz (*sowie einen schnellen CPU und eine schnelle Internetverbindung*)
+1.  Ein Linux-System mit mindestens 20GB freiem Speicherplatz (*sowie eine schnelle CPU und eine schnelle Internetverbindung*)
 
     (***Die folgende Anleitung basiert auf Ubuntu, sollte jedoch auch auf anderen Distributionen funktionieren***).
 
-2. Eine microSD-Karte auf der die ftcommunity-TXT-Firmware installiert werden kann. Jede SD(HC) microSD-Karte sollte funktionieren! 
+2. Eine microSD-Karte, auf der die ftcommunity-TXT-Firmware installiert werden kann. Jede SD(HC) microSD-Karte sollte funktionieren! 
 
 	(*Karten mit anderen technischen Spezifikationen (z.B. microSD-XC) wurden nicht getestet*). 
 	Um sicher zu sein, wird empfohlen, eine microSD(HC)-Karte mit 32GB oder weniger zu verwenden.
