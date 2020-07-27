@@ -1,0 +1,65 @@
+config BR2_TARGET_ROOTFS_TXTZIP
+	bool "TXT sd card zip"
+
+if BR2_TARGET_ROOTFS_TXTZIP
+	config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME
+		bool "Custom file name"
+
+	if BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME
+		choice
+			prompt "Name source"
+			default BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SOURCE_STRING
+
+		config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SOURCE_STRING
+			bool "String"
+
+		config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SOURCE_FILE
+			bool "File"
+
+		endchoice
+
+		if BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SOURCE_FILE
+			config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SOURCE_FILE_NAME
+				string "Source File"
+
+			config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_PREFIX
+				string "Prefix"
+
+			config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SUFFIX
+				string "Suffix"
+		endif
+
+		if BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_SOURCE_STRING
+			config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_NAME
+				string "File name"
+				default "txt"
+		endif
+
+		config BR2_TARGET_ROOTFS_TXTZIP_CUSTOM_NAME_EXTENSION
+			string "Extension"
+			default "zip"
+	endif
+
+	config BR2_TARGET_ROOTFS_TXTZIP_CONFIG
+		string "File list config file"
+		help
+			Path to output configuration file
+			File format:
+			Use one line per file/directory
+
+			Lines must use one of the following formats:
+			<source path>
+			<source path>-><target path>
+
+			Target must not be an absolute path
+			If target is unspecified the file will just be copied to the root of the output structure
+			If target is a file name the file will be copied using this name to the root of the output structure
+			If target is a path the file will be copied to the specified path in the output structure. The directory will be created automatically
+
+	config BR2_TARGET_ROOTFS_TXTZIP_DEPENDS
+		string "Depending packages"
+		default ""
+		help
+			List of packages that need to be built before
+			For example: rootfs-initramfs rootfs-squashfs
+endif
