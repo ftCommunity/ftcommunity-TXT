@@ -908,7 +908,7 @@ class IconGrid(QWidget):
                 but.clicked.connect(self.do_launch)
             else:
                 but.clicked.connect(self.do_open_folder)
-            self.grid.addWidget(but, index / self.columns, index % self.columns, Qt.AlignCenter)
+            self.grid.addWidget(but, index // self.columns, index % self.columns, Qt.AlignCenter)
             index += 1
 
     def on_refresh(self):
@@ -1132,7 +1132,7 @@ class VerticalScrollArea(QScrollArea):
                 # start a timer that does some slow decelleration
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.on_timer)
-                self.timer.start(1000 / self.TIMER_HZ)
+                self.timer.start(int(1000 / self.TIMER_HZ))
             # if the user was dragging don't forward any event
             if self.dragging:
                 self.dragging = None
@@ -1170,7 +1170,7 @@ class VerticalScrollArea(QScrollArea):
                         # start a timer that does some slow decelleration
                         self.timer = QTimer(self)
                         self.timer.timeout.connect(self.on_timer)
-                        self.timer.start(1000 / self.TIMER_HZ)
+                        self.timer.start(int(1000 / self.TIMER_HZ))
             if self.dragging:
                 dist_y = self.dragging[0] - event.globalPos().y()
                 self.verticalScrollBar().setValue(self.dragging[1] + dist_y)
