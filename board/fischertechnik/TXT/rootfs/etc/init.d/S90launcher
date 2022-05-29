@@ -32,6 +32,7 @@ start() {
                      QWS_MOUSE_PROTO=Tslib:/dev/input/event0 \
                      QWS_KEYBOARD="" \
                      QWS_DISPLAY="$DISPLAY" \
+                     QT_QPA_PLATFORM=linuxfb \
                      /opt/ftc/launcher.py \
               -- -qws \
               && echo "OK" || echo "FAIL"
