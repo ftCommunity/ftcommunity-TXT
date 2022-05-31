@@ -141,7 +141,7 @@ class ConfirmationDialog(PlainDialog):
         self.ok_but.setDisabled(True)
         self.cancel_but.setDisabled(True)
         # send button label back to tcp client
-        self.sock.write(self.sender().text() + "\n")
+        self.sock.write((self.sender().text() + "\n").encode("utf8"))
         # close dialog after 1 second
         close_timer = QTimer(self)
         close_timer.setSingleShot(True)
@@ -995,7 +995,7 @@ class TcpServer(QTcpServer):
                     elif cmd == "confirm":
                         self.confirm.emit(s, parm)
                     elif cmd == "quit":
-                        s.write("Bye\n")
+                        s.write("Bye\n".encode("utf8"))
                         s.close()
                     elif cmd == "get-app":
                         self.get_app.emit(s)
@@ -1008,7 +1008,7 @@ class TcpServer(QTcpServer):
                     elif cmd == "logging-stop":
                         self.enable_logging.emit(False)
                     else:
-                        s.write("Unknown command\n")
+                        s.write("Unknown command\n".encode("utf8"))
                         print("Unknown command ", cmd)
 
     def removeConnection(self):
@@ -1453,8 +1453,8 @@ class Launcher(TouchApplication):
             app_dir, app_exec_name = os.path.split(self.app_executable)
             app_group, app_dir_name = os.path.split(app_dir)
             app_group_name = os.path.basename(app_group)
-            s.write(os.path.join(app_group_name, app_dir_name, app_exec_name))
-        s.write("\n")
+            s.write(os.path.join(app_group_name, app_dir_name, app_exec_name).encode("utf8"))
+        s.write("\n".encode("utf8"))
 
     def on_stop_app(self):
         if self.app_is_running():
