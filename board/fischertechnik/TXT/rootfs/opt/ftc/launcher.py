@@ -297,7 +297,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).__init__(parent)
         self.resize(64, 64)
         # center relative to parent
-        self.move(QPoint(parent.width() / 2 - 32, parent.height() / 2 - 32))
+        self.move(QPoint(parent.width() // 2 - 32, parent.height() // 2 - 32))
         self.step = 0
         self.app = app
         # create a timer to close this window after 10 seconds at most
@@ -348,11 +348,11 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).deleteLater()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height()) / 2 - 16
+        radius = min(self.width(), self.height()) // 2 - 16
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.translate(self.width() / 2, self.height() / 2)
+        painter.translate(self.width() // 2, self.height() // 2)
         painter.rotate(45)
         painter.rotate(self.step)
         painter.drawImage(0, radius, self.bright)
@@ -1089,7 +1089,8 @@ class VerticalScrollArea(QScrollArea):
         self.drag_speed = None
         self.timer = None
         self.release_lock = None
-
+        self.press_timer = None
+        
     def eventFilter(self, obj, event):
         # first make sure the child widget uses the full possible width
         if event.type() == event.Resize:
