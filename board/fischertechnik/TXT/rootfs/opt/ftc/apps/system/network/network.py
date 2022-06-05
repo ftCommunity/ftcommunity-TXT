@@ -8,7 +8,7 @@
 
 import sys, os, socket, array, struct, fcntl, string, platform
 import shlex, time, copy
-from subprocess import Popen, call, PIPE, check_output
+from subprocess import Popen, call, PIPE, check_output, STDOUT
 from TouchStyle import *
 from launcher import LauncherPlugin
 
@@ -42,7 +42,7 @@ def all_interfaces():
         s.fileno(), SIOCGIFCONF,
         struct.pack('iL', bytes, names.buffer_info()[0])
     ))[0]
-    namestr = names.tostring()
+    namestr = names.tobytes()
 
     # get additional info for all interfaces found
     lst = { }
@@ -958,7 +958,7 @@ class NetworkWindow(TouchWindow):
     def check4busybox(self):
         # cat (like most other tools) will tell if they are in fact
         # busybox
-        cat_help = check_output(["cat", "--help"]).decode("UTF-8")
+        cat_help = check_output(["cat", "--help"], stderr=STDOUT).decode("UTF-8")
         return cat_help.lower().find("busybox") >= 0
 
     def edit_perm(self):

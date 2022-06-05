@@ -1057,7 +1057,8 @@ class LauncherPluginAdapter:
         module = importlib.reload(importlib.import_module(module_name))
         try:
             self.plugin = module.createPlugin(launcher)
-        except:
+        except Exception as e:
+            print(e)
             self.returncode = -1
 
     def poll(self):
