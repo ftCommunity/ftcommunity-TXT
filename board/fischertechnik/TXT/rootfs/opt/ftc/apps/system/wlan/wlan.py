@@ -149,6 +149,9 @@ def get_associated(_iface):
 
 # background thread to monitor state of interface
 class MonitorThread(QThread):
+
+    update_status = pyqtSignal(str)
+    
     def __init__(self):
         QThread.__init__(self)
 
@@ -157,17 +160,18 @@ class MonitorThread(QThread):
 
     def run(self):
         self.timer = QTimer()
-        self.timer.connect( self.timer, SIGNAL("timeout()"), self.on_timer_tick )
+        self.timer.timeout.connect(self.on_timer_tick)
         self.timer.start(5000) # Poll every 5 seconds
         self.exec_()
 
+    @pyqtSlot()
     def on_timer_tick(self):
         status = get_associated(IFACE)
-        self.emit( SIGNAL('update_status(QString)'), status )   
+        self.update_status.emit(status)   
 
     def stop(self):
         print("Stopping network monitor thread...")
-        self.timer.stop()
+        #self.timer.stop()
         self.quit()
         self.wait()
         print("... network monitor thread stopped")
@@ -176,7 +180,7 @@ class WlanWindow(TouchWindow):
     def __init__(self, app, str):
         super().__init__(str)
         self.monitorThread = MonitorThread()
-        self.connect( self.monitorThread, SIGNAL("update_status(QString)"), app.on_update_status )
+        self.monitorThread.update_status.connect(app.on_update_status)
 
     def show(self):
         super().show()
@@ -286,7 +290,8 @@ class FtcGuiPlugin(LauncherPlugin):
 
     def on_set_country(self, x):
         set_country(IFACE, self.sender().data())
-        
+
+    @pyqtSlot(str)
     def on_update_status(self, ssid):
         if self.connected_ssid != ssid:
             self.connected_ssid = ssid
