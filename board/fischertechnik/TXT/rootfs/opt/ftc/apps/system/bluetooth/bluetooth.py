@@ -124,8 +124,8 @@ class HciConfig(ExecThread):
 class ServiceEnable(ExecThread):
     def __init__(self, enable):
         # check for txt init script
-        if os.path.exists("/etc/init.d/S60bluetooth"):
-            cmd = "sudo /etc/init.d/S60bluetooth "
+        if os.path.exists("/etc/init.d/S40bluetooth"):
+            cmd = "sudo /etc/init.d/S40bluetooth "
         else:
             cmd = "sudo /etc/init.d/bluetooth "
         if enable: cmd += "enable"
@@ -140,7 +140,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).__init__(parent)
 
         self.resize(64, 64)
-        self.move(QPoint(parent.width()/2-32, parent.height()/2-32))
+        self.move(QPoint(parent.width()//2-32, parent.height()//2-32))
 
         self.step = 0
 
@@ -175,13 +175,13 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).close()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height())/2 - 16
+        radius = min(self.width(), self.height())//2 - 16
         painter = QPainter()
         painter.begin(self)
 
         painter.setRenderHint(QPainter.Antialiasing)
 
-        painter.translate(self.width()/2, self.height()/2)
+        painter.translate(self.width()//2, self.height()//2)
         painter.rotate(45)
         painter.rotate(self.step)
         painter.drawImage(0,radius, self.bright)

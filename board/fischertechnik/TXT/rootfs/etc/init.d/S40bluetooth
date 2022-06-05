@@ -1,51 +1,84 @@
 #!/bin/sh
-#
-# Start/stop bluetooth....
-#
 
 ENABLE_FLAG=/etc/bluetooth/enabled
+DAEMON="bluetoothd"
+PIDFILE="/var/run/$DAEMON.pid"
+
+BLUETOOTHD_ARGS="-n"
+
+# shellcheck source=/dev/null
+[ -r "/etc/default/$DAEMON" ] && . "/etc/default/$DAEMON"
+
+start() {
+	printf 'Starting %s: ' "$DAEMON"
+	if [ -f $ENABLE_FLAG ]; then
+	    # shellcheck disable=SC2086 # we need the word splitting
+	    start-stop-daemon -S -q -m -b -p "$PIDFILE" -x "/usr/libexec/bluetooth/$DAEMON" \
+			      -- $BLUETOOTHD_ARGS
+	    status=$?
+	    if [ "$status" -eq 0 ]; then
+		echo "OK"
+		
+		hciconfig hci0 up piscan
+	    else
+		echo "FAIL"
+	    fi
+	    return "$status"
+	else
+	    echo "SERVICE DISABLED"
+	fi
+}
+
+stop() {
+	printf 'Stopping %s: ' "$DAEMON"
+	if [ -f $ENABLE_FLAG ]; then
+	    hciconfig hci0 down
+	    
+	    start-stop-daemon -K -q -p "$PIDFILE"
+	    status=$?
+	    if [ "$status" -eq 0 ]; then
+		echo "OK"
+	    else
+		echo "FAIL"
+	    fi
+	    return "$status"
+	fi
+}
+
+restart() {
+	stop
+	sleep 1
+	start
+}
+
+reload() {
+	printf 'Reloading %s: ' "$DAEMON"
+	start-stop-daemon -K -s HUP -q -p "$PIDFILE"
+	status=$?
+	if [ "$status" -eq 0 ]; then
+		echo "OK"
+	else
+		echo "FAIL"
+	fi
+	return "$status"
+}
 
 case "$1" in
-  start)
-	printf "Starting bluetooth: "
-        if [ -f $ENABLE_FLAG ]; then
-	    bluetoothd
-	    hciconfig hci0 up piscan
+	start|stop|restart|reload)
+		"$1";;
+	enable)
+            printf "Enabling bluetooth: "
+	    touch $ENABLE_FLAG
 	    echo "OK"
-	else
-	    echo "SERVICE DISABLED"
-	fi
-	;;
-  stop)
-        printf "Stopping bluetooth: "
-        if [ -f $ENABLE_FLAG ]; then
-	    hciconfig hci0 down
-	    killall bluetoothd
+	    "$0" start
+	    ;;
+	disable)
+	    "$0" stop
+            printf "Disabling bluetooth: "
+	    rm -f $ENABLE_FLAG
 	    echo "OK"
-	else
-	    echo "SERVICE DISABLED"
-	fi
-	;;
-  enable)
-        printf "Enabling bluetooth: "
-	touch $ENABLE_FLAG
-	echo "OK"
-	"$0" start
-	;;
-  disable)
-	"$0" stop
-        printf "Disabling bluetooth: "
-	rm -f $ENABLE_FLAG
-	echo "OK"
-	;;
-  restart|reload)
-	"$0" stop
-	"$0" start
-	;;
-  *)
-	echo "Usage: $0 {start|stop|restart}"
-	exit 1
+	    ;;
+	*)
+		echo "Usage: $0 {start|stop|restart|reload}"
+		exit 1
 esac
-
-exit $?
-
