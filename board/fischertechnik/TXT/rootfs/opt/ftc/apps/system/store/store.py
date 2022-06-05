@@ -117,7 +117,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).__init__(parent)
 
         self.resize(64, 64)
-        self.move(QPoint(parent.width()/2-32, parent.height()/2-32))
+        self.move(QPoint(parent.width()//2-32, parent.height()//2-32))
 
         self.step = 0
         self.percent = -1
@@ -157,7 +157,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).close()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height())/2 - 16
+        radius = min(self.width(), self.height())//2 - 16
         painter = QPainter()
         painter.begin(self)
 
@@ -165,9 +165,9 @@ class BusyAnimation(QWidget):
             font = painter.font()
             # half the size than the current font size 
             if font.pointSize() < 0:
-                font.setPixelSize(font.pixelSize() / 3)
+                font.setPixelSize(font.pixelSize() // 3)
             else:
-                font.setPointSize(font.pointSize() / 3)
+                font.setPointSize(font.pointSize() // 3)
             # set the modified font to the painter */
             painter.setFont(font)
 
@@ -176,7 +176,7 @@ class BusyAnimation(QWidget):
 
         painter.setRenderHint(QPainter.Antialiasing)
 
-        painter.translate(self.width()/2, self.height()/2)
+        painter.translate(self.width()//2, self.height()//2)
         painter.rotate(45)
         painter.rotate(self.step)
         painter.drawImage(0,radius, self.bright)
