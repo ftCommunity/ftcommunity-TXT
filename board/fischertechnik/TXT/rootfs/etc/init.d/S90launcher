@@ -29,8 +29,8 @@ start() {
         start-stop-daemon --start -c ftc --background --make-pidfile --pidfile $PIDFILE \
               --exec /usr/bin/env \
                      PYTHONPATH=/opt/ftc \
-                     QWS_MOUSE_PROTO=Tslib:/dev/input/event0 \
-                     QWS_KEYBOARD="" \
+		     QT_QPA_FB_TSLIB=1 \
+		     TSLIB_TSDEVICE=/dev/input/event0 \
                      QWS_DISPLAY="$DISPLAY" \
                      QT_QPA_PLATFORM=linuxfb \
                      /opt/ftc/launcher.py \
