@@ -17,6 +17,8 @@ if [ -r /etc/default/launcher ]; then
 fi
 
 DISPLAY="Transformed:Rot${SCREEN_ROTATION:-0}"
+#https://forum.qt.io/topic/121362/rotate-qt-app-in-framebuffer
+
 # SECURITY NOTE: Enabling the builtin VNC server
 # gives everyone with a network connection to
 # your TXT unrestricted access to all CFW features,
@@ -29,10 +31,10 @@ start() {
         start-stop-daemon --start -c ftc --background --make-pidfile --pidfile $PIDFILE \
               --exec /usr/bin/env \
                      PYTHONPATH=/opt/ftc \
+                     QT_QPA_PLATFORM=linuxfb \
 		     QT_QPA_FB_TSLIB=1 \
 		     TSLIB_TSDEVICE=/dev/input/event0 \
                      QWS_DISPLAY="$DISPLAY" \
-                     QT_QPA_PLATFORM=linuxfb \
                      /opt/ftc/launcher.py \
               -- -qws \
               && echo "OK" || echo "FAIL"
