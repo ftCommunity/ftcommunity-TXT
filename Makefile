@@ -1,6 +1,6 @@
 
 all: buildroot/Makefile buildroot/.config
-	make -C buildroot
+	make -C buildroot -j10
 
 clean:
 	BR2_EXTERNAL=.. make -C buildroot clean
