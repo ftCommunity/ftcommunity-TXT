@@ -127,7 +127,7 @@ class TouchKeyboard(TouchDialog):
         edit.hbox.addWidget(but)
 
         but = QPushButton(" ")
-        but.setObjectName("osk_return")
+        but.setObjectName("keyboard_return")
         but.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         but.clicked.connect(self.close)
         edit.hbox.addWidget(but)

@@ -302,6 +302,13 @@ QPushButton#osk_caps {
     height: 32px;
 }
 
+/* the enter button of the on-screen-keyboard */
+QPushButton#keyboard_return {
+    image: url(keyboard_return);
+    width: 32px;
+    height: 32px;
+}
+
 /* a flat button has no decoration at all */
 QPushButton:flat {
     border-style: none;  
