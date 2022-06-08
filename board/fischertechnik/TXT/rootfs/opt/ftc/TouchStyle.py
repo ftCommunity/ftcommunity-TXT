@@ -134,24 +134,24 @@ class TouchTitle(QLabel):
         self.close.setObjectName("closebut")
         self.parent = parent
         self.close.clicked.connect(parent.close)
-        self.close.move(self.width() - 40, self.height() / 2 - 20)
+        self.close.move(self.width() - 40, self.height() // 2 - 20)
         self.installEventFilter(self)
         self.menubut = None
         self.confbut = None
 
     def eventFilter(self, obj, event):
         if event.type() == event.Resize:
-            self.close.move(self.width() - 40, self.height() / 2 - 20)
+            self.close.move(self.width() - 40, self.height() // 2 - 20)
             if self.menubut:
-                self.menubut.move(8, self.height() / 2 - 20)
+                self.menubut.move(8, self.height() // 2 - 20)
             if self.confbut:
-                self.confbut.move(8, self.height() / 2 - 20)
+                self.confbut.move(8, self.height() // 2 - 20)
         return False
 
     def addMenu(self):
         self.menubut = QPushButton(self)
         self.menubut.setObjectName("menubut")
-        self.menubut.move(8, self.height() / 2 - 20)
+        self.menubut.move(8, self.height() // 2 - 20)
         self.menu = TouchMenu(self.menubut)
         self.menubut.clicked.connect(self.menu.on_button_clicked)
         return self.menu
@@ -159,7 +159,7 @@ class TouchTitle(QLabel):
     def addConfirm(self):
         self.confbut = QPushButton(self)
         self.confbut.setObjectName("confirmbut")
-        self.confbut.move(8, self.height() / 2 - 20)
+        self.confbut.move(8, self.height() // 2 - 20)
         self.confbut.setDefault(True)
         self.confbut.clicked.connect(self.parent.close)
         return self.confbut
@@ -276,8 +276,9 @@ class TouchDialog(QDialog):
 
         # create a vertical layout and put all widgets inside
         self.layout = QVBoxLayout()
-        self.titlebar = TouchTitle(title, self)
-        self.layout.addWidget(self.titlebar)
+        if title:
+            self.titlebar = TouchTitle(title, self)
+            self.layout.addWidget(self.titlebar)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 

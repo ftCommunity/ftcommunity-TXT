@@ -2,6 +2,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from TouchStyle import TouchDialog
+
 class TouchHandler(QObject):
     def __init__(self, parent):
         QObject.__init__(self, parent)
@@ -14,29 +16,18 @@ class TouchHandler(QObject):
                 text = widget.text()
                 cpos = widget.cursorPosition()
 
-                #print(event)
-
                 if event.type() == QEvent.MouseButtonPress:# TouchBegin
-                    if False:
-                        keyboard = TouchKeyboard2(widget)
+                    keyboard = TouchKeyboard(widget)
 
-                        keyboard.setText(text)
-                        keyboard.exec()
-                        widget.setText(keyboard.text())
-                    else:
-                        keyboard = TouchKeyboard(widget)
-
-                        keyboard.focus(text, 0)
-                        keyboard.setWindowState(Qt.WindowFullScreen)
-                        #keyboard.showFullScreen()
-                        keyboard.exec()
-                        widget.setText(keyboard.text())
+                    keyboard.focus(text, 0)
+                    keyboard.exec_()
+                    widget.setText(keyboard.text())
                         
 
             return False
 
         
-class TouchKeyboard(QDialog):
+class TouchKeyboard(TouchDialog):
     # a pushbutton that additionally shows a second small label
     # in subscript
     class KbdButton(QPushButton):
@@ -109,21 +100,15 @@ class TouchKeyboard(QDialog):
         ["0","1","2","3","4","5","6","7","8","9","+","-","#","^","<","Aa" ]
     ]
 
-    caps = False
+    def __init__(self, parent = None):
+        super().__init__(None, parent)
 
-    def __init__(self,parent = None):
-        QDialog.__init__(self, parent)
+        self.caps = False
 
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-        
+        self.layout = QVBoxLayout(self.centralWidget)
+
         w = 100#self.width()
         h = 120#self.height()
-
-        #conf = self.addConfirm()
-
-        #self.setCancelButton()
-
 
         self.line = self.FocusLineEdit()
         self.line.setProperty("nopopup", True)
@@ -202,12 +187,7 @@ class TouchKeyboard(QDialog):
     def caps_changed(self):
         self.line.setFocus()  # restore focus
 
-        # default is not caps locked
-        try:
-            self.caps = not self.caps
-        except AttributeError:
-            self.caps = True
-
+        self.caps = not self.caps
         if self.caps:
             keys = self.keys_upper
             subs = self.keys_lower
