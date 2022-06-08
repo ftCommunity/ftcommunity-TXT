@@ -5,9 +5,7 @@
 
 case "$1" in
   start)
-      printf "Starting netfilter: "
-      /usr/bin/netreq_setup.sh
-      echo "OK"
+      echo "netfilter disabled due to https://github.com/ftCommunity/ftcommunity-TXT/issues/200"
       ;;
   stop)
       ;;
