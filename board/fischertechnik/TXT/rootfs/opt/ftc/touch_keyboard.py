@@ -120,13 +120,13 @@ class TouchKeyboard(TouchDialog):
         edit.hbox = QHBoxLayout()
         edit.hbox.setContentsMargins(0, 0, 0, 0)
 
-        but = QPushButton("<-")
+        but = QPushButton(" ")
         but.setObjectName("osk_erase")
         but.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         but.clicked.connect(self.key_erase)
         edit.hbox.addWidget(but)
 
-        but = QPushButton("OK")
+        but = QPushButton(" ")
         but.setObjectName("osk_return")
         but.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         but.clicked.connect(self.close)
@@ -151,7 +151,7 @@ class TouchKeyboard(TouchDialog):
 
             for cnt in range(len(keys[a])):
                 if keys[a][cnt] == "Aa":
-                    but = QPushButton("^^")
+                    but = QPushButton(" ")
                     but.setObjectName("osk_caps")
                     but.clicked.connect(self.caps_changed)
                 else:
