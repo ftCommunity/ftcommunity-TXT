@@ -810,4 +810,7 @@ class TouchApplication(QApplication):
         if not QT5 and not TouchInputContext.keyboard_present():
             self.setAutoSipEnabled(True)
             self.setInputContext(TouchInputContext(self))
+        if QT5:
+            import touch_keyboard
+            self.installEventFilter(touch_keyboard.TouchHandler(self))
         TouchSetStyle(self)
