@@ -151,9 +151,13 @@ def get_associated(_iface):
 class MonitorThread(QThread):
 
     update_status = pyqtSignal(str)
+    ssid_removed = pyqtSignal(str)
+    ssid_added = pyqtSignal(str)
     
     def __init__(self):
         QThread.__init__(self)
+        self.ssids = {}
+        self.associated_ssid = ""
 
     def __del__(self):
         self.stop()
@@ -161,14 +165,26 @@ class MonitorThread(QThread):
     def run(self):
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_tick)
-        self.timer.start(5000) # Poll every 5 seconds
+        self.timer.start(2000) # Poll every 2 seconds
         self.exec_()
 
     @pyqtSlot()
     def on_timer_tick(self):
-        status = get_associated(IFACE)
-        self.update_status.emit(status)   
+        ssid = get_associated(IFACE)
+        if ssid != self.associated_ssid:
+            self.update_status.emit(ssid)
+            self.associated_ssid = ssid
 
+        current_ssids = {s for s in get_networks(IFACE)}
+        new_ssids = current_ssids.difference(self.ssids)
+        missing_ssids = self.ssids.difference(current_ssids)
+        
+        for ssid in new_ssids:
+            self.ssid_added.emit(ssid)
+        for ssid in missing_ssids:
+            self.ssid_removed.emit(ssid)
+        self.ssids = current_ssids
+            
     def stop(self):
         print("Stopping network monitor thread...")
         #self.timer.stop()
@@ -181,6 +197,8 @@ class WlanWindow(TouchWindow):
         super().__init__(str)
         self.monitorThread = MonitorThread()
         self.monitorThread.update_status.connect(app.on_update_status)
+        self.monitorThread.ssid_added.connect(app.new_ssid)
+        self.monitorThread.ssid_removed.connect(app.removed_ssid)
 
     def show(self):
         super().show()
@@ -216,35 +234,7 @@ class FtcGuiPlugin(LauncherPlugin):
         self.connected_ssid = ""
         self.encr_key = ""
         
-        networks_dup = get_networks(IFACE)
-        if networks_dup:
-            # remove duplicate ssids
-            self.networks = []
-            if len(networks_dup) > 1:
-                for i in range(len(networks_dup)-1):
-                    has_dup = False
-                    for j in range(i+1,len(networks_dup)):
-                        if networks_dup[i]['ssid'] == networks_dup[j]['ssid']:
-                            has_dup = True
-                    if not has_dup:
-                        if networks_dup[i]['ssid'] != "\\x00":
-                            self.networks.append(networks_dup[i])
-
-                if networks_dup[-1]['ssid'] != "\\x00":
-                    self.networks.append(networks_dup[-1])
-
-            # only one ssid returned: This sure has no duplicate
-            elif len(networks_dup) > 0:
-                self.networks.append(networks_dup[0])
-        else:
-            # this will be reached if the network scan totally failed since
-            # e.g. the wifi card is disabled (kill switch)
-            pass
-        
         self.ssids_w = QComboBox()
-        if self.networks:
-            for network in self.networks:
-                self.ssids_w.addItem(network['ssid'])
         self.ssids_w.activated[str].connect(self.set_default_encryption)
         self.ssids_w.setCurrentIndex(-1)
         self.vbox.addWidget(self.ssids_w)
@@ -271,28 +261,37 @@ class FtcGuiPlugin(LauncherPlugin):
         self.connect.setDisabled(True)
         self.vbox.addWidget(self.connect)
 
-        # check if a network is already connected
-        self.connected_ssid = get_associated(IFACE)
-        if self.connected_ssid != "":
-            for i in range(len(self.networks)):
-                if self.networks[i]['ssid'] == self.connected_ssid:
-                    self.ssids_w.setCurrentIndex(i)
-
-        # update gui depending on selected ssid
-        if self.networks and self.ssids_w.currentText() != "":
-            self.set_default_encryption(self.ssids_w.currentText())
-
         self.mainWindow.centralWidget.setLayout(self.vbox)
 
         # make sure key edit has focus
         self.key.setFocus()
         self.mainWindow.show()
 
+
+    @pyqtSlot(str)
+    def new_ssid(self, ssid):
+        self.ssids_w.addItem(ssid)
+
+    @pyqtSlot(str)
+    def removed_ssid(self, ssid):
+        items = self.ssids_w.findItems(ssid, Qt.MatchExactly) 
+        for item in items:
+            self.ssids_w.takeItem(item)
+
+    @pyqtSlot(str)
     def on_set_country(self, x):
         set_country(IFACE, self.sender().data())
 
     @pyqtSlot(str)
     def on_update_status(self, ssid):
+        # select in list
+        if self.connected_ssid != "":
+            for i in range(len(self.networks)):
+                if self.networks[i]['ssid'] == self.connected_ssid:
+                    self.ssids_w.setCurrentIndex(i)
+                    self.set_default_encryption(self.ssids_w.currentText())
+
+        # manage changes
         if self.connected_ssid != ssid:
             self.connected_ssid = ssid
             self.update_connect_button(self.ssids_w.currentText())
