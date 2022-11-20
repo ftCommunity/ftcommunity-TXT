@@ -796,18 +796,13 @@ class AppIcon(QToolButton):
         self.setText(app["name"].replace("&", "&&"))
         self.setIcon(QIcon(app["icon"]))
         self.setIconSize(app["icon"].size())
+
         self.installEventFilter(self)
-        # check if there's a VerticalScrollArea
-        # in the family tree ...
-        while parent and not parent.inherits("VerticalScrollArea"):
-            parent = parent.parent()
-        # ... and register its event filter to let it pre-filter
-        # mouse events
-        if parent:
-            self.installEventFilter(parent)
+
         shadow = QGraphicsDropShadowEffect(self)
         shadow.setOffset(QPointF(3, 3))
         self.setGraphicsEffect(shadow)
+            
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
 
@@ -853,21 +848,13 @@ class IconGrid(QWidget):
         self.grid.setContentsMargins(0, 10, 0, 10)
         self.setLayout(self.grid)
         # event to know the final size when creating the icon grid
-        self.installEventFilter(self)
-        self.columns = 0
+        self.columns = 3
         self.button_app = None
 
-    def eventFilter(self, obj, event):
-        if event.type() == event.Resize:
-            if self.width() != 0 and int(self.width() / 80) != self.columns:
-                # scale icon grid to use the full width
-                self.columns = int(self.width() / 80)
-                self.createAppIcons()
-                # make sure all columns are the same width
-                w = int(self.width()/self.columns)
-                for i in range(self.columns):
-                    self.grid.setColumnMinimumWidth(i, w)
-        return False
+        self.createAppIcons()
+        for i in range(self.columns):
+            self.grid.setColumnMinimumWidth(i, 80)
+        
 
     def setButtonApp(self, app):
         self.button_app = app
@@ -1079,15 +1066,6 @@ class VerticalScrollArea(QScrollArea):
         self.setWidget(content)
 
         
-    def eventFilter(self, obj, event):
-        # first make sure the child widget uses the full possible width
-        if event.type() == event.Resize:
-            self.widget().setMinimumWidth(self.width())
-        # just eat double clicks ...
-        #if event.type() == event.MouseButtonDblClick:
-        #    return True
-        return False
-
 class Launcher(TouchApplication):
     def __init__(self, args):
         super(Launcher, self).__init__(args)
