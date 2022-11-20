@@ -27,12 +27,6 @@ if platform.system() != 'Windows':
 
 THEME = "default"
 
-# the following is meant to suppress unwanted clicks when scrolling
-if TXT:
-    MIN_CLICK_TIME = 0.1    # a click needs to be 100ms at least ...
-else:
-    MIN_CLICK_TIME = 0
-
 CTRL_PORT = 9000
 BUSY_TIMEOUT = 20
 
@@ -1054,7 +1048,6 @@ class LauncherPluginAdapter:
 
 
 class VerticalScrollArea(QScrollArea):
-    TIMER_HZ = 25
 
     def __init__(self, content, parent=None):
         super(VerticalScrollArea, self).__init__(parent)
@@ -1144,7 +1137,6 @@ class Launcher(TouchApplication):
         config = configparser.RawConfigParser()
         config.add_section('view')
         config.set("view", 'path', self.icons.getPath())
-        config.set("view", "min_click_time", MIN_CLICK_TIME)
 
         # save the 'button_launch' option if it exists
         try:
@@ -1174,10 +1166,6 @@ class Launcher(TouchApplication):
             path = config.get('view', 'path')
             self.icons.setPath(path)
         
-        if config.has_option('view', 'min_click_time'):
-            global MIN_CLICK_TIME
-            MIN_CLICK_TIME = float(config.get("view", "min_click_time"))
-
         return True
 
     def launch_app(self, executable, managed, name):
