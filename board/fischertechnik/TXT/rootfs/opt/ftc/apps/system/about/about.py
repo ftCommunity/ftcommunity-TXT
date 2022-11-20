@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import sys, os, ftrobopy
+import sys, os
 from TxtStyle import *
 from launcher import LauncherPlugin
 
@@ -80,8 +80,12 @@ class VersionsDialog(TxtDialog):
             if(i < 2): py_ver_str += "."
         vbox.addWidget(VersionWidget("Python", py_ver_str))
 
-        # --------- ftrobopy version ----------
-        vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
+        try:
+            import ftrobopy
+            # --------- ftrobopy version ----------
+            vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
+        except:
+            pass
 
         # --------- qt -----------
         vbox.addWidget(VersionWidget("Qt", QT_VERSION_STR))
@@ -136,7 +140,7 @@ class AboutPlugin(LauncherPlugin):
 
         self.vbox.addStretch()
 
-        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2020 the ft:community"))
+        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2022 the ft:community"))
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)
