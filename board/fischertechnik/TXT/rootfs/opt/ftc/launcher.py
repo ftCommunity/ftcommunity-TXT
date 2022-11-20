@@ -14,18 +14,10 @@ import xml.etree.ElementTree as ET
 from TouchStyle import TouchDialog, TouchApplication, TouchKeyboard, \
     TXT, BUTTON_THREAD, IS_ARM
 
-# try to prefer PyQt5/Qt5
-try:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtNetwork import *
-    QT5 = True
-except:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    from PyQt4.QtNetwork import *
-    QT5 = False
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import *
 
 PLUGINS_DIR = "plugins"
 
