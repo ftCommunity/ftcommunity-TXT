@@ -172,9 +172,6 @@ class StatusPopup(QFrame):
         self.adjustSize()
         parent.main_widget.setGraphicsEffect(QGraphicsBlurEffect(parent))
 
-    def closeEvent(self, event):
-        self.parent().main_widget.setGraphicsEffect(None)
-
 
 class StatusBar(QWidget):
     def __init__(self, parent=None):
@@ -362,9 +359,6 @@ class FolderName(TouchKeyboard):
 class FolderOpIcon(QToolButton):
     def __init__(self, type, parent=None):
         super(FolderOpIcon, self).__init__(parent)
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(QPointF(3, 3))
-        self.setGraphicsEffect(shadow)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setToolButtonStyle(Qt.ToolButtonIconOnly)
         pix = Icon(type + ".png")
@@ -777,7 +771,6 @@ class AppPopup(QFrame):
         # request refresh of current view since there's
         # now a new folder
         self.refresh.emit()
-        # a toolbutton with drop shadow
 
 
 class AppIcon(QToolButton):
@@ -793,10 +786,6 @@ class AppIcon(QToolButton):
 
         self.installEventFilter(self)
 
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(QPointF(3, 3))
-        self.setGraphicsEffect(shadow)
-            
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
 
@@ -816,15 +805,6 @@ class AppIcon(QToolButton):
 
     def on_go_to_folder(self, apps):
         self.go_to_folder.emit(apps)
-
-    # hide shadow while icon is pressed
-    def mousePressEvent(self, event):
-        self.graphicsEffect().setEnabled(False)
-        QToolButton.mousePressEvent(self, event)
-
-    def mouseReleaseEvent(self, event):
-        self.graphicsEffect().setEnabled(True)
-        QToolButton.mouseReleaseEvent(self, event)
 
 
 class IconGrid(QWidget):
