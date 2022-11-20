@@ -1075,132 +1075,18 @@ class VerticalScrollArea(QScrollArea):
         self.setFrameStyle(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        QScroller.grabGesture(self, QScroller.LeftMouseButtonGesture);
         self.setWidget(content)
-        self.press_event = None
-        self.dragging = None
-        self.delayed_press = False
-        self.drag_speed = None
-        self.timer = None
-        self.release_lock = None
-        self.press_timer = None
+
         
     def eventFilter(self, obj, event):
         # first make sure the child widget uses the full possible width
         if event.type() == event.Resize:
             self.widget().setMinimumWidth(self.width())
         # just eat double clicks ...
-        if event.type() == event.MouseButtonDblClick:
-            return True
-        # we also need to catch mouse events
-        if event.type() == event.MouseButtonPress and event.button() == Qt.LeftButton:
-            # a delayed event is just passed through
-            if self.delayed_press:
-                return False
-            # any regular press within the release lock time is totally ignored
-            if self.release_lock:
-                return True
-            self.drag_speed = None
-            # stop any existing drag timer
-            if self.timer:
-                self.timer.stop()
-                self.timer = None
-            # start a timer used to check for long presses
-            self.press_timer = QTimer(self)
-            self.press_timer.timeout.connect(self.on_press_timer)
-            self.press_timer.setSingleShot(True)
-            self.press_timer.start(1000)
-            # remember this event to be able to replay it later
-            self.press_event = { "time": time.time(), "obj": obj, "event": QMouseEvent( event) }
-            self.dragging = None
-            # don't pass this event to the target now
-            return True
-
-        if event.type() == event.MouseButtonRelease and event.button() == Qt.LeftButton:
-            # cancel any press timer that may still be running
-            if self.press_timer:
-                self.press_timer.stop()
-                self.press_timer = None
-            self.release_lock = int(250*self.TIMER_HZ/1000)   # lock for 250ms
-            # processing of the release lock requires the timer
-            if not self.timer:
-                # start a timer that does some slow decelleration
-                self.timer = QTimer(self)
-                self.timer.timeout.connect(self.on_timer)
-                self.timer.start(int(1000 / self.TIMER_HZ))
-            # if the user was dragging don't forward any event
-            if self.dragging:
-                self.dragging = None
-                self.press_event = None
-                return True
-            # check if the intercepted press event came from the same
-            # object that now receives a release event. In that case
-            # re-inject the intercepted event now
-            if self.press_event and self.press_event["obj"] == obj:
-                # the user was not dragging. But we've eaten the previous
-                # button press event and we thus need to fake the press
-                # event now
-                if time.time() - self.press_event["time"] > MIN_CLICK_TIME:
-                    self.delayed_press = True
-                    QApplication.sendEvent(self.press_event["obj"], self.press_event["event"])
-                    self.delayed_press = False
-                self.press_event = None
-            return False
-
-        if event.type() == event.MouseMove and obj == self.widget() and self.press_event:
-            # we are only interested in the vertical distance
-            # not dragging yet? Check if user has moved the mouse far enough vertically
-            # to start dragging
-            if not self.dragging:
-                dist_y = self.press_event["event"].globalPos().y() - event.globalPos().y()
-                if abs(dist_y) > 20:
-                    # cancel any long press timer that may still  be runinng
-                    if self.press_timer:
-                        self.press_timer.stop()
-                        self.press_timer = None
-                    self.dragging = (event.globalPos().y(), self.verticalScrollBar().value())
-                    # restart drag timer
-                    self.last_drag_pos = None
-                    if not self.timer:
-                        # start a timer that does some slow decelleration
-                        self.timer = QTimer(self)
-                        self.timer.timeout.connect(self.on_timer)
-                        self.timer.start(int(1000 / self.TIMER_HZ))
-            if self.dragging:
-                dist_y = self.dragging[0] - event.globalPos().y()
-                self.verticalScrollBar().setValue(self.dragging[1] + dist_y)
+        #if event.type() == event.MouseButtonDblClick:
+        #    return True
         return False
-
-    def on_press_timer(self):
-        # send custom "long press" event to the object that would have received the
-        # initial click
-        QApplication.sendEvent(self.press_event["obj"], QEvent(2000))
-        # and cancel any possible future dragging and clicking
-        self.dragging = None
-        self.press_event = None
-
-    def on_timer(self):
-        if self.release_lock:
-            self.release_lock -= 1
-        # measure speed while user still drags
-        if self.dragging:
-            if self.last_drag_pos:
-                self.drag_speed = self.TIMER_HZ * (self.verticalScrollBar().value() - self.last_drag_pos)
-            self.last_drag_pos = self.verticalScrollBar().value()
-        elif self.drag_speed:
-            # scroll ...
-            self.verticalScrollBar().setValue(self.verticalScrollBar().value() + int(self.drag_speed / self.TIMER_HZ))
-            if self.drag_speed:
-                dec = 5 * (1000 / self.TIMER_HZ)
-                if self.drag_speed < -dec:
-                    self.drag_speed += dec
-                elif self.drag_speed > dec:
-                    self.drag_speed -= dec
-                else:
-                    self.drag_speed = None
-        if not self.dragging and not self.drag_speed and not self.release_lock:
-            self.timer.stop()
-            self.timer = None
-
 
 class Launcher(TouchApplication):
     def __init__(self, args):
