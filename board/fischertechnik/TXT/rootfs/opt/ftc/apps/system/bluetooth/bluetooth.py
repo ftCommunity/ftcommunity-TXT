@@ -5,6 +5,7 @@
 import sys, os, shlex, io, time
 from subprocess import Popen, call, PIPE, check_output, CalledProcessError
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 # only care for the built-in bluetooth adapter
 DEV = "hci0"
@@ -208,9 +209,9 @@ class EntryWidget(QWidget):
     def setText(self, str):
         self.value.setText(str)
 
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
@@ -294,7 +295,6 @@ class FtcGuiApplication(TouchApplication):
         self.hciconfig(None, self.get_name)
 
         self.w.show()
-        self.exec_()        
 
     def service_enable(self, on):
         self.w.centralWidget.setGraphicsEffect(QGraphicsBlurEffect(self))
@@ -393,4 +393,12 @@ class FtcGuiApplication(TouchApplication):
             pass
     
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)
