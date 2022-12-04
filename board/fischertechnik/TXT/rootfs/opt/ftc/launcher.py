@@ -1007,8 +1007,8 @@ class LauncherPluginAdapter:
         self.plugin = None
         import importlib, re
         module_name = re.search(BASE + "/(.+).py", module_script).group(1).replace("/", ".")
-        module = importlib.reload(importlib.import_module(module_name))
         try:
+            module = importlib.reload(importlib.import_module(module_name))
             self.plugin = module.createPlugin(launcher)
         except Exception as e:
             print(e)
