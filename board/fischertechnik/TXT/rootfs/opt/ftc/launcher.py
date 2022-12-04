@@ -19,6 +19,10 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtNetwork import *
 
+LOGFILE="/tmp/launcher.log"
+from logger import *
+init_logger(LOGFILE)
+
 PLUGINS_DIR = "plugins"
 
 # PTYs are not available on windows.
