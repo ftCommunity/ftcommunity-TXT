@@ -21,7 +21,10 @@ import xml.etree.ElementTree as ET
 
 from launcher import LauncherPlugin
 
-FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
+try:
+    FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
+except:
+    FW_VERSION = semantic_version.Version("1.0.0")
 
 # url of the "app store"
 URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/packages/"
