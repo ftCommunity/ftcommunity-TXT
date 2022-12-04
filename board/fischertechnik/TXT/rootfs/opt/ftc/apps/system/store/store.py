@@ -226,7 +226,7 @@ class NetworkAccessManager(QNetworkAccessManager):
         reply.deleteLater()
 
     def slotError(self, code):
-        print("Error:", code)
+        print("Error %s while trying to access %s" % (code, self.url))
         
     def slotSslErrors(self, errors):
         for e in errors:
@@ -248,6 +248,7 @@ class NetworkAccessManager(QNetworkAccessManager):
         QNetworkAccessManager.__init__(self)
         self.messageBuffer = []
         url   = QUrl((url % branch) + filename)
+        self.url = url.toDisplayString()
         req   = QNetworkRequest(url)
         reply = self.get(req)
         reply.ignoreSslErrors()
@@ -708,7 +709,7 @@ class AppListWidget(QListWidget):
                         # create a tuple of app name and its parameters
                         app_dirs.append(appparms)
             except:
-                print("Failed: ", i)
+                print("Failed to scan app directory: ", i)
                 pass
                 
         return app_dirs
