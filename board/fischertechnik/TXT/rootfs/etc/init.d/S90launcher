@@ -22,6 +22,8 @@ fi
 # ENABLE VNC AT YOUR OWN RISK by uncommenting the next line
 #export DISPLAY="multi: ${DISPLAY} VNC:0" 
 
+export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
+
 start() {
         printf "Starting $NAME: "
         start-stop-daemon --start -c ftc --background --make-pidfile --pidfile $PIDFILE \
