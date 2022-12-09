@@ -62,4 +62,4 @@ def init_logger(filename=''):
 
 if __name__ == "__main__":
     init_logger("/tmp/launcher.log")
-    print('Foo')
+
