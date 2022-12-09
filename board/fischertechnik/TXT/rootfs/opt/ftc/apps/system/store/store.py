@@ -12,10 +12,7 @@ from pathlib import Path
 
 from TouchStyle import *
 
-try:
-    from PyQt5.QtNetwork import *
-except:
-    from PyQt4.QtNetwork import *
+from PyQt5.QtNetwork import *
 
 import xml.etree.ElementTree as ET
 
