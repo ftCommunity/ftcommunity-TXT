@@ -5,18 +5,11 @@
 # the like
 import struct, os, platform, socket
 
-# try to prefer PyQt5/Qt5
-try:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-    QT5 = True
-except:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    QT5 = False
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
-__version__ = '1.7'
+__version__ = '1.8'
 
 TouchStyle_version = float(__version__)  # Kept for backward compatibility
 
@@ -737,81 +730,9 @@ class TouchKeyboard(TouchDialog):
         if self.sender().objectName() == "confirmbut":
             self.text_changed.emit(self.line.text())
 
-if not QT5:
-    class TouchInputContext(QInputContext):
-        def __init__(self,parent):
-            QInputContext.__init__(self,parent)
-            self.keyboard = None
-
-        def keyboard_present():
-            # on the (non-arm) desktop always return False to force
-            # on screen keyboard
-            if platform.machine()[0:3] != "arm":
-                print("Forcing on screen keyboard on non-arm device")
-                return False
-
-            try:
-                for i in os.listdir("/dev/input/by-id"):
-                    if i[-4:] == "-kbd":
-                        return True
-            except:
-                pass
-            return False
-
-        def reset(self):
-            pass
-
-        def filterEvent(self, event):
-
-            if event.type() == QEvent.RequestSoftwareInputPanel:
-                if self.focusWidget().property("nopopup"):
-                    return True
-
-                if not self.keyboard:
-                    self.keyboard = TouchKeyboard(self.focusWidget())
-                    self.keyboard.text_changed[str].connect(self.on_text_changed)
-                else:
-                    self.keyboard.updateParent(self.focusWidget())
-
-                text = ""
-                cpos = 0
-                self.widget = self.focusWidget()
-                if self.widget.inherits("QLineEdit"):
-                    text = self.widget.text()
-                    cpos = self.widget.cursorPosition() 
-                elif self.widget.inherits("QTextEdit"):
-                    text = self.widget.toPlainText()
-                    cpos = self.widget.textCursor().position()
-
-                self.keyboard.focus(text, cpos)
-
-                self.keyboard.show()
-                return True
-
-            # the keyboard always overlays the entire sceen.
-            # Thus we don't close it via the event but from the
-            # panels own close button
-            elif event.type() == QEvent.CloseSoftwareInputPanel:
-                return True
-
-            return False
-
-        def on_text_changed(self, str):
-            if self.widget.inherits("QLineEdit"):
-                self.widget.setText(str)
-                # a line edit emits the editingFinished signal when done
-                self.widget.editingFinished.emit()
-            elif self.widget.inherits("QTextEdit"):
-                self.widget.setText(str)
-
-
 class TouchApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)        
-        if not QT5 and not TouchInputContext.keyboard_present():
-            self.setAutoSipEnabled(True)
-            self.setInputContext(TouchInputContext(self))
-        if QT5:
-            import touch_keyboard
-            self.installEventFilter(touch_keyboard.TouchHandler(self))
+        import touch_keyboard
+        self.installEventFilter(touch_keyboard.TouchHandler(self))
         TouchSetStyle(self)
