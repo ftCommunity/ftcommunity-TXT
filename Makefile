@@ -12,7 +12,7 @@ CONFIG_DEPENDS = \
   .gitmodules \
   board/fischertechnik/TXT/tisdk_am335x-fischertechnik_txt_defconfig
 
-buildroot/.config: $(CONFIG_DEPENDS)
+buildroot/.config: $(CONFIG_DEPENDS) buildroot/Makefile
 	BR2_EXTERNAL=.. make -C buildroot fischertechnik_TXT_defconfig
 
 imagedir := buildroot/output/images
