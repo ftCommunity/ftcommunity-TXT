@@ -8,6 +8,7 @@ Section "Device"
         Identifier      "Configured Video Device"
 	Driver "fbdev"
 	Option "fbdev" "/dev/fb0"
+        Option "Rotate" "UD"
 EndSection
 
 Section "Monitor"
@@ -28,5 +29,5 @@ Section "InputClass"
 	MatchIsTouchscreen "on"
 	MatchDevicePath "/dev/input/event0"
 	Driver "tslib"
-	Option "TransformationMatrix" "100 0 0 0 75 0 0 0 6"
+	Option "TransformationMatrix" "-100 0 6 0 -75 6 0 0 6"
 EndSection
