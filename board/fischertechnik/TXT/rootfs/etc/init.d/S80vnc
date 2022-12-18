@@ -9,7 +9,7 @@ conffile=/etc/default/x11vnc
 [ -f $conffile ] && . $conffile
 
 start() {
-    if [ $ENABLED -eq "yes" ]; then
+    if [ $ENABLED = "yes" ]; then
         printf "Starting $NAME: "
         start-stop-daemon --start -c ftc --make-pidfile --background --pidfile $PIDFILE \
 			  --exec x11vnc -- -display :0 -forever \
