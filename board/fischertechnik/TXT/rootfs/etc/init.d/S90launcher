@@ -15,13 +15,6 @@ if [ -r /etc/default/launcher ]; then
   done < /etc/default/launcher
 fi
 
-# SECURITY NOTE: Enabling the builtin VNC server
-# gives everyone with a network connection to
-# your TXT unrestricted access to all CFW features,
-# exactly as if they were sitting directly in front of it.
-# ENABLE VNC AT YOUR OWN RISK by uncommenting the next line
-#export DISPLAY="multi: ${DISPLAY} VNC:0" 
-
 export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
 export PYTHONPATH=/opt/ftc
 export DISPLAY=:0
