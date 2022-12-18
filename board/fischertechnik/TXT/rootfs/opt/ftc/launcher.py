@@ -1064,6 +1064,7 @@ class Launcher(TouchApplication):
         self.tcpServer.get_app.connect(self.on_get_app)
         self.tcpServer.stop_app.connect(self.on_stop_app)
         self.log_file = None
+        self.popup = None
         self.addWidgets()
         self.exec_()        
 
