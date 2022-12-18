@@ -23,16 +23,16 @@ fi
 #export DISPLAY="multi: ${DISPLAY} VNC:0" 
 
 export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
+export PYTHONPATH=/opt/ftc
+export DISPLAY=:0
+export TSLIB_TSDEVICE=/dev/input/event0
+export QT_QPA_PLATFORM=xcb
+
 
 start() {
         printf "Starting $NAME: "
         start-stop-daemon --start -c ftc --background --make-pidfile --pidfile $PIDFILE \
-              --exec /usr/bin/env \
-                     PYTHONPATH=/opt/ftc \
-                     DISPLAY=:0 \
-                     TSLIB_TSDEVICE=/dev/input/event0 \
-		     QT_QPA_PLATFORM=xcb \
-                     /opt/ftc/launcher.py \
+              --exec /opt/ftc/launcher.py \
               && echo "OK" || echo "FAIL"
 }
 
