@@ -1454,10 +1454,27 @@ class Launcher(TouchApplication):
         self.w.show()
 
 
+def install_exception_hook():
+    sys._excepthook = sys.excepthook # always save before overriding
+
+    def application_exception_hook(exctype, value, traceback):
+        # Let's try to write the problem
+        print("Exctype : %s, value : %s traceback : %s"%(exctype, value, traceback))
+        # Call the normal Exception hook after (this will probably abort application)
+        sys._excepthook(exctype, value, traceback)
+        sys.exit(1)
+
+    # Do not forget to our exception hook
+    sys.excepthook = application_exception_hook
+
+    
 # Only actually do something if this script is run standalone, so we can test our 
 # application, but we're also able to import this program without actually running
 # any code.
 if __name__ == "__main__":
 
-
-    Launcher(sys.argv)
+    try:
+        install_exception_hook()
+        Launcher(sys.argv)
+    except Exception as e:
+        print(e)
