@@ -1459,14 +1459,5 @@ class Launcher(TouchApplication):
 # any code.
 if __name__ == "__main__":
 
-    # run websockify in the background to allow noVNC to connect to 
-    # the qt embedded built-in vnc server
-    try:
-        import _thread, websockify
-        from websockify.websocket import *
-        from websockify.websocketproxy import *
-        _thread.start_new_thread(websockify.websocketproxy.websockify_init, ())
-    except:
-        pass
 
     Launcher(sys.argv)
