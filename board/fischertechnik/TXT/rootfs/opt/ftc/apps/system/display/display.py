@@ -49,10 +49,9 @@ class DisplaySettingsPlugin(LauncherPlugin):
 
     def on_calibrate_touchscreen(self):
         # make sure that only ts_calibrate reacts to touch events...
-        old_window = self.mainWindow
-        self.mainWindow = TouchBaseWidget()
-        self.mainWindow.show()
-        old_window.close()
+        self.popup = TouchDialog("", self.mainWindow)
+        self.popup.show()
+
         subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "calibrate"])
         self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
@@ -65,9 +64,8 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.restart_launcher(msg % rotation)
 
     def restart_launcher(self, text):
-        old_window = self.mainWindow
-        self.mainWindow = TouchBaseWidget()
-        layout = QVBoxLayout()
+        self.popup = TouchDialog("", self.mainWindow)
+        layout = self.popup.layout
         layout.addStretch()
 
         lbl = QLabel(text)
@@ -76,12 +74,12 @@ class DisplaySettingsPlugin(LauncherPlugin):
         layout.addWidget(lbl)
 
         layout.addStretch()
-        self.mainWindow.setLayout(layout)        
-        self.mainWindow.show()
-        old_window.close()
-        # the 0 msec timer makes sure that the actual restart does
+        self.popup.show()
+        
+        # the timer makes sure that the actual restart does
         # not happen before the message window has been displayed...
-        QTimer.singleShot(0, self.do_restart_launcher)
+        self.restartTimer = QTimer()
+        self.restartTimer.singleShot(2000, self.do_restart_launcher)
 
     def do_restart_launcher(self):
         subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])

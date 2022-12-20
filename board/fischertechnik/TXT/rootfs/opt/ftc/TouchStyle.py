@@ -161,9 +161,11 @@ class TouchTitle(QLabel):
         self.close.setObjectName("cancelbut")
 
 
-# The TXT does not use windows. Instead we just paint custom 
-# toplevel windows fullscreen. This widget is closed when the 
-# pwoer button is being pressed
+# The TXT does not use windows. Instead we just paint custom toplevel
+# windows fullscreen. This widget is closed when the pwoer button is
+# being pressed.
+#
+# To do: This class notifies the launcher which should be de-coupled.
 class TouchBaseWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
