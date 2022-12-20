@@ -535,7 +535,7 @@ class IpEdit(TouchDialog):
         for i in buttons:
             btn = QPushButton(i)
             btn.clicked.connect(self.btn_clicked)
-            grid.addWidget(btn, cnt/4, cnt%4) 
+            grid.addWidget(btn, cnt//4, cnt%4) 
             cnt += 1
 
         grid_w.setLayout(grid)

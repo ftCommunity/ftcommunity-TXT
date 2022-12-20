@@ -175,9 +175,6 @@ class TouchBaseWidget(QWidget):
 
         self.setObjectName("centralwidget")
 
-        if TXT:
-            self.subdialogs = []
-
         if BUTTON_THREAD:
             BUTTON_THREAD.power_button_released.connect(self.close)
 
@@ -205,19 +202,6 @@ class TouchBaseWidget(QWidget):
         finally:
             sock.close()
 
-    def unregister(self,child):
-        if TXT:
-            self.subdialogs.remove(child)
-
-    def register(self,child):
-        if TXT:
-            self.subdialogs.append(child)
-        
-    def close(self):
-        if TXT:
-            for i in self.subdialogs:
-                i.close()
-        super(TouchBaseWidget, self).close()
 
 
 class TouchWindow(TouchBaseWidget):
@@ -247,16 +231,7 @@ class TouchWindow(TouchBaseWidget):
 class TouchDialog(QDialog):
     def __init__(self,title,parent):
         QDialog.__init__(self,parent)
-        # for some odd reason the childern are not registered
-        # as child windows on the txt
-        if TXT:
-            # search for a matching root parent widget
-            while parent and not (parent.inherits("TouchBaseWidget") or parent.inherits("TouchDialog")):
-                parent = parent.parent()
-            self.parent = parent
-            if parent:
-                parent.register(self)
-            self.setParent(parent)
+
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
@@ -280,16 +255,6 @@ class TouchDialog(QDialog):
         self.layout.addWidget(self.centralWidget)
         self.setLayout(self.layout)
 
-    def updateParent(self, parent):
-        if TXT:
-            # search for a matching root parent widget
-            while parent and not (parent.inherits("TouchBaseWidget") or parent.inherits("TouchDialog")):
-                parent = parent.parent()
-            self.parent = parent
-            if parent:
-                parent.register(self)
-            self.setParent(parent)
-
     def setCentralWidget(self, w):
         # remove the old central widget and add a new one
         self.centralWidget.deleteLater()
@@ -304,19 +269,6 @@ class TouchDialog(QDialog):
     
     def setCancelButton(self):
         return self.titlebar.setCancelButton()
-
-    def unregister(self, child):
-        if TXT:
-            self.parent.unregister(child)
-
-    def register(self, child):
-        if TXT:
-            self.parent.register(child)
-
-    def close(self):
-        if TXT and self.parent:
-            self.parent.unregister(self)
-        super(TouchDialog, self).close()
         
     # TXT windows are always fullscreen
     def exec_(self):
