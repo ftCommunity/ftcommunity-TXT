@@ -82,7 +82,14 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.restartTimer.singleShot(2000, self.do_restart_launcher)
 
     def do_restart_launcher(self):
-        subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])
+        # We need to restart the X server and ourselves.
+        cmd="sudo /etc/init.d/S40xorg restart && sudo /etc/init.d/S90launcher restart && sudo /etc/init.d/S80vnc restart"
+
+        self.p = subprocess.Popen(args=cmd, shell=True,
+                                  start_new_session=True,
+                                  stdin=subprocess.DEVNULL,
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.DEVNULL)
 
     def unset_reset_calibration_flag(self):
         subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "commit"])
