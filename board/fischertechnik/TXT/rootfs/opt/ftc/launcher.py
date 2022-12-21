@@ -312,6 +312,7 @@ class BusyAnimation(QWidget):
         return img
 
     def timer_expired(self):
+        self.etimer = None
         # App launch expired without callback ...
         self.expired.emit()
         self.close()
@@ -329,7 +330,8 @@ class BusyAnimation(QWidget):
         self.repaint()
 
     def close(self):
-        self.etimer.stop()
+        if self.etimer:
+            self.etimer.stop()
         self.atimer.stop()
         super(BusyAnimation, self).close()
         super(BusyAnimation, self).deleteLater()
