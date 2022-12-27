@@ -4,6 +4,7 @@ if [ "$(whoami)" != "root" ]; then
   exit 1
 fi
 /bin/launcher-msg "Rebooting..."
+sleep 2
 case $(cat /rom/etc/sysversion)  in
     [0123].*|4.[0123].*|4.4.[012]*)
         # normal reboot hangs on firmware versions  < 4.4.3
