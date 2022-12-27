@@ -9,6 +9,9 @@ rm -f "$TARGET/etc/init.d/S93-am335x-pm-firmware-load"
 # remove start scripts for openvpn
 rm -f "$TARGET/etc/init.d/S60openvpn"
 
+# remove xorg start script
+rm -f "$TARGET/etc/init.d/S40xorg"
+
 # Try to generate a detailed firmware version number from git.
 # Fall back to the generic version number from the board config
 # if we are not building from a git repository, and abort the build

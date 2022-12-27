@@ -1,51 +1,65 @@
 #!/bin/sh
+#
+# Starts Xorg
+#
 
-NAME=launcher
-PIDFILE=/var/run/$NAME.pid
+BIN=/usr/bin/Xorg
+PIDFILE=/var/run/xorg.pid
 
-if [ -r /etc/default/launcher ]; then
-  while read line ; do
-    case "$line" in
-      "SCREEN_ROTATION=0") SCREEN_ROTATION=0 ;;
-      "SCREEN_ROTATION=90") SCREEN_ROTATION=90 ;;
-      "SCREEN_ROTATION=180") SCREEN_ROTATION=180 ;;
-      "SCREEN_ROTATION=270") SCREEN_ROTATION=270 ;;
-      *) echo "Ignoring unknown configuration entry: $line" ;;
-    esac
-  done < /etc/default/launcher
-fi
+LAUNCHER_CONFIG=/etc/default/launcher
+XORG_CONF=/etc/X11/xorg.conf
+SCREEN_ROTATION=0
+[ -e $LAUNCHER_CONFIG ] && . $LAUNCHER_CONFIG
+use_config() {
+    config=$XORG_CONF.$1
+    if ! diff -N -q $XORG_CONF $config; then
+	cp -f $config $XORG_CONF
+    fi
+}
+case $SCREEN_ROTATION in
+90)  use_config cw;;
+180) use_config ud;;
+270) use_config ccw;;
+*)   use_config up;;
+esac
 
-export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
-export PYTHONPATH=/opt/ftc
-export DISPLAY=:0
 
+# ":0.0 vt01" makes sure Xorg finds the correct terminal.
+# -allowMouseOpenFail allows the server to start up even if the mouse device
+#   can't be opened or initialised.
+# -noreset prevents a server reset when the last client connection is closed.
+# -nocursor hides the mouse pointer
+XORG_ARGS=":0.0 vt01 -s 0 -noreset -allowMouseOpenFail -nocursor"
 
 start() {
-        printf "Starting $NAME: "
-        start-stop-daemon --start -c ftc --background --make-pidfile --pidfile $PIDFILE \
-              --exec /opt/ftc/launcher.py \
-              && echo "OK" || echo "FAIL"
+	printf "Starting Xorg: "
+	start-stop-daemon -S -q -b -m -p $PIDFILE --exec xinit /etc/X11/xinit/xinitrc -- $BIN $XORG_ARGS
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
 }
 
 stop() {
-        printf "Stopping $NAME: "
-        start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE \
-                && echo "OK" || echo "FAIL"
-	rm -f $PIDFILE
+	printf "Stopping Xorg: "
+	start-stop-daemon -K -q -p $PIDFILE
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+}
+
+restart() {
+	stop
+	sleep 2
+	start
 }
 
 case "$1" in
-        start)
-                start
-                ;;
-        stop)
-                stop
-                ;;
-        restart)
-                stop
-                start
-                ;;
-        *)
-                echo "Usage: $0 {start|stop|restart}"
-                exit 1
+	start)
+		start
+	;;
+	stop)
+		stop
+	;;
+	restart|reload)
+		restart
+	;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+	exit 1
 esac

@@ -83,7 +83,7 @@ class DisplaySettingsPlugin(LauncherPlugin):
 
     def do_restart_launcher(self):
         # We need to restart the X server and ourselves.
-        cmd="sudo /etc/init.d/S40xorg restart && sudo /etc/init.d/S90launcher restart && sudo /etc/init.d/S80vnc restart"
+        cmd="sudo /etc/init.d/S90launcher restart"
 
         self.p = subprocess.Popen(args=cmd, shell=True,
                                   start_new_session=True,
