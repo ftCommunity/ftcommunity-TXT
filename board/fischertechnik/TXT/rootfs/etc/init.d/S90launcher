@@ -25,15 +25,12 @@ esac
 
 
 # ":0.0 vt01" makes sure Xorg finds the correct terminal.
-# -allowMouseOpenFail allows the server to start up even if the mouse device
-#   can't be opened or initialised.
-# -noreset prevents a server reset when the last client connection is closed.
 # -nocursor hides the mouse pointer
-XORG_ARGS=":0.0 vt01 -s 0 -noreset -allowMouseOpenFail -nocursor"
+XORG_ARGS=":0.0 vt01 -s 0 -nocursor"
 
 start() {
 	printf "Starting Xorg: "
-	start-stop-daemon -S -q -b -m -p $PIDFILE --exec xinit /etc/X11/xinit/xinitrc -- $BIN $XORG_ARGS
+	start-stop-daemon -S -q -b -m -p $PIDFILE --exec xinit -- /etc/X11/xinit/xinitrc -- $BIN $XORG_ARGS
 	[ $? = 0 ] && echo "OK" || echo "FAIL"
 }
 

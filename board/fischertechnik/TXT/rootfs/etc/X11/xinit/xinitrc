@@ -2,7 +2,7 @@
 
 set_background()
 {
-  xsetroot -bitmap /etc/ftc-xbg.xbm
+  xsetroot -solid '#5c96cc'
 }
 
 start_vnc()
@@ -12,7 +12,7 @@ start_vnc()
   # to enable, add ENABLED=yes to $conffile
   [ -f $conffile ] && . $conffile
   if [ $ENABLED = "yes" ]; then
-    sudo -u ftc x11vnc -- -display :0 -forever &
+    sudo -u ftc x11vnc -display :0 -forever &
   fi
 }
 
