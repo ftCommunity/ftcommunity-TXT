@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-FT_BT_REMOTE_SERVER_VERSION = 9df88db2676cf1364e85a373889183ff21c4922e
+FT_BT_REMOTE_SERVER_VERSION = 038b40b431b3d3558b91717d49cd34e1e435dc5a
 FT_BT_REMOTE_SERVER_SITE = $(call github,ftCommunity,ft_bt_remote_server,$(FT_BT_REMOTE_SERVER_VERSION))
 FT_BT_REMOTE_SERVER_LICENSE = GPLv3+
 FT_BT_REMOTE_SERVER_INSTALL_STAGING = NO
