@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load ftc splash image. Use FT colors for progress bar
-psplash --filename /etc/ftc-logo.png -y 212 --BarCol FC1504 --BarBkCol 347ECC --BkCol 000000 &
+psplash --filename /etc/ftc-shutdown.png -y 212 --BarCol FC1504 --BarBkCol 347ECC --BkCol 000000 &
 
 
 # count scripts to be executed

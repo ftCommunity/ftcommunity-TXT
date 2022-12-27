@@ -2,7 +2,7 @@
 
 set_background()
 {
-  xsetroot -solid green
+  xsetroot -bitmap /etc/ftc-xbg.xbm
 }
 
 start_vnc()
