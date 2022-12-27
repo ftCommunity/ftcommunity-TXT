@@ -18,11 +18,12 @@ start_vnc()
 
 start_launcher()
 {
-  export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
-  export PYTHONPATH=/opt/ftc
-  #export DISPLAY=:0
+  EXPORT="
+    PYTHONPYCACHEPREFIX=/home/ftc/.pycache
+    PYTHONPATH=/opt/ftc
+  "
 
-  sudo -u ftc /opt/ftc/launcher.py
+  sudo -u ftc $EXPORT /opt/ftc/launcher.py
 }
 
 set_background
