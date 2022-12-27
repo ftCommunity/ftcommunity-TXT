@@ -5,6 +5,10 @@ cp -af $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/docs/favicon.ico $TARGET/var/www/
 # mv $TARGET/etc/init.d/S01logging $TARGET/etc/init.d/M01logging||echo "Logging already turned off!"
 # Remove obsolete PM firmware load script
 rm -f "$TARGET/etc/init.d/S93-am335x-pm-firmware-load"
+
+# remove start scripts for openvpn
+rm -f "$TARGET/etc/init.d/S60openvpn"
+
 # Try to generate a detailed firmware version number from git.
 # Fall back to the generic version number from the board config
 # if we are not building from a git repository, and abort the build
