@@ -22,9 +22,12 @@ start_launcher()
   export PYTHONPATH=/opt/ftc
   #export DISPLAY=:0
 
-  exec sudo -u ftc /opt/ftc/launcher.py
+  sudo -u ftc /opt/ftc/launcher.py
 }
 
 set_background
 start_vnc
-start_launcher
+while true; do
+    start_launcher
+done
+      
