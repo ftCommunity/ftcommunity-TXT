@@ -174,7 +174,6 @@ class StatusPopup(QFrame):
                 vbox.addWidget(line)
         self.setLayout(vbox)
         self.adjustSize()
-        parent.main_widget.setGraphicsEffect(QGraphicsBlurEffect(parent))
 
 
 class StatusBar(QWidget):
