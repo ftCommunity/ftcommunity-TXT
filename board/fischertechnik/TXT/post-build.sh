@@ -12,10 +12,13 @@ rm -f "$TARGET/etc/init.d/S60openvpn"
 # remove xorg start script
 rm -f "$TARGET/etc/init.d/S40xorg"
 
+# remove unused firmware
+find "$TARGET/usr/lib/firmware/ti-connectivity" ! -name "TIInit_11.8.32.bts" -type f -exec rm -f {} +
+
 # Try to generate a detailed firmware version number from git.
 # Fall back to the generic version number from the board config
 # if we are not building from a git repository, and abort the build
-# if we are building from git but the tag part of the version 
+# if we are building from git but the tag part of the version
 # number from git does not match the base version in 
 # board/fischertechnik/TXT/rootfs/etc/fw-ver.txt
 GIT_VERSION=$(git -C $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH describe --tags --match='v*' 2>/dev/null)
