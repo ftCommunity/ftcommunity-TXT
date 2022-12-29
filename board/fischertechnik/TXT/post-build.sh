@@ -13,7 +13,8 @@ rm -f "$TARGET/etc/init.d/S60openvpn"
 rm -f "$TARGET/etc/init.d/S40xorg"
 
 # remove unused firmware
-find "$TARGET/usr/lib/firmware/ti-connectivity" ! -name "TIInit_11.8.32.bts" -type f -exec rm -f {} +
+find "$TARGET/usr/lib/firmware/ti-connectivity" -iname "TIInit*.bts" ! -name "TIInit_11.8.32.bts" -type f -exec rm -f {} +
+find "$TARGET/usr/lib/firmware/ti-connectivity" -iname "wl*.bin" ! -name "wl18xx-fw-4.bin" -type f -exec rm -f {} +
 
 # Try to generate a detailed firmware version number from git.
 # Fall back to the generic version number from the board config
