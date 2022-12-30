@@ -1,50 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="de_DE" sourcelanguage="en">
+<!DOCTYPE TS><TS version="2.0" language="de_DE" sourcelanguage="en">
 <context>
     <name>AppInfo</name>
     <message>
-        <location filename="store.py" line="413"/>
+        <location filename="store.py" line="414"/>
         <source>Version</source>
         <translation>Version</translation>
     </message>
     <message>
-        <location filename="store.py" line="414"/>
+        <location filename="store.py" line="415"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="store.py" line="415"/>
+        <location filename="store.py" line="416"/>
         <source>Author</source>
         <translation>Autor</translation>
     </message>
     <message>
-        <location filename="store.py" line="416"/>
+        <location filename="store.py" line="417"/>
         <source>Firmware</source>
         <translation>Firmware</translation>
     </message>
     <message>
-        <location filename="store.py" line="417"/>
+        <location filename="store.py" line="418"/>
         <source>Set</source>
         <translation>Baukasten</translation>
     </message>
     <message>
-        <location filename="store.py" line="418"/>
+        <location filename="store.py" line="419"/>
         <source>Model</source>
         <translation>Modell</translation>
     </message>
     <message>
-        <location filename="store.py" line="419"/>
+        <location filename="store.py" line="420"/>
         <source>Category</source>
         <translation>Kategorie</translation>
     </message>
     <message>
-        <location filename="store.py" line="473"/>
+        <location filename="store.py" line="474"/>
         <source>Inst.</source>
         <translation>Inst.</translation>
     </message>
     <message>
-        <location filename="store.py" line="420"/>
+        <location filename="store.py" line="421"/>
         <source>Dependencies</source>
         <translation>Abhängigkeiten</translation>
     </message>
@@ -80,42 +79,42 @@
 <context>
     <name>Error</name>
     <message>
-        <location filename="store.py" line="281"/>
+        <location filename="store.py" line="282"/>
         <source>Not a valid zip file</source>
         <translation>Keine gültige ZIP-Datei</translation>
     </message>
     <message>
-        <location filename="store.py" line="300"/>
+        <location filename="store.py" line="301"/>
         <source>Manifest does not contain a UUID!</source>
         <translation>Manifest enthält keine UUID!</translation>
     </message>
     <message>
-        <location filename="store.py" line="313"/>
+        <location filename="store.py" line="314"/>
         <source>Unable to create target dir!</source>
         <translation>Kann Zielverzeichnis nicht erstellen!</translation>
     </message>
     <message>
-        <location filename="store.py" line="732"/>
+        <location filename="store.py" line="736"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="store.py" line="487"/>
+        <location filename="store.py" line="488"/>
         <source>Update app path mismatch.</source>
         <translation>Aktualisierungspfad stimmt nicht überein.</translation>
     </message>
     <message>
-        <location filename="store.py" line="508"/>
+        <location filename="store.py" line="509"/>
         <source>Delete app path not found!</source>
         <translation>Zu löschender Pfad nicht gefunden!</translation>
     </message>
     <message>
-        <location filename="store.py" line="514"/>
+        <location filename="store.py" line="515"/>
         <source>Unable to remove app</source>
         <translation>Kann Applikation nicht löschen</translation>
     </message>
     <message>
-        <location filename="store.py" line="766"/>
+        <location filename="store.py" line="770"/>
         <source>no version info</source>
         <translation>Keine Versionsinformation</translation>
     </message>
@@ -123,7 +122,7 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="store.py" line="834"/>
+        <location filename="store.py" line="838"/>
         <source>Store</source>
         <translation>Store</translation>
     </message>
@@ -131,17 +130,17 @@
 <context>
     <name>Menu</name>
     <message>
-        <location filename="store.py" line="448"/>
+        <location filename="store.py" line="449"/>
         <source>Install</source>
         <translation>Installieren</translation>
     </message>
     <message>
-        <location filename="store.py" line="454"/>
+        <location filename="store.py" line="455"/>
         <source>Uninstall</source>
         <translation>Deinstall.</translation>
     </message>
     <message>
-        <location filename="store.py" line="460"/>
+        <location filename="store.py" line="461"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
@@ -202,27 +201,27 @@
 <context>
     <name>NewRepo</name>
     <message>
-        <location filename="store.py" line="374"/>
+        <location filename="store.py" line="375"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="store.py" line="385"/>
+        <location filename="store.py" line="386"/>
         <source>Name:</source>
         <translation>Name:</translation>
     </message>
     <message>
-        <location filename="store.py" line="394"/>
+        <location filename="store.py" line="395"/>
         <source>User:</source>
         <translation>Nutzer:</translation>
     </message>
     <message>
-        <location filename="store.py" line="397"/>
+        <location filename="store.py" line="398"/>
         <source>Repository:</source>
         <translation>Repository:</translation>
     </message>
     <message>
-        <location filename="store.py" line="390"/>
+        <location filename="store.py" line="391"/>
         <source>Github:</source>
         <translation>Github:</translation>
     </message>
@@ -230,17 +229,17 @@
 <context>
     <name>menu</name>
     <message>
-        <location filename="store.py" line="838"/>
+        <location filename="store.py" line="842"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="store.py" line="840"/>
+        <location filename="store.py" line="844"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
     <message>
-        <location filename="store.py" line="846"/>
+        <location filename="store.py" line="850"/>
         <source>ftc</source>
         <translation>ftc</translation>
     </message>
