@@ -11,6 +11,7 @@ except:
 from subprocess import *
 from TouchStyle import *
 from threading import Timer
+from touch_keyboard import TouchKeyboard
 
 try:
     if TouchStyle_version<1.2:
@@ -681,11 +682,7 @@ class TouchAuxKeyboard(TouchKeyboard):
     def __init__(self, title, strg, parent):
         TouchKeyboard.__init__(self, parent)
         
-        self.strg=strg
-        self.titlebar.setText(title)
         self.line.setText(strg)
-        self.text_changed[str].connect(self.gotText)
-        self.result=strg
         
         try:
             dummy = float(strg.split(";")[0])
@@ -693,15 +690,9 @@ class TouchAuxKeyboard(TouchKeyboard):
         except:
             pass
         
-    def gotText(self, string):
-        self.result=string
-        
     def exec_(self):
         TouchKeyboard.exec_(self)
-        return self.result
-    
-    def close(self):
-        TouchKeyboard.close(self)
+        return self.text()
         
 
 if __name__ == "__main__":
