@@ -52,19 +52,18 @@ class ExecThread(QThread):
                 response = [ "", "" ]
                 response_stdout = ""
                 response_stderr = ""
+        except FileNotFoundError:
+            print( "Unable to locate '%s' program. Is it in your path?" % executable )
+            self.result(False, "Program not found")
         except OSError as e:
-            if e.errno == errno.ENOENT:
-                #print( "Unable to locate '%s' program. Is it in your path?" % executable )
-                self.result(False, "Program not found")
-            else:
-                #print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
-                self.result(False, "Exec error")
+            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
+            self.result(False, "Exec error")
         except ValueError as e:
-            #print( "Value error occured. Check your parameters." )
+            print( "Value error occured. Check your parameters." )
             self.result(False, "Value Error")
         else:
             if proc.wait() != 0:
-                #print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
+                print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
                 self.result(False, response)
             else:
                 #print( "Executable '%s' returned successfully." %(executable) )

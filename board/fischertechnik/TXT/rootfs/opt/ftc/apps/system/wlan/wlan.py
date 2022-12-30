@@ -6,8 +6,8 @@
 # sudo wpa_supplicant -B -Dwext -i wlan0 -C/var/run/wpa_supplicant
 
 import sys, os, shlex, time
-from subprocess import Popen, call, PIPE
 from TouchStyle import *
+from TouchAuxiliary import run_program
 from launcher import LauncherPlugin
 
 try:
@@ -29,38 +29,6 @@ COUNTRIES = {
     "France": "FR"
 }
     
-def run_program(rcmd):
-    """
-    Runs a program, and it's paramters (e.g. rcmd="ls -lh /var/www")
-    Returns output if successful, or None and logs error if not.
-    """
-    
-    cmd = shlex.split(rcmd)
-    executable = cmd[0]
-    executable_options=cmd[1:]    
-
-    try:
-        proc  = Popen(([executable] + executable_options), stdout=PIPE, stderr=PIPE)
-        response = proc.communicate()
-        response_stdout, response_stderr = response[0].decode('UTF-8'), response[1].decode('UTF-8')
-    except OSError as e:
-        if e.errno == errno.ENOENT:
-            print( "Unable to locate '%s' program. Is it in your path?" % executable )
-        else:
-            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
-        return ""
-    except ValueError as e:
-        print( "Value error occured. Check your parameters." )
-        return ""
-    else:
-        if proc.wait() != 0:
-            print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
-            return ""
-        else:
-            print( "Command '%s' returned successfully." %(rcmd) )
-            print( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] ))
-            return response_stdout
-
 def scan_networks(iface, retry=2):
     run_program("sudo wpa_cli -i %s scan_interval 5" % iface)
     for attempt in range(retry+1):

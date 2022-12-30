@@ -640,13 +640,15 @@ def run_program(rcmd):
         proc  = Popen(([executable] + executable_options), stdout=PIPE, stderr=PIPE)
         response = proc.communicate()
         response_stdout, response_stderr = response[0].decode('UTF-8'), response[1].decode('UTF-8')
+    except FileNotFoundError:
+        print( "Unable to locate '%s' program. Is it in your path?" % executable )
+        return ""
     except OSError as e:
-        if e.errno == errno.ENOENT:
-            print( "Unable to locate '%s' program. Is it in your path?" % executable )
-        else:
-            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
+        print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
+        return ""
     except ValueError as e:
         print( "Value error occured. Check your parameters." )
+        return ""
     else:
         if proc.wait() != 0:
             print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
