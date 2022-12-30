@@ -774,22 +774,28 @@ class AppIcon(QToolButton):
         self.setIcon(QIcon(app["icon"]))
         self.setIconSize(app["icon"].size())
 
-        self.installEventFilter(self)
+        self.grabGesture(Qt.TapAndHoldGesture, Qt.DontStartGestureOnChildren)
 
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
+        
 
-    def eventFilter(self, obj, event):
-        if event.type() == 2000:
-            # current this only doesn't do anything for folders
-            if "dir" in self.app:
+    def event(self, event):
+        if event.type() != QEvent.Gesture:
+            return QToolButton.event(self, event)
+        
+        for g in event.activeGestures():
+            if g.state() == Qt.GestureFinished:
                 # get all the app details from the IconGrid
                 popup = AppPopup(self)
                 popup.refresh.connect(self.on_refresh)
                 popup.go_to_folder.connect(self.on_go_to_folder)
                 popup.show()
-        return False
 
+        event.accept()
+        return True
+        
+        
     def on_refresh(self):
         self.refresh.emit()
 
