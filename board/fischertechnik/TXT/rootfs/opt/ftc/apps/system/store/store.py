@@ -22,7 +22,7 @@ from launcher import LauncherPlugin
 try:
     FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
 except:
-    FW_VERSION = semantic_version.Version("0.0.0-no-version")
+    FW_VERSION = semantic_version.Version("0.10.8")
 
 # url of the "app store"
 URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/packages/"
