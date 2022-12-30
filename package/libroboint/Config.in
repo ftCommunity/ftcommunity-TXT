@@ -6,3 +6,10 @@ config BR2_PACKAGE_LIBROBOINT
   select BR2_PACKAGE_BINUTILS_TARGET 
   help
     Install libroboint
+
+config BR2_PACKAGE_LIBROBOINT_PYTHON
+  bool "libroboint python bindings"
+  depends on BR2_PACKAGE_LIBROBOINT
+  depends on BR2_PACKAGE_PYTHON3
+  help
+    Install libroboint python bindings
