@@ -12,7 +12,7 @@ import platform
 import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, \
-    TXT, BUTTON_THREAD, IS_ARM
+    TXT, BUTTON_THREAD, getScreenSize, IS_ARM
 from touch_keyboard import TouchKeyboard
 
 from PyQt5.QtCore import *
@@ -37,17 +37,6 @@ BUSY_TIMEOUT = 20
 
 # make sure all file access happens relative to this script
 BASE = os.path.dirname(os.path.realpath(__file__))
-
-
-def getScreenSize():
-    if IS_ARM:
-        return QApplication.desktop().screenGeometry().size()
-
-    if 'SCREEN' in os.environ:
-        (w, h) = os.environ.get('SCREEN').split('x')
-        return QSize(int(w), int(h))
-
-    return QSize(240, 320)
 
         
 class PlainDialog(QDialog):

@@ -56,19 +56,23 @@ INPUT_EVENT_SIZE = struct.calcsize(INPUT_EVENT_FORMAT)
 
 STYLE_NAME = "themes/default/style.qss"
 
-# window size used on PC
-if 'SCREEN' in os.environ:
-    (w, h) = os.environ.get('SCREEN').split('x')
-    WIN_WIDTH = int(w)
-    WIN_HEIGHT = int(h)
-else:
-    if DEV_ORIENTATION == "LANDSCAPE":
-        WIN_WIDTH = 320
-        WIN_HEIGHT = 240
-    else:
-        WIN_WIDTH = 240
-        WIN_HEIGHT = 320
 
+
+
+        
+def getScreenSize():
+    if IS_ARM:
+        return QApplication.desktop().screenGeometry().size()
+
+    if 'SCREEN' in os.environ:
+        (w, h) = os.environ.get('SCREEN').split('x')
+        return QSize(int(w), int(h))
+
+    if DEV_ORIENTATION == "LANDSCAPE":
+        return QSize(320, 240)
+    
+    return QSize(240, 320)
+        
 
 
 # background thread to monitor power button event device
@@ -169,12 +173,7 @@ class TouchTitle(QLabel):
 class TouchBaseWidget(QWidget):
     def __init__(self):
         QWidget.__init__(self)
-        if IS_ARM and not DEV:
-            size = QApplication.desktop().screenGeometry()
-            self.setFixedSize(size.width(), size.height())
-        else:
-            self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
-
+        self.setFixedSize(getScreenSize())
         self.setObjectName("centralwidget")
 
         if BUTTON_THREAD:
@@ -237,11 +236,7 @@ class TouchDialog(QDialog):
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background 
         # gradient is being used
-        if IS_ARM and not DEV:
-            size = QApplication.desktop().screenGeometry()
-            self.setFixedSize(size.width(), size.height())
-        else:
-            self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
+        self.setFixedSize(getScreenSize())
         self.setObjectName("centralwidget")
 
         # create a vertical layout and put all widgets inside
