@@ -1,5 +1,12 @@
 #!/bin/sh
 
+
+set_locale()
+{
+  source /etc/locale
+  export LC_ALL
+}
+
 set_background()
 {
   xsetroot -solid '#5c96cc'
@@ -18,14 +25,11 @@ start_vnc()
 
 start_launcher()
 {
-  EXPORT="
-    PYTHONPYCACHEPREFIX=/home/ftc/.pycache
-    PYTHONPATH=/opt/ftc
-  "
-
-  sudo -u ftc $EXPORT /opt/ftc/launcher.py
+  export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
+  sudo -u ftc PYTHONPATH=/opt/ftc /opt/ftc/launcher.py
 }
 
+set_locale
 set_background
 start_vnc
 while true; do
