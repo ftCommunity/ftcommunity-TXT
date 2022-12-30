@@ -17,9 +17,9 @@ use_config() {
     fi
 }
 case $SCREEN_ROTATION in
-90)  use_config cw;;
+90)  use_config ccw;;
 180) use_config ud;;
-270) use_config ccw;;
+270) use_config cw;;
 *)   use_config up;;
 esac
 
