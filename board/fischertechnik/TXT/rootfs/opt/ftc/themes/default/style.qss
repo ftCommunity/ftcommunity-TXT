@@ -1,12 +1,17 @@
 /* QT theme for fischertechnik TXT
 /* http://doc.qt.io/qt-4.8/stylesheet-reference.html */
 /* http://doc.qt.io/qt-4.8/stylesheet-examples.html */
+/* https://doc.qt.io/qt-5/stylesheet-syntax.html */
+/* default font in Qt4: helvetica */
+/*              in Qt5: liberation mono */
 
 /* widgets by default let the background shine through and use a big white font */
 * { 
     background-color: rgba(255,255,255,40);
     selection-background-color: none;
-    font: bold 32px "sans-serif"; 
+    font-size: 28px;
+    font-family: "Liberation Sans";
+    font-style: bold;
     color: white;
     outline: 0;
     border: none;

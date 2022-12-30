@@ -14,10 +14,6 @@ class LicenseDialog(TxtDialog):
         txt = QTextEdit()
         txt.setReadOnly(True)
         
-        font = QFont()
-        font.setPointSize(16)
-        txt.setFont(font)
-    
         # load gpl from disk
         name = os.path.join(os.path.dirname(os.path.realpath(__file__)), lic)
         text=open(name, encoding="utf-8").read()
