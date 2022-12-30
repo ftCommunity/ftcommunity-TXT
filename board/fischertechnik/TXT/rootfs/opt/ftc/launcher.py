@@ -619,12 +619,10 @@ class AppPopup(QFrame):
         # remove bottom/right/left borders
         self.setStyleSheet("QFrame { border-bottom: 0; border-left: 0; border-right: 0; }")
 
-        # find root window
-        while parent and not parent.inherits("TouchTopWidget"):
-            parent = parent.parent()
-
         # set size
-        self.resize(parent.width(), self.HEIGHT)
+        screenSize = getScreenSize()
+        self.resize(screenSize.width(), self.HEIGHT)
+        
         vbox = QVBoxLayout(self)
         vbox.setContentsMargins(0, 0, 0, 0)
         vbox.setSpacing(0)
@@ -670,9 +668,9 @@ class AppPopup(QFrame):
         vbox.addWidget(hbox_w)
         vbox.addStretch()
         self.setLayout(vbox)
+        
         # open popup at the roots bottom
-        pos = parent.mapToGlobal(QPoint(0, parent.height() - self.height()))
-        self.move(pos)
+        self.move(QPoint(0, screenSize.height() - self.height()))
 
     def app_move_one_folder_up(self):
         # parent is the appicon, parent.parent is the icongrid
