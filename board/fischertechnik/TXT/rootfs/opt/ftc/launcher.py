@@ -11,8 +11,9 @@ import select, time, locale
 import platform
 import xml.etree.ElementTree as ET
 
-from TouchStyle import TouchDialog, TouchApplication, TouchKeyboard, \
+from TouchStyle import TouchDialog, TouchApplication, \
     TXT, BUTTON_THREAD, IS_ARM
+from touch_keyboard import TouchKeyboard
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -763,10 +764,12 @@ class AppPopup(QFrame):
         self.close()
         # request name of new folder from user
         folder_name = FolderName(self)
-        folder_name.titlebar.setText(QCoreApplication.translate("Folder", "New"))
-        folder_name.text_changed.connect(self.on_new_folder)
         folder_name.show()
         folder_name.exec_()
+        text = folder_name.text()
+        if text:
+            self.on_new_folder(text)
+            
 
     def on_new_folder(self, name):
         icongrid = self.parent().parent()
