@@ -160,8 +160,9 @@ QTabBar::tab:!selected {
 QTabWidget::tab-bar { alignment: center; }
 
 QTabWidget, QTabWidget::pane, QStackedWidget {
-  background: rgba(0,0,0,0); 
+/*   we would like a transparent background, but transparency seems ignored */
 /*   background: none; */
+  background-color: #448acc;
 }
 
 QTabWidget::pane {
