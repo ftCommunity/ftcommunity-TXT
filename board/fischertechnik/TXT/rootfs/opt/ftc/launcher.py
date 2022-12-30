@@ -1224,8 +1224,9 @@ class Launcher(TouchApplication):
             self.log_timer = None
 
     def on_busyExpired(self):
-        self.popup.close()
-        self.popup = None
+        if self.popup:
+            self.popup.close()
+            self.popup = None
 
     def category_setup(self):
         # reload locale
