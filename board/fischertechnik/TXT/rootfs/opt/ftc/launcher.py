@@ -306,10 +306,8 @@ class BusyAnimation(QWidget):
         return img
 
     def timer_expired(self):
-        self.etimer = None
         # App launch expired without callback ...
         self.expired.emit()
-        self.close()
 
     def animate(self):
         # if the app isn't running anymore then stop the
@@ -324,8 +322,7 @@ class BusyAnimation(QWidget):
         self.repaint()
 
     def close(self):
-        if self.etimer:
-            self.etimer.stop()
+        self.etimer.stop()
         self.atimer.stop()
         super(BusyAnimation, self).close()
         super(BusyAnimation, self).deleteLater()
@@ -1103,6 +1100,7 @@ class Launcher(TouchApplication):
         # popup may have expired in the meantime
         if self.popup:
             self.popup.close()
+            self.popup = None
 
     # this signal is received when app logging is to be 
     # enabled
@@ -1226,6 +1224,7 @@ class Launcher(TouchApplication):
             self.log_timer = None
 
     def on_busyExpired(self):
+        self.popup.close()
         self.popup = None
 
     def category_setup(self):
