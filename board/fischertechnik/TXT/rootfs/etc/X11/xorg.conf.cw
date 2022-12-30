@@ -13,6 +13,7 @@ EndSection
 
 Section "Monitor"
         Identifier      "Configured Monitor"
+	DisplaySize     370 490
 EndSection
 
 Section "Screen"
