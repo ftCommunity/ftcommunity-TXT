@@ -13,6 +13,7 @@ from pathlib import Path
 from TouchStyle import *
 
 from PyQt5.QtNetwork import *
+from PyQt5 import QtCore
 
 import xml.etree.ElementTree as ET
 
@@ -463,7 +464,9 @@ class AppDialog(TouchDialog):
 
         text = QTextEdit()
         text.setReadOnly(True)
-
+        text.setTextInteractionFlags (QtCore.Qt.NoTextInteraction)    
+        QScroller.grabGesture(text.viewport(), QScroller.LeftMouseButtonGesture);
+        
         for i in sorted(parms):
             if(AppDialog.format(i)):
                 value = str(parms[i])
