@@ -92,6 +92,8 @@ class VersionsDialog(TxtDialog):
 
         # put everything inside a scroll area
         scroll = QScrollArea(self.centralWidget)
+        QScroller.grabGesture(scroll, QScroller.LeftMouseButtonGesture);
+        
         scroll.setWidget(vbox_w)
 
         self.setCentralWidget(scroll)

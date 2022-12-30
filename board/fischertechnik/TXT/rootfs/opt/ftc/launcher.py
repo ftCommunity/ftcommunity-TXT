@@ -598,6 +598,8 @@ class FolderList(TouchDialog):
             self.setViewMode(QListView.ListMode)
             self.setMovement(QListView.Static)
             self.setIconSize(QSize(32, 32))
+            #self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+            #QScroller.grabGesture(self.viewport(), QScroller.LeftMouseButtonGesture);
 
             # add all folders
             for a in apps:

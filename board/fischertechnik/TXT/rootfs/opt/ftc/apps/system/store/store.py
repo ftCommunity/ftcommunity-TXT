@@ -609,6 +609,9 @@ class AppListWidget(QListWidget):
     def __init__(self, parent=None):
         super(AppListWidget, self).__init__(parent)
 
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        QScroller.grabGesture(self.viewport(), QScroller.LeftMouseButtonGesture);
+        
         self.setUniformItemSizes(True)
         self.setViewMode(QListView.ListMode)
         self.setMovement(QListView.Static)
