@@ -38,27 +38,25 @@ BUSY_TIMEOUT = 20
 # make sure all file access happens relative to this script
 BASE = os.path.dirname(os.path.realpath(__file__))
 
-# window size used on PC
-if 'SCREEN' in os.environ:
-    (w, h) = os.environ.get('SCREEN').split('x')
-    WIN_WIDTH = int(w)
-    WIN_HEIGHT = int(h)
-else:
-    WIN_WIDTH = 240
-    WIN_HEIGHT = 320
 
+def getScreenSize():
+    if IS_ARM:
+        return QApplication.desktop().screenGeometry().size()
 
+    if 'SCREEN' in os.environ:
+        (w, h) = os.environ.get('SCREEN').split('x')
+        return QSize(int(w), int(h))
+
+    return QSize(240, 320)
+
+        
 class PlainDialog(QDialog):
     """A simple dialog without any decorations (and this without
     the user being able to get rid of it by himself)
     """
     def __init__(self):
         super(PlainDialog, self).__init__()
-        if IS_ARM:
-            size = QApplication.desktop().screenGeometry()
-            self.setFixedSize(size.width(), size.height())
-        else:
-            self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
+        self.setFixedSize(getScreenSize())
         self.setObjectName("centralwidget")
 
     def exec_(self):
@@ -233,11 +231,7 @@ class TouchTopWidget(QWidget):
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background
         # gradient is being used
-        if IS_ARM:
-            size = QApplication.desktop().screenGeometry()
-            self.setFixedSize(size.width(), size.height())
-        else:
-            self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
+        self.setFixedSize(getScreenSize())
         self.setObjectName("centralwidget")
         # create a vertical layout for the statusbar
         self.top_layout = QVBoxLayout()
@@ -831,13 +825,15 @@ class IconGrid(QWidget):
         self.grid.setSpacing(0)
         self.grid.setContentsMargins(0, 10, 0, 10)
         self.setLayout(self.grid)
+
+        self.columnWidth = 80
         # event to know the final size when creating the icon grid
-        self.columns = 3
+        self.columns = getScreenSize().width() // self.columnWidth
         self.button_app = None
 
         self.createAppIcons()
         for i in range(self.columns):
-            self.grid.setColumnMinimumWidth(i, 80)
+            self.grid.setColumnMinimumWidth(i, self.columnWidth)
         
 
     def setButtonApp(self, app):
