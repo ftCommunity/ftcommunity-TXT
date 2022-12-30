@@ -479,21 +479,21 @@ QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off {
 
 QScrollBar:vertical {
      border: none;
-     width: 32px;
-     margin: 32px 0 32px 0;
+     width: 8px;
+     margin: 8px 0 8px 0;
 }
 
 QScrollBar::handle:vertical {
      border: 4px solid lightgrey;
      border-radius: 4px;
      background: white;
-     min-height: 32px;
+     min-height: 8px;
 }
 
 QScrollBar::add-line:vertical {
      border: none;
      background: none;
-     height: 32px;
+     height: 8px;
      subcontrol-position: bottom;
      subcontrol-origin: margin;
 }
@@ -501,15 +501,15 @@ QScrollBar::add-line:vertical {
 QScrollBar::sub-line:vertical {
      border: none;
      background: none;
-     height: 32px;
+     height: 8px;
      subcontrol-position: top;
      subcontrol-origin: margin;
 }
 
 QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
      border: none;
-     width: 32px;
-     height: 32px;
+     width: 8px;
+     height: 8px;
      background: none;
 }
 
@@ -523,21 +523,21 @@ QScrollBar::down-arrow:vertical {
 
 QScrollBar:horizontal {
      border: none;
-     height: 32px;
-     margin: 0 32px 0 32px;
+     height: 8px;
+     margin: 0 8px 0 8px;
 }
 
 QScrollBar::handle:horizontal {
      border: 4px solid lightgrey;
      border-radius: 4px;
      background: white;
-     min-width: 32px;
+     min-width: 8px;
 }
 
 QScrollBar::add-line:horizontal {
      border: none;
      background: none;
-     width: 32px;
+     width: 8px;
      subcontrol-position: right;
      subcontrol-origin: margin;
 }
@@ -545,15 +545,15 @@ QScrollBar::add-line:horizontal {
 QScrollBar::sub-line:horizontal {
      border: none;
      background: none;
-     width: 32px;
+     width: 8px;
      subcontrol-position: left;
      subcontrol-origin: margin;
 }
 
 QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
      border: none;
-     width: 32px;
-     height: 32px;
+     width: 8px;
+     height: 8px;
      background: none;
 }
 
