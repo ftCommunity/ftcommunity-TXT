@@ -4,6 +4,7 @@
 import sys, os
 from TxtStyle import *
 from launcher import LauncherPlugin
+from PyQt5 import QtCore
 
 VERSION_FILE = "/etc/fw-ver.txt"
 
@@ -13,7 +14,9 @@ class LicenseDialog(TxtDialog):
         
         txt = QTextEdit()
         txt.setReadOnly(True)
-        
+        txt.setTextInteractionFlags (QtCore.Qt.NoTextInteraction)    
+        QScroller.grabGesture(txt.viewport(), QScroller.LeftMouseButtonGesture);
+
         # load gpl from disk
         name = os.path.join(os.path.dirname(os.path.realpath(__file__)), lic)
         text=open(name, encoding="utf-8").read()
