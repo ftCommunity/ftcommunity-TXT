@@ -775,7 +775,9 @@ class AppListWidget(QListWidget):
         # set TouchWindow as parent
         dialog = AppDialog(item.text(), self.url, app_parms, installed_version, self.parent)
         dialog.refresh.connect(self.on_refresh)
-        dialog.exec_()
+
+        # exec_ breaks grabGesture: https://bugreports.qt.io/browse/QTBUG-67210
+        dialog.show()
 
     def notify_launcher(self):
         # send a signal so launcher so it reloads the view
