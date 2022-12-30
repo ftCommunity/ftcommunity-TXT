@@ -376,6 +376,13 @@ QToolButton#launcher-icon {
     color: white;
 }
 
+QToolButton#launcher-icon:pressed {
+    color: blue;
+    /*border-style: inset;*/
+    border: 2px solid blue;
+    border-radius: 4px
+}
+
 QComboBox {
     border-style: outset;
     border-width: 4px;
