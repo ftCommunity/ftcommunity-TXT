@@ -1,0 +1,4 @@
+config BR2_PACKAGE_FT_TXT_SND_CAT
+    bool "ft_txt_snd_cat"
+    help
+        Install ft_txt_snd_cat
