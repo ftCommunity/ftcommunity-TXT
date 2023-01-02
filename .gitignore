@@ -1,3 +1,4 @@
 build/
 .jekyll*
 __pycache__/
+/output
