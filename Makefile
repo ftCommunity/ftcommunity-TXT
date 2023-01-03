@@ -8,7 +8,7 @@ BR_INIT_ENV := BR2_EXTERNAL=$(ROOT_DIR)
 
 
 .PHONY: all
-all: $(IMAGE_DIR)/rootfs.img
+all: $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage $(IMAGE_DIR)/am335x-kno_txt.dtb
 
 .PHONY: clean
 clean:
@@ -43,16 +43,25 @@ $(BUILD_DIR)/initramfs/.config: $(ROOT_DIR)/buildroot/Makefile
 $(ROOT_DIR)/buildroot/Makefile:
 	git submodule update --init buildroot
 
-$(IMAGE_DIR)/rootfs.img: $(INITRAMFS_DIR)/initramfs.cpio prepare-structure
+$(IMAGE_DIR)/rootfs.img: rootfs
+$(IMAGE_DIR)/uImage: rootfs
+$(IMAGE_DIR)/am335x-kno_txt.dtb: rootfs
+
+.PHONY: rootfs
+rootfs: $(INITRAMFS_DIR)/initramfs.cpio prepare-structure
 	$(MAKE) -C $(BUILD_DIR)/rootfs
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
+	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
 
-$(INITRAMFS_DIR)/initramfs.cpio: $(BUILD_DIR)/initramfs/.config prepare-structure
+$(INITRAMFS_DIR)/initramfs.cpio: initramfs
+
+.PHONY: initramfs
+initramfs: $(BUILD_DIR)/initramfs/.config prepare-structure
 	$(MAKE) -C $(BUILD_DIR)/initramfs
 	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
-release: all
+release: $(IMAGE_DIR)/am335x-kno_txt.dtb $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage
 	$(eval version := $(shell cat $(BUILD_DIR)/rootfs/target/etc/fw-ver.txt))
 	$(eval zipfile := $(IMAGE_DIR)/ftcommunity-txt-$(version).zip)
 	rm -f $(zipfile)
