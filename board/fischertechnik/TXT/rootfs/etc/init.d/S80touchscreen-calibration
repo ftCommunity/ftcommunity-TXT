@@ -6,7 +6,9 @@ start() {
   fi
 }
 
-stop() {}
+stop() {
+    echo ""
+}
 
 case "$1" in
         start)

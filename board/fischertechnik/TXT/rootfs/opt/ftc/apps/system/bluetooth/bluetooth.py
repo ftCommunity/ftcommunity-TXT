@@ -5,6 +5,7 @@
 import sys, os, shlex, io, time
 from subprocess import Popen, call, PIPE, check_output, CalledProcessError
 from TouchStyle import *
+from launcher import LauncherPlugin
 
 # only care for the built-in bluetooth adapter
 DEV = "hci0"
@@ -51,19 +52,18 @@ class ExecThread(QThread):
                 response = [ "", "" ]
                 response_stdout = ""
                 response_stderr = ""
+        except FileNotFoundError:
+            print( "Unable to locate '%s' program. Is it in your path?" % executable )
+            self.result(False, "Program not found")
         except OSError as e:
-            if e.errno == errno.ENOENT:
-                #print( "Unable to locate '%s' program. Is it in your path?" % executable )
-                self.result(False, "Program not found")
-            else:
-                #print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
-                self.result(False, "Exec error")
+            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
+            self.result(False, "Exec error")
         except ValueError as e:
-            #print( "Value error occured. Check your parameters." )
+            print( "Value error occured. Check your parameters." )
             self.result(False, "Value Error")
         else:
             if proc.wait() != 0:
-                #print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
+                print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
                 self.result(False, response)
             else:
                 #print( "Executable '%s' returned successfully." %(executable) )
@@ -124,8 +124,8 @@ class HciConfig(ExecThread):
 class ServiceEnable(ExecThread):
     def __init__(self, enable):
         # check for txt init script
-        if os.path.exists("/etc/init.d/S60bluetooth"):
-            cmd = "sudo /etc/init.d/S60bluetooth "
+        if os.path.exists("/etc/init.d/S40bluetooth"):
+            cmd = "sudo /etc/init.d/S40bluetooth "
         else:
             cmd = "sudo /etc/init.d/bluetooth "
         if enable: cmd += "enable"
@@ -140,7 +140,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).__init__(parent)
 
         self.resize(64, 64)
-        self.move(QPoint(parent.width()/2-32, parent.height()/2-32))
+        self.move(QPoint(parent.width()//2-32, parent.height()//2-32))
 
         self.step = 0
 
@@ -175,13 +175,13 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).close()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height())/2 - 16
+        radius = min(self.width(), self.height())//2 - 16
         painter = QPainter()
         painter.begin(self)
 
         painter.setRenderHint(QPainter.Antialiasing)
 
-        painter.translate(self.width()/2, self.height()/2)
+        painter.translate(self.width()//2, self.height()//2)
         painter.rotate(45)
         painter.rotate(self.step)
         painter.drawImage(0,radius, self.bright)
@@ -208,9 +208,9 @@ class EntryWidget(QWidget):
     def setText(self, str):
         self.value.setText(str)
 
-class FtcGuiApplication(TouchApplication):
-    def __init__(self, args):
-        TouchApplication.__init__(self, args)
+class FtcGuiPlugin(LauncherPlugin):
+    def __init__(self, application):
+        LauncherPlugin.__init__(self, application)
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
@@ -294,7 +294,6 @@ class FtcGuiApplication(TouchApplication):
         self.hciconfig(None, self.get_name)
 
         self.w.show()
-        self.exec_()        
 
     def service_enable(self, on):
         self.w.centralWidget.setGraphicsEffect(QGraphicsBlurEffect(self))
@@ -393,4 +392,12 @@ class FtcGuiApplication(TouchApplication):
             pass
     
 if __name__ == "__main__":
+    class FtcGuiApplication(TouchApplication):
+        def __init__(self, args):
+            super().__init__(args)
+            module = FtcGuiPlugin(self)
+            self.exec_()
     FtcGuiApplication(sys.argv)
+else:
+    def createPlugin(launcher):
+        return FtcGuiPlugin(launcher)

@@ -4,4 +4,5 @@ if [ "$(whoami)" != "root" ]; then
   exit 1
 fi
 /bin/launcher-msg "Shutting down..."
+sleep 2
 exec /bin/busybox poweroff

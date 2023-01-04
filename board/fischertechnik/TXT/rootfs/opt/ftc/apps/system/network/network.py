@@ -6,16 +6,16 @@
 # - DNS settings
 # - deal with non-busybox systems
 
-import sys, os, socket, array, struct, fcntl, string, platform
-import shlex, time, copy
-from subprocess import Popen, call, PIPE, check_output
+import sys, os, socket, array, struct, fcntl, platform
+import shlex, copy
+from subprocess import check_output, STDOUT
 from TouchStyle import *
+from TouchAuxiliary import run_program
 from launcher import LauncherPlugin
 
 DEFAULT="wlan0"
 INTERFACES = "/etc/network/interfaces"
 RESOLVCONF = "/etc/resolv.conf"
-PFILE="/etc/netreq_permissions"
 
 # For testing on PC: environment may point to buildroot
 if 'TOUCHUI_FAKEROOT' in os.environ:
@@ -42,7 +42,7 @@ def all_interfaces():
         s.fileno(), SIOCGIFCONF,
         struct.pack('iL', bytes, names.buffer_info()[0])
     ))[0]
-    namestr = names.tostring()
+    namestr = names.tobytes()
 
     # get additional info for all interfaces found
     lst = { }
@@ -54,36 +54,6 @@ def all_interfaces():
             lst[name] = (addr, mask)
     return lst
 
-# execute ifconfig up/down, trigger dhcpcd if required
-def run_program(rcmd):
-    """
-    Runs a program, and it's paramters (e.g. rcmd="ls -lh /var/www")
-    Returns output if successful, or None and logs error if not.
-    """
-
-    cmd = shlex.split(rcmd)
-    executable = cmd[0]
-    executable_options=cmd[1:]    
-
-    try:
-        proc  = Popen(([executable] + executable_options), stdout=PIPE, stderr=PIPE)
-        response = proc.communicate()
-        response_stdout, response_stderr = response[0].decode('UTF-8'), response[1].decode('UTF-8')
-    except OSError as e:
-        if e.errno == errno.ENOENT:
-            print( "Unable to locate '%s' program. Is it in your path?" % executable )
-        else:
-            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
-    except ValueError as e:
-        print( "Value error occured. Check your parameters." )
-    else:
-        if proc.wait() != 0:
-            print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
-            return response
-        else:
-            print( "Executable '%s' returned successfully." %(executable) )
-            print( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] ))
-            return response_stdout
 
 def check4dhcp(_iface):
     pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
@@ -190,78 +160,7 @@ class ResolvConf(QObject):
         except:
             pass
 
-class PermissionsFile(QObject):
-    def __init__(self):
-        super(PermissionsFile,self).__init__()
 
-        self.file_ok = True
-        self.allowed = []
-        self.denied = []
-
-        # file must be writable
-        if not os.access(PFILE, os.W_OK):
-            self.file_ok = False
-            return
-    
-        # try to open the file
-        try:
-            with open(PFILE, "r") as f:
-                for l in f:
-                    # ignore anything after '#'
-                    i = l.split('#')[0].split()
-                    if len(i) >= 2:
-                        name = None
-                        if len(i) > 2:
-                            name = i[2]
-                            
-                        if i[0][0].lower() == 'a':
-                            self.allowed.append( (i[1], name) )
-                        if i[0][0].lower() == 'd':
-                            self.denied.append( (i[1], name) )
-        except:
-            self.file_ok = False
-
-    def isAvailable(self):
-        return self.file_ok
-
-    def permissions(self):
-        perm = []
-        for i in self.allowed:
-            perm.append( ('a', i) )
-        for i in self.denied:
-            perm.append( ('d', i) )
-
-        return perm
-
-    def dump(self):
-        print("Allowed:")
-        for i in self.allowed:
-            print(i)
-        print("Denied:")
-        for i in self.denied:
-            print(i)
-    
-    def remove(self, perm):
-        if perm[0] == 'a':
-            self.allowed.remove(perm[1])
-        else:
-            self.denied.remove(perm[1])
-
-        # and write modfied file
-        with open(PFILE, "w") as f:
-            print("# netreq permissions written by network.py", file=f)
-            for i in self.allowed:
-                if i[1]:
-                    print("a", i[0], i[1], file=f)
-                else:
-                    print("a", i[0], file=f)
-                
-            for i in self.denied:
-                if i[1]:
-                    print("d", i[0], i[1], file=f)
-                else:
-                    print("d", i[0], file=f)
-        
 # deal with /etc/network/interfaces
 class Interfaces(QObject):
     error = pyqtSignal(str)
@@ -535,7 +434,7 @@ class IpEdit(TouchDialog):
         for i in buttons:
             btn = QPushButton(i)
             btn.clicked.connect(self.btn_clicked)
-            grid.addWidget(btn, cnt/4, cnt%4) 
+            grid.addWidget(btn, cnt//4, cnt%4) 
             cnt += 1
 
         grid_w.setLayout(grid)
@@ -820,63 +719,6 @@ class DeletePermDialog(TouchDialog):
 
         TouchDialog.close(self)
 
-     
-class PermissionWidget(QListWidget):
-    def __init__(self, pfile, parent=None):
-        super(PermissionWidget, self).__init__(parent)
-
-        self.pfile = pfile
-        self.setUniformItemSizes(True)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setTextElideMode(Qt.ElideRight)
-        self.setViewMode(QListView.ListMode)
-        self.setMovement(QListView.Static)
-        self.setIconSize(QSize(32,32))
-        self.parent = parent
-
-        self.set(pfile)
-        
-        # react on clicks
-        self.itemClicked.connect(self.onItemClicked)
-        self.setIconSize(QSize(32, 32))
-
-    def set(self, pfile):
-        for p in pfile.permissions():
-            if p[0] == 'a':
-                icon = "allow.png"
-            else:
-                icon = "deny.png"
-
-            # if entry has a host name show that instead
-            if p[1][1]:
-                name = p[1][1]
-            else:
-                name = p[1][0]
-               
-            item = QListWidgetItem(QIcon(os.path.join(os.path.dirname(os.path.realpath(__file__)),icon)),name)
-            item.setData(Qt.UserRole, p)
-            self.addItem(item)
-
-    def onItemClicked(self, item):
-        permission = item.data(Qt.UserRole)
-        
-        # get confirmation from user to delete this permission
-        dialog = DeletePermDialog(permission, self.parent)
-        dialog.confirmed.connect(self.on_delete)
-        dialog.exec_()
-        
-    def on_delete(self):
-        item = self.takeItem(self.currentRow())
-        self.pfile.remove(item.data(Qt.UserRole))
-        
-class EditPermDialog(TouchDialog):
-    def __init__(self, pfile, parent):
-        TouchDialog.__init__(self, QCoreApplication.translate("Permissions", "Permissions"), parent)
-
-        self.perm = PermissionWidget(pfile)
-        self.setCentralWidget(self.perm)
-        self.show()
-
 class NetworkWindow(TouchWindow):
     def __init__(self):
         TouchWindow.__init__(self, QCoreApplication.translate("Main", "Network"))
@@ -888,13 +730,6 @@ class NetworkWindow(TouchWindow):
         menu_dns = menu.addAction(QCoreApplication.translate("Menu","DNS"))
         menu_dns.triggered.connect(self.edit_dns)
 
-        # if the permissions file is present and can be read and written, then
-        # allow user to edit it
-        self.pfile = PermissionsFile()
-        if self.pfile.isAvailable():
-            menu_permissions = menu.addAction(QCoreApplication.translate("Menu","Permissions"))
-            menu_permissions.triggered.connect(self.edit_perm)
-        
         self.interfaces_file = Interfaces(self.busybox)    # get interfaces from config file
         self.ifs = all_interfaces()                        # get interfaces from system
 
@@ -958,7 +793,7 @@ class NetworkWindow(TouchWindow):
     def check4busybox(self):
         # cat (like most other tools) will tell if they are in fact
         # busybox
-        cat_help = check_output(["cat", "--help"]).decode("UTF-8")
+        cat_help = check_output(["cat", "--help"], stderr=STDOUT).decode("UTF-8")
         return cat_help.lower().find("busybox") >= 0
 
     def edit_perm(self):

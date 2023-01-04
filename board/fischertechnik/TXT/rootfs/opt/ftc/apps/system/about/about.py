@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import sys, os, ftrobopy
+import sys, os
 from TxtStyle import *
 from launcher import LauncherPlugin
+from PyQt5 import QtCore
 
 VERSION_FILE = "/etc/fw-ver.txt"
 
@@ -13,11 +14,9 @@ class LicenseDialog(TxtDialog):
         
         txt = QTextEdit()
         txt.setReadOnly(True)
-        
-        font = QFont()
-        font.setPointSize(16)
-        txt.setFont(font)
-    
+        txt.setTextInteractionFlags (QtCore.Qt.NoTextInteraction)    
+        QScroller.grabGesture(txt.viewport(), QScroller.LeftMouseButtonGesture);
+
         # load gpl from disk
         name = os.path.join(os.path.dirname(os.path.realpath(__file__)), lic)
         text=open(name, encoding="utf-8").read()
@@ -80,8 +79,12 @@ class VersionsDialog(TxtDialog):
             if(i < 2): py_ver_str += "."
         vbox.addWidget(VersionWidget("Python", py_ver_str))
 
-        # --------- ftrobopy version ----------
-        vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
+        try:
+            import ftrobopy
+            # --------- ftrobopy version ----------
+            vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
+        except:
+            pass
 
         # --------- qt -----------
         vbox.addWidget(VersionWidget("Qt", QT_VERSION_STR))
@@ -92,6 +95,8 @@ class VersionsDialog(TxtDialog):
 
         # put everything inside a scroll area
         scroll = QScrollArea(self.centralWidget)
+        QScroller.grabGesture(scroll, QScroller.LeftMouseButtonGesture);
+        
         scroll.setWidget(vbox_w)
 
         self.setCentralWidget(scroll)
@@ -136,7 +141,7 @@ class AboutPlugin(LauncherPlugin):
 
         self.vbox.addStretch()
 
-        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2020 the ft:community"))
+        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2022 the ft:community"))
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)

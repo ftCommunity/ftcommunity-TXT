@@ -4,10 +4,7 @@
 
 import os
 
-try:
-    from PyQt5.QtCore import QCoreApplication
-except:
-    from PyQt4.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication
 
 def name():
     return QCoreApplication.translate("PluginKbd", "Keyboard")

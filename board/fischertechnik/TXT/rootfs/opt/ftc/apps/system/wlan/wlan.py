@@ -6,8 +6,8 @@
 # sudo wpa_supplicant -B -Dwext -i wlan0 -C/var/run/wpa_supplicant
 
 import sys, os, shlex, time
-from subprocess import Popen, call, PIPE
 from TouchStyle import *
+from TouchAuxiliary import run_program
 from launcher import LauncherPlugin
 
 try:
@@ -29,58 +29,35 @@ COUNTRIES = {
     "France": "FR"
 }
     
-def run_program(rcmd):
-    """
-    Runs a program, and it's paramters (e.g. rcmd="ls -lh /var/www")
-    Returns output if successful, or None and logs error if not.
-    """
-    
-    cmd = shlex.split(rcmd)
-    executable = cmd[0]
-    executable_options=cmd[1:]    
-
-    try:
-        proc  = Popen(([executable] + executable_options), stdout=PIPE, stderr=PIPE)
-        response = proc.communicate()
-        response_stdout, response_stderr = response[0].decode('UTF-8'), response[1].decode('UTF-8')
-    except OSError as e:
-        if e.errno == errno.ENOENT:
-            print( "Unable to locate '%s' program. Is it in your path?" % executable )
-        else:
-            print( "O/S error occured when trying to run '%s': \"%s\"" % (executable, str(e)) )
-    except ValueError as e:
-        print( "Value error occured. Check your parameters." )
-    else:
-        if proc.wait() != 0:
-            print( "Executable '%s' returned with the error: \"%s\"" %(executable,response_stderr) )
-            return response
-        else:
-            print( "Executable '%s' returned successfully." %(executable) )
-            print( " First line of response was \"%s\"" %(response_stdout.split('\n')[0] ))
-            return response_stdout
+def scan_networks(iface, retry=2):
+    run_program("sudo wpa_cli -i %s scan_interval 5" % iface)
+    for attempt in range(retry+1):
+        if "OK" in run_program("sudo wpa_cli -i %s scan" % iface):
+            return True
+    return False
 
 def get_networks(iface, retry=2):
     """
     Grab a list of wireless networks within range, and return a list of dicts describing them.
     """
-    while retry > 0:
-        if "OK" in run_program("sudo wpa_cli -i %s scan" % iface):
-            networks=[]
-            time.sleep(0.5)
-            r = run_program("sudo wpa_cli -i %s scan_result" % iface).strip()
-            if "bssid" in r and len ( r.split("\n") ) >1 :
-                for line in r.split("\n")[1:]:
-                    b, fr, s, f = line.split()[:4]
-                    ss = " ".join(line.split()[4:]) #Hmm, dirty
-                    networks.append( {"bssid":b, "freq":fr, "sig":s, "ssid":ss, "flag":f} )
-                return networks
-#        else:
-#            print("SCAN did not return ok, trying setting the country to DE ...")
-#            run_program("sudo wpa_cli -i %s set country DE" % iface)
-#            run_program("sudo wpa_cli -i %s save_config" % iface)
-#            run_program("sudo rfkill unblock wifi")
-            
-        retry-=1
+    for attempt in range(retry+1):
+        networks=[]
+        r = run_program("sudo wpa_cli -i %s scan_result" % iface).strip()
+        if "bssid" in r and len ( r.split("\n") ) >1 :
+            for line in r.split("\n")[1:]:
+                b, fr, s, f = line.split()[:4]
+                ss = " ".join(line.split()[4:]) #Hmm, dirty
+                networks.append( {"bssid":b, "freq":fr, "sig":s, "ssid":ss, "flag":f} )
+            return networks
+ 
+#       print("SCAN did not return ok, trying setting the country to DE ...")
+#       run_program("sudo wpa_cli -i %s set country DE" % iface)
+#       run_program("sudo wpa_cli -i %s save_config" % iface)
+#       run_program("sudo rfkill unblock wifi")
+
+        time.sleep(0.5)
+
+    return None
 
 def connect_to_network(_iface, _ssid, _type, _pass=None):
     """
@@ -149,25 +126,52 @@ def get_associated(_iface):
 
 # background thread to monitor state of interface
 class MonitorThread(QThread):
+
+    update_status = pyqtSignal(str)
+    network_added = pyqtSignal(object)
+    ssid_removed = pyqtSignal(str)
+    
     def __init__(self):
         QThread.__init__(self)
+        self.ssids = set()
+        self.associated_ssid = ""
 
     def __del__(self):
         self.stop()
 
     def run(self):
         self.timer = QTimer()
-        self.timer.connect( self.timer, SIGNAL("timeout()"), self.on_timer_tick )
-        self.timer.start(5000) # Poll every 5 seconds
+        self.timer.timeout.connect(self.on_timer_tick)
+
+        scan_networks(IFACE)
+        self.timer.start(2000) # Poll every 2 seconds
+        
         self.exec_()
 
+    @pyqtSlot()
     def on_timer_tick(self):
-        status = get_associated(IFACE)
-        self.emit( SIGNAL('update_status(QString)'), status )   
+        ssid = get_associated(IFACE)
+        if ssid != self.associated_ssid:
+            self.update_status.emit(ssid)
+            self.associated_ssid = ssid
 
+        networks = get_networks(IFACE)
+        if networks:
+            print(networks)
+            current_ssids = {s["ssid"] for s in networks}
+            new_ssids = current_ssids.difference(self.ssids)
+            missing_ssids = self.ssids.difference(current_ssids)
+
+            for ssid in new_ssids:
+                network = next(x for x in networks if x["ssid"] == ssid)
+                self.network_added.emit(network)
+            for ssid in missing_ssids:
+                self.ssid_removed.emit(ssid)
+            self.ssids = current_ssids
+            
     def stop(self):
         print("Stopping network monitor thread...")
-        self.timer.stop()
+        #self.timer.stop()
         self.quit()
         self.wait()
         print("... network monitor thread stopped")
@@ -176,7 +180,9 @@ class WlanWindow(TouchWindow):
     def __init__(self, app, str):
         super().__init__(str)
         self.monitorThread = MonitorThread()
-        self.connect( self.monitorThread, SIGNAL("update_status(QString)"), app.on_update_status )
+        self.monitorThread.update_status.connect(app.on_update_status)
+        self.monitorThread.network_added.connect(app.new_network)
+        self.monitorThread.ssid_removed.connect(app.ssid_removed)
 
     def show(self):
         super().show()
@@ -212,35 +218,7 @@ class FtcGuiPlugin(LauncherPlugin):
         self.connected_ssid = ""
         self.encr_key = ""
         
-        networks_dup = get_networks(IFACE)
-        if networks_dup:
-            # remove duplicate ssids
-            self.networks = []
-            if len(networks_dup) > 1:
-                for i in range(len(networks_dup)-1):
-                    has_dup = False
-                    for j in range(i+1,len(networks_dup)):
-                        if networks_dup[i]['ssid'] == networks_dup[j]['ssid']:
-                            has_dup = True
-                    if not has_dup:
-                        if networks_dup[i]['ssid'] != "\\x00":
-                            self.networks.append(networks_dup[i])
-
-                if networks_dup[-1]['ssid'] != "\\x00":
-                    self.networks.append(networks_dup[-1])
-
-            # only one ssid returned: This sure has no duplicate
-            elif len(networks_dup) > 0:
-                self.networks.append(networks_dup[0])
-        else:
-            # this will be reached if the network scan totally failed since
-            # e.g. the wifi card is disabled (kill switch)
-            pass
-        
         self.ssids_w = QComboBox()
-        if self.networks:
-            for network in self.networks:
-                self.ssids_w.addItem(network['ssid'])
         self.ssids_w.activated[str].connect(self.set_default_encryption)
         self.ssids_w.setCurrentIndex(-1)
         self.vbox.addWidget(self.ssids_w)
@@ -257,7 +235,7 @@ class FtcGuiPlugin(LauncherPlugin):
         self.vbox.addWidget(QLabel(QCoreApplication.translate("Main", "Key:")))
         self.key = QLineEdit(self.encr_key)
         self.key.setPlaceholderText(QCoreApplication.translate("placeholder", "key"))
-        self.key.editingFinished.connect(self.do_edit_done)
+        self.key.textChanged.connect(self.do_edit_done)
         self.vbox.addWidget(self.key)
 
         # the connect button is by default disabled until
@@ -267,27 +245,43 @@ class FtcGuiPlugin(LauncherPlugin):
         self.connect.setDisabled(True)
         self.vbox.addWidget(self.connect)
 
-        # check if a network is already connected
-        self.connected_ssid = get_associated(IFACE)
-        if self.connected_ssid != "":
-            for i in range(len(self.networks)):
-                if self.networks[i]['ssid'] == self.connected_ssid:
-                    self.ssids_w.setCurrentIndex(i)
-
-        # update gui depending on selected ssid
-        if self.networks and self.ssids_w.currentText() != "":
-            self.set_default_encryption(self.ssids_w.currentText())
-
         self.mainWindow.centralWidget.setLayout(self.vbox)
 
         # make sure key edit has focus
         self.key.setFocus()
         self.mainWindow.show()
 
+
+    @pyqtSlot(object)
+    def new_network(self, network):
+        print("found network %s" % network)
+        self.ssids_w.addItem(network["ssid"])
+        self.update_connect_button(self.ssids_w.currentText())
+        self.networks.append(network)
+
+    @pyqtSlot(str)
+    def ssid_removed(self, ssid):
+        print("lost ssid %s" % ssid)
+        idx = self.ssids_w.findText(ssid)
+        if idx != -1:
+            self.ssids_w.removeItem(idx)
+        self.networks = [s for s in self.networks if s["ssid"] != ssid]
+        self.update_connect_button(self.ssids_w.currentText())
+
+    @pyqtSlot(bool)
     def on_set_country(self, x):
         set_country(IFACE, self.sender().data())
-        
+
+    @pyqtSlot(str)
     def on_update_status(self, ssid):
+        # select in list
+        if self.connected_ssid != "":
+            for i in range(len(self.networks)):
+                if self.networks[i]['ssid'] == self.connected_ssid:
+                    self.ssids_w.setCurrentIndex(i)
+                    self.set_default_encryption(self.ssids_w.currentText())
+
+        # manage changes
         if self.connected_ssid != ssid:
             self.connected_ssid = ssid
             self.update_connect_button(self.ssids_w.currentText())
@@ -297,15 +291,9 @@ class FtcGuiPlugin(LauncherPlugin):
 
     def set_key(self, k):
         self.encr_key = k
-
-        # enable connect button if key was entered
-        if k != "":
-            # but only if the current network isn't already connected
-            self.connect.setDisabled(self.connected_ssid == self.ssids_w.currentText())
-        else:
-            self.connect.setDisabled(True)
-
         self.key.setText(k)
+        
+        self.update_connect_button(self.ssids_w.currentText())
 
         # user entered a key using a keyboard
     def do_edit_done(self):
@@ -332,13 +320,16 @@ class FtcGuiPlugin(LauncherPlugin):
                     self.encr_w.setCurrentIndex(0)
         self.update_connect_button(net)
 
-    def update_connect_button(self,net):
-        if net == self.connected_ssid:
+    def update_connect_button(self, ssid):
+
+        already_connected = self.connected_ssid == self.ssids_w.currentText()
+        key_unavailable = self.encr_key == ""
+        
+        self.connect.setDisabled(already_connected or key_unavailable)
+        if already_connected:
             self.connect.setText(QCoreApplication.translate("Main", "connected"))
-            self.connect.setDisabled(True)
         else:
             self.connect.setText(QCoreApplication.translate("Main", "Connect"))
-            self.connect.setDisabled(self.encr_key == "")
 
 if __name__ == "__main__":
     class FtcGuiApplication(TouchApplication):

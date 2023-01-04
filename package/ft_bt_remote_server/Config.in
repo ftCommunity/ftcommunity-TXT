@@ -1,6 +1,6 @@
 config BR2_PACKAGE_FT_BT_REMOTE_SERVER
 	bool "ft_bt_remote_server"
-    select BR2_PACKAGE_BLUEZ_UTILS
+    select BR2_PACKAGE_BLUEZ5_UTILS
 	help
 	  The ft_bt_remote_server allows to use the fischertechnik
 	  remote control sender unit from the BT Control Set as a

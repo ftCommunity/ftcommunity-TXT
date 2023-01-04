@@ -11,21 +11,18 @@ import select, time, locale
 import platform
 import xml.etree.ElementTree as ET
 
-from TouchStyle import TouchDialog, TouchApplication, TouchKeyboard, \
-    TXT, BUTTON_THREAD, IS_ARM
+from TouchStyle import TouchDialog, TouchApplication, \
+    TXT, BUTTON_THREAD, getScreenSize, IS_ARM
+from touch_keyboard import TouchKeyboard
 
-# try to prefer PyQt5/Qt5
-try:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtNetwork import *
-    QT5 = True
-except:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    from PyQt4.QtNetwork import *
-    QT5 = False
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import *
+
+LOGFILE="/tmp/launcher.log"
+from logger import *
+init_logger(LOGFILE)
 
 PLUGINS_DIR = "plugins"
 
@@ -35,39 +32,20 @@ if platform.system() != 'Windows':
 
 THEME = "default"
 
-# the following is meant to suppress unwanted clicks when scrolling
-if TXT:
-    MIN_CLICK_TIME = 0.1    # a click needs to be 100ms at least ...
-else:
-    MIN_CLICK_TIME = 0
-
 CTRL_PORT = 9000
 BUSY_TIMEOUT = 20
 
 # make sure all file access happens relative to this script
 BASE = os.path.dirname(os.path.realpath(__file__))
 
-# window size used on PC
-if 'SCREEN' in os.environ:
-    (w, h) = os.environ.get('SCREEN').split('x')
-    WIN_WIDTH = int(w)
-    WIN_HEIGHT = int(h)
-else:
-    WIN_WIDTH = 240
-    WIN_HEIGHT = 320
-
-
+        
 class PlainDialog(QDialog):
     """A simple dialog without any decorations (and this without
     the user being able to get rid of it by himself)
     """
     def __init__(self):
         super(PlainDialog, self).__init__()
-        if IS_ARM:
-            size = QApplication.desktop().screenGeometry()
-            self.setFixedSize(size.width(), size.height())
-        else:
-            self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
+        self.setFixedSize(getScreenSize())
         self.setObjectName("centralwidget")
 
     def exec_(self):
@@ -141,7 +119,7 @@ class ConfirmationDialog(PlainDialog):
         self.ok_but.setDisabled(True)
         self.cancel_but.setDisabled(True)
         # send button label back to tcp client
-        self.sock.write(self.sender().text() + "\n")
+        self.sock.write((self.sender().text() + "\n").encode("utf8"))
         # close dialog after 1 second
         close_timer = QTimer(self)
         close_timer.setSingleShot(True)
@@ -184,10 +162,6 @@ class StatusPopup(QFrame):
                 vbox.addWidget(line)
         self.setLayout(vbox)
         self.adjustSize()
-        parent.main_widget.setGraphicsEffect(QGraphicsBlurEffect(parent))
-
-    def closeEvent(self, event):
-        self.parent().main_widget.setGraphicsEffect(None)
 
 
 class StatusBar(QWidget):
@@ -246,11 +220,7 @@ class TouchTopWidget(QWidget):
         # the setFixedSize is only needed for testing on a desktop pc
         # the centralwidget name makes sure the themes background
         # gradient is being used
-        if IS_ARM:
-            size = QApplication.desktop().screenGeometry()
-            self.setFixedSize(size.width(), size.height())
-        else:
-            self.setFixedSize(WIN_WIDTH, WIN_HEIGHT)
+        self.setFixedSize(getScreenSize())
         self.setObjectName("centralwidget")
         # create a vertical layout for the statusbar
         self.top_layout = QVBoxLayout()
@@ -297,7 +267,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).__init__(parent)
         self.resize(64, 64)
         # center relative to parent
-        self.move(QPoint(parent.width() / 2 - 32, parent.height() / 2 - 32))
+        self.move(QPoint(parent.width() // 2 - 32, parent.height() // 2 - 32))
         self.step = 0
         self.app = app
         # create a timer to close this window after 10 seconds at most
@@ -327,7 +297,6 @@ class BusyAnimation(QWidget):
     def timer_expired(self):
         # App launch expired without callback ...
         self.expired.emit()
-        self.close()
 
     def animate(self):
         # if the app isn't running anymore then stop the
@@ -348,11 +317,11 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).deleteLater()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height()) / 2 - 16
+        radius = min(self.width(), self.height()) // 2 - 16
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.translate(self.width() / 2, self.height() / 2)
+        painter.translate(self.width() // 2, self.height() // 2)
         painter.rotate(45)
         painter.rotate(self.step)
         painter.drawImage(0, radius, self.bright)
@@ -376,9 +345,6 @@ class FolderName(TouchKeyboard):
 class FolderOpIcon(QToolButton):
     def __init__(self, type, parent=None):
         super(FolderOpIcon, self).__init__(parent)
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(QPointF(3, 3))
-        self.setGraphicsEffect(shadow)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setToolButtonStyle(Qt.ToolButtonIconOnly)
         pix = Icon(type + ".png")
@@ -613,6 +579,8 @@ class FolderList(TouchDialog):
             self.setViewMode(QListView.ListMode)
             self.setMovement(QListView.Static)
             self.setIconSize(QSize(32, 32))
+            #self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+            #QScroller.grabGesture(self.viewport(), QScroller.LeftMouseButtonGesture);
 
             # add all folders
             for a in apps:
@@ -651,12 +619,10 @@ class AppPopup(QFrame):
         # remove bottom/right/left borders
         self.setStyleSheet("QFrame { border-bottom: 0; border-left: 0; border-right: 0; }")
 
-        # find root window
-        while parent and not parent.inherits("TouchTopWidget"):
-            parent = parent.parent()
-
         # set size
-        self.resize(parent.width(), self.HEIGHT)
+        screenSize = getScreenSize()
+        self.resize(screenSize.width(), self.HEIGHT)
+        
         vbox = QVBoxLayout(self)
         vbox.setContentsMargins(0, 0, 0, 0)
         vbox.setSpacing(0)
@@ -702,9 +668,9 @@ class AppPopup(QFrame):
         vbox.addWidget(hbox_w)
         vbox.addStretch()
         self.setLayout(vbox)
+        
         # open popup at the roots bottom
-        pos = parent.mapToGlobal(QPoint(0, parent.height() - self.height()))
-        self.move(pos)
+        self.move(QPoint(0, screenSize.height() - self.height()))
 
     def app_move_one_folder_up(self):
         # parent is the appicon, parent.parent is the icongrid
@@ -776,10 +742,12 @@ class AppPopup(QFrame):
         self.close()
         # request name of new folder from user
         folder_name = FolderName(self)
-        folder_name.titlebar.setText(QCoreApplication.translate("Folder", "New"))
-        folder_name.text_changed.connect(self.on_new_folder)
         folder_name.show()
         folder_name.exec_()
+        text = folder_name.text()
+        if text:
+            self.on_new_folder(text)
+            
 
     def on_new_folder(self, name):
         icongrid = self.parent().parent()
@@ -791,7 +759,6 @@ class AppPopup(QFrame):
         # request refresh of current view since there's
         # now a new folder
         self.refresh.emit()
-        # a toolbutton with drop shadow
 
 
 class AppIcon(QToolButton):
@@ -804,46 +771,34 @@ class AppIcon(QToolButton):
         self.setText(app["name"].replace("&", "&&"))
         self.setIcon(QIcon(app["icon"]))
         self.setIconSize(app["icon"].size())
-        self.installEventFilter(self)
-        # check if there's a VerticalScrollArea
-        # in the family tree ...
-        while parent and not parent.inherits("VerticalScrollArea"):
-            parent = parent.parent()
-        # ... and register its event filter to let it pre-filter
-        # mouse events
-        if parent:
-            self.installEventFilter(parent)
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setOffset(QPointF(3, 3))
-        self.setGraphicsEffect(shadow)
+
+        self.grabGesture(Qt.TapAndHoldGesture, Qt.DontStartGestureOnChildren)
+
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
+        
 
-    def eventFilter(self, obj, event):
-        if event.type() == 2000:
-            # current this only doesn't do anything for folders
-            if "dir" in self.app:
+    def event(self, event):
+        if event.type() != QEvent.Gesture:
+            return QToolButton.event(self, event)
+        
+        for g in event.activeGestures():
+            if g.state() == Qt.GestureFinished:
                 # get all the app details from the IconGrid
                 popup = AppPopup(self)
                 popup.refresh.connect(self.on_refresh)
                 popup.go_to_folder.connect(self.on_go_to_folder)
                 popup.show()
-        return False
 
+        event.accept()
+        return True
+        
+        
     def on_refresh(self):
         self.refresh.emit()
 
     def on_go_to_folder(self, apps):
         self.go_to_folder.emit(apps)
-
-    # hide shadow while icon is pressed
-    def mousePressEvent(self, event):
-        self.graphicsEffect().setEnabled(False)
-        QToolButton.mousePressEvent(self, event)
-
-    def mouseReleaseEvent(self, event):
-        self.graphicsEffect().setEnabled(True)
-        QToolButton.mouseReleaseEvent(self, event)
 
 
 class IconGrid(QWidget):
@@ -860,22 +815,16 @@ class IconGrid(QWidget):
         self.grid.setSpacing(0)
         self.grid.setContentsMargins(0, 10, 0, 10)
         self.setLayout(self.grid)
+
+        self.columnWidth = 80
         # event to know the final size when creating the icon grid
-        self.installEventFilter(self)
-        self.columns = 0
+        self.columns = getScreenSize().width() // self.columnWidth
         self.button_app = None
 
-    def eventFilter(self, obj, event):
-        if event.type() == event.Resize:
-            if self.width() != 0 and int(self.width() / 80) != self.columns:
-                # scale icon grid to use the full width
-                self.columns = int(self.width() / 80)
-                self.createAppIcons()
-                # make sure all columns are the same width
-                w = int(self.width()/self.columns)
-                for i in range(self.columns):
-                    self.grid.setColumnMinimumWidth(i, w)
-        return False
+        self.createAppIcons()
+        for i in range(self.columns):
+            self.grid.setColumnMinimumWidth(i, self.columnWidth)
+        
 
     def setButtonApp(self, app):
         self.button_app = app
@@ -908,7 +857,7 @@ class IconGrid(QWidget):
                 but.clicked.connect(self.do_launch)
             else:
                 but.clicked.connect(self.do_open_folder)
-            self.grid.addWidget(but, index / self.columns, index % self.columns, Qt.AlignCenter)
+            self.grid.addWidget(but, index // self.columns, index % self.columns, Qt.AlignCenter)
             index += 1
 
     def on_refresh(self):
@@ -995,7 +944,7 @@ class TcpServer(QTcpServer):
                     elif cmd == "confirm":
                         self.confirm.emit(s, parm)
                     elif cmd == "quit":
-                        s.write("Bye\n")
+                        s.write("Bye\n".encode("utf8"))
                         s.close()
                     elif cmd == "get-app":
                         self.get_app.emit(s)
@@ -1008,7 +957,7 @@ class TcpServer(QTcpServer):
                     elif cmd == "logging-stop":
                         self.enable_logging.emit(False)
                     else:
-                        s.write("Unknown command\n")
+                        s.write("Unknown command\n".encode("utf8"))
                         print("Unknown command ", cmd)
 
     def removeConnection(self):
@@ -1054,10 +1003,11 @@ class LauncherPluginAdapter:
         self.plugin = None
         import importlib, re
         module_name = re.search(BASE + "/(.+).py", module_script).group(1).replace("/", ".")
-        module = importlib.reload(importlib.import_module(module_name))
         try:
+            module = importlib.reload(importlib.import_module(module_name))
             self.plugin = module.createPlugin(launcher)
-        except:
+        except Exception as e:
+            print(e)
             self.returncode = -1
 
     def poll(self):
@@ -1074,7 +1024,6 @@ class LauncherPluginAdapter:
 
 
 class VerticalScrollArea(QScrollArea):
-    TIMER_HZ = 25
 
     def __init__(self, content, parent=None):
         super(VerticalScrollArea, self).__init__(parent)
@@ -1082,132 +1031,10 @@ class VerticalScrollArea(QScrollArea):
         self.setFrameStyle(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        QScroller.grabGesture(self, QScroller.LeftMouseButtonGesture);
         self.setWidget(content)
-        self.press_event = None
-        self.dragging = None
-        self.delayed_press = False
-        self.drag_speed = None
-        self.timer = None
-        self.release_lock = None
 
-    def eventFilter(self, obj, event):
-        # first make sure the child widget uses the full possible width
-        if event.type() == event.Resize:
-            self.widget().setMinimumWidth(self.width())
-        # just eat double clicks ...
-        if event.type() == event.MouseButtonDblClick:
-            return True
-        # we also need to catch mouse events
-        if event.type() == event.MouseButtonPress and event.button() == Qt.LeftButton:
-            # a delayed event is just passed through
-            if self.delayed_press:
-                return False
-            # any regular press within the release lock time is totally ignored
-            if self.release_lock:
-                return True
-            self.drag_speed = None
-            # stop any existing drag timer
-            if self.timer:
-                self.timer.stop()
-                self.timer = None
-            # start a timer used to check for long presses
-            self.press_timer = QTimer(self)
-            self.press_timer.timeout.connect(self.on_press_timer)
-            self.press_timer.setSingleShot(True)
-            self.press_timer.start(1000)
-            # remember this event to be able to replay it later
-            self.press_event = { "time": time.time(), "obj": obj, "event": QMouseEvent( event) }
-            self.dragging = None
-            # don't pass this event to the target now
-            return True
-
-        if event.type() == event.MouseButtonRelease and event.button() == Qt.LeftButton:
-            # cancel any press timer that may still be running
-            if self.press_timer:
-                self.press_timer.stop()
-                self.press_timer = None
-            self.release_lock = int(250*self.TIMER_HZ/1000)   # lock for 250ms
-            # processing of the release lock requires the timer
-            if not self.timer:
-                # start a timer that does some slow decelleration
-                self.timer = QTimer(self)
-                self.timer.timeout.connect(self.on_timer)
-                self.timer.start(1000 / self.TIMER_HZ)
-            # if the user was dragging don't forward any event
-            if self.dragging:
-                self.dragging = None
-                self.press_event = None
-                return True
-            # check if the intercepted press event came from the same
-            # object that now receives a release event. In that case
-            # re-inject the intercepted event now
-            if self.press_event and self.press_event["obj"] == obj:
-                # the user was not dragging. But we've eaten the previous
-                # button press event and we thus need to fake the press
-                # event now
-                if time.time() - self.press_event["time"] > MIN_CLICK_TIME:
-                    self.delayed_press = True
-                    QApplication.sendEvent(self.press_event["obj"], self.press_event["event"])
-                    self.delayed_press = False
-                self.press_event = None
-            return False
-
-        if event.type() == event.MouseMove and obj == self.widget() and self.press_event:
-            # we are only interested in the vertical distance
-            # not dragging yet? Check if user has moved the mouse far enough vertically
-            # to start dragging
-            if not self.dragging:
-                dist_y = self.press_event["event"].globalPos().y() - event.globalPos().y()
-                if abs(dist_y) > 20:
-                    # cancel any long press timer that may still  be runinng
-                    if self.press_timer:
-                        self.press_timer.stop()
-                        self.press_timer = None
-                    self.dragging = (event.globalPos().y(), self.verticalScrollBar().value())
-                    # restart drag timer
-                    self.last_drag_pos = None
-                    if not self.timer:
-                        # start a timer that does some slow decelleration
-                        self.timer = QTimer(self)
-                        self.timer.timeout.connect(self.on_timer)
-                        self.timer.start(1000 / self.TIMER_HZ)
-            if self.dragging:
-                dist_y = self.dragging[0] - event.globalPos().y()
-                self.verticalScrollBar().setValue(self.dragging[1] + dist_y)
-        return False
-
-    def on_press_timer(self):
-        # send custom "long press" event to the object that would have received the
-        # initial click
-        QApplication.sendEvent(self.press_event["obj"], QEvent(2000))
-        # and cancel any possible future dragging and clicking
-        self.dragging = None
-        self.press_event = None
-
-    def on_timer(self):
-        if self.release_lock:
-            self.release_lock -= 1
-        # measure speed while user still drags
-        if self.dragging:
-            if self.last_drag_pos:
-                self.drag_speed = self.TIMER_HZ * (self.verticalScrollBar().value() - self.last_drag_pos)
-            self.last_drag_pos = self.verticalScrollBar().value()
-        elif self.drag_speed:
-            # scroll ...
-            self.verticalScrollBar().setValue(self.verticalScrollBar().value() + int(self.drag_speed / self.TIMER_HZ))
-            if self.drag_speed:
-                dec = 5 * (1000 / self.TIMER_HZ)
-                if self.drag_speed < -dec:
-                    self.drag_speed += dec
-                elif self.drag_speed > dec:
-                    self.drag_speed -= dec
-                else:
-                    self.drag_speed = None
-        if not self.dragging and not self.drag_speed and not self.release_lock:
-            self.timer.stop()
-            self.timer = None
-
-
+        
 class Launcher(TouchApplication):
     def __init__(self, args):
         super(Launcher, self).__init__(args)
@@ -1229,6 +1056,7 @@ class Launcher(TouchApplication):
         self.tcpServer.get_app.connect(self.on_get_app)
         self.tcpServer.stop_app.connect(self.on_stop_app)
         self.log_file = None
+        self.popup = None
         self.addWidgets()
         self.exec_()        
 
@@ -1265,6 +1093,7 @@ class Launcher(TouchApplication):
         # popup may have expired in the meantime
         if self.popup:
             self.popup.close()
+            self.popup = None
 
     # this signal is received when app logging is to be 
     # enabled
@@ -1286,7 +1115,6 @@ class Launcher(TouchApplication):
         config = configparser.RawConfigParser()
         config.add_section('view')
         config.set("view", 'path', self.icons.getPath())
-        config.set("view", "min_click_time", MIN_CLICK_TIME)
 
         # save the 'button_launch' option if it exists
         try:
@@ -1316,10 +1144,6 @@ class Launcher(TouchApplication):
             path = config.get('view', 'path')
             self.icons.setPath(path)
         
-        if config.has_option('view', 'min_click_time'):
-            global MIN_CLICK_TIME
-            MIN_CLICK_TIME = float(config.get("view", "min_click_time"))
-
         return True
 
     def launch_app(self, executable, managed, name):
@@ -1393,7 +1217,9 @@ class Launcher(TouchApplication):
             self.log_timer = None
 
     def on_busyExpired(self):
-        self.popup = None
+        if self.popup:
+            self.popup.close()
+            self.popup = None
 
     def category_setup(self):
         # reload locale
@@ -1452,8 +1278,8 @@ class Launcher(TouchApplication):
             app_dir, app_exec_name = os.path.split(self.app_executable)
             app_group, app_dir_name = os.path.split(app_dir)
             app_group_name = os.path.basename(app_group)
-            s.write(os.path.join(app_group_name, app_dir_name, app_exec_name))
-        s.write("\n")
+            s.write(os.path.join(app_group_name, app_dir_name, app_exec_name).encode("utf8"))
+        s.write("\n".encode("utf8"))
 
     def on_stop_app(self):
         if self.app_is_running():
@@ -1623,19 +1449,27 @@ class Launcher(TouchApplication):
         self.w.show()
 
 
+def install_exception_hook():
+    sys._excepthook = sys.excepthook # always save before overriding
+
+    def application_exception_hook(exctype, value, traceback):
+        # Let's try to write the problem
+        print("Exctype : %s, value : %s traceback : %s"%(exctype, value, traceback))
+        # Call the normal Exception hook after (this will probably abort application)
+        sys._excepthook(exctype, value, traceback)
+        sys.exit(1)
+
+    # Do not forget to our exception hook
+    sys.excepthook = application_exception_hook
+
+    
 # Only actually do something if this script is run standalone, so we can test our 
 # application, but we're also able to import this program without actually running
 # any code.
 if __name__ == "__main__":
 
-    # run websockify in the background to allow noVNC to connect to 
-    # the qt embedded built-in vnc server
     try:
-        import _thread, websockify
-        from websockify.websocket import *
-        from websockify.websocketproxy import *
-        _thread.start_new_thread(websockify.websocketproxy.websockify_init, ())
-    except:
-        pass
-
-    Launcher(sys.argv)
+        install_exception_hook()
+        Launcher(sys.argv)
+    except Exception as e:
+        print(e)
