@@ -1,0 +1,10 @@
+# See package/makedevs/README for details
+#
+# This device table is used to assign proper ownership and permissions
+# on various files.
+#
+# <name>                                <type>  <mode>  <uid>   <gid>   <major> <minor> <start> <inc>   <count>
+/media/sdcard                           d       755     0       0       -       -       -       -       -
+/media/sdcard/boot                      d       755     0       0       -       -       -       -       -
+/media/sdcard/root                      d       755     0       0       -       -       -       -       -
+/media/sdcard/data                      d       755     0       0       -       -       -       -       -
