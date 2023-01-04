@@ -48,7 +48,7 @@ $(IMAGE_DIR)/uImage: rootfs
 $(IMAGE_DIR)/am335x-kno_txt.dtb: rootfs
 
 .PHONY: rootfs
-rootfs: $(INITRAMFS_DIR)/initramfs.cpio prepare-structure
+rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio prepare-structure
 	$(MAKE) -C $(BUILD_DIR)/rootfs
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
