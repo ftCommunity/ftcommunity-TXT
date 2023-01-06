@@ -1,7 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from PyQt4.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication
+    
 import fcntl, socket, struct
 
 def name():

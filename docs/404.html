@@ -1,0 +1,33 @@
+---
+permalink: /404.html
+---
+<h1 id="heading">Ooops, Something Went Wrong</h1>
+<p id="text">
+  Unfortunately the site you requested doesn’t exist!
+</p>
+<p id="secondary_text">
+  Back to <a href="{{site.baseurl}}/">Mainpage</a>
+</p>
+<script>
+{% assign label = site.data.label %}
+document.addEventListener("DOMContentLoaded", function(){
+  if(window.location.href.indexOf('/de/') > -1) {
+    {% assign lang = "de" %}
+    document.getElementsByTagName('HTML')[0].setAttribute('lang', '{{ lang }}');
+    document.getElementById('heading').innerHTML = 'Ooops, etwas ist schief gelaufen';
+    document.getElementById('text').innerHTML = 'Leider existiert die angeforderte Seite nicht!';
+    document.getElementById('secondary_text').innerHTML = 'Zur&uuml;ck zur <a href="{{site.baseurl}}/">Hauptseite</a>';
+    document.getElementById('page-nav').innerHTML = '<li class="level-1{% if path == "" %} active current{% endif %}"><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>{% include navigation.html %}';
+    document.getElementById('footerTxt1').innerHTML = "{{ label.maintained_by[lang] }}";
+    document.getElementById('footerTxt2').innerHTML = "{{ label.community[lang] }}";
+    document.getElementById('footerTxt3').innerHTML = "{{ label.edit_page[lang] }}";
+  } else { 
+    {% assign lang = "en" %}
+    document.getElementsByTagName('HTML')[0].setAttribute('lang', '{{ lang }}');
+    document.getElementById('page-nav').innerHTML = '<li class="level-1{% if path == "" %} active current{% endif %}"><a href="{{ site.baseurl }}/{{ lang }}/">{{ label.home[lang] }}</a></li>{% include navigation.html %}';
+    document.getElementById('footerTxt1').innerHTML = "{{ label.maintained_by[lang] }}";
+    document.getElementById('footerTxt2').innerHTML = "{{ label.community[lang] }}";
+    document.getElementById('footerTxt3').innerHTML = "{{ label.edit_page[lang] }}";
+  }
+});
+</script>

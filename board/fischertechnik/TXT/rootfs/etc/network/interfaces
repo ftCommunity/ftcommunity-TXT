@@ -14,7 +14,6 @@ iface usb0 inet static
 
 iface wlan0 inet dhcp
 	udhcpc_opts -t 0 &
-	pre-up test -f /etc/network/wpa.wlan0.conf || touch /etc/network/wpa.wlan0.conf
 	pre-up wpa_supplicant -B -Dnl80211 -iwlan0 -I/etc/wpa_supplicant.conf -c/etc/network/wpa.wlan0.conf
 	post-down killall -q wpa_supplicant
 

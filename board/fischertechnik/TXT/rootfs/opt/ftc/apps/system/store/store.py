@@ -7,15 +7,22 @@
 
 import sys, os, io, time
 import configparser, zipfile, shutil
-import semantic_version
+import semantic_version, subprocess
 from pathlib import Path
-from PyQt4.QtNetwork import *
-import xml.etree.ElementTree as ET
 
 from TouchStyle import *
+
+from PyQt5.QtNetwork import *
+from PyQt5 import QtCore
+
+import xml.etree.ElementTree as ET
+
 from launcher import LauncherPlugin
 
-FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
+try:
+    FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
+except:
+    FW_VERSION = semantic_version.Version("0.10.8")
 
 # url of the "app store"
 URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/packages/"
@@ -29,6 +36,9 @@ GITHUB_URL = "https://raw.githubusercontent.com/%s/%%s/packages/"
 # directory were the user installed apps are located
 APPBASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 USERAPPBASE = os.path.join(APPBASE, "user")
+
+# on the TX-Pi the store can use apt-get to install dependencies
+APT_GET = "/usr/bin/apt-get"
 
 def get_category_name(code):
     category_map = {
@@ -108,7 +118,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).__init__(parent)
 
         self.resize(64, 64)
-        self.move(QPoint(parent.width()/2-32, parent.height()/2-32))
+        self.move(QPoint(parent.width()//2-32, parent.height()//2-32))
 
         self.step = 0
         self.percent = -1
@@ -148,7 +158,7 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).close()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height())/2 - 16
+        radius = min(self.width(), self.height())//2 - 16
         painter = QPainter()
         painter.begin(self)
 
@@ -156,9 +166,9 @@ class BusyAnimation(QWidget):
             font = painter.font()
             # half the size than the current font size 
             if font.pointSize() < 0:
-                font.setPixelSize(font.pixelSize() / 3)
+                font.setPixelSize(font.pixelSize() // 3)
             else:
-                font.setPointSize(font.pointSize() / 3)
+                font.setPointSize(font.pointSize() // 3)
             # set the modified font to the painter */
             painter.setFont(font)
 
@@ -167,7 +177,7 @@ class BusyAnimation(QWidget):
 
         painter.setRenderHint(QPainter.Antialiasing)
 
-        painter.translate(self.width()/2, self.height()/2)
+        painter.translate(self.width()//2, self.height()//2)
         painter.rotate(45)
         painter.rotate(self.step)
         painter.drawImage(0,radius, self.bright)
@@ -217,7 +227,7 @@ class NetworkAccessManager(QNetworkAccessManager):
         reply.deleteLater()
 
     def slotError(self, code):
-        print("Error:", code)
+        print("Error %s while trying to access %s" % (code, self.url))
         
     def slotSslErrors(self, errors):
         for e in errors:
@@ -239,6 +249,7 @@ class NetworkAccessManager(QNetworkAccessManager):
         QNetworkAccessManager.__init__(self)
         self.messageBuffer = []
         url   = QUrl((url % branch) + filename)
+        self.url = url.toDisplayString()
         req   = QNetworkRequest(url)
         reply = self.get(req)
         reply.ignoreSslErrors()
@@ -318,6 +329,24 @@ class PackageLoader(NetworkAccessManager):
         print("Making executable: " + executable)
         os.chmod(executable, 0o744)
 
+        # handling for apt dependencies
+        if manifest.has_option('app', 'depends'):
+            print("Manifest contains dependencies. Installing them")
+            if os.path.isfile(APT_GET):
+                # assemble apt-get command
+                cmd = ["sudo", "apt-get", "-y", "install" ]
+                # split comma seperated dependencies into a space seperated list
+                # and append list to command
+                cmd.extend(manifest.get('app', 'depends').split(","))
+                try:
+                    subprocess.run(cmd, check=True)
+                except Exception as e:
+                    print("Error running apt-get:", str(e))
+                    return((False, "Error running apt-get: "+str(e)))
+            else:
+                print("Unable to install dependencies: Missing apt-get ...")
+                return((False, "Missing apt-get"))
+        
         print("done")
         return((True,""))
 
@@ -389,7 +418,8 @@ class AppDialog(TouchDialog):
                    "firmware": QCoreApplication.translate("AppInfo", "Firmware"),
                    "set":      QCoreApplication.translate("AppInfo", "Set"),
                    "model":    QCoreApplication.translate("AppInfo", "Model"),
-                   "category": QCoreApplication.translate("AppInfo", "Category")
+                   "category": QCoreApplication.translate("AppInfo", "Category"),
+                   "depends":  QCoreApplication.translate("AppInfo", "Dependencies")
                }
         if id in labels:
             return labels[id]
@@ -434,7 +464,9 @@ class AppDialog(TouchDialog):
 
         text = QTextEdit()
         text.setReadOnly(True)
-
+        text.setTextInteractionFlags (QtCore.Qt.NoTextInteraction)    
+        QScroller.grabGesture(text.viewport(), QScroller.LeftMouseButtonGesture);
+        
         for i in sorted(parms):
             if(AppDialog.format(i)):
                 value = str(parms[i])
@@ -561,6 +593,7 @@ class PackageListLoader(NetworkAccessManager):
                 append_parameter(packages, app, 'author', None, appparms)
                 append_parameter(packages, app, 'version', None, appparms)
                 append_parameter(packages, app, 'firmware', None, appparms)
+                append_parameter(packages, app, 'depends', None, appparms)
 
                 # if the app has a firmware spec, check if it matches the
                 # current firmware and only append the app if it does
@@ -579,6 +612,9 @@ class AppListWidget(QListWidget):
     def __init__(self, parent=None):
         super(AppListWidget, self).__init__(parent)
 
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        QScroller.grabGesture(self.viewport(), QScroller.LeftMouseButtonGesture);
+        
         self.setUniformItemSizes(True)
         self.setViewMode(QListView.ListMode)
         self.setMovement(QListView.Static)
@@ -679,7 +715,7 @@ class AppListWidget(QListWidget):
                         # create a tuple of app name and its parameters
                         app_dirs.append(appparms)
             except:
-                print("Failed: ", i)
+                print("Failed to scan app directory: ", i)
                 pass
                 
         return app_dirs
@@ -739,7 +775,9 @@ class AppListWidget(QListWidget):
         # set TouchWindow as parent
         dialog = AppDialog(item.text(), self.url, app_parms, installed_version, self.parent)
         dialog.refresh.connect(self.on_refresh)
-        dialog.exec_()
+
+        # exec_ breaks grabGesture: https://bugreports.qt.io/browse/QTBUG-67210
+        dialog.show()
 
     def notify_launcher(self):
         # send a signal so launcher so it reloads the view

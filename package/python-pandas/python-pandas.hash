@@ -1,0 +1,5 @@
+# md5, sha256 from https://pypi.org/pypi/pandas/json
+md5	c70bbdfed7f1b9807a738f85fcdd9767  pandas-0.25.3.tar.gz
+sha256	52da74df8a9c9a103af0a72c9d5fdc8e0183a90884278db7f386b5692a2220a4  pandas-0.25.3.tar.gz
+# Locally computed sha256 checksums
+sha256	79e4e818a662c6c02b052499bd6ededa18e780d3c026339834cc09455fea6ced  LICENSE

@@ -1,0 +1,46 @@
+---
+layout: null
+---
+{
+  "short_name": "ft TXT cfw",
+  "name": "fischertechnik TXT community firmware",
+  "description": "{{ site.data.label.description["de"] }}",
+  "icons": [
+    {
+      "src": "{{site.baseurl}}/pwa/mipmap-mdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "{{site.baseurl}}/pwa/mipmap-hdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "{{site.baseurl}}/pwa/mipmap-xhdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "{{site.baseurl}}/pwa/mipmap-xxhdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "{{site.baseurl}}/pwa/mipmap-xxxhdpi/ic_launcher.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "{{site.baseurl}}/pwa/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "{{site.baseurl}}/de/",
+  "background_color": "#fff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "{{site.baseurl}}/",
+  "theme_color": "#448acc"
+}

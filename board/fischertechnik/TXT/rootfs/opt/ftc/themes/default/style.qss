@@ -1,12 +1,17 @@
 /* QT theme for fischertechnik TXT
 /* http://doc.qt.io/qt-4.8/stylesheet-reference.html */
 /* http://doc.qt.io/qt-4.8/stylesheet-examples.html */
+/* https://doc.qt.io/qt-5/stylesheet-syntax.html */
+/* default font in Qt4: helvetica */
+/*              in Qt5: liberation mono */
 
 /* widgets by default let the background shine through and use a big white font */
 * { 
     background-color: rgba(255,255,255,40);
     selection-background-color: none;
-    font: bold 32px "sans-serif"; 
+    font-size: 28px;
+    font-family: "Liberation Sans";
+    font-style: bold;
     color: white;
     outline: 0;
     border: none;
@@ -155,8 +160,9 @@ QTabBar::tab:!selected {
 QTabWidget::tab-bar { alignment: center; }
 
 QTabWidget, QTabWidget::pane, QStackedWidget {
-  background: rgba(0,0,0,0); 
+/*   we would like a transparent background, but transparency seems ignored */
 /*   background: none; */
+  background-color: #448acc;
 }
 
 QTabWidget::pane {
@@ -302,6 +308,13 @@ QPushButton#osk_caps {
     height: 32px;
 }
 
+/* the enter button of the on-screen-keyboard */
+QPushButton#keyboard_return {
+    image: url(keyboard_return);
+    width: 32px;
+    height: 32px;
+}
+
 /* a flat button has no decoration at all */
 QPushButton:flat {
     border-style: none;  
@@ -361,6 +374,13 @@ QToolButton {
 QToolButton#launcher-icon {
     font: bold 12px;
     color: white;
+}
+
+QToolButton#launcher-icon:pressed {
+    color: blue;
+    /*border-style: inset;*/
+    border: 2px solid blue;
+    border-radius: 4px
 }
 
 QComboBox {
@@ -467,21 +487,21 @@ QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off {
 
 QScrollBar:vertical {
      border: none;
-     width: 32px;
-     margin: 32px 0 32px 0;
+     width: 8px;
+     margin: 8px 0 8px 0;
 }
 
 QScrollBar::handle:vertical {
      border: 4px solid lightgrey;
      border-radius: 4px;
      background: white;
-     min-height: 32px;
+     min-height: 8px;
 }
 
 QScrollBar::add-line:vertical {
      border: none;
      background: none;
-     height: 32px;
+     height: 8px;
      subcontrol-position: bottom;
      subcontrol-origin: margin;
 }
@@ -489,15 +509,15 @@ QScrollBar::add-line:vertical {
 QScrollBar::sub-line:vertical {
      border: none;
      background: none;
-     height: 32px;
+     height: 8px;
      subcontrol-position: top;
      subcontrol-origin: margin;
 }
 
 QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
      border: none;
-     width: 32px;
-     height: 32px;
+     width: 8px;
+     height: 8px;
      background: none;
 }
 
@@ -511,21 +531,21 @@ QScrollBar::down-arrow:vertical {
 
 QScrollBar:horizontal {
      border: none;
-     height: 32px;
-     margin: 0 32px 0 32px;
+     height: 8px;
+     margin: 0 8px 0 8px;
 }
 
 QScrollBar::handle:horizontal {
      border: 4px solid lightgrey;
      border-radius: 4px;
      background: white;
-     min-width: 32px;
+     min-width: 8px;
 }
 
 QScrollBar::add-line:horizontal {
      border: none;
      background: none;
-     width: 32px;
+     width: 8px;
      subcontrol-position: right;
      subcontrol-origin: margin;
 }
@@ -533,15 +553,15 @@ QScrollBar::add-line:horizontal {
 QScrollBar::sub-line:horizontal {
      border: none;
      background: none;
-     width: 32px;
+     width: 8px;
      subcontrol-position: left;
      subcontrol-origin: margin;
 }
 
 QScrollBar::left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
      border: none;
-     width: 32px;
-     height: 32px;
+     width: 8px;
+     height: 8px;
      background: none;
 }
 

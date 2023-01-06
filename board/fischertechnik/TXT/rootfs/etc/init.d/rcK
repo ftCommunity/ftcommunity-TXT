@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# stop X related stuff
+for i in $(ls -r /etc/init.d/S9?*) ;do
+	$i stop
+done
+
+sleep 1
+
+# load ftc splash image. Use FT colors for progress bar
+psplash --filename /etc/ftc-shutdown.png -y 212 --BarCol FC1504 --BarBkCol 347ECC --BkCol 000000 &
+
+
+# count scripts to be executed
+scripts=$(ls -r /etc/init.d/S[012345678]?*)
+SPLASH_MAX=0
+SPLASH_LAST=""
+for i in $scripts; do
+     # Ignore dangling symlinks (if any).
+     [ ! -f "$i" ] && continue
+     SPLASH_MAX=$((SPLASH_MAX+1))
+     SPLASH_LAST="$i"
+done
+
+# calculate the step size for the progress bar
+SPLASH_STEP=$((100/SPLASH_MAX))
+
+# Stop all init scripts in /etc/init.d
+# executing them in reversed numerical order.
+#
+SPLASH=100
+for i in $scripts; do
+
+    sleep 0.1
+    
+     # Ignore dangling symlinks (if any).
+     [ ! -f "$i" ] && continue
+
+     SPLASH=$((SPLASH-SPLASH_STEP))
+
+     if [ "$i" == "$SPLASH_LAST" ] ; then
+        psplash-write "PROGRESS 0"
+        psplash-write "QUIT"
+     else
+       psplash-write "PROGRESS $SPLASH"
+     fi
+
+     case "$i" in
+	*.sh)
+	    # Source shell script for speed.
+	    (
+		trap - INT QUIT TSTP
+		set stop
+		. $i
+	    )
+	    ;;
+	*)
+	    # No sh extension, so fork subprocess.
+	    $i stop
+	    ;;
+    esac
+done
+

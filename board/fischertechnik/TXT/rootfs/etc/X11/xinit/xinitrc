@@ -1,0 +1,38 @@
+#!/bin/sh
+
+
+set_locale()
+{
+  source /etc/locale
+  export LC_ALL
+}
+
+set_background()
+{
+  xsetroot -solid '#5c96cc'
+}
+
+start_vnc()
+{
+  ENABLED=no
+  conffile=/etc/default/x11vnc
+  # to enable, add ENABLED=yes to $conffile
+  [ -f $conffile ] && . $conffile
+  if [ $ENABLED = "yes" ]; then
+    sudo -u ftc x11vnc -display :0 -forever &
+  fi
+}
+
+start_launcher()
+{
+  export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
+  sudo -u ftc PYTHONPATH=/opt/ftc /opt/ftc/launcher.py
+}
+
+set_locale
+set_background
+start_vnc
+while true; do
+    start_launcher
+done
+      

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# writes back hwclock during shutdown
+
+case "$1" in
+    stop|restart|reload|force-reload)
+	/usr/sbin/hwclock -w
+	;;
+esac

@@ -1,0 +1,5 @@
+# md5, sha256 from https://pypi.org/pypi/luma.oled/json
+md5	44e62e74c0c745ec9bcf63646efc0d1f  luma.oled-3.9.0.tar.gz
+sha256	e51c2ce5b88d591f9c64ab49d6bd5abd26759b87180706d615fec796569b6f6b  luma.oled-3.9.0.tar.gz
+# Locally computed sha256 checksums
+sha256	85346ca55ea85ba4c30d8e11d71217956d7429ce0198b396a4400228467ad3ce  LICENSE.rst

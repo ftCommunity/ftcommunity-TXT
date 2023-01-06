@@ -4,7 +4,8 @@
 import sys, os, subprocess, time, re
 from TouchStyle import *
 from launcher import LauncherPlugin, MessageDialog
-from PyQt4.QtCore import QTimer
+
+from PyQt5.QtCore import QTimer
 
 class DisplaySettingsPlugin(LauncherPlugin):
 
@@ -41,15 +42,17 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.calibrate = QPushButton(QCoreApplication.translate("main", "Calibrate\ntouchscreen"))
         self.calibrate.clicked.connect(self.on_calibrate_touchscreen)
         self.vbox.addWidget(self.calibrate)
+        self.savecalibration = QPushButton(QCoreApplication.translate("main", "Save\ncalibration"))
+        self.savecalibration.clicked.connect(self.on_unset_reset_calibration_flag)
+        self.vbox.addWidget(self.savecalibration)
         self.mainWindow.show()
 
     def on_calibrate_touchscreen(self):
         # make sure that only ts_calibrate reacts to touch events...
-        old_window = self.mainWindow
-        self.mainWindow = TouchBaseWidget()
-        self.mainWindow.show()
-        old_window.close()
-        subprocess.run(["sudo", "TSLIB_TSDEVICE=/dev/input/event0", "/usr/bin/ts_calibrate"])
+        self.popup = TouchDialog("", self.mainWindow)
+        self.popup.show()
+
+        subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "calibrate"])
         self.restart_launcher(QCoreApplication.translate("main", "Activating new touchscreen calibration..."))
 
     def on_change_orientation(self, index):
@@ -61,9 +64,8 @@ class DisplaySettingsPlugin(LauncherPlugin):
         self.restart_launcher(msg % rotation)
 
     def restart_launcher(self, text):
-        old_window = self.mainWindow
-        self.mainWindow = TouchBaseWidget()
-        layout = QVBoxLayout()
+        self.popup = TouchDialog("", self.mainWindow)
+        layout = self.popup.layout
         layout.addStretch()
 
         lbl = QLabel(text)
@@ -72,15 +74,37 @@ class DisplaySettingsPlugin(LauncherPlugin):
         layout.addWidget(lbl)
 
         layout.addStretch()
-        self.mainWindow.setLayout(layout)        
-        self.mainWindow.show()
-        old_window.close()
-        # the 0 msec timer makes sure that the actual restart does
+        self.popup.show()
+        
+        # the timer makes sure that the actual restart does
         # not happen before the message window has been displayed...
-        QTimer.singleShot(0, self.do_restart_launcher)
+        self.restartTimer = QTimer()
+        self.restartTimer.singleShot(2000, self.do_restart_launcher)
 
     def do_restart_launcher(self):
-        subprocess.run(["sudo", "/etc/init.d/S90launcher", "restart"])
+        # We need to restart the X server and ourselves.
+        cmd="sudo /etc/init.d/S90launcher restart"
+
+        self.p = subprocess.Popen(args=cmd, shell=True,
+                                  start_new_session=True,
+                                  stdin=subprocess.DEVNULL,
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.DEVNULL)
+
+    def unset_reset_calibration_flag(self):
+        subprocess.run(["sudo", "/sbin/calibrate-touchscreen", "commit"])
+
+    def on_unset_reset_calibration_flag(self):
+        msg = TouchMessageBox(QCoreApplication.translate("main", "Save"), self.mainWindow)
+        msg.addConfirm()
+        msg.setCancelButton()
+        msg.setText(QCoreApplication.translate("main", "Do you really want to save the current touchscreen calibration?"))
+        msg.setPosButton(QCoreApplication.translate("main", "Save"))
+        msg.setNegButton(QCoreApplication.translate("main", "No"))
+        success, text = msg.exec_()
+        if success == False or text == QCoreApplication.translate("main", "No"):
+            return
+        self.unset_reset_calibration_flag()
 
 
 if __name__ == "__main__":

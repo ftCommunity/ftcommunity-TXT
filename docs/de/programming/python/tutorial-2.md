@@ -29,6 +29,11 @@ $ export PYTHONPATH=/opt/ftc
 $ /opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py
 ```
 
+Hinweis an TX-Pi-Entwickler: Wenn das Programm mit der Fehlermeldung "cannot connect to X server" abbricht, muß folgender Befehl vor dem Ausführen des Programmes ausgeführt werden:
+```
+export DISPLAY=:0.0
+```
+
 Der Pfad ergibt sich wieder aus der UUID, wie sie in der Manifest-Datei deiner App steht.
 
 Jetzt kannst du Fehlermeldungen und Debug-Ausgaben in deiner Remote-Shell sehen.

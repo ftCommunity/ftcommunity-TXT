@@ -80,8 +80,8 @@ class FtcGuiPlugin(LauncherPlugin):
             with open("/etc/locale", "w") as f:
                 print('LANG="'+loc+'"', file=f)
                 print('LC_ALL="'+loc+'"', file=f)
-        except:
-            pass
+        except Exception as e:
+            print("Exception while saving locale: %s" % e)
 
         # request launcher rescan
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -91,6 +91,8 @@ class FtcGuiPlugin(LauncherPlugin):
             sock.sendall(bytes("rescan\n", "UTF-8"))
         except socket.error as msg:
             pass
+        except Exception as e:
+            print("Unexpected exception while reloading locale: %s" % e)
 
     # read locale from /etc/locale
     def locale_read(self):

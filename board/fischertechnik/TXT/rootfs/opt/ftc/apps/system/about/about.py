@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-import sys, os, ftrobopy
+import sys, os
 from TxtStyle import *
 from launcher import LauncherPlugin
+from PyQt5 import QtCore
 
 VERSION_FILE = "/etc/fw-ver.txt"
 
@@ -13,11 +14,9 @@ class LicenseDialog(TxtDialog):
         
         txt = QTextEdit()
         txt.setReadOnly(True)
-        
-        font = QFont()
-        font.setPointSize(16)
-        txt.setFont(font)
-    
+        txt.setTextInteractionFlags (QtCore.Qt.NoTextInteraction)    
+        QScroller.grabGesture(txt.viewport(), QScroller.LeftMouseButtonGesture);
+
         # load gpl from disk
         name = os.path.join(os.path.dirname(os.path.realpath(__file__)), lic)
         text=open(name, encoding="utf-8").read()
@@ -29,6 +28,7 @@ class SmallLabel(QLabel):
     def __init__(self, str, parent=None):
         super(SmallLabel, self).__init__(str, parent)
         self.setObjectName("smalllabel")
+        self.setWordWrap(True)
 
 class VersionWidget(QWidget):
     def __init__(self,title,str,parent=None):
@@ -41,9 +41,9 @@ class VersionWidget(QWidget):
 class VersionsDialog(TxtDialog):
     def str_from_file(self, fname):
         try:
-            return open(fname).readline().strip()
+            return open(fname).readline().rstrip("\0").strip()
         except:
-            return "???"
+            return None
 
     def __init__(self,title,parent):
         TxtDialog.__init__(self, title, parent)
@@ -52,14 +52,25 @@ class VersionsDialog(TxtDialog):
 
         # add various version info
         vbox = QVBoxLayout()
+
+        # ---------- Raspberry Pi version ----------
+        if self.str_from_file("/sys/firmware/devicetree/base/model"):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "System"),
+                                         self.str_from_file("/sys/firmware/devicetree/base/model")))
+
+        if self.str_from_file("/etc/tx-pi-ver.txt"):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "TX-Pi Version"),
+                                         self.str_from_file("/etc/tx-pi-ver.txt")))
         
         # -------- firmware version ------------
-        vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Firmware"),
-                                     self.str_from_file(VERSION_FILE)))
+        if self.str_from_file(VERSION_FILE):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Firmware"),
+                                         self.str_from_file(VERSION_FILE)))
 
         # --------- kernel version -----------
-        vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Linux"),
-                                     self.str_from_file("/proc/version").split()[2]))
+        if self.str_from_file("/proc/version"):
+            vbox.addWidget(VersionWidget(QCoreApplication.translate("VersionsDialog", "Linux"),
+                                         self.str_from_file("/proc/version").split()[2]))
 
         # --------- python version ----------
         py_ver_str = ""
@@ -68,8 +79,12 @@ class VersionsDialog(TxtDialog):
             if(i < 2): py_ver_str += "."
         vbox.addWidget(VersionWidget("Python", py_ver_str))
 
-        # --------- ftrobopy version ----------
-        vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
+        try:
+            import ftrobopy
+            # --------- ftrobopy version ----------
+            vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
+        except:
+            pass
 
         # --------- qt -----------
         vbox.addWidget(VersionWidget("Qt", QT_VERSION_STR))
@@ -80,6 +95,8 @@ class VersionsDialog(TxtDialog):
 
         # put everything inside a scroll area
         scroll = QScrollArea(self.centralWidget)
+        QScroller.grabGesture(scroll, QScroller.LeftMouseButtonGesture);
+        
         scroll.setWidget(vbox_w)
 
         self.setCentralWidget(scroll)
@@ -90,7 +107,7 @@ class AboutPlugin(LauncherPlugin):
 
         translator = QTranslator()
         path = os.path.dirname(os.path.realpath(__file__))
-        translator.load(QLocale.system(), os.path.join(path, "about_"))
+        translator.load(self.locale(), os.path.join(path, "about_"))
         self.installTranslator(translator)
         
         # create the empty main window
@@ -115,7 +132,7 @@ class AboutPlugin(LauncherPlugin):
         
         # and add some text
         self.txt = QLabel(QCoreApplication.translate("FtcGuiApplication",
-                                                     "Fischertechnik TXT firmware "
+                                                     "Firmware for fischertechnik - "
                                                      "community edition"))
         self.txt.setObjectName("smalllabel")
         self.txt.setWordWrap(True)
@@ -124,7 +141,7 @@ class AboutPlugin(LauncherPlugin):
 
         self.vbox.addStretch()
 
-        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016 the ft:community"))
+        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2022 the ft:community"))
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)

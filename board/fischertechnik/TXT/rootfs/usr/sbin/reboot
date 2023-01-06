@@ -1,0 +1,18 @@
+#!/bin/sh
+if [ "$(whoami)" != "root" ]; then
+  echo "$0 must be run as root" >&2;
+  exit 1
+fi
+/bin/launcher-msg "Rebooting..."
+sleep 2
+case $(cat /rom/etc/sysversion)  in
+    [0123].*|4.[0123].*|4.4.[012]*)
+        # normal reboot hangs on firmware versions  < 4.4.3
+        # workaround: set a short rtc wakeup timer and power off instead
+        echo +15 > /sys/class/rtc/rtc1/wakealarm
+        exec /bin/busybox poweroff
+        ;;
+    *)
+        exec /bin/busybox reboot
+        ;;
+esac
