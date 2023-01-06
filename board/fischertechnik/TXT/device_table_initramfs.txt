@@ -8,3 +8,4 @@
 /media/sdcard/boot                      d       755     0       0       -       -       -       -       -
 /media/sdcard/root                      d       755     0       0       -       -       -       -       -
 /media/sdcard/data                      d       755     0       0       -       -       -       -       -
+/newroot                                d       755     0       0       -       -       -       -       -
