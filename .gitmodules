@@ -3,5 +3,4 @@
 	url = https://github.com/EstherMi/ft-brickly-userguide.git
 [submodule "buildroot"]
 	path = buildroot
-	url = https://github.com/ftCommunity/buildroot
-	branch = ftcommunity-TXT
+	url = https://github.com/buildroot/buildroot.git
