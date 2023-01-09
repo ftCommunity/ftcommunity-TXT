@@ -252,7 +252,6 @@ class NetworkAccessManager(QNetworkAccessManager):
         self.url = url.toDisplayString()
         req   = QNetworkRequest(url)
         reply = self.get(req)
-        reply.ignoreSslErrors()
         self.progress_percent = -1
         self.ignoreNotFound = ignoreNotFound
 
