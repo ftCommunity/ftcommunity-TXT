@@ -252,7 +252,6 @@ class NetworkAccessManager(QNetworkAccessManager):
         self.url = url.toDisplayString()
         req   = QNetworkRequest(url)
         reply = self.get(req)
-        reply.ignoreSslErrors()
         self.progress_percent = -1
         self.ignoreNotFound = ignoreNotFound
 
@@ -297,7 +296,7 @@ class PackageLoader(NetworkAccessManager):
         # is used as the apps local directory
         manifest_str = io.StringIO(z.read("manifest").decode('utf-8'))
         manifest = configparser.RawConfigParser()
-        manifest.readfp(manifest_str)
+        manifest.read_file(manifest_str)
         if not manifest.has_option('app', 'uuid'):
             return((False, QCoreApplication.translate("Error", "Manifest does not contain a UUID!")))
 
@@ -573,7 +572,7 @@ class PackageListLoader(NetworkAccessManager):
         # parse result
         packages_str = io.StringIO(result[1].decode('utf-8'))
         packages = configparser.RawConfigParser()
-        packages.readfp(packages_str)
+        packages.read_file(packages_str)
         apps = packages.sections() 
         applist = []
         for app in apps:
