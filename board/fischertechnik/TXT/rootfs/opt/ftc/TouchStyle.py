@@ -21,7 +21,6 @@ TXPI = os.path.isfile('/etc/tx-pi')
 # check for Fischertechnik community firmware app development settings
 DEV = os.path.isfile("/etc/ft-cfw-dev.txt")
 # Do we use an ARM architecture?
-IS_ARM = platform.machine()[:3] == "arm"
 
 DEV_ORIENTATION = "PORTRAIT"
 
@@ -61,7 +60,7 @@ STYLE_NAME = "themes/default/style.qss"
 
         
 def getScreenSize():
-    if IS_ARM:
+    if TXT or TXPI:
         return QApplication.desktop().screenGeometry().size()
 
     if 'SCREEN' in os.environ:
@@ -182,7 +181,7 @@ class TouchBaseWidget(QWidget):
     # TXT windows are always fullscreen on arm (txt itself)
     # and windowed else (e.g. on PC)
     def show(self):
-        if IS_ARM and not DEV:
+        if TXT or TXPI and not DEV:
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
@@ -269,7 +268,7 @@ class TouchDialog(QDialog):
         
     # TXT windows are always fullscreen
     def exec_(self):
-        if IS_ARM and not DEV:
+        if TXT or TXPI and not DEV:
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
