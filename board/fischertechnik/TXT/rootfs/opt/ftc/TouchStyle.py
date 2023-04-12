@@ -20,7 +20,7 @@ TXT = os.path.isfile("/etc/fw-ver.txt")
 TXPI = os.path.isfile('/etc/tx-pi')
 # check for Fischertechnik community firmware app development settings
 DEV = os.path.isfile("/etc/ft-cfw-dev.txt")
-# Do we use an ARM architecture?
+
 
 DEV_ORIENTATION = "PORTRAIT"
 

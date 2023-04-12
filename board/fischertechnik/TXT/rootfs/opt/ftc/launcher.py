@@ -12,7 +12,7 @@ import platform
 import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, \
-    TXT, BUTTON_THREAD, getScreenSize, IS_ARM
+    TXT, BUTTON_THREAD, getScreenSize
 from touch_keyboard import TouchKeyboard
 
 from PyQt5.QtCore import *
@@ -251,8 +251,9 @@ class TouchTopWidget(QWidget):
 
     # TXT windows are always fullscreen
     def show(self):
-        # go fullscreen on arm, stay windowed otherwise
-        if IS_ARM:
+        # go fullscreen on small displays, stay windowed otherwise
+        s = getScreenSize() 
+        if s.height() < 480 || s.width() < 480: 
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
