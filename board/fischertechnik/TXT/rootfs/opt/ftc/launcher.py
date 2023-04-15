@@ -253,7 +253,7 @@ class TouchTopWidget(QWidget):
     def show(self):
         # go fullscreen on small displays, stay windowed otherwise
         s = getScreenSize() 
-        if s.height() < 480 || s.width() < 480: 
+        if s.height() < 480 or s.width() < 480: 
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
