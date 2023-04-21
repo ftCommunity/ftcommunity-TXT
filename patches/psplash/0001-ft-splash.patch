@@ -1,8 +1,8 @@
---- psplash.orig/psplash.c	2016-06-05 23:14:59.000000000 +0200
-+++ psplash-5b3c1cc28f5abdc2c33830150b48b278cc4f7bca/psplash.c	2018-04-29 15:17:44.726214920 +0200
-@@ -25,6 +25,11 @@
- #include "psplash-bar-img.h"
- #include "radeon-font.h"
+--- psplash.orig/psplash.c     2021-10-29 14:44:47.000000000 +0200
++++ psplash-44afb7506d43cca15582b4c5b90ba5580344d75d/psplash.c 2023-04-22 00:36:49.918344557 +0200
+@@ -20,6 +20,11 @@
+ #endif
+ #include FONT_HEADER
  
 +int YPos = -1;
 +unsigned long BarCol=0xFFFFFFFF;
@@ -12,13 +12,12 @@
  #define SPLIT_LINE_POS(fb)                                  \
  	(  (fb)->height                                     \
  	 - ((  PSPLASH_IMG_SPLIT_DENOMINATOR                \
-@@ -51,13 +56,28 @@
+@@ -46,13 +51,28 @@
  
    /* Clear */
  
--  psplash_fb_draw_rect (fb, 
 +  if(BkCol == 0xFFFFFFFF)
-+   psplash_fb_draw_rect (fb, 
+   psplash_fb_draw_rect (fb, 
  			0, 
  			SPLIT_LINE_POS(fb) - h, 
  			fb->width,
@@ -42,7 +41,7 @@
    psplash_fb_draw_text (fb,
  			(fb->width-w)/2, 
  			SPLIT_LINE_POS(fb) - h,
-@@ -73,28 +93,84 @@
+@@ -69,28 +89,84 @@
  
    /* 4 pix border */
    x      = ((fb->width  - BAR_IMG_WIDTH)/2) + 4 ;
@@ -132,7 +131,7 @@
      }
  
    DBG("value: %i, width: %i, barwidth :%i\n", value, 
-@@ -209,6 +285,9 @@
+@@ -227,6 +303,9 @@
    PSplashFB *fb;
    bool       disable_console_switch = FALSE;
  
@@ -142,7 +141,7 @@
    signal(SIGHUP, psplash_exit);
    signal(SIGINT, psplash_exit);
    signal(SIGQUIT, psplash_exit);
-@@ -233,10 +312,46 @@
+@@ -251,10 +330,46 @@
          fbdev_id = atoi(argv[i]);
          continue;
        }
@@ -189,8 +188,8 @@
                argv[0]);
        exit(-1);
    }
-@@ -275,11 +390,12 @@
-     }
+@@ -297,11 +412,12 @@
+ #endif
  
    /* Clear the background with #ecece1 */
 -  psplash_fb_draw_rect (fb, 0, 0, fb->width, fb->height,
@@ -205,36 +204,33 @@
  			 (fb->width  - POKY_IMG_WIDTH)/2, 
  #if PSPLASH_IMG_FULLSCREEN
  			 (fb->height - POKY_IMG_HEIGHT)/2,
-@@ -292,21 +408,29 @@
+@@ -314,12 +430,19 @@
  			 POKY_IMG_BYTES_PER_PIXEL,
  			 POKY_IMG_ROWSTRIDE,
  			 POKY_IMG_RLE_PIXEL_DATA);
 +  } else {
-+    char Cmd[512];
-+    memset(Cmd, 0, sizeof(Cmd));
-+    sprintf(Cmd,"fbv -s1 %s", FileName);
-+    system(Cmd); /* Draw file with fbv command */
++       char Cmd[512];
++       memset(Cmd, 0, sizeof(Cmd));
++       sprintf(Cmd,"fbv -s1 %s", FileName);
++       system(Cmd); /* Draw file with fbv command */
 +  }
  
+ #ifdef PSPLASH_SHOW_PROGRESS_BAR
    /* Draw progress bar border */
--  psplash_fb_draw_image (fb, 
 +  if ( BkCol == 0xFFFFFFFF)
-+   psplash_fb_draw_image (fb, 
+   psplash_fb_draw_image (fb, 
  			 (fb->width  - BAR_IMG_WIDTH)/2, 
 -			 SPLIT_LINE_POS(fb),
-+			 (YPos < 0)?SPLIT_LINE_POS(fb):YPos, 
++			 (YPos < 0)?SPLIT_LINE_POS(fb):YPos,
  			 BAR_IMG_WIDTH,
  			 BAR_IMG_HEIGHT,
  			 BAR_IMG_BYTES_PER_PIXEL,
- 			 BAR_IMG_ROWSTRIDE,
- 			 BAR_IMG_RLE_PIXEL_DATA);
- 
-+ 
-   psplash_draw_progress (fb, 0);
+@@ -330,7 +453,7 @@
+ #endif
  
  #ifdef PSPLASH_STARTUP_MSG
 -  psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
 +  if(strlen(FileName) == 0) psplash_draw_msg (fb, PSPLASH_STARTUP_MSG);
  #endif
  
-   psplash_main (fb, pipe_fd, 0);
+   /* Scene set so let's flip the buffers. */
