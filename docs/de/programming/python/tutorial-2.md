@@ -29,7 +29,7 @@ $ export PYTHONPATH=/opt/ftc
 $ /opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py
 ```
 
-Hinweis an TX-Pi-Entwickler: Wenn das Programm mit der Fehlermeldung "cannot connect to X server" abbricht, muß folgender Befehl vor dem Ausführen des Programmes ausgeführt werden:
+Hinweis an TX-Pi-Entwickler: Wenn das Programm mit der Fehlermeldung "cannot connect to X server" abbricht, muss folgender Befehl vor dem Ausführen des Programmes ausgeführt werden:
 ```
 export DISPLAY=:0.0
 ```
@@ -56,11 +56,11 @@ Ein anderer Ansatz, um Python und Qt zu integrieren, ist `PySide`. PySide wird a
 
 ## Unter Linux
 
-PyQt ist für alle großen Linux-Distributionen verfügbar. Suche mit deinem bevorzugten Paket-Manager nach einem Paket namens `pyqt`, `python-qt` oder ähnlich und installiere es.
+Installiere PyQt5 mit `pip install PyQt5` um die UI anzeigen zu können. Vielleicht musst du `pip`, Pythons Paketmanager, erst mit `sudo apt install pip` installieren.
 
 Die TXT-Apps brauchen ein spezielles Qt-TXT-Thema. Um die TXT-Apps auf dem PC ausführen zu können, müssen die Dateien für dieses Thema auch auf dem PC installiert werden.
 
-Kopiere `TouchStyle.py` und das ganze `themes`-Verzeichnis in ein gemeinsames Verzeichnis auf deinem PC. Du findest diese Dateien im [Repository](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc).
+Kopiere `TouchStyle.py`, `touch_keyboard.py` und das ganze `themes`-Verzeichnis in ein gemeinsames Verzeichnis auf deinem PC. Du findest diese Dateien im [Repository](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc).
 
 Wenn du die Dateien in dem Verzeichnis abgelegt hast, in dem auch deine App abgelegt hast, brauchst du nichts weiter zu tun. Wenn sie an einem anderen Ort liegen, musst du Python mit diesem Ort bekannt machen. Wenn `TxtStyle.py` und das `themes`-Verzeichnis unter `/tmp/mytxtenv` liegen, dann musst du folgendes eingeben:
 
@@ -91,8 +91,8 @@ Kleine Abweichungen in der Schriftdarstellung zwischen TXT (links) und PC (recht
 
 ## Unter Windows
 
-PyQt4 ist für so gut wie alle Windows-Versionen verfügbar. Um es zu installieren, gehe auf die Download-Webseite von [PyQt4](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/) und lade dir dort die passende Datei herunter. (*Für ein Windows x64 mit Python 3.4 x64 wäre [**PyQt4**-4.11.4-gpl- **Py3.4** - **Qt4.8.7** - **x64** .exe](https://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt4-4.11.4-gpl-Py3.4-Qt4.8.7-x64.exe/download) die richtige Datei.*)
+PyQt5 kann auch auf Windows mit `pip install PyQt5` installiert werden.
 
-TXT Anwendungen benötigen jedoch ein spezielles Thema, damit sie wie auf dem TXT aussehen. Lade dir dies von [Github](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc) herunter (*Du brauchst die Datei `TouchStyle.py` und den Ordner `themes`.*) Kopiere diese Dateien in deinen `site-packages`-Ordner. Schreibe nun ein Testprogramm. Jetzt kannst du in die Windows-Konsole gehen und wenn du `python Test.py` eingibst, wirst du auch sogleich ein TXT-Fenster sehen.
+TXT Anwendungen benötigen jedoch ein spezielles Thema, damit sie wie auf dem TXT aussehen. Lade dir dies von [Github](https://github.com/ftCommunity/ftcommunity-TXT/tree/master/board/fischertechnik/TXT/rootfs/opt/ftc) herunter (*Du brauchst die Dateien `TouchStyle.py`, `touch_keyboard.py` und den Ordner `themes`.*) Kopiere diese Dateien in deinen `site-packages`-Ordner. Schreibe nun ein Testprogramm. Jetzt kannst du in die Windows-Konsole gehen und wenn du `python Test.py` eingibst, wirst du auch sogleich ein TXT-Fenster sehen.
 
 ![Ausführung auf dem TXT oder PC](../../../en/programming/python/tut2_img3.png) 
