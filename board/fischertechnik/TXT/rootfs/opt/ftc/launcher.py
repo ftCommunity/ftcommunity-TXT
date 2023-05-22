@@ -12,7 +12,7 @@ import platform
 import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, \
-    TXT, BUTTON_THREAD, getScreenSize
+    BUTTON_THREAD, getScreenSize, BusyAnimation
 from touch_keyboard import TouchKeyboard
 
 from PyQt5.QtCore import *
@@ -33,7 +33,7 @@ if platform.system() != 'Windows':
 THEME = "default"
 
 CTRL_PORT = 9000
-BUSY_TIMEOUT = 20
+
 
 # make sure all file access happens relative to this script
 BASE = os.path.dirname(os.path.realpath(__file__))
@@ -257,79 +257,6 @@ class TouchTopWidget(QWidget):
             QWidget.showFullScreen(self)
         else:
             QWidget.show(self)
-
-
-class BusyAnimation(QWidget):
-    """Shows a busy animation on top of any application.
-    """
-    expired = pyqtSignal()
-
-    def __init__(self, app, parent=None):
-        super(BusyAnimation, self).__init__(parent)
-        self.resize(64, 64)
-        # center relative to parent
-        self.move(QPoint(parent.width() // 2 - 32, parent.height() // 2 - 32))
-        self.step = 0
-        self.app = app
-        # create a timer to close this window after 10 seconds at most
-        self.etimer = QTimer(self)
-        self.etimer.setSingleShot(True)
-        self.etimer.timeout.connect(self.timer_expired)
-        self.etimer.start(BUSY_TIMEOUT * 1000)
-        # animate at 5 frames/sec
-        self.atimer = QTimer(self)
-        self.atimer.timeout.connect(self.animate)
-        self.atimer.start(200)
-        # create small circle bitmaps for animation
-        self.dark = self.draw(16, QColor("#808080"))
-        self.bright = self.draw(16, QColor("#fcce04"))
-        
-    def draw(self, size, color):
-        img = QImage(size, size, QImage.Format_ARGB32)
-        img.fill(Qt.transparent)
-        painter = QPainter(img)
-        painter.setPen(Qt.white)
-        painter.setRenderHint(QPainter.Antialiasing, True)
-        painter.setBrush(QBrush(color))
-        painter.drawEllipse(0, 0, img.width() - 1, img.height() - 1)
-        painter.end()
-        return img
-
-    def timer_expired(self):
-        # App launch expired without callback ...
-        self.expired.emit()
-
-    def animate(self):
-        # if the app isn't running anymore then stop the
-        # animation. This typically only happens for non-txt-styled
-        # apps or with apps crashing.
-        #
-        # We might tell the user that the app ended unexpectedly
-        if self.app.poll():
-            self.close()
-            return
-        self.step += 45
-        self.repaint()
-
-    def close(self):
-        self.etimer.stop()
-        self.atimer.stop()
-        super(BusyAnimation, self).close()
-        super(BusyAnimation, self).deleteLater()
-
-    def paintEvent(self, event):
-        radius = min(self.width(), self.height()) // 2 - 16
-        painter = QPainter()
-        painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.translate(self.width() // 2, self.height() // 2)
-        painter.rotate(45)
-        painter.rotate(self.step)
-        painter.drawImage(0, radius, self.bright)
-        for i in range(7):
-            painter.rotate(45)
-            painter.drawImage(0, radius, self.dark)
-        painter.end()
 
 
 class Icon(QPixmap):
