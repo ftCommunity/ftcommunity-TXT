@@ -505,20 +505,23 @@ class BusyAnimation(QWidget):
     """Shows a busy animation on top of any application.
     """
     expired = pyqtSignal()
-    BUSY_TIMEOUT = 20
 
-    def __init__(self, app, parent=None):
+    def __init__(self, parent=None, process=None, timeout_s=None):
+        # if an process or a timeout is specified, then we the widget
+        # closes itself if process.poll() returns True, or if the
+        # timeout is expired, respectively.
         super(BusyAnimation, self).__init__(parent)
         self.resize(64, 64)
         # center relative to parent
         self.move(QPoint(parent.width() // 2 - 32, parent.height() // 2 - 32))
         self.step = 0
-        self.app = app
-        # create a timer to close this window after 10 seconds at most
+        self.process = process
+        # create a timer to close this window after the timeout expired
         self.etimer = QTimer(self)
-        self.etimer.setSingleShot(True)
-        self.etimer.timeout.connect(self.timer_expired)
-        self.etimer.start(BUSY_TIMEOUT * 1000)
+        if timeout_s:
+            self.etimer.setSingleShot(True)
+            self.etimer.timeout.connect(self.timer_expired)
+            self.etimer.start(timeout_s * 1000)
         # animate at 5 frames/sec
         self.atimer = QTimer(self)
         self.atimer.timeout.connect(self.animate)
@@ -548,7 +551,7 @@ class BusyAnimation(QWidget):
         # apps or with apps crashing.
         #
         # We might tell the user that the app ended unexpectedly
-        if self.app.poll():
+        if self.process is not None and self.process.poll():
             self.close()
             return
         self.step += 45

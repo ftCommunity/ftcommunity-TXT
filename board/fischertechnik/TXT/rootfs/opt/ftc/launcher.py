@@ -1120,7 +1120,7 @@ class Launcher(TouchApplication):
                 self.app_process = subprocess.Popen( ("pythonw", str(executable)) )
 
         # display some busy icon
-        self.popup = BusyAnimation(self.app_process, self.w)
+        self.popup = BusyAnimation(parent=self.w, process=self.app_process, timeout_s=20)
         self.popup.expired.connect(self.on_busyExpired)
         self.popup.show()
 

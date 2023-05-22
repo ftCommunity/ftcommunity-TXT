@@ -132,65 +132,6 @@ class ServiceEnable(ExecThread):
         else:      cmd += "disable"        
         super(ServiceEnable,self).__init__(cmd, True)
         
-# a rotating "i am busy" widget to be shown while busy
-class BusyAnimation(QWidget):
-    expired = pyqtSignal()
-
-    def __init__(self, parent=None):
-        super(BusyAnimation, self).__init__(parent)
-
-        self.resize(64, 64)
-        self.move(QPoint(parent.width()//2-32, parent.height()//2-32))
-
-        self.step = 0
-
-        # animate at 5 frames/sec
-        self.atimer = QTimer(self)
-        self.atimer.timeout.connect(self.animate)
-        self.atimer.start(200)
-
-        # create small circle bitmaps for animation
-        self.dark = self.draw(16, QColor("#808080"))
-        self.bright = self.draw(16, QColor("#fcce04"))
-        
-    def draw(self, size, color):
-        img = QImage(size, size, QImage.Format_ARGB32)
-        img.fill(Qt.transparent)
-
-        painter = QPainter(img)
-        painter.setPen(Qt.white)
-        painter.setRenderHint(QPainter.Antialiasing, True)
-        painter.setBrush(QBrush(color))
-        painter.drawEllipse(0, 0, img.width()-1, img.height()-1)
-        painter.end()
-
-        return img
-
-    def animate(self):
-        self.step += 45
-        self.repaint()
-
-    def close(self):
-        self.atimer.stop()
-        super(BusyAnimation, self).close()
-
-    def paintEvent(self, event):
-        radius = min(self.width(), self.height())//2 - 16
-        painter = QPainter()
-        painter.begin(self)
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width()//2, self.height()//2)
-        painter.rotate(45)
-        painter.rotate(self.step)
-        painter.drawImage(0,radius, self.bright)
-        for i in range(7):
-            painter.rotate(45)
-            painter.drawImage(0,radius, self.dark)
-
-        painter.end()
-        
 class EntryWidget(QWidget):
     def __init__(self, title, parent = None):
         QWidget.__init__(self, parent)
