@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 
-import sys, os, shlex, io, time
+import sys, shlex, io, time
 from subprocess import Popen, call, PIPE, check_output, CalledProcessError
 from TouchStyle import *
 from launcher import LauncherPlugin

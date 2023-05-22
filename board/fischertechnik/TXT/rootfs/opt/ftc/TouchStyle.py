@@ -3,17 +3,16 @@
 # Initially meant to implement a TXT Qt style. Now also includes
 # additional functionality to communicate with the app launcher and
 # the like
-import struct, os, platform, socket
+import os
+import socket
+import struct
 
 from PyQt5.QtCore import *
-from PyQt5.QtCore import pyqtSignal, QPoint, QTimer, Qt
 from PyQt5.QtGui import *
-from PyQt5.QtGui import QColor, QImage, QPainter, QBrush
 from PyQt5.QtWidgets import *
 
 __version__ = '1.8'
 
-from PyQt5.QtWidgets import QWidget
 
 TouchStyle_version = float(__version__)  # Kept for backward compatibility
 
