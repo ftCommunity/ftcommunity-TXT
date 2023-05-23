@@ -70,7 +70,7 @@ This app allows to test the inputs and output of the TXT directly on its touchsc
 
 ## Radio
 
-Due to incompatibilities between different sound systems, the audio output of this app is currently not working.
+This app plays web radio streams on the TXT speaker.
 
 ## TXTShow
 
