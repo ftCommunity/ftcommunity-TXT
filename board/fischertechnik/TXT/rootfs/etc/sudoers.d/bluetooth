@@ -1,4 +1,4 @@
 ## Permissions for ftc access to programs required
 ## for bluetooth setup
 
-ftc     ALL = NOPASSWD: /usr/bin/hcitool, /etc/init.d/S60bluetooth, /bin/pkill -SIGINT hcitool
+ftc     ALL = NOPASSWD: /usr/bin/hcitool, /etc/init.d/S40bluetooth, /bin/pkill -SIGINT hcitool

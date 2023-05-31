@@ -4,6 +4,7 @@
 
 case "$1" in
     stop|restart|reload|force-reload)
-	/usr/sbin/hwclock -w
+	# hwclock is read during startup in utc by rtc_cmos
+	/usr/sbin/hwclock -w -u
 	;;
 esac

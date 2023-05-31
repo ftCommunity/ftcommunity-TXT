@@ -87,7 +87,7 @@ Mit diesem Werkzeug lassen sich direkt auf dem TXT alle Ein- und Ausgänge über
 
 ## Radio
 
-Leider funktioniert diese App momentan nicht.
+Diese App spielt Webradios auf dem TXT-Lautsprecher ab.
 
 ## TXTShow
 
