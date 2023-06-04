@@ -117,8 +117,8 @@ class TouchKeyboard(TouchDialog):
 
         self.layout = QVBoxLayout(self.centralWidget)
 
-        w = 100#self.width()
-        h = 120#self.height()
+        w = self.width()
+        h = self.height()
 
         self.line = self.FocusLineEdit()
         self.line.setProperty("nopopup", True)
