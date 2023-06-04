@@ -15,11 +15,18 @@ class TouchHandler(QObject):
                 return False
             
             if widget.inherits("QLineEdit"):
-
+                
                 if event.type() == QEvent.MouseButtonPress:# TouchBegin
                     text = widget.text()
+                    validator = widget.validator()
+                    if validator:
+                        # simple heuristics as checking for QIntValidator does not seem to work
+                        numbers_only = validator.validate("asd", 0)[0] != QValidator.Acceptable and \
+                                       validator.validate("123", 0)[0] == QValidator.Acceptable
+                    else:
+                        numbers_only = False
                     
-                    keyboard = TouchKeyboard(widget)
+                    keyboard = TouchKeyboard(widget, numbers_only)
 
                     keyboard.set_text(text)
                     keyboard.exec_()
@@ -35,8 +42,8 @@ class TouchKeyboard(TouchDialog):
     class KbdButton(QPushButton):
         SUBSCRIPT_FRAC = 2
 
-        def __init__(self, t, s, parent=None):
-            if t == s:
+        def __init__(self, t, s=None, parent=None):
+            if s is None:
                 QPushButton.__init__(self, t, parent)
                 self.sub = None
             else:
@@ -101,8 +108,9 @@ class TouchKeyboard(TouchDialog):
         ["p","q","r","s","t","u","v","w","x","y","z",":",";","!","?","Aa" ],
         ["0","1","2","3","4","5","6","7","8","9","+","-","#","^","<","Aa" ]
     ]
+    keys_numeric = [ "1","2","3","4","5","6","7","8","9", "0" ]
 
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, only_numbers = False):
         super().__init__(None, parent)
 
         self.caps = False
@@ -137,41 +145,62 @@ class TouchKeyboard(TouchDialog):
         edit.setLayout(edit.hbox)
         self.layout.addWidget(edit)
 
-        self.tab = QTabWidget()
+        if only_numbers:
+            keys = self.keys_numeric
 
-        if self.caps: 
-            keys = self.keys_upper
-            subs = self.keys_lower
-        else:         
-            keys = self.keys_lower
-            subs = self.keys_upper
-
-        for a in range(3):
             page = QWidget()
             page.grid = QGridLayout()
             page.grid.setContentsMargins(0, 0, 0, 0)
 
-            for cnt in range(len(keys[a])):
-                if keys[a][cnt] == "Aa":
-                    but = QPushButton(" ")
-                    but.setObjectName("osk_caps")
-                    but.clicked.connect(self.caps_changed)
-                else:
-                    but = self.KbdButton(keys[a][cnt], subs[a][cnt])
-                    but.clicked.connect(self.key_pressed)
+            for cnt in range(len(keys)):
+                but = self.KbdButton(keys[cnt])
+                but.clicked.connect(self.key_pressed)
 
                 but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
                 if w < h:
-                    page.grid.addWidget(but, cnt // 4, cnt % 4)
+                    page.grid.addWidget(but, cnt // 3, cnt % 3)
                 else:
-                    page.grid.addWidget(but, cnt // 8, cnt % 8)
+                    page.grid.addWidget(but, cnt // 4, cnt % 4)
 
             page.setLayout(page.grid)
-            self.tab.addTab(page, self.keys_tab[a])
 
-        self.tab.tabBar().setExpanding(True)
-        self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.layout.addWidget(self.tab)
+            self.layout.addWidget(page)
+            
+        else:
+            if self.caps: 
+                keys = self.keys_upper
+                subs = self.keys_lower
+            else:         
+                keys = self.keys_lower
+                subs = self.keys_upper
+
+            self.tab = QTabWidget()
+            for a in range(len(keys)):
+                page = QWidget()
+                page.grid = QGridLayout()
+                page.grid.setContentsMargins(0, 0, 0, 0)
+
+                for cnt in range(len(keys[a])):
+                    if keys[a][cnt] == "Aa":
+                        but = QPushButton(" ")
+                        but.setObjectName("osk_caps")
+                        but.clicked.connect(self.caps_changed)
+                    else:
+                        but = self.KbdButton(keys[a][cnt], subs[a][cnt])
+                        but.clicked.connect(self.key_pressed)
+
+                    but.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                    if w < h:
+                        page.grid.addWidget(but, cnt // 4, cnt % 4)
+                    else:
+                        page.grid.addWidget(but, cnt // 8, cnt % 8)
+
+                page.setLayout(page.grid)
+                self.tab.addTab(page, self.keys_tab[a])
+
+            self.tab.tabBar().setExpanding(True)
+            self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self.layout.addWidget(self.tab)
     
     def set_text(self, str):
         self.line.setText(str)
