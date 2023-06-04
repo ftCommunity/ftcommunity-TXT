@@ -33,7 +33,7 @@ class TouchKeyboard(TouchDialog):
     # a pushbutton that additionally shows a second small label
     # in subscript
     class KbdButton(QPushButton):
-        SUBSCRIPT_SCALE = 0.5
+        SUBSCRIPT_FRAC = 2
 
         def __init__(self, t, s, parent=None):
             if t == s:
@@ -62,9 +62,9 @@ class TouchKeyboard(TouchDialog):
                 # half the normal font size
                 font = painter.font()
                 if font.pointSize() > 0:
-                    font.setPointSize(font.pointSize() * self.SUBSCRIPT_SCALE)
+                    font.setPointSize(font.pointSize() // self.SUBSCRIPT_FRAC)
                 else:
-                    font.setPixelSize(font.pixelSize() * self.SUBSCRIPT_SCALE)
+                    font.setPixelSize(font.pixelSize() // self.SUBSCRIPT_FRAC)
                     
                 painter.setFont(font)
 
