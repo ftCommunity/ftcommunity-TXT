@@ -7,19 +7,21 @@ from TouchStyle import TouchDialog
 class TouchHandler(QObject):
     def __init__(self, parent):
         QObject.__init__(self, parent)
-        self.keyboard = None
 
 
     def eventFilter(self, widget, event):
 
+            if widget.inherits("FocusLineEdit"):
+                return False
+            
             if widget.inherits("QLineEdit"):
-                text = widget.text()
-                cpos = widget.cursorPosition()
 
                 if event.type() == QEvent.MouseButtonPress:# TouchBegin
+                    text = widget.text()
+                    
                     keyboard = TouchKeyboard(widget)
 
-                    keyboard.focus(text, 0)
+                    keyboard.set_text(text)
                     keyboard.exec_()
                     widget.setText(keyboard.text())
                         
@@ -171,9 +173,9 @@ class TouchKeyboard(TouchDialog):
         self.tab.tabBar().setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.layout.addWidget(self.tab)
     
-    def focus(self, str, cpos):
+    def set_text(self, str):
         self.line.setText(str)
-        self.line.setCursorPosition(cpos)
+        self.line.setCursorPosition(str.length())
 
     def key_erase(self):
         self.line.backspace()
