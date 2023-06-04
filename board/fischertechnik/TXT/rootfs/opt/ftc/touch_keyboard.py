@@ -175,7 +175,7 @@ class TouchKeyboard(TouchDialog):
     
     def set_text(self, str):
         self.line.setText(str)
-        self.line.setCursorPosition(str.length())
+        self.line.setCursorPosition(len(str))
 
     def key_erase(self):
         self.line.backspace()
