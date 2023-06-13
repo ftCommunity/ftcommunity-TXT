@@ -9,8 +9,6 @@ try:
         if asset["content_type"] == "application/zip":
             print(asset["size"])
             sys.exit(0)
-            while True:
-                pass
 except:
     pass
 sys.exit(1)
