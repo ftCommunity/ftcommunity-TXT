@@ -64,7 +64,6 @@ if ! [ $(wc -c < "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
   exit 21
 fi
 echo "ok"
-exit 0
 echo "backing up current system..."
 if ! mkdir -p "${BACKUPDIR}" || \
    ! mv "${BOOTDIR}/uImage" "${BOOTDIR}/am335x-kno_txt.dtb" "${BOOTDIR}/rootfs.img" "${BACKUPDIR}" 1>&2; \
