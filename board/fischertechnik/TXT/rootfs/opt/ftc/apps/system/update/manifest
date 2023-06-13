@@ -1,0 +1,15 @@
+[app]
+name: Update
+category: System
+icon: icon.png
+;Icon partly from https://www.iconfinder.com/icons/984748/arrows_refresh_reload_update_icon
+desc: Sytem Update
+exec: update.py
+managed: yes
+uuid: 1a32cebe-2303-4072-a51b-156dcf03f01f
+version: 1.0
+firmware: 0.9.3
+
+[de]
+name: Update
+desc: Systemaktualisierung
