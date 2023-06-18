@@ -25,7 +25,6 @@ You can now start your updated app on the TXT using the launcher.
 When apps are being started using the launcher no debug output and no error messages are visible. This may be a problem during development. You can launch apps when being logged in into the TXT via SSH (as user "ftc", no password). In order to start the test app log into the TXT via SSH first. Then type:
 
 ```
-$ export PYTHONPATH=/opt/ftc
 $ /opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py
 ```
 
