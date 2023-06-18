@@ -25,7 +25,6 @@ Jetzt kannst du die aktualisierte App auf dem TXT mit dem Launcher starten.
 Wenn Apps über den Launcher (Startbildschirm) gestartet werden, werden keine Fehlermeldungen angezeigt. Dies kann während der Entwicklung ein Nachteil sein. Du kannst die Apps auch starten, wenn du über SSH (als User "ftc", kein Passwort) auf dem TXT eingeloggt bist. Verbinde dich zuerst über SSH mit dem TXT (z.B. `ssh ftc@192.168.0.12`). Du musst auf dem TXT die Verbindung erlauben. In der Remote Shell gibst du ein:
 
 ```
-$ export PYTHONPATH=/opt/ftc
 $ /opt/ftc/apps/user/191fe5a6-313b-4083-af65-d1ad7fd6d281/test.py
 ```
 
