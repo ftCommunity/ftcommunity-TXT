@@ -14,14 +14,8 @@ all: $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage $(IMAGE_DIR)/am335x-kno_txt.dtb
 clean:
 	rm -rf $(OUTPUT_DIR)
 
-.PHONY: prepare-structure
-prepare-structure:
-	mkdir -p $(OUTPUT_DIR)
-	mkdir -p $(IMAGE_DIR)
-	mkdir -p $(INITRAMFS_DIR)
-
 .PHONY: prepare
-prepare: prepare-structure $(BUILD_DIR)/rootfs/.config $(BUILD_DIR)/initramfs/.config
+prepare: $(BUILD_DIR)/rootfs/.config $(BUILD_DIR)/initramfs/.config
 
 .PHONY: source
 source: rootfs-source initramfs-source
@@ -35,9 +29,11 @@ initramfs-source: $(BUILD_DIR)/initramfs/.config
 	$(MAKE) -C $(BUILD_DIR)/initramfs source
 
 $(BUILD_DIR)/rootfs/.config: $(ROOT_DIR)/buildroot/Makefile
+	mkdir -p $(BUILD_DIR)/rootfs
 	$(BR_INIT_ENV) $(MAKE) O=$(BUILD_DIR)/rootfs -C $(ROOT_DIR)/buildroot fischertechnik_TXT_rootfs_defconfig
 
 $(BUILD_DIR)/initramfs/.config: $(ROOT_DIR)/buildroot/Makefile
+	mkdir -p $(BUILD_DIR)/initramfs
 	$(BR_INIT_ENV) $(MAKE) O=$(BUILD_DIR)/initramfs -C $(ROOT_DIR)/buildroot fischertechnik_TXT_initramfs_defconfig
 
 $(ROOT_DIR)/buildroot/Makefile:
@@ -48,18 +44,21 @@ $(IMAGE_DIR)/uImage: rootfs
 $(IMAGE_DIR)/am335x-kno_txt.dtb: rootfs
 
 .PHONY: rootfs
-rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio prepare-structure
+rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
 	$(MAKE) -C $(BUILD_DIR)/rootfs
+	mkdir -p $(IMAGE_DIR)
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
 	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
 
-$(INITRAMFS_DIR)/initramfs.cpio: initramfs
+$(INITRAMFS_DIR)/initramfs.cpio:
+	$(MAKE) initramfs
+	mkdir -p $(INITRAMFS_DIR)
+	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
 .PHONY: initramfs
-initramfs: $(BUILD_DIR)/initramfs/.config prepare-structure
+initramfs: $(BUILD_DIR)/initramfs/.config
 	$(MAKE) -C $(BUILD_DIR)/initramfs
-	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
 release: $(IMAGE_DIR)/am335x-kno_txt.dtb $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage
 	$(eval version := $(shell cat $(BUILD_DIR)/rootfs/target/etc/fw-ver.txt))
