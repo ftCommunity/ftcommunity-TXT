@@ -1,6 +1,7 @@
 #!/bin/sh
 export PATH=/bin/:/usr/bin:/sbin:/usr/sbin
 BASE_URL="https://github.com/ftCommunity/ftcommunity-TXT/releases/download"
+TAG_RELEASE_API_URL="https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases/tags"
 TARGET_VERSION="$1"
 CURRENT_VERSION="$(cat /etc/fw-ver.txt)"
 ARCHIVE="ftcommunity-txt-${TARGET_VERSION}.zip"
@@ -47,12 +48,22 @@ if [ $? != 0 ] ; then
 fi
 
 echo "validating update..."
+echo "wget -qO- "${TAG_RELEASE_API_URL}/v${TARGET_VERSION}" | get_size_json.py"
+SIZE=$(wget -qO- "${TAG_RELEASE_API_URL}/v${TARGET_VERSION}" | get_size_json.py)
+echo $SIZE
+sleep 3
 # TODO: real check of update files against a known developer signature
-if ! [ -f "${TEMPDIR}/${ARCHIVE}" ] ; then
+# Currently we just check the file size
+if ! [ -f "${TEMPDIR}/${ARCHIVE}" ]; then
   echo "validate update failed" >&2
   exit 20
 fi
 
+if ! [ $(wc -c < "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
+  echo "validate update failed!" >&2
+  exit 21
+fi
+echo "ok"
 echo "backing up current system..."
 if ! mkdir -p "${BACKUPDIR}" || \
    ! mv "${BOOTDIR}/uImage" "${BOOTDIR}/am335x-kno_txt.dtb" "${BOOTDIR}/rootfs.img" "${BACKUPDIR}" 1>&2; \
