@@ -8,7 +8,7 @@ BR_INIT_ENV := BR2_EXTERNAL=$(ROOT_DIR)
 
 
 .PHONY: all
-all: $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage $(IMAGE_DIR)/am335x-kno_txt.dtb
+all: sdcard_files
 
 .PHONY: clean
 clean:
@@ -39,8 +39,8 @@ $(BUILD_DIR)/initramfs/.config: $(ROOT_DIR)/buildroot/Makefile
 $(ROOT_DIR)/buildroot/Makefile:
 	git submodule update --init buildroot
 
-$(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage $(IMAGE_DIR)/am335x-kno_txt.dtb:
-	$(MAKE) rootfs
+.PHONY: sdcard_files
+sdcard_files: rootfs
 	mkdir -p $(IMAGE_DIR)
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
