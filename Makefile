@@ -39,17 +39,16 @@ $(BUILD_DIR)/initramfs/.config: $(ROOT_DIR)/buildroot/Makefile
 $(ROOT_DIR)/buildroot/Makefile:
 	git submodule update --init buildroot
 
-$(IMAGE_DIR)/rootfs.img: rootfs
-$(IMAGE_DIR)/uImage: rootfs
-$(IMAGE_DIR)/am335x-kno_txt.dtb: rootfs
-
-.PHONY: rootfs
-rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
-	$(MAKE) -C $(BUILD_DIR)/rootfs
+$(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage $(IMAGE_DIR)/am335x-kno_txt.dtb:
+	$(MAKE) rootfs
 	mkdir -p $(IMAGE_DIR)
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
 	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
+
+.PHONY: rootfs
+rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
+	$(MAKE) -C $(BUILD_DIR)/rootfs
 
 $(INITRAMFS_DIR)/initramfs.cpio:
 	$(MAKE) initramfs
