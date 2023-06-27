@@ -47,11 +47,11 @@ sdcard_files: rootfs
 	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
 
 .PHONY: rootfs
-rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
+rootfs: $(INITRAMFS_DIR)/initramfs.cpio
+	$(MAKE) $(BUILD_DIR)/rootfs/.config 
 	$(MAKE) -C $(BUILD_DIR)/rootfs
 
-$(INITRAMFS_DIR)/initramfs.cpio:
-	$(MAKE) initramfs
+$(INITRAMFS_DIR)/initramfs.cpio: initramfs
 	mkdir -p $(INITRAMFS_DIR)
 	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
