@@ -1,31 +1,6 @@
 #!/bin/busybox sh
 mount -t vfat /dev/mmcblk1p1 /media/sdcard/boot -o dmask=077,fmask=177,sync
 
-# Copy the necessary tools from rootfs.img
-mount -t auto /media/sdcard/boot/rootfs.img /newroot -o loop,ro
-cp /newroot/usr/lib/libfuse.so.2 \
-   /newroot/lib/libudev.so.1 \
-   /newroot/lib/librt.so.1 \
-   /newroot/lib/libpthread.so.0 \
-   /newroot/usr/lib/libext2fs.so.2 \
-   /newroot/usr/lib/libcom_err.so.2 \
-   /newroot/lib/libblkid.so.1 \
-   /newroot/lib/libuuid.so.1 \
-   /newroot/usr/lib/libe2p.so.2 \
-   /newroot/usr/lib/libpng16.so.16 \
-   /newroot/usr/lib/libjpeg.so.8 \
-   /newroot/usr/lib/libgif.so.7 \
-   /newroot/usr/lib/libz.so.1 \
-   /newroot/lib/libm.so.6 \
-   /lib
-cp /newroot/sbin/mkfs.fat \
-   /newroot/sbin/mke2fs \
-   /newroot/usr/bin/psplash \
-   /newroot/usr/bin/psplash-write \
-   /newroot/usr/bin/fbv \
-   /bin
-umount /newroot
-
 # Hide cursor and show splash screen
 echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
 psplash -n --filename /ftc-firstboot.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
