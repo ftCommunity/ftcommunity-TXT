@@ -62,7 +62,7 @@ $(BUILD_DIR)/.imaged_copied copy-images: $(BUILD_DIR)/.rootfs_built
 	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
 	touch $(BUILD_DIR)/.imaged_copied
 
-release: $(IMAGE_DIR)/am335x-kno_txt.dtb $(IMAGE_DIR)/rootfs.img $(IMAGE_DIR)/uImage
+release: $(BUILD_DIR)/.imaged_copied
 	$(eval version := $(shell cat $(BUILD_DIR)/rootfs/target/etc/fw-ver.txt))
 	$(eval zipfile := $(IMAGE_DIR)/ftcommunity-txt-$(version).zip)
 	rm -f $(zipfile)
