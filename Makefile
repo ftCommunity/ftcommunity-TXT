@@ -38,24 +38,20 @@ $(ROOT_DIR)/buildroot/Makefile:
 	git submodule update --init buildroot
 
 .PHONY: rootfs
-$(BUILD_DIR)/.rootfs_built rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
+rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
 	$(MAKE) -C $(BUILD_DIR)/rootfs
-	mkdir -p $(BUILD_DIR)
-	touch $(BUILD_DIR)/.rootfs_built
 
 .PHONY: initramfs
-$(BUILD_DIR)/.initramfs_built initramfs: $(BUILD_DIR)/initramfs/.config
-	mkdir -p $(BUILD_DIR)
+initramfs: $(BUILD_DIR)/initramfs/.config
 	$(MAKE) -C $(BUILD_DIR)/initramfs
-	touch $(BUILD_DIR)/.initramfs_built
 
 .PHONY: copy-initramfs
-$(INITRAMFS_DIR)/initramfs.cpio copy-iniramfs: $(BUILD_DIR)/.initramfs_built
+$(INITRAMFS_DIR)/initramfs.cpio copy-iniramfs: initramfs
 	mkdir -p $(INITRAMFS_DIR)
 	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
 .PHONY: copy-images
-$(BUILD_DIR)/.imaged_copied copy-images: $(BUILD_DIR)/.rootfs_built
+$(BUILD_DIR)/.imaged_copied copy-images: rootfs
 	mkdir -p $(IMAGE_DIR) $(BUILD_DIR)
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
