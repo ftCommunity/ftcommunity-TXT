@@ -26,11 +26,11 @@ rootfs-source: $(BUILD_DIR)/rootfs/.config
 initramfs-source: $(BUILD_DIR)/initramfs/.config
 	$(MAKE) -C $(BUILD_DIR)/initramfs source
 
-$(BUILD_DIR)/rootfs/.config: $(ROOT_DIR)/buildroot/Makefile
+$(BUILD_DIR)/rootfs/.config: $(ROOT_DIR)/buildroot/Makefile configs/fischertechnik_TXT_rootfs_defconfig
 	mkdir -p $(BUILD_DIR)/rootfs
 	$(BR_INIT_ENV) $(MAKE) O=$(BUILD_DIR)/rootfs -C $(ROOT_DIR)/buildroot fischertechnik_TXT_rootfs_defconfig
 
-$(BUILD_DIR)/initramfs/.config: $(ROOT_DIR)/buildroot/Makefile
+$(BUILD_DIR)/initramfs/.config: $(ROOT_DIR)/buildroot/Makefile configs/fischertechnik_TXT_initramfs_defconfig
 	mkdir -p $(BUILD_DIR)/initramfs
 	$(BR_INIT_ENV) $(MAKE) O=$(BUILD_DIR)/initramfs -C $(ROOT_DIR)/buildroot fischertechnik_TXT_initramfs_defconfig
 
