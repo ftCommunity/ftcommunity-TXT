@@ -59,7 +59,7 @@ if ! [ -f "${TEMPDIR}/${ARCHIVE}" ]; then
   exit 20
 fi
 
-if ! [ $(wc -c < "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
+if ! [ $(stat -c %s "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
   echo "validate update failed!" >&2
   exit 21
 fi
