@@ -74,7 +74,7 @@ chmod go-rwx /media/sdcard/data/overlay/ || fail
 mkdir -p /media/sdcard/data/home/ftc/apps || fail
 chown -R 1001:1001 /media/sdcard/data/home/ftc || fail
 mkdir -p /media/sdcard/data/home/ROBOPro/ROBOProFiles || fail
-chown -R 1000:1000 /media/sdcard/data/home/ROBOPro || fail
+chown -R 1004:1008 /media/sdcard/data/home/ROBOPro || fail
 umount /media/sdcard/data || fail
 
 progress 100 "finished"

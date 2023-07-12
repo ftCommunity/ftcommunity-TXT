@@ -1,3 +1,3 @@
 - -1 i2c 84 - - - -
-ROBOPro 1000 ROBOPro 1000 !=ROBOPro /opt/fischertechnik /bin/sh users,tty,video,audio,i2c
+ROBOPro 1004 ROBOPro 1008 !=ROBOPro /opt/fischertechnik /bin/sh users,tty,video,audio,i2c
 ftc 1001 ftc 1001 - /home/ftc /bin/sh users,tty,video,audio,i2c,sudo,gpio,dialout

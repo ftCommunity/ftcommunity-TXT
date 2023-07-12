@@ -6,5 +6,6 @@ while [ -f /run/txtcontrol-service -o -f /run/txtcontrol-app ] ; do
     else
         DISPLAY="SDL_VIDEODRIVER=dummy"
     fi
+    chown -R ROBOPro:ROBOPro /home/ROBOPro
     chroot /rom/ su - ROBOPro -c "$DISPLAY ./TxtControlMain /dev/ttyO2 65000"
 done
