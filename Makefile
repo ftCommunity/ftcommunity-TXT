@@ -53,7 +53,7 @@ $(INITRAMFS_DIR)/initramfs.cpio copy-iniramfs: initramfs
 	mkdir -p $(INITRAMFS_DIR)
 	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
-release: $(BUILD_DIR)/.imaged_copied
+release: rootfs initramfs
 	$(eval version := $(shell cat $(BUILD_DIR)/rootfs/target/etc/fw-ver.txt))
 	$(eval zipfile := $(IMAGE_DIR)/ftcommunity-txt-$(version).zip)
 	rm -f $(zipfile)
