@@ -12,4 +12,4 @@ overlay			/etc			overlay	lowerdir=/media/sdcard/root/etc,upperdir=/media/sdcard/
 /dev/shm		/rom/dev/shm	bind	bind		0	0
 /tmp			/rom/tmp		bind	bind		0	0
 /sys			/rom/sys		bind	bind		0	0
-/home/ROBOPro/ROBOProFiles	/rom/opt/knobloch/ROBOProFiles	bind	bind		0	0
+/home/ROBOPro/ROBOProFiles	/rom/opt/knobloch/ROBOPro	bind	bind		0	0
