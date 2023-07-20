@@ -11,4 +11,5 @@ source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-robolt/Config.in"
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-semantic-version1/Config.in"
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-smbus2/Config.in"
 source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-zbarlight/Config.in"
+source "$BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/package/python-sip-qt5/Config.in"
 
