@@ -16,19 +16,14 @@ rm -f "$TARGET/etc/init.d/S40xorg"
 find "$TARGET/usr/lib/firmware/ti-connectivity" -iname "TIInit*.bts" ! -name "TIInit_11.8.32.bts" -type f -exec rm -f {} +
 find "$TARGET/usr/lib/firmware/ti-connectivity" -iname "wl*.bin" ! -name "wl18xx-fw-4.bin" ! -name "wl18xx-conf.bin" -exec rm -f {} +
 
-# Try to generate a detailed firmware version number from git.
-# Fall back to the generic version number from the board config
-# if we are not building from a git repository, and abort the build
-# if we are building from git but the tag part of the version
-# number from git does not match the base version in 
-# board/fischertechnik/TXT/rootfs/etc/fw-ver.txt
+# Check if firmware version from the board version and tag match
 GIT_VERSION=$(git -C $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH describe --tags --match='v*' 2>/dev/null)
 if [ -n "$GIT_VERSION" ] ; then
   BASE_VERSION=$(cat $BR2_EXTERNAL_FTCOMMUNITY_TXT_PATH/board/fischertechnik/TXT/rootfs/etc/fw-ver.txt)
   if [[ "${GIT_VERSION}" == "v${BASE_VERSION}"* ]] ; then
-    echo "${GIT_VERSION#v}" > $TARGET/etc/fw-ver.txt
+    echo "v${BASE_VERSION} is a regular release"
   elif [ "${BASE_VERSION#*-}" = "rc" ]; then
-    echo "${BASE_VERSION}+${GIT_VERSION}" > $TARGET/etc/fw-ver.txt
+    echo "v${BASE_VERSION} is an rc release"
   else
     echo "Version number $GIT_VERSION from 'git describe' does not match the base version $BASE_VERSION"
     echo "Please fix the base version in board/fischertechnik/TXT/rootfs/etc/fw-ver.txt"

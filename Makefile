@@ -40,6 +40,7 @@ $(ROOT_DIR)/buildroot/Makefile:
 .PHONY: rootfs
 rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
 	$(MAKE) -C $(BUILD_DIR)/rootfs
+	mkdir -p $(IMAGE_DIR)
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
 	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
 	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
@@ -53,7 +54,7 @@ $(INITRAMFS_DIR)/initramfs.cpio copy-iniramfs: initramfs
 	mkdir -p $(INITRAMFS_DIR)
 	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
-release: $(BUILD_DIR)/.imaged_copied
+release: rootfs initramfs
 	$(eval version := $(shell cat $(BUILD_DIR)/rootfs/target/etc/fw-ver.txt))
 	$(eval zipfile := $(IMAGE_DIR)/ftcommunity-txt-$(version).zip)
 	rm -f $(zipfile)
