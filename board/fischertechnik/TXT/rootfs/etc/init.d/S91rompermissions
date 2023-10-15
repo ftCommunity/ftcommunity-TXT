@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# this fixes permissions of rom files
+
+start() {
+	src=/rom/opt/knobloch/SoundFiles
+	dst=/home/ROBOPro/SoundFiles
+	if [ ! -e $dst ]; then
+		cp -a $src $dst
+		chmod 755 $dst
+	fi
+	mount --bind $dst $src
+}
+
+stop() {
+    echo ""
+}
+
+case "$1" in
+        start)
+                start
+                ;;
+        stop)
+                stop
+                ;;
+        restart)
+                stop
+                start
+                ;;
+        *)
+                echo "Usage: $0 {start}"
+                exit 1
+esac
