@@ -10,6 +10,10 @@ all: rootfs
 
 .PHONY: clean
 clean:
+	rm -rf $(BUILD_DIR)
+
+.PHONY: cleanall
+cleanall:
 	rm -rf $(OUTPUT_DIR)
 
 .PHONY: config
