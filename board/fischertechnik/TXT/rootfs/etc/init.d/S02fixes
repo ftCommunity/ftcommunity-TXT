@@ -2,11 +2,18 @@
 
 check_104() {
     # uid mapping changed for user ROBOPro
-    if [ `id -u ROBOPro` != 1004 ]; then
-	rm -f /media/sdcard/data/overlay/etc/password*
-    fi
     if [ `id -g ROBOPro` != 1008 ]; then
-	rm -f /media/sdcard/data/overlay/etc/group*
+	delgroup ROBOPro
+	addgroup -g 1008 ROBOPro
+    fi
+    if [ `id -u ROBOPro` != 1004 ]; then
+	deluser ROBOPro
+	adduser -h /opt/fischertechnik -s /bin/sh -G ROBOPro -D -H -u 1004 ROBOPro
+	adduser ROBOPro users
+	adduser ROBOPro tty
+	adduser ROBOPro video
+	adduser ROBOPro audio
+	adduser ROBOPro i2c
     fi
 }
 
