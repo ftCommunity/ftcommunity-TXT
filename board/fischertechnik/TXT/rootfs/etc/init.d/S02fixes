@@ -1,0 +1,28 @@
+#!/bin/sh
+
+check_104() {
+    # uid mapping changed for user ROBOPro
+    if [ `id -u ROBOPro` != 1004 ]; then
+	rm -f /media/sdcard/data/overlay/etc/password*
+    fi
+    if [ `id -g ROBOPro` != 1008 ]; then
+	rm -f /media/sdcard/data/overlay/etc/group*
+    fi
+}
+
+check_105() {
+    # ntp user was newly introduced in buildroot 2023.02.3
+    if !id -u ntp; then
+	adduser -s /bin/false -S -D -H -u 101 -G ntp ntp
+    fi
+}
+    
+case "$1" in
+    start)
+	check_104
+	check_105
+	;;
+esac
+
+
+	    
