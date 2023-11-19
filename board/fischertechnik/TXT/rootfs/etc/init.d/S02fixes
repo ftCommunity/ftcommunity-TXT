@@ -2,12 +2,10 @@
 
 check_104() {
     # uid mapping changed for user ROBOPro
-    if [ `id -g ROBOPro` != 1008 ]; then
+    if [ `id -g ROBOPro` != 1008  || `id -u ROBOPro` != 1004 ]; then
+	deluser ROBOPro
 	delgroup ROBOPro
 	addgroup -g 1008 ROBOPro
-    fi
-    if [ `id -u ROBOPro` != 1004 ]; then
-	deluser ROBOPro
 	adduser -h /opt/fischertechnik -s /bin/sh -G ROBOPro -D -H -u 1004 ROBOPro
 	adduser ROBOPro users
 	adduser ROBOPro tty
