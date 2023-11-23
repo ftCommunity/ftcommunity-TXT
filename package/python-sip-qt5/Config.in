@@ -1,9 +1,0 @@
-config BR2_PACKAGE_PYTHON_SIP_QT5
-	bool "python-sip-qt5"
-	depends on BR2_PACKAGE_PYTHON_PYQT5
-	depends on BR2_PACKAGE_PYTHON_SIP
-	help
-	  SIP is a tool that makes it very easy to create Python bindings
-          for C and C++ libraries. It was originally developed to create PyQt,
-	  the Python bindings for the Qt toolkit, but can be used to
-	  create bindings for any C or C++ library.
