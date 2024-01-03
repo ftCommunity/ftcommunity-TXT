@@ -1,0 +1,4 @@
+config BR2_PACKAGE_PYTHON_LIDAR
+	bool "python-lidar"
+	help
+	  VL53L0X Python interface
