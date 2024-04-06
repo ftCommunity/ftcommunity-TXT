@@ -79,9 +79,9 @@ class VersionsDialog(TxtDialog):
             if(i < 2): py_ver_str += "."
         vbox.addWidget(VersionWidget("Python", py_ver_str))
 
+        # --------- ftrobopy version ----------
         try:
             import ftrobopy
-            # --------- ftrobopy version ----------
             vbox.addWidget(VersionWidget("ftrobopy", ftrobopy.version()))
         except:
             pass
@@ -91,6 +91,15 @@ class VersionsDialog(TxtDialog):
 
         vbox.addWidget(VersionWidget("PyQt", PYQT_VERSION_STR))
 
+        # -------- opencv -------
+        try:
+            import cv2
+            # --------- ftrobopy version ----------
+            vbox.addWidget(VersionWidget("opencv", cv2.__version__))
+        except:
+            pass
+
+        
         vbox_w.setLayout(vbox)
 
         # put everything inside a scroll area
