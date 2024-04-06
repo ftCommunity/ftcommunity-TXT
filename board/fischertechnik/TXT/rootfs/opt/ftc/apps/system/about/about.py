@@ -141,7 +141,7 @@ class AboutPlugin(LauncherPlugin):
 
         self.vbox.addStretch()
 
-        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2022 the ft:community"))
+        self.c = QLabel(QCoreApplication.translate("FtcGuiApplication","(c) 2016-2024 the ft:community"))
         self.c.setObjectName("tinylabel")
         self.c.setWordWrap(True)
         self.c.setAlignment(Qt.AlignCenter)
