@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+from applist import print_apptable
+
+print("""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -19,9 +25,11 @@
     <center><div>
 	<hr/>
 
-	<h2>Installed apps</h2>
-	<!--#exec cmd="python3 /var/www/applist.py" -->
+	<h2>Installed apps</h2>""")
 
+print_apptable()
+
+print("""
 	<hr/>
 	<h2>App upload</h2>
 	<form action="upload.py" method="post" enctype="multipart/form-data">
@@ -33,4 +41,4 @@
     </div></center>
     
   </body>
-</html>
+</html>""")
