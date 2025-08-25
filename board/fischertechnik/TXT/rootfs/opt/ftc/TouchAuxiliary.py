@@ -269,7 +269,7 @@ class TouchAuxCamWidget(QWidget):
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update)
-        self.timer.start(1000/fps)
+        self.timer.start(1000//fps)
 
         qsp = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         qsp.setHeightForWidth(True)
@@ -285,7 +285,7 @@ class TouchAuxCamWidget(QWidget):
             return QSize(320,240)
 
     def heightForWidth(self,w):
-        return w*3/4
+        return (w*3)//4
     
     def closeCam(self):
         self.cap.release()    
@@ -296,7 +296,7 @@ class TouchAuxCamWidget(QWidget):
         # expand/shrink to widget size
         if self.zoom:
             wsize = (self.size().width()*2, self.size().height()*2)
-            rect=QRect(self.size().width()/2,self.size().height()/2,self.size().width(), self.size().height())
+            rect=QRect(self.size().width()//2,self.size().height()//2,self.size().width(), self.size().height())
         else:
             wsize = (self.size().width(), self.size().height())
             rect=QRect(0,0,self.size().width(), self.size().height())
