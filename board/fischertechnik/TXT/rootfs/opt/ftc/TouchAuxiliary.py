@@ -252,7 +252,7 @@ class TouchAuxCamWidget(QWidget):
         self.cwidth=cwidth
         
         self.pwidth=cwidth
-        self.pheight=cwidth*3/4
+        self.pheight=(cwidth*3)//4
         
         CAM_DEV = os.environ.get('FTC_CAM')
         if CAM_DEV == None:
@@ -264,7 +264,7 @@ class TouchAuxCamWidget(QWidget):
         self.cap = cv2.VideoCapture(CAM_DEV)
         if self.cap.isOpened():
             self.cap.set(3,cwidth)
-            self.cap.set(4,cwidth*3/4)
+            self.cap.set(4,(cwidth*3)//4)
             self.cap.set(5,fps)
         
         self.timer = QTimer(self)
@@ -280,7 +280,7 @@ class TouchAuxCamWidget(QWidget):
 
     def sizeHint(self):
         try:
-            return QSize(self.cwidth,self.cwidth*3/4)
+            return QSize(self.cwidth,(self.cwidth*3)//4)
         except:
             return QSize(320,240)
 
