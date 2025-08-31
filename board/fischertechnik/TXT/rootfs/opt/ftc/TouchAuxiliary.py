@@ -252,7 +252,7 @@ class TouchAuxCamWidget(QWidget):
         self.cwidth=cwidth
         
         self.pwidth=cwidth
-        self.pheight=cwidth*3/4
+        self.pheight=(cwidth*3)//4
         
         CAM_DEV = os.environ.get('FTC_CAM')
         if CAM_DEV == None:
@@ -264,14 +264,14 @@ class TouchAuxCamWidget(QWidget):
         self.cap = cv2.VideoCapture(CAM_DEV)
         if self.cap.isOpened():
             self.cap.set(3,cwidth)
-            self.cap.set(4,cwidth*3/4)
+            self.cap.set(4,(cwidth*3)//4)
             self.cap.set(5,fps)
             # fix from https://raspberrypi.stackexchange.com/questions/105358/raspberry-pi4-error-while-using-2-usb-cameras-vidioc-qbuf-invalid-argument
             self.cap.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update)
-        self.timer.start(1000/fps)
+        self.timer.start(1000//fps)
 
         qsp = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         qsp.setHeightForWidth(True)
@@ -282,12 +282,12 @@ class TouchAuxCamWidget(QWidget):
 
     def sizeHint(self):
         try:
-            return QSize(self.cwidth,self.cwidth*3/4)
+            return QSize(self.cwidth,(self.cwidth*3)//4)
         except:
             return QSize(320,240)
 
     def heightForWidth(self,w):
-        return w*3/4
+        return (w*3)//4
     
     def closeCam(self):
         self.cap.release()    
@@ -298,7 +298,7 @@ class TouchAuxCamWidget(QWidget):
         # expand/shrink to widget size
         if self.zoom:
             wsize = (self.size().width()*2, self.size().height()*2)
-            rect=QRect(self.size().width()/2,self.size().height()/2,self.size().width(), self.size().height())
+            rect=QRect(self.size().width()//2,self.size().height()//2,self.size().width(), self.size().height())
         else:
             wsize = (self.size().width(), self.size().height())
             rect=QRect(0,0,self.size().width(), self.size().height())
