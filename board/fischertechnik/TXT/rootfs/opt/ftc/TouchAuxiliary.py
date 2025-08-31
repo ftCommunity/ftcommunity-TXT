@@ -266,6 +266,8 @@ class TouchAuxCamWidget(QWidget):
             self.cap.set(3,cwidth)
             self.cap.set(4,cwidth*3/4)
             self.cap.set(5,fps)
+            # fix from https://raspberrypi.stackexchange.com/questions/105358/raspberry-pi4-error-while-using-2-usb-cameras-vidioc-qbuf-invalid-argument
+            self.cap.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update)
