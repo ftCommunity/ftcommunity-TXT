@@ -723,7 +723,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft_device.c linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft_device.c
 --- linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft_device.c	2016-02-18 21:58:59.000000000 +0100
 +++ linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft_device.c	2016-02-26 23:47:47.438867804 +0100
-@@ -1091,6 +1091,52 @@
+@@ -1214,6 +1214,52 @@
  			}
  		}
  	}, {
@@ -774,8 +774,8 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft_device.c linux-ti-lin
 +		}
 +	}, {
  		/* This should be the last item.
- 		   Used with the custom argument */
- 		.name = "",
+ 		 * Used with the custom argument
+ 		 */
 diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft.h linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft.h
 --- linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft.h	2016-02-18 21:58:59.000000000 +0100
 +++ linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft.h	2016-02-26 23:47:47.486868042 +0100
