@@ -746,20 +746,23 @@ class AppIcon(QToolButton):
                     scroll_area = parent
                     break
                 parent = parent.parentWidget()
-            scroller = None
-            if scroll_area is not None:
-                scroller = getattr(scroll_area, "scroller", None)
-                if scroller is None:
+            guard = getattr(scroll_area, "_touch_tap_guard", None) if scroll_area is not None else None
+            if guard is None:
+                scroller = getattr(scroll_area, "scroller", None) if scroll_area is not None else None
+                if scroller is None and scroll_area is not None:
                     for target in (scroll_area.viewport(), scroll_area):
                         if QScroller.hasScroller(target):
                             scroller = QScroller.scroller(target)
                             break
-            self._tap_guard = TouchTapGuard(
-                scroll_area,
-                scroller=scroller,
-                max_tap_distance=self.MAX_TAP_DISTANCE,
-                parent=self,
-            )
+                guard = TouchTapGuard(
+                    scroll_area,
+                    scroller=scroller,
+                    max_tap_distance=self.MAX_TAP_DISTANCE,
+                    parent=scroll_area or self,
+                )
+                if scroll_area is not None:
+                    scroll_area._touch_tap_guard = guard
+            self._tap_guard = guard
         return self._tap_guard
 
     def mousePressEvent(self, event):
@@ -779,7 +782,12 @@ class AppIcon(QToolButton):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self._get_tap_guard().should_suppress_release(event.globalPos()):
+            decision = self._get_tap_guard().consume_release(
+                event.globalPos(),
+                widget=self,
+                callback=self.click,
+            )
+            if decision != "allow":
                 self.setDown(False)
                 event.accept()
                 return
@@ -1070,7 +1078,7 @@ class VerticalScrollArea(QScrollArea):
         self.setFrameStyle(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroller = configure_touch_scroller(self.viewport())
+        self.scroller = configure_touch_scroller(self.viewport(), scroll_area=self)
         self.setWidget(content)
 
         
