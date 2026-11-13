@@ -64,8 +64,8 @@
     </message>
     <message>
         <location filename="about.py" line="141"/>
-        <source>(c) 2016-2024 the ft:community</source>
-        <translation>(c) 2016-2024 die ft:community</translation>
+        <source>(c) 2016-2026 the ft:community</source>
+        <translation>(c) 2016-2026 die ft:community</translation>
     </message>
 </context>
 <context>

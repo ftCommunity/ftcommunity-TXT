@@ -1,0 +1,15 @@
+[app]
+name: Update
+category: System
+author: ft:community
+icon: icon.png
+desc: Check for and install firmware updates
+exec: update.py
+managed: launcher-plugin
+uuid: 4bc07655-db57-43cb-b58b-b1255b53079d
+version: 1.0
+firmware: >=1.2.0
+
+[de]
+name: Update
+desc: Firmware-Updates suchen und installieren

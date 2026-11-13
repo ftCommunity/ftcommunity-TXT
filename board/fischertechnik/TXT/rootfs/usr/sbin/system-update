@@ -1,81 +1,426 @@
-#!/bin/sh
-export PATH=/bin/:/usr/bin:/sbin:/usr/sbin
-BASE_URL="https://github.com/ftCommunity/ftcommunity-TXT/releases/download"
-TAG_RELEASE_API_URL="https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases/tags"
-TARGET_VERSION="$1"
-CURRENT_VERSION="$(cat /etc/fw-ver.txt)"
-ARCHIVE="ftcommunity-txt-${TARGET_VERSION}.zip"
-BOOTDIR="/media/sdcard/boot"
-TEMPDIR="/tmp/update-${TARGET_VERSION}"
-BACKUPDIR="${BOOTDIR}/system-old"
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+"""Download, verify, back up, and install ftcommunity-TXT firmware updates."""
 
-if [ "$(whoami)" != "root" ]; then
-  echo "$0 must be run as root" >&2;
-  exit 1
-fi
+import argparse
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import zipfile
+import zlib
 
-if [ -z "${TARGET_VERSION}" ]; then
-  echo "usage: $0 <version>" >&2;
-  echo "example: $0 1.0" >&2;
-  exit 2
-fi
+BASE_URL = "https://github.com/ftCommunity/ftcommunity-TXT/releases/download"
+TAG_RELEASE_API_URL = "https://api.github.com/repos/ftCommunity/ftcommunity-TXT/releases/tags"
+VERSION_FILE = "/etc/fw-ver.txt"
+BOOTDIR = "/media/sdcard/boot"
+DATADIR = "/media/sdcard/data"
+BACKUPDIR = os.path.join(BOOTDIR, "system-old")
+REQUIRED_FILES = ("uImage", "am335x-kno_txt.dtb", "rootfs.img")
+USER_AGENT = "ftcommunity-TXT-updater/1.2"
+CHUNK_SIZE = 65536
 
-if [ "${CURRENT_VERSION}" = "${TARGET_VERSION}" ]; then
-  echo "Already running ${CURRENT_VERSION}"
-  exit 3
-fi
 
-if ! [ -f "${BOOTDIR}/uImage" -a "${BOOTDIR}/am335x-kno_txt.dtb" -a -f "${BOOTDIR}/rootfs.img" ]; then
-  if [ -f "${BOOTDIR}/uImage" -a "${BOOTDIR}/am335x-kno_txt.dtb" ] ; then
-    echo "cannot update a system with advanced layout, please update manually" >&2;
-    exit 4
-  else
-    echo "system files not found, aborting" >&2;
-    exit 5
-  fi
-fi
+class UpdateError(Exception):
+    """Error carrying an exit status code matching CLI conventions."""
 
-if ! mkdir -p "${TEMPDIR}" && chmod u=rwx,go=rx "${TEMPDIR}"; then
-  echo "prepare update failed" >&2
-  exit 4
-fi
+    def __init__(self, message, exit_code=1):
+        super().__init__(message)
+        self.exit_code = exit_code
 
-echo "fetching archive from github..."
-MESSAGE=$(wget -nv "${BASE_URL}/v${TARGET_VERSION}/${ARCHIVE}" -O "${TEMPDIR}/${ARCHIVE}" 2>&1)
-if [ $? != 0 ] ; then
-  echo "download failed\n$MESSAGE" >&2
-  exit 10
-fi
 
-echo "validating update..."
-echo "wget -qO- "${TAG_RELEASE_API_URL}/v${TARGET_VERSION}" | get_size_json.py"
-SIZE=$(wget -qO- "${TAG_RELEASE_API_URL}/v${TARGET_VERSION}" | get_size_json.py)
-echo $SIZE
-sleep 3
-# TODO: real check of update files against a known developer signature
-# Currently we just check the file size
-if ! [ -f "${TEMPDIR}/${ARCHIVE}" ]; then
-  echo "validate update failed" >&2
-  exit 20
-fi
+def emit(progress_mode, tag, value):
+    """Emit structured progress or plain text messages with immediate flush."""
+    if progress_mode:
+        print(f"{tag}:{value}", flush=True)
+    elif tag in ("STEP", "DETAIL"):
+        print(value, flush=True)
 
-if ! [ $(stat -c %s "${TEMPDIR}/${ARCHIVE}") = $SIZE ]; then
-  echo "validate update failed!" >&2
-  exit 21
-fi
-echo "ok"
-echo "backing up current system..."
-if ! mkdir -p "${BACKUPDIR}" || \
-   ! mv "${BOOTDIR}/uImage" "${BOOTDIR}/am335x-kno_txt.dtb" "${BOOTDIR}/rootfs.img" "${BACKUPDIR}" 1>&2; \
-then
-  echo "back up current system failed" >&2
-  exit 30
-fi
 
-echo "installing update..."
-cd "${BOOTDIR}"
-if ! unzip -qq "${TEMPDIR}/${ARCHIVE}" ; then
-  echo "install update failed" >&2
-  mv "${BACKUPDIR}/uImage" "${BACKUPDIR}/am335x-kno_txt.dtb" "${BACKUPDIR}/rootfs.img" "${BASE_DIR}"
-  exit 40
-fi
+def sanitize_version(ver):
+    """Normalize a version/tag string for safe filesystem temp naming."""
+    return re.sub(r"[^A-Za-z0-9._+-]", "_", ver or "custom")
+
+
+def read_current_version():
+    """Return currently installed firmware version string."""
+    try:
+        with open(VERSION_FILE, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return ""
+
+
+def fetch_github_zip_size(target_version):
+    """Query GitHub tag release API for zip asset size, returning int or 0."""
+    tag = target_version if target_version.startswith("v") else f"v{target_version}"
+    url = f"{TAG_RELEASE_API_URL}/{tag}"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/vnd.github+json"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        for asset in data.get("assets", []):
+            name = asset.get("name", "")
+            ctype = asset.get("content_type", "")
+            if name.lower().endswith(".zip") or ctype in ("application/zip", "application/x-zip-compressed"):
+                return int(asset.get("size") or 0)
+    except Exception:
+        return 0
+    return 0
+
+
+def dir_size(path):
+    """Return total size in bytes of regular files inside path."""
+    if not os.path.isdir(path):
+        return 0
+    total = 0
+    for entry in os.scandir(path):
+        if entry.is_file():
+            total += entry.stat().st_size
+    return total
+
+
+def pick_staging_base():
+    """Choose staging directory on SD card data partition (avoiding small tmpfs /tmp)."""
+    if os.path.isdir(DATADIR) and os.path.ismount(DATADIR):
+        base = os.path.join(DATADIR, ".system-update")
+    else:
+        base = "/tmp/.system-update"
+    os.makedirs(base, mode=0o755, exist_ok=True)
+    # Clean leftovers from aborted prior runs so failed updates never leak space.
+    for entry in os.scandir(base):
+        if entry.is_dir() and entry.name.startswith("update-"):
+            shutil.rmtree(entry.path, ignore_errors=True)
+    return base
+
+
+def download_archive(url, dest_path, expected_size, progress_mode):
+    """Stream archive download to disk in small chunks and emit progress."""
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        raise UpdateError(f"Unsupported update URL: {url}", 10)
+
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        resp = urllib.request.urlopen(req, timeout=30)
+    except (urllib.error.URLError, urllib.error.HTTPError, OSError) as exc:
+        raise UpdateError(f"Download failed: {exc}", 10)
+
+    total = expected_size if expected_size > 0 else int(resp.headers.get("Content-Length") or 0)
+    downloaded = 0
+    last_pct = -1
+    last_ts = 0.0
+
+    with resp, open(dest_path, "wb") as out_f:
+        while True:
+            chunk = resp.read(CHUNK_SIZE)
+            if not chunk:
+                break
+            out_f.write(chunk)
+            downloaded += len(chunk)
+            now = time.monotonic()
+            if total > 0:
+                pct = min(100, int(downloaded * 100 / total))
+                if pct != last_pct and (pct == 100 or now - last_ts >= 0.25):
+                    last_pct = pct
+                    last_ts = now
+                    emit(progress_mode, "PROGRESS", pct)
+                    emit(
+                        progress_mode,
+                        "DETAIL",
+                        f"{downloaded / (1024 * 1024):.1f} / {total / (1024 * 1024):.1f} MB",
+                    )
+            elif now - last_ts >= 0.4:
+                last_ts = now
+                emit(progress_mode, "DETAIL", f"{downloaded / (1024 * 1024):.1f} MB")
+        out_f.flush()
+        os.fsync(out_f.fileno())
+
+    if expected_size > 0 and downloaded != expected_size:
+        raise UpdateError(
+            f"Size mismatch: downloaded {downloaded} bytes, expected {expected_size} bytes",
+            21,
+        )
+    if expected_size == 0 and total > 0 and downloaded != total:
+        raise UpdateError(
+            f"Incomplete download: {downloaded} bytes of {total} bytes",
+            10,
+        )
+    return downloaded
+
+
+def verify_and_extract(archive_path, extract_dir, progress_mode):
+    """Verify ZIP integrity and extract exact boot files into staging directory."""
+    if not zipfile.is_zipfile(archive_path):
+        raise UpdateError("Downloaded file is not a valid ZIP archive", 20)
+
+    os.makedirs(extract_dir, exist_ok=True)
+    found = {}
+    try:
+        with zipfile.ZipFile(archive_path, "r") as zf:
+            for info in zf.infolist():
+                if info.is_dir():
+                    continue
+                name = os.path.basename(info.filename)
+                if name in REQUIRED_FILES:
+                    # Prefer root-level match if multiple entries exist.
+                    if name not in found or info.filename == name:
+                        found[name] = info
+
+            missing = [f for f in REQUIRED_FILES if f not in found]
+            if missing:
+                raise UpdateError(f"ZIP archive misses required files: {', '.join(missing)}", 22)
+
+            total_uncompressed = sum(found[f].file_size for f in REQUIRED_FILES)
+            if total_uncompressed <= 0:
+                raise UpdateError("Firmware files inside archive are empty", 22)
+
+            copied = 0
+            last_pct = -1
+            for name in REQUIRED_FILES:
+                info = found[name]
+                if info.file_size <= 0:
+                    raise UpdateError(f"Firmware file {name} inside archive is empty", 22)
+                out_path = os.path.join(extract_dir, name)
+                with zf.open(info, "r") as src, open(out_path, "wb") as dst:
+                    while True:
+                        buf = src.read(CHUNK_SIZE)
+                        if not buf:
+                            break
+                        dst.write(buf)
+                        copied += len(buf)
+                        pct = min(100, int(copied * 100 / total_uncompressed))
+                        if pct != last_pct:
+                            last_pct = pct
+                            emit(progress_mode, "PROGRESS", pct)
+                    dst.flush()
+                    os.fsync(dst.fileno())
+    except UpdateError:
+        raise
+    except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError) as exc:
+        raise UpdateError(f"ZIP verification failed: {exc}", 20)
+
+
+def install_staged_files(extract_dir, progress_mode):
+    """Back up active boot files to system-old and install staged files safely."""
+    needed_bytes = sum(os.path.getsize(os.path.join(extract_dir, f)) for f in REQUIRED_FILES)
+    free_boot = shutil.disk_usage(BOOTDIR).free
+    old_backup_bytes = dir_size(BACKUPDIR)
+    margin = 4 * 1024 * 1024
+
+    if free_boot + old_backup_bytes < needed_bytes + margin:
+        raise UpdateError(
+            f"Not enough free space on {BOOTDIR} "
+            f"(need {(needed_bytes + margin) // (1024 * 1024)} MB)",
+            31,
+        )
+
+    emit(progress_mode, "STEP", "backup")
+    emit(progress_mode, "PROGRESS", 0)
+    if os.path.exists(BACKUPDIR):
+        shutil.rmtree(BACKUPDIR)
+    os.makedirs(BACKUPDIR, exist_ok=True)
+
+    backed_up = []
+    try:
+        for name in REQUIRED_FILES:
+            src = os.path.join(BOOTDIR, name)
+            dst = os.path.join(BACKUPDIR, name)
+            shutil.move(src, dst)
+            backed_up.append(name)
+    except Exception as exc:
+        for name in backed_up:
+            shutil.move(os.path.join(BACKUPDIR, name), os.path.join(BOOTDIR, name))
+        raise UpdateError(f"Backup of current system failed: {exc}", 30)
+
+    emit(progress_mode, "STEP", "install")
+    emit(progress_mode, "PROGRESS", 0)
+    copied = 0
+    last_pct = -1
+    temp_targets = []
+    try:
+        for name in REQUIRED_FILES:
+            src_path = os.path.join(extract_dir, name)
+            tmp_dst = os.path.join(BOOTDIR, f".{name}.new")
+            final_dst = os.path.join(BOOTDIR, name)
+            temp_targets.append(tmp_dst)
+            emit(progress_mode, "DETAIL", name)
+            with open(src_path, "rb") as src_f, open(tmp_dst, "wb") as dst_f:
+                while True:
+                    buf = src_f.read(CHUNK_SIZE)
+                    if not buf:
+                        break
+                    dst_f.write(buf)
+                    copied += len(buf)
+                    pct = min(100, int(copied * 100 / needed_bytes))
+                    if pct != last_pct:
+                        last_pct = pct
+                        emit(progress_mode, "PROGRESS", pct)
+                dst_f.flush()
+                os.fsync(dst_f.fileno())
+            os.replace(tmp_dst, final_dst)
+            temp_targets.remove(tmp_dst)
+    except Exception as exc:
+        for tmp in temp_targets:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+        for name in REQUIRED_FILES:
+            bkp = os.path.join(BACKUPDIR, name)
+            if os.path.exists(bkp):
+                shutil.move(bkp, os.path.join(BOOTDIR, name))
+        raise UpdateError(f"Install update failed, restored backup: {exc}", 40)
+
+    emit(progress_mode, "STEP", "sync")
+    subprocess.run(["sync"], check=False)
+
+
+def restore_backup(progress_mode):
+    """Restore firmware files from /media/sdcard/boot/system-old."""
+    for name in REQUIRED_FILES:
+        if not os.path.isfile(os.path.join(BACKUPDIR, name)):
+            raise UpdateError(f"Backup file missing: {BACKUPDIR}/{name}", 32)
+
+    emit(progress_mode, "STEP", "restore")
+    emit(progress_mode, "PROGRESS", 50)
+    for name in REQUIRED_FILES:
+        src = os.path.join(BACKUPDIR, name)
+        dst = os.path.join(BOOTDIR, name)
+        os.replace(src, dst)
+    shutil.rmtree(BACKUPDIR, ignore_errors=True)
+    subprocess.run(["sync"], check=False)
+    emit(progress_mode, "PROGRESS", 100)
+    emit(progress_mode, "STEP", "done")
+
+
+def verify_boot_layout():
+    """Verify standard SD card boot layout before performing any modifications."""
+    if all(os.path.isfile(os.path.join(BOOTDIR, f)) for f in REQUIRED_FILES):
+        return
+    if os.path.isfile(os.path.join(BOOTDIR, "uImage")) and os.path.isfile(
+        os.path.join(BOOTDIR, "am335x-kno_txt.dtb")
+    ):
+        raise UpdateError("cannot update a system with advanced layout, please update manually", 4)
+    raise UpdateError("system files not found, aborting", 5)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="ftcommunity-TXT firmware updater")
+    parser.add_argument("version", nargs="?", help="Target firmware version (e.g. 1.2.0)")
+    parser.add_argument("--url", help="Direct http(s) URL to firmware ZIP archive")
+    parser.add_argument("--file", help="Local pre-downloaded ZIP archive on /home/ftc or /media/sdcard/data")
+    parser.add_argument("--size", type=int, default=0, help="Expected archive size in bytes")
+    parser.add_argument("--force", action="store_true", help="Allow reinstalling current or older version")
+    parser.add_argument("--restore", action="store_true", help="Restore previous firmware from system-old backup")
+    parser.add_argument("--progress", action="store_true", help="Emit machine-readable progress lines")
+    return parser.parse_args()
+
+
+def validate_local_archive(file_arg, expected_size):
+    """Ensure --file points to an existing regular archive inside allowed user/SD data dirs."""
+    real_path = os.path.realpath(file_arg)
+    allowed_prefixes = tuple(
+        os.path.realpath(p).rstrip("/") + "/"
+        for p in ("/home/ftc", DATADIR)
+    )
+    if not any(real_path.startswith(p) for p in allowed_prefixes):
+        raise UpdateError(f"Archive path outside allowed data directories: {real_path}", 20)
+    if not os.path.isfile(real_path):
+        raise UpdateError(f"Archive file not found: {real_path}", 20)
+    if expected_size > 0 and os.path.getsize(real_path) != expected_size:
+        raise UpdateError("Archive size mismatch", 21)
+    return real_path
+
+
+def main():
+    args = parse_args()
+    if os.geteuid() != 0:
+        print(f"{sys.argv[0]} must be run as root", file=sys.stderr)
+        sys.exit(1)
+
+    if args.restore:
+        try:
+            restore_backup(args.progress)
+        except UpdateError as exc:
+            print(str(exc), file=sys.stderr)
+            sys.exit(exc.exit_code)
+        return
+
+    if not args.version:
+        print("usage: system-update [--url URL] [--size BYTES] [--force] <version>", file=sys.stderr)
+        sys.exit(2)
+
+    target_version = args.version.strip()
+    normalized_target = target_version[1:] if target_version.startswith("v") else target_version
+    current_version = read_current_version()
+
+    if current_version == normalized_target and not args.force:
+        print(f"Already running {current_version}")
+        sys.exit(3)
+
+    def _on_term(signum, _frame):
+        raise UpdateError(f"Update cancelled (signal {signum})", 130)
+
+    signal.signal(signal.SIGTERM, _on_term)
+    signal.signal(signal.SIGINT, _on_term)
+
+    temp_dir = None
+    try:
+        emit(args.progress, "STEP", "prepare")
+        verify_boot_layout()
+
+        staging_base = pick_staging_base()
+        temp_dir = tempfile.mkdtemp(prefix=f"update-{sanitize_version(normalized_target)}-", dir=staging_base)
+        os.chmod(temp_dir, 0o755)
+
+        extract_dir = os.path.join(temp_dir, "extracted")
+        expected_size = args.size
+
+        if args.file:
+            archive_path = validate_local_archive(args.file, expected_size)
+            delete_source_archive = False
+        else:
+            url = args.url
+            if not url:
+                url = f"{BASE_URL}/v{normalized_target}/ftcommunity-txt-{normalized_target}.zip"
+                if expected_size <= 0:
+                    expected_size = fetch_github_zip_size(normalized_target)
+
+            archive_path = os.path.join(temp_dir, "update.zip")
+            delete_source_archive = True
+            emit(args.progress, "STEP", "download")
+            emit(args.progress, "PROGRESS", 0)
+            download_archive(url, archive_path, expected_size, args.progress)
+
+        emit(args.progress, "STEP", "verify")
+        emit(args.progress, "PROGRESS", 0)
+        verify_and_extract(archive_path, extract_dir, args.progress)
+
+        if delete_source_archive and os.path.exists(archive_path):
+            os.remove(archive_path)
+
+        install_staged_files(extract_dir, args.progress)
+        emit(args.progress, "STEP", "done")
+        emit(args.progress, "PROGRESS", 100)
+        if not args.progress:
+            print("Update successfully installed. Reboot the TXT to activate it.")
+    except UpdateError as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(exc.exit_code)
+    except Exception as exc:
+        print(f"Unexpected update error: {exc}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        if temp_dir and os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    main()
