@@ -510,6 +510,134 @@ class _LazyTouchHandler(QObject):
         return False
 
 
+class TouchTapGuard(QObject):
+    """Track pointer displacement and scroll state to reject swipe-triggered taps."""
+
+    def __init__(self, scroll_area=None, scroller=None, max_tap_distance=10, parent=None):
+        super(TouchTapGuard, self).__init__(parent or scroll_area)
+        self._scroll_area = scroll_area
+        self._scroller = scroller
+        self._max_dist = max_tap_distance
+        self._press_pos = None
+        self._press_scroll = None
+        self._suppressed = False
+        self._forwarding = False
+
+    def is_scroller_scrolling(self):
+        return (
+            self._scroller is not None
+            and self._scroller.state() in (QScroller.Dragging, QScroller.Scrolling)
+        )
+
+    def _moved_too_far(self, global_pos):
+        if self._press_pos is None:
+            return False
+        return (global_pos - self._press_pos).manhattanLength() > self._max_dist
+
+    def mark_suppressed(self):
+        self._suppressed = True
+
+    def on_press(self, global_pos):
+        if self.is_scroller_scrolling():
+            self._press_pos = None
+            self._press_scroll = None
+            self._suppressed = True
+            return False
+        self._press_pos = global_pos
+        vbar = self._scroll_area.verticalScrollBar() if self._scroll_area is not None else None
+        self._press_scroll = vbar.value() if vbar is not None else None
+        self._suppressed = False
+        return True
+
+    def on_move(self, global_pos):
+        if self._press_pos is not None and not self._suppressed:
+            if self._moved_too_far(global_pos):
+                self._suppressed = True
+        return not self._suppressed
+
+    def should_suppress_release(self, global_pos):
+        vbar = self._scroll_area.verticalScrollBar() if self._scroll_area is not None else None
+        scrolled = (
+            vbar is not None
+            and self._press_scroll is not None
+            and abs(vbar.value() - self._press_scroll) > 2
+        )
+        suppress = (
+            self._suppressed
+            or self._moved_too_far(global_pos)
+            or scrolled
+            or self.is_scroller_scrolling()
+        )
+        self._press_pos = None
+        self._press_scroll = None
+        self._suppressed = False
+        return suppress
+
+    def eventFilter(self, obj, event):
+        if self._forwarding:
+            return False
+        etype = event.type()
+        if etype == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            if not self.on_press(event.globalPos()):
+                event.accept()
+                return True
+        elif etype == QEvent.MouseMove and (event.buttons() & Qt.LeftButton):
+            self.on_move(event.globalPos())
+        elif etype == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+            if self.should_suppress_release(event.globalPos()):
+                # Release outside viewport so item views reset pressed state without clicking.
+                cancel_pos = QPoint(-1, -1)
+                cancel_ev = QMouseEvent(
+                    QEvent.MouseButtonRelease,
+                    cancel_pos,
+                    obj.mapToGlobal(cancel_pos),
+                    Qt.LeftButton,
+                    Qt.NoButton,
+                    event.modifiers(),
+                )
+                self._forwarding = True
+                try:
+                    QApplication.sendEvent(obj, cancel_ev)
+                finally:
+                    self._forwarding = False
+                event.accept()
+                return True
+        return False
+
+
+def configure_touch_scroller(
+    widget,
+    drag_distance_px=10,
+    suppress_drag_clicks=False,
+    scroll_area=None,
+    max_tap_distance=10,
+):
+    """Enable left-button kinetic scrolling with DPI-scaled thresholds and optional tap guard."""
+    QScroller.grabGesture(widget, QScroller.LeftMouseButtonGesture)
+    scroller = QScroller.scroller(widget)
+    props = scroller.scrollerProperties()
+    screen = QApplication.primaryScreen()
+    dpi = screen.physicalDotsPerInchY() if screen is not None else 0.0
+    if dpi > 0:
+        props.setScrollMetric(
+            QScrollerProperties.DragStartDistance,
+            drag_distance_px * 0.0254 / dpi,
+        )
+    props.setScrollMetric(QScrollerProperties.MaximumClickThroughVelocity, 0.0)
+    scroller.setScrollerProperties(props)
+    if suppress_drag_clicks:
+        area = scroll_area or widget.parentWidget()
+        guard = TouchTapGuard(
+            area,
+            scroller=scroller,
+            max_tap_distance=max_tap_distance,
+            parent=widget,
+        )
+        widget.installEventFilter(guard)
+        widget._touch_tap_guard = guard
+    return scroller
+
+
 class TouchApplication(QApplication):
     def __init__(self, args):
         QApplication.__init__(self, args)

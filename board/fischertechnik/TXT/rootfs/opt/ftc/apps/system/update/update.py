@@ -32,7 +32,6 @@ from TouchStyle import (
     QLocale,
     QProgressBar,
     QPushButton,
-    QScroller,
     QSize,
     Qt,
     QTextEdit,
@@ -47,6 +46,7 @@ from TouchStyle import (
     TouchDialog,
     TouchMessageBox,
     TouchWindow,
+    configure_touch_scroller,
     pyqtSignal,
 )
 
@@ -716,7 +716,7 @@ class ReleaseDialog(FullScreenTouchDialog):
         text.setObjectName("tinylabel")
         text.setReadOnly(True)
         text.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
-        QScroller.grabGesture(text.viewport(), QScroller.LeftMouseButtonGesture)
+        configure_touch_scroller(text.viewport())
 
         cmp_val = release.get("cmp")
         if cmp_val == 1:
@@ -839,7 +839,7 @@ class UpdatePlugin(LauncherPlugin):
 
         self.list_w = QListWidget()
         self.list_w.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        QScroller.grabGesture(self.list_w.viewport(), QScroller.LeftMouseButtonGesture)
+        configure_touch_scroller(self.list_w.viewport(), suppress_drag_clicks=True, scroll_area=self.list_w)
         self.list_w.setViewMode(QListView.ListMode)
         self.list_w.setMovement(QListView.Static)
         self.list_w.setIconSize(QSize(24, 24))

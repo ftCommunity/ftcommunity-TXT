@@ -12,7 +12,8 @@ import platform
 import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, \
-    BUTTON_THREAD, getScreenSize, BusyAnimation
+    BUTTON_THREAD, getScreenSize, BusyAnimation, \
+    TouchTapGuard, configure_touch_scroller
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -721,6 +722,7 @@ class AppPopup(QFrame):
 class AppIcon(QToolButton):
     refresh = pyqtSignal()
     go_to_folder = pyqtSignal(object)
+    MAX_TAP_DISTANCE = 10
 
     def __init__(self, app, parent=None):
         super(AppIcon, self).__init__(parent)
@@ -733,14 +735,64 @@ class AppIcon(QToolButton):
 
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
-        
+        self._tap_guard = None
+
+    def _get_tap_guard(self):
+        if self._tap_guard is None:
+            parent = self.parentWidget()
+            scroll_area = None
+            while parent is not None:
+                if isinstance(parent, QScrollArea):
+                    scroll_area = parent
+                    break
+                parent = parent.parentWidget()
+            scroller = None
+            if scroll_area is not None:
+                scroller = getattr(scroll_area, "scroller", None)
+                if scroller is None:
+                    for target in (scroll_area.viewport(), scroll_area):
+                        if QScroller.hasScroller(target):
+                            scroller = QScroller.scroller(target)
+                            break
+            self._tap_guard = TouchTapGuard(
+                scroll_area,
+                scroller=scroller,
+                max_tap_distance=self.MAX_TAP_DISTANCE,
+                parent=self,
+            )
+        return self._tap_guard
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if not self._get_tap_guard().on_press(event.globalPos()):
+                event.ignore()
+                return
+        QToolButton.mousePressEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton:
+            if not self._get_tap_guard().on_move(event.globalPos()):
+                self.setDown(False)
+                event.ignore()
+                return
+        QToolButton.mouseMoveEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self._get_tap_guard().should_suppress_release(event.globalPos()):
+                self.setDown(False)
+                event.accept()
+                return
+        QToolButton.mouseReleaseEvent(self, event)
 
     def event(self, event):
         if event.type() != QEvent.Gesture:
             return QToolButton.event(self, event)
-        
+
         for g in event.activeGestures():
             if g.state() == Qt.GestureFinished:
+                self._get_tap_guard().mark_suppressed()
+                self.setDown(False)
                 # get all the app details from the IconGrid
                 popup = AppPopup(self)
                 popup.refresh.connect(self.on_refresh)
@@ -1018,7 +1070,7 @@ class VerticalScrollArea(QScrollArea):
         self.setFrameStyle(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        QScroller.grabGesture(self, QScroller.LeftMouseButtonGesture);
+        self.scroller = configure_touch_scroller(self.viewport())
         self.setWidget(content)
 
         
