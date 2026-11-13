@@ -493,11 +493,27 @@ class TouchMessageBox(TouchDialog):
         return None, None
 
 
+class _LazyTouchHandler(QObject):
+    """Defer importing touch_keyboard until a QLineEdit is actually tapped."""
+    def __init__(self, parent):
+        QObject.__init__(self, parent)
+        self._handler = None
+
+    def eventFilter(self, widget, event):
+        if (event.type() == QEvent.MouseButtonPress
+                and widget.inherits("QLineEdit")
+                and not widget.inherits("FocusLineEdit")):
+            if self._handler is None:
+                import touch_keyboard
+                self._handler = touch_keyboard.TouchHandler(self.parent())
+            return self._handler.eventFilter(widget, event)
+        return False
+
+
 class TouchApplication(QApplication):
     def __init__(self, args):
-        QApplication.__init__(self, args)        
-        import touch_keyboard
-        self.installEventFilter(touch_keyboard.TouchHandler(self))
+        QApplication.__init__(self, args)
+        self.installEventFilter(_LazyTouchHandler(self))
         TouchSetStyle(self)
 
 

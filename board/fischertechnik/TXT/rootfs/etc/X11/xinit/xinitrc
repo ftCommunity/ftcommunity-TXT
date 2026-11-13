@@ -25,7 +25,7 @@ start_vnc()
 
 start_launcher()
 {
-  export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
+  # /opt/ftc is precompiled at build time; user apps write __pycache__ on rw /home
   sudo -u ftc PYTHONPATH=/opt/ftc /opt/ftc/launcher.py
 }
 

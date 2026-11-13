@@ -170,16 +170,45 @@ class StatusBar(QWidget):
         self.setObjectName("statusbar")
         self.setVisible(True)
         self.setAutoFillBackground(True)
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update)
-        self.timer.start(2000) # replant timer in ms
         # scan for plugins
         self.plugins = {}
         for file in os.listdir(os.path.join(BASE, PLUGINS_DIR)):
             if file.endswith(".py"):
                 fname = os.path.splitext(os.path.basename(file))[0]
                 self.plugins[fname] = __import__(PLUGINS_DIR + "." + fname,
-                                            globals(), locals(), ['object']) 
+                                            globals(), locals(), ['object'])
+        self._pixmap_cache = {}
+        self._last_snapshot = None
+        self._cached_time = ""
+        self._cached_pixmaps = []
+        self._refresh_state(repaint=False)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self._refresh_state)
+        self.timer.start(3000) # check plugins/clock periodically; repaint only on change
+
+    def _refresh_state(self, repaint=True):
+        time_str = QLocale().toString(QTime.currentTime(), QLocale.ShortFormat)
+        raw_icons = []
+        for name in sorted(self.plugins):
+            data = self.plugins[name].icon()
+            raw_icons.append(tuple(data) if data else None)
+        snapshot = (time_str, tuple(raw_icons))
+        if snapshot == self._last_snapshot:
+            return
+        self._last_snapshot = snapshot
+        self._cached_time = time_str
+        pixmaps = []
+        for key in raw_icons:
+            if key is not None:
+                pix = self._pixmap_cache.get(key)
+                if pix is None:
+                    pix = QPixmap(list(key))
+                    self._pixmap_cache[key] = pix
+                if not pix.isNull():
+                    pixmaps.append(pix)
+        self._cached_pixmaps = pixmaps
+        if repaint:
+            super(StatusBar, self).update()
 
     def mousePressEvent(self, event):
         popup = StatusPopup(self.plugins, self, self.parent())
@@ -193,20 +222,16 @@ class StatusBar(QWidget):
         painter.fillRect(self.rect(), self.palette().color(self.backgroundRole()))
         # draw the time at the very right
         painter.drawText(QRect(QPoint(0, 0), self.size()),
-              Qt.AlignRight, QLocale().toString(QTime.currentTime(), QLocale.ShortFormat))
-        # draw all plugin icons fromt he left
+              Qt.AlignRight, self._cached_time)
+        # draw all cached plugin icons from the left
         x = 0
-        for name in sorted(self.plugins):
-            plugin = self.plugins[name]
-            # request icon from plugin
-            icon = QPixmap(plugin.icon())
-            if icon:
-                painter.drawPixmap(x, 0, icon)
-                x += icon.width()
+        for icon in self._cached_pixmaps:
+            painter.drawPixmap(x, 0, icon)
+            x += icon.width()
         painter.end()
 
     def update(self):
-        self.repaint()
+        self._refresh_state(repaint=True)
 
 
 class TouchTopWidget(QWidget):
