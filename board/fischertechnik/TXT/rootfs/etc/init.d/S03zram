@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# Configure compressed LZ4 ZRAM swap to relieve pressure on 110 MiB RAM.
+#
+
+ZRAM_DEV=/dev/zram0
+ZRAM_SYS=/sys/block/zram0
+ZRAM_SIZE=67108864
+
+start() {
+	[ -b "$ZRAM_DEV" ] && [ -d "$ZRAM_SYS" ] || return 0
+	if grep -q "^${ZRAM_DEV} " /proc/swaps 2>/dev/null; then
+		return 0
+	fi
+
+	printf "Starting zram swap: "
+	echo 1 > "${ZRAM_SYS}/reset" 2>/dev/null || true
+	echo lz4 > "${ZRAM_SYS}/comp_algorithm" 2>/dev/null || true
+	if ! echo "$ZRAM_SIZE" > "${ZRAM_SYS}/disksize"; then
+		echo "FAIL"
+		return 1
+	fi
+	if ! mkswap "$ZRAM_DEV" >/dev/null 2>&1; then
+		echo "FAIL"
+		return 1
+	fi
+	# BusyBox swapon is built without CONFIG_FEATURE_SWAPON_PRI (-p)
+	if ! swapon "$ZRAM_DEV"; then
+		echo "FAIL"
+		return 1
+	fi
+
+	# Single-page swap-in and slightly higher swappiness work better with ZRAM
+	[ -w /proc/sys/vm/page-cluster ] && echo 0 > /proc/sys/vm/page-cluster
+	[ -w /proc/sys/vm/swappiness ] && echo 80 > /proc/sys/vm/swappiness
+	echo "OK"
+}
+
+stop() {
+	[ -b "$ZRAM_DEV" ] && [ -d "$ZRAM_SYS" ] || return 0
+	if grep -q "^${ZRAM_DEV} " /proc/swaps 2>/dev/null; then
+		printf "Stopping zram swap: "
+		swapoff "$ZRAM_DEV" && echo 1 > "${ZRAM_SYS}/reset" 2>/dev/null && echo "OK" || echo "FAIL"
+	fi
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart|reload)
+		stop
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac

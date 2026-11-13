@@ -1,4 +1,4 @@
-#!/bin/busybox sh
+#!/bin/sh
 /bin/busybox --install -s
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
@@ -13,22 +13,53 @@ move_kernel_mounts() {
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
-mkdir -p /dev/pts
-mkdir -p /dev/shm
+mkdir -p /dev/pts /dev/shm
+mkdir -p /media/sdcard/boot /media/sdcard/data /media/sdcard/root /newroot
 
-if ! [ -b /dev/mmcblk1p2 ] ; then
-  if ! /repartition-sd-card ; then
+# wait briefly for SD card block device (mmcblk0 / mmcblk1)
+SD_DEV=""
+for i in $(seq 1 40); do
+  for d in /dev/mmcblk0 /dev/mmcblk1; do
+    if [ -b "$d" ]; then
+      SD_DEV="$d"
+      break 2
+    fi
+  done
+  sleep 0.25
+done
+
+if [ -z "$SD_DEV" ]; then
+  echo "ERROR: No SD card block device found. Dropping to a shell."
+  exec /bin/sh
+fi
+
+# allow kernel to finish scanning partition table
+if ! [ -b "${SD_DEV}p1" ]; then
+  for i in $(seq 1 20); do
+    [ -b "${SD_DEV}p1" ] && break
+    sleep 0.1
+  done
+fi
+
+if ! [ -b "${SD_DEV}p2" ]; then
+  if ! /repartition-sd-card "$SD_DEV"; then
      echo "failed to repartition the SD card. Dropping to a shell"
      exec /bin/sh
   fi
 fi
 
-# mount SD card partitions.
-mount -t vfat /dev/mmcblk1p1 /media/sdcard/boot -o dmask=022,fmask=133,flush
-mount -t ext4 /dev/mmcblk1p2 /media/sdcard/data
+# repair dirty FAT32 boot partition before mounting
+if command -v fsck.fat >/dev/null 2>&1; then
+  fsck.fat -a "${SD_DEV}p1" || true
+fi
+
+# mount SD card partitions
+mount -t vfat "${SD_DEV}p1" /media/sdcard/boot -o dmask=022,fmask=133,flush
+rm -f /media/sdcard/boot/FSCK[0-9][0-9][0-9][0-9].REC
+mount -t ext4 "${SD_DEV}p2" /media/sdcard/data
 mount -t squashfs /media/sdcard/boot/rootfs.img /media/sdcard/root -o loop,ro
 
-ROM_VERSION=$(cat /media/sdcard/root/etc/fw-ver.txt)
+ROM_VERSION=$(cat /media/sdcard/root/etc/fw-ver.txt 2>/dev/null || echo "unknown")
 ROOT_TYPE=ro
 if [ -r /media/sdcard/boot/rootfs.conf ]; then
   ROOT_TYPE=$(cat /media/sdcard/boot/rootfs.conf)
@@ -58,7 +89,7 @@ mount -o move /media/sdcard/data /newroot/media/sdcard/data
 move_kernel_mounts / /newroot/
 exec switch_root /newroot /sbin/init
 
-#This will only be run if the exec above failed
+# This will only be run if the exec above failed
 echo "Failed to switch_root. Dropping to a shell"
 move_kernel_mounts /newroot/ /
 exec /bin/sh

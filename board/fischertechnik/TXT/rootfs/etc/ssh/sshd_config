@@ -70,10 +70,11 @@ AuthorizedKeysFile	.ssh/authorized_keys
 
 # To disable tunneled clear text passwords, change to no here!
 #PasswordAuthentication yes
-PermitEmptyPasswords yes
+# Do not accept empty passwords via auth method "none" before publickey is tried
+PermitEmptyPasswords no
 
-# Change to no to disable s/key passwords
-ChallengeResponseAuthentication no
+# Allow PAM touchscreen confirmation via keyboard-interactive if publickey fails
+KbdInteractiveAuthentication yes
 # Kerberos options
 #KerberosAuthentication no
 #KerberosOrLocalPasswd yes
@@ -106,7 +107,7 @@ UsePAM yes
 #PrintLastLog yes
 #TCPKeepAlive yes
 #UseLogin no
-UsePrivilegeSeparation sandbox		# Default for new installations.
+#UsePrivilegeSeparation sandbox		# Deprecated in modern OpenSSH
 #PermitUserEnvironment no
 #Compression delayed
 #ClientAliveInterval 0
