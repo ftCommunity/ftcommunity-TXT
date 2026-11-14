@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ftcommunity-TXT <dev@ftcommunity.de>
+Date: Fri, 13 Nov 2026 17:43:00 +0100
+Subject: [PATCH] Stop bluetoothd before starting ft_bt_remote_server
+
+Ensure bluetoothd cannot hold an active LE link or interfere with hci0
+advertising when starting the BT Control Set receiver, and turn off LE
+advertising after ft_bt_remote_server exits.
+---
+ ft_bt_remote_start.sh | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/ft_bt_remote_start.sh b/ft_bt_remote_start.sh
+index 1111111..2222222 100755
+--- a/ft_bt_remote_start.sh
++++ b/ft_bt_remote_start.sh
+@@ -5,6 +5,12 @@
+ 
+ NAME="BT Control Receiver"
+ 
++if [ -x /etc/init.d/S40bluetooth ]; then
++    /etc/init.d/S40bluetooth stop >/dev/null 2>&1 || true
++fi
++start-stop-daemon -K -q -x /usr/libexec/bluetooth/bluetoothd >/dev/null 2>&1 || true
++sleep 0.2
++
+ hciconfig hci0 up
+ hciconfig hci0 name "$NAME"
+ hciconfig hci0 noscan
+@@ -33,3 +39,5 @@ fi
+ hciconfig hci0 reset
+ 
+ ft_bt_remote_server -n "$NAME"
++
++hciconfig hci0 noleadv >/dev/null 2>&1 || true

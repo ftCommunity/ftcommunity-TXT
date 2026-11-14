@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ftcommunity-TXT <dev@ftcommunity.de>
+Date: Fri, 13 Nov 2026 17:43:00 +0100
+Subject: [PATCH] Allow writes to comm_channel characteristic and stop adv on exit
+
+The comm_channel characteristic (0x2de2) declares write properties
+(BT_GATT_CHRC_PROP_WRITE | BT_GATT_CHRC_PROP_WRITE_WITHOUT_RESP) but was
+registered with BT_ATT_PERM_READ only, causing BlueZ gatt-server
+check_permissions() to reject Write Req from the BT Control Set remote
+with BT_ATT_ERROR_WRITE_NOT_PERMITTED (0x03).
+
+Also disable LE advertising cleanly when shutting down.
+---
+ src/ft_bt_remote_server.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/src/ft_bt_remote_server.c b/src/ft_bt_remote_server.c
+index 1111111..2222222 100644
+--- a/src/ft_bt_remote_server.c
++++ b/src/ft_bt_remote_server.c
+@@ -387,7 +387,8 @@ static void populate_comm_channel_service(struct server *server)
+ 	service = gatt_db_add_service(server->db, &uuid, true, 3);
+ 
+ 	bt_uuid128_create(&uuid, bt_remote_uuid16(0x2de2));
+-	tmp = gatt_db_service_add_characteristic(service, &uuid, BT_ATT_PERM_READ,
++	tmp = gatt_db_service_add_characteristic(service, &uuid,
++						 BT_ATT_PERM_READ | BT_ATT_PERM_WRITE,
+ 	  BT_GATT_CHRC_PROP_READ | BT_GATT_CHRC_PROP_WRITE | BT_GATT_CHRC_PROP_WRITE_WITHOUT_RESP,
+ 						 NULL, NULL, server);
+ 	gatt_db_attribute_write(tmp, 0, (void *)&comm_channel, sizeof(comm_channel),
+@@ -888,6 +889,17 @@ static int ble_init(struct server *server)
+   return 0;
+ }
+ 
++static void ble_disable_advertising(struct server *server)
++{
++  int dev = (server->dev_id == -1) ? 0 : server->dev_id;
++  int dd = hci_open_dev(dev);
++  if (dd < 0)
++    return;
++
++  hci_le_set_advertise_enable(dd, 0, 1000);
++  hci_close_dev(dd);
++}
++
+ int main(int argc, char *argv[])
+ {
+ 	int opt;
+@@ -982,6 +994,8 @@ int main(int argc, char *argv[])
+ 	    sleep(1);
+ 	}
+ 	
++	ble_disable_advertising(&server);
++
+ 	printf("Shutting down...\n");	  
+ 	close(server.uinput_fd);
+ 
+-- 
+2.43.0
