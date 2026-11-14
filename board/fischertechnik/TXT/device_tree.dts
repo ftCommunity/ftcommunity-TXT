@@ -627,6 +627,8 @@
 		compatible = "rohm,dh2228fv";
 		reg = <0>;
 		spi-max-frequency = <10000000>;
+		/* Cortex-M3 audio slave needs CS held low >=10us after transfer to prepare 0xbb status */
+		spi-cs-hold-delay-ns = <50000>;
 	};
 };
 
