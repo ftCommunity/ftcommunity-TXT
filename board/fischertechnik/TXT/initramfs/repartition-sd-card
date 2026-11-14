@@ -1,5 +1,7 @@
-#!/bin/busybox sh
-mount -t vfat /dev/mmcblk1p1 /media/sdcard/boot -o dmask=077,fmask=177,sync
+#!/bin/sh
+DEV="${1:-/dev/mmcblk0}"
+mkdir -p /media/sdcard/boot /media/sdcard/data /media/sdcard/root /newroot
+mount -t vfat "${DEV}p1" /media/sdcard/boot -o dmask=077,fmask=177,sync
 
 # Hide cursor and show splash screen
 echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
@@ -30,7 +32,7 @@ progress 45 "backup rootfs.img"
 umount /media/sdcard/boot || fail
 
 # repartition the SD card
-fdisk -u /dev/mmcblk1 << EOF || fail
+fdisk -u "$DEV" << EOF || fail
 d
 n
 p
@@ -39,6 +41,8 @@ p
 1000000
 t
 c
+a
+1
 n
 p
 2
@@ -49,12 +53,12 @@ EOF
 progress 50 "repartition sd card"
 
 # Create the new file systems
-mkfs.fat -n CFW-BOOT -F 32 /dev/mmcblk1p1 || fail
+mkfs.fat -n CFW-BOOT -F 32 "${DEV}p1" || fail
 progress 55 "create FAT fs on partition 1"
-echo y | mke2fs -q -t ext4 -L CFW-DATA /dev/mmcblk1p2 || fail
+echo y | mke2fs -q -t ext4 -L CFW-DATA "${DEV}p2" || fail
 progress 60 "create ext4 fs on partition 2"
 # restore backed up files
-mount -t vfat /dev/mmcblk1p1 /media/sdcard/boot -o dmask=077,fmask=177 || fail
+mount -t vfat "${DEV}p1" /media/sdcard/boot -o dmask=077,fmask=177 || fail
 cp /backup/uImage  /media/sdcard/boot || fail
 progress 65 "restore uImage"
 cp /backup/am335x-kno_txt.dtb  /media/sdcard/boot || fail
@@ -67,7 +71,7 @@ fi
 umount /media/sdcard/boot || fail
 progress 95 "restore partition 1 complete"
 
-mount -t ext4 /dev/mmcblk1p2 /media/sdcard/data || fail
+mount -t ext4 "${DEV}p2" /media/sdcard/data || fail
 mkdir -p /media/sdcard/data/overlay/etc/ || fail
 mkdir -p /media/sdcard/data/overlay/.workdir/etc || fail
 chmod go-rwx /media/sdcard/data/overlay/ || fail 
