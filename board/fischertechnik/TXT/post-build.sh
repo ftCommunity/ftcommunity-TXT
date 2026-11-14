@@ -12,6 +12,9 @@ rm -f "$TARGET/etc/init.d/S60openvpn"
 # remove xorg start script
 rm -f "$TARGET/etc/init.d/S40xorg"
 
+# remove upstream bluez init script (replaced by S40bluetooth)
+rm -f "$TARGET/etc/init.d/S40bluetoothd"
+
 # remove unused firmware
 find "$TARGET/usr/lib/firmware/ti-connectivity" -iname "TIInit*.bts" ! -name "TIInit_11.8.32.bts" -type f -exec rm -f {} +
 find "$TARGET/usr/lib/firmware/ti-connectivity" -iname "wl*.bin" ! -name "wl18xx-fw-4.bin" ! -name "wl18xx-conf.bin" -exec rm -f {} +

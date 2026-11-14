@@ -31,17 +31,20 @@ start() {
 
 stop() {
 	printf 'Stopping %s: ' "$DAEMON"
-	if [ -f $ENABLE_FLAG ]; then
-	    hciconfig hci0 down
+	if [ -f $ENABLE_FLAG ] || [ -f $PIDFILE ]; then
+	    hciconfig hci0 down >/dev/null 2>&1 || true
 	    
 	    start-stop-daemon -K -q -p "$PIDFILE"
 	    status=$?
+	    rm -f "$PIDFILE"
 	    if [ "$status" -eq 0 ]; then
 		echo "OK"
 	    else
 		echo "FAIL"
 	    fi
 	    return "$status"
+	else
+	    echo "SERVICE DISABLED"
 	fi
 }
 
