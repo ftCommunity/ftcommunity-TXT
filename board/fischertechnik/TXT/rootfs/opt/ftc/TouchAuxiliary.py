@@ -409,7 +409,7 @@ class TouchAuxListRequester(TouchDialog):
         # the list
         self.itemlist = QListWidget()
         self.itemlist.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        QScroller.grabGesture(self.itemlist.viewport(), QScroller.LeftMouseButtonGesture);
+        configure_touch_scroller(self.itemlist.viewport())
         self.itemlist.setObjectName("smalllabel")
         self.itemlist.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.itemlist.addItems(items)
