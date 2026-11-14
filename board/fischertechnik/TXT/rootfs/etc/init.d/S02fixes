@@ -2,7 +2,7 @@
 
 check_104() {
     # uid mapping changed for user ROBOPro
-    if [ `id -g ROBOPro` != 1008  || `id -u ROBOPro` != 1004 ]; then
+    if [ "$(id -g ROBOPro 2>/dev/null)" != "1008" ] || [ "$(id -u ROBOPro 2>/dev/null)" != "1004" ]; then
 	deluser ROBOPro
 	delgroup ROBOPro
 	addgroup -g 1008 ROBOPro
@@ -17,7 +17,7 @@ check_104() {
 
 check_105() {
     # ntp user was newly introduced in buildroot 2023.02.3
-    if !id -u ntp; then
+    if ! id -u ntp >/dev/null 2>&1; then
 	adduser -s /bin/false -S -D -H -u 101 -G ntp ntp
     fi
 }
