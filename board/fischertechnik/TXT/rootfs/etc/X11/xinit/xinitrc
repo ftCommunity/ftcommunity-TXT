@@ -23,14 +23,23 @@ start_vnc()
   fi
 }
 
+setup_fontconfig_cache()
+{
+  if [ -d /home/ftc ] && mkdir -p /home/ftc/.cache/fontconfig 2>/dev/null; then
+    chown ftc:ftc /home/ftc/.cache /home/ftc/.cache/fontconfig 2>/dev/null || true
+    ln -sfn /home/ftc/.cache/fontconfig /var/cache/fontconfig
+  fi
+}
+
 start_launcher()
 {
-  export PYTHONPYCACHEPREFIX=/home/ftc/.pycache
-  sudo -u ftc PYTHONPATH=/opt/ftc /opt/ftc/launcher.py
+  # /opt/ftc is precompiled at build time; user apps write __pycache__ on rw /home
+  sudo -u ftc PYTHONWARNINGS=ignore::DeprecationWarning PYTHONPATH=/opt/ftc /opt/ftc/launcher.py
 }
 
 set_locale
 set_background
+setup_fontconfig_cache
 start_vnc
 while true; do
     start_launcher
