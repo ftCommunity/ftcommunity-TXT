@@ -5,7 +5,6 @@
 import configparser
 import html
 from html.parser import HTMLParser
-import json
 import os
 import re
 import shutil
@@ -13,9 +12,6 @@ import socket
 import subprocess
 import sys
 import threading
-import urllib.error
-import urllib.parse
-import urllib.request
 
 from PyQt5 import QtCore
 from launcher import LauncherPlugin
@@ -54,10 +50,20 @@ from TouchStyle import (
     pyqtSignal,
 )
 
-try:
-    import semantic_version
-except ImportError:
-    semantic_version = None
+_SEMVER_UNSET = object()
+_semantic_version = _SEMVER_UNSET
+
+
+def _get_semantic_version():
+    """Lazily import semantic_version so opening the UI stays fast."""
+    global _semantic_version
+    if _semantic_version is _SEMVER_UNSET:
+        try:
+            import semantic_version as sv
+            _semantic_version = sv
+        except ImportError:
+            _semantic_version = None
+    return _semantic_version
 
 APP_DIR = os.path.dirname(os.path.realpath(__file__))
 VERSION_FILE = "/etc/fw-ver.txt"
@@ -144,10 +150,11 @@ def compare_versions(candidate, current):
     curr_s = (current or "").strip().lstrip("vV")
     if not cand_s or not curr_s:
         return None
-    if semantic_version is not None:
+    sv = _get_semantic_version()
+    if sv is not None:
         try:
-            v_cand = semantic_version.Version.coerce(cand_s)
-            v_curr = semantic_version.Version.coerce(curr_s)
+            v_cand = sv.Version.coerce(cand_s)
+            v_curr = sv.Version.coerce(curr_s)
             if v_cand > v_curr:
                 return 1
             if v_cand == v_curr:
@@ -192,6 +199,7 @@ class _ZipLinkParser(HTMLParser):
         self.links = []
 
     def handle_starttag(self, tag, attrs):
+        import urllib.parse
         if tag.lower() != "a":
             return
         for key, val in attrs:
@@ -203,6 +211,7 @@ class _ZipLinkParser(HTMLParser):
 
 def _http_get(url, accept=None, timeout=15, max_bytes=2 * 1024 * 1024):
     """Perform an HTTP GET with bounded read size."""
+    import urllib.request
     headers = {"User-Agent": USER_AGENT}
     if accept:
         headers["Accept"] = accept
@@ -216,6 +225,7 @@ def _http_get(url, accept=None, timeout=15, max_bytes=2 * 1024 * 1024):
 
 def _head_size(url, timeout=6):
     """Best-effort Content-Length lookup via HTTP HEAD."""
+    import urllib.request
     try:
         req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -242,6 +252,7 @@ def _pick_zip_asset(release_obj):
 
 def _build_release_entry(tag, version, url, size, published, notes, prerelease, current_ver, filename=""):
     """Construct normalized release metadata dictionary."""
+    import urllib.parse
     clean_ver = (version or tag or "").strip().lstrip("vV")
     return {
         "tag": tag or clean_ver,
@@ -295,6 +306,8 @@ def _parse_json_releases(payload, current_ver):
 
 def fetch_releases(raw_source, current_ver):
     """Fetch and parse available firmware releases from a GitHub repo or custom URL."""
+    import json
+    import urllib.parse
     kind, target = normalize_source(raw_source)
     if kind == "github":
         api_url = f"https://api.github.com/repos/{target}/releases?per_page=25"
@@ -364,14 +377,13 @@ class ReleaseFetchThread(QThread):
         self.current_ver = current_ver
 
     def run(self):
+        import json
+        import urllib.error
         try:
             releases = fetch_releases(self.source, self.current_ver)
             self.finished_ok.emit(releases)
         except urllib.error.HTTPError as exc:
-            if exc.code in (403, 429):
-                self.finished_err.emit(f"HTTP {exc.code}: {exc.reason}")
-            else:
-                self.finished_err.emit(f"HTTP {exc.code}: {exc.reason}")
+            self.finished_err.emit(f"HTTP {exc.code}: {exc.reason}")
         except (urllib.error.URLError, OSError, ValueError, json.JSONDecodeError) as exc:
             self.finished_err.emit(str(exc))
 
@@ -406,6 +418,7 @@ class InstallWorker(QThread):
         if free_bytes < needed_min:
             raise RuntimeError(f"Insufficient disk space ({free_bytes // (1024 * 1024)} MB free)")
 
+        import urllib.request
         dest_path = os.path.join(CACHE_DIR, "update.zip")
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=30) as resp, open(dest_path, "wb") as out_f:

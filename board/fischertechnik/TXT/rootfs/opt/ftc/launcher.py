@@ -13,16 +13,19 @@ import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, \
     BUTTON_THREAD, getScreenSize, BusyAnimation
-from touch_keyboard import TouchKeyboard
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtNetwork import *
 
-LOGFILE="/tmp/launcher.log"
-from logger import *
-init_logger(LOGFILE)
+LOGFILE = "/tmp/launcher.log"
+if __name__ == "__main__":
+    # Expose __main__ as "launcher" so plugins importing LauncherPlugin reuse
+    # this module instead of importing launcher.py a second time.
+    sys.modules.setdefault("launcher", sys.modules[__name__])
+    from logger import init_logger
+    init_logger(LOGFILE)
 
 PLUGINS_DIR = "plugins"
 
@@ -290,9 +293,10 @@ class Icon(QPixmap):
 
 
 # let the user enter the name of a new folder
-class FolderName(TouchKeyboard):
-    def __init__(self, parent=None):
-        super(FolderName, self).__init__(parent)
+def FolderName(parent=None):
+    """Lazily import TouchKeyboard only when creating a new folder."""
+    from touch_keyboard import TouchKeyboard
+    return TouchKeyboard(parent)
 
 
 class FolderOpIcon(QToolButton):
@@ -773,11 +777,26 @@ class IconGrid(QWidget):
         # event to know the final size when creating the icon grid
         self.columns = getScreenSize().width() // self.columnWidth
         self.button_app = None
+        self._page_cache = {}
 
         self.createAppIcons()
         for i in range(self.columns):
             self.grid.setColumnMinimumWidth(i, self.columnWidth)
-        
+
+    def _detach_grid_widgets(self):
+        while self.grid.count():
+            item = self.grid.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.hide()
+
+    def clearCache(self):
+        """Destroy cached AppIcon widgets across all folders."""
+        self._detach_grid_widgets()
+        for _apps_ref, buttons in self._page_cache.values():
+            for btn in buttons:
+                btn.deleteLater()
+        self._page_cache.clear()
 
     def setButtonApp(self, app):
         self.button_app = app
@@ -788,36 +807,42 @@ class IconGrid(QWidget):
 
     def setPath(self, path):
         # empty path given? Return root
-        if path == "":
-            return self.apps.getRoot()
+        if not path:
+            self.setApps(self.apps.getRoot())
+            return
         # otherwise try to set path
         self.setApps(self.apps.getRoot().getFolderList(path.split("/")))
 
     def createAppIcons(self):
-        # remove all existing widgets from grid
-        w = self.grid.takeAt(0)
-        while w:
-            w.widget().deleteLater()
-            w = self.grid.takeAt(0)
-        # create pages to hold every app
-        index = 0
-        for app in self.apps:
-            # create a launch button for this app
-            but = AppIcon(app, self)
-            but.refresh.connect(self.on_refresh)
-            but.go_to_folder.connect(self.on_go_to_folder)
-            if "exec" in app:
-                but.clicked.connect(self.do_launch)
-            else:
-                but.clicked.connect(self.do_open_folder)
+        self._detach_grid_widgets()
+
+        cache_key = id(self.apps)
+        cached = self._page_cache.get(cache_key)
+        if cached is not None and cached[0] is self.apps:
+            buttons = cached[1]
+        else:
+            buttons = []
+            for app in self.apps:
+                but = AppIcon(app, self)
+                but.refresh.connect(self.on_refresh)
+                but.go_to_folder.connect(self.on_go_to_folder)
+                if "exec" in app:
+                    but.clicked.connect(self.do_launch)
+                else:
+                    but.clicked.connect(self.do_open_folder)
+                buttons.append(but)
+            self._page_cache[cache_key] = (self.apps, buttons)
+
+        for index, but in enumerate(buttons):
             self.grid.addWidget(but, index // self.columns, index % self.columns, Qt.AlignCenter)
-            index += 1
+            but.show()
 
     def on_refresh(self):
-        # the item tree has changed 
+        # the item tree has changed
         # write updated tree to disk
         self.apps.getRoot().export()
-        # refresh the view
+        # rebuild cached icons to reflect folder changes
+        self.clearCache()
         self.createAppIcons()
 
     def on_go_to_folder(self, apps):
@@ -882,7 +907,7 @@ class TcpServer(QTcpServer):
 
     def receiveMessage(self):
         # check clients for data
-        for s in self.connections:
+        for s in list(self.connections):
             if s.canReadLine():
                 line = str(s.readLine(), "utf-8").strip()
                 if len(line) > 0:
@@ -914,10 +939,14 @@ class TcpServer(QTcpServer):
                         print("Unknown command ", cmd)
 
     def removeConnection(self):
-        pass
+        sock = self.sender()
+        if sock in self.connections:
+            self.connections.remove(sock)
+        if sock is not None:
+            sock.deleteLater()
 
     def socketError(self):
-        pass
+        self.removeConnection()
 
 
 class LauncherPlugin(QObject):
@@ -948,7 +977,7 @@ class LauncherPlugin(QObject):
 class LauncherPluginAdapter:
     """Adapter for running lightweight apps as launcher plugins.
 
-    Implements parts of the subprocess.Popen API (poll(), kill(), returncode)
+    Implements parts of the subprocess.Popen API (poll(), kill(), wait(), returncode)
     in order to keep changes to FtcGuiApplication as minimal as possible
     """
     def __init__(self, launcher, module_script):
@@ -957,7 +986,9 @@ class LauncherPluginAdapter:
         import importlib, re
         module_name = re.search(BASE + "/(.+).py", module_script).group(1).replace("/", ".")
         try:
-            module = importlib.reload(importlib.import_module(module_name))
+            module = sys.modules.get(module_name)
+            if module is None:
+                module = importlib.import_module(module_name)
             self.plugin = module.createPlugin(launcher)
         except Exception as e:
             print(e)
@@ -968,6 +999,9 @@ class LauncherPluginAdapter:
         if self.returncode is None and self.plugin and self.plugin.isClosed():
             self.kill()
         return self.returncode
+
+    def wait(self, timeout=None):
+        return self.poll()
 
     def kill(self):
         if self.plugin:
@@ -993,9 +1027,11 @@ class Launcher(TouchApplication):
         super(Launcher, self).__init__(args)
         # category setup also loads the locale
         self.category_setup()
-        # load stylesheet from the same place the script was loaded from
-        self.setStyleSheet( "file:///" + BASE + "/themes/" + THEME + "/style.qss")
+        # TouchApplication.__init__ already applied default style; only override custom themes
+        if THEME != "default":
+            self.setStyleSheet("file:///" + BASE + "/themes/" + THEME + "/style.qss")
         self.app_process = None
+        self._launching = False
         # create TCP server so other programs can request a icon list refresh
         # or launch an app
         self.tcpServer = TcpServer()
@@ -1081,41 +1117,61 @@ class Launcher(TouchApplication):
         except:
             pass
 
-    def settings_load(self):
+    def settings_read(self):
+        path = ""
+        button_launch = None
         if not os.path.isfile(self.settings_file()):
-            return False
+            return path, button_launch
 
         config = configparser.RawConfigParser()
         config.read(self.settings_file())
 
         if config.has_option('view', 'button_launch'):
-            self.button_launch = config.get('view', 'button_launch')
-            self.icons.setButtonApp(self.button_launch)
-
-        # get view path 
+            button_launch = config.get('view', 'button_launch')
         if config.has_option('view', 'path'):
             path = config.get('view', 'path')
+        return path, button_launch
+
+    def settings_load(self):
+        if not os.path.isfile(self.settings_file()):
+            return False
+
+        path, button_launch = self.settings_read()
+        if button_launch is not None:
+            self.button_launch = button_launch
+            self.icons.setButtonApp(self.button_launch)
+        if path:
             self.icons.setPath(path)
-        
+
         return True
 
     def launch_app(self, executable, managed, name):
         self.settings_save()
 
-        if self.app_is_running():
+        if self._launching or self.app_is_running():
             return
 
         # get managed state
         if managed.lower() == "text":
             # text mode apps will be handled by Raphaels new external system
             return
-     
-        # run the executable
-        self.app_executable = executable
 
-        if managed.lower() == "launcher-plugin":
-            self.app_process = LauncherPluginAdapter(self, executable)
-        else:
+        self._launching = True
+        try:
+            # run the executable
+            self.app_executable = executable
+
+            if managed.lower() == "launcher-plugin":
+                # Paint busy feedback before synchronous plugin import/initialization
+                self.popup = BusyAnimation(parent=self.w)
+                self.popup.show()
+                QCoreApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
+                try:
+                    self.app_process = LauncherPluginAdapter(self, executable)
+                finally:
+                    self.on_busyExpired()
+                return
+
             # assume that we can just launch enything under non-windows
             if platform.system() != 'Windows':
                 # give app the current locale
@@ -1144,10 +1200,12 @@ class Launcher(TouchApplication):
                 os.environ['PYTHONPATH'] = BASE
                 self.app_process = subprocess.Popen( ("pythonw", str(executable)) )
 
-        # display some busy icon
-        self.popup = BusyAnimation(parent=self.w, process=self.app_process, timeout_s=20)
-        self.popup.expired.connect(self.on_busyExpired)
-        self.popup.show()
+            # display some busy icon
+            self.popup = BusyAnimation(parent=self.w, process=self.app_process, timeout_s=20)
+            self.popup.expired.connect(self.on_busyExpired)
+            self.popup.show()
+        finally:
+            self._launching = False
 
     def on_log_timer(self):
         # check if process is still alive
@@ -1219,11 +1277,14 @@ class Launcher(TouchApplication):
         }
 
     def on_rescan(self):
+        current_path = self.icons.getPath()
         # re-translate categories as the language app may have triggered this
         self.category_setup()
         # rescan all apps
         self.apps = self.scan_app_dirs()
-        self.icons.setApps(self.apps)
+        self.icons.clearCache()
+        target = (self.apps.getFolderList(current_path.split("/")) if current_path else None) or self.apps
+        self.icons.setApps(target)
 
     def on_get_app(self, s):
         if self.app_is_running():
@@ -1237,11 +1298,10 @@ class Launcher(TouchApplication):
     def on_stop_app(self):
         if self.app_is_running():
             self.app_process.kill()
-            while self.app_process.poll() is None:
+            try:
+                self.app_process.wait(timeout=2)
+            except Exception:
                 pass
-            # give app a second to terminate
-            # fix for https://github.com/ftCommunity/ftcommunity-TXT/issues/50
-            time.sleep(1)
 
     # read a number of entries from the manifest and return them 
     # as a dictionary
@@ -1299,7 +1359,8 @@ class Launcher(TouchApplication):
                     if os.path.isfile(manifestfile):
                         # get app info
                         manifest = configparser.RawConfigParser()
-                        manifest.read_file(open(manifestfile, "r", encoding="utf8"))
+                        with open(manifestfile, "r", encoding="utf8") as mf:
+                            manifest.read_file(mf)
 
                         app = self.manifest_import(app_dir, manifest) 
                         root_applist.append(app)
@@ -1388,8 +1449,13 @@ class Launcher(TouchApplication):
         # scan for available apps
         self.apps = self.scan_app_dirs()
         self.w = TouchTopWidget()
-        # create icon grid
-        self.icons = IconGrid(self.apps)
+        initial_path, button_launch = self.settings_read()
+        initial_apps = (self.apps.getFolderList(initial_path.split("/")) if initial_path else None) or self.apps
+        # create icon grid once directly for the target startup folder
+        self.icons = IconGrid(initial_apps)
+        if button_launch is not None:
+            self.button_launch = button_launch
+            self.icons.setButtonApp(button_launch)
         self.icons.open_folder.connect(self.on_open_folder)
         self.icons.launch.connect(self.on_launch)
         # connect power button to icon grid
@@ -1397,8 +1463,6 @@ class Launcher(TouchApplication):
         # create a scrollarea for the icons
         self.scroll = VerticalScrollArea(self.icons, self.w)
         self.w.addWidget(self.scroll)
-        # try to load current settings
-        self.settings_load()
         self.w.show()
 
 
