@@ -493,12 +493,73 @@ class TouchMessageBox(TouchDialog):
         return None, None
 
 
+class _LazyTouchHandler(QObject):
+    """Defer importing touch_keyboard until a QLineEdit is actually tapped."""
+    def __init__(self, parent):
+        QObject.__init__(self, parent)
+        self._handler = None
+
+    def eventFilter(self, widget, event):
+        if (event.type() == QEvent.MouseButtonPress
+                and widget.inherits("QLineEdit")
+                and not widget.inherits("FocusLineEdit")):
+            if self._handler is None:
+                import touch_keyboard
+                self._handler = touch_keyboard.TouchHandler(self.parent())
+            return self._handler.eventFilter(widget, event)
+        return False
+
+
 class TouchApplication(QApplication):
     def __init__(self, args):
-        QApplication.__init__(self, args)        
-        import touch_keyboard
-        self.installEventFilter(touch_keyboard.TouchHandler(self))
+        QApplication.__init__(self, args)
+        self.installEventFilter(_LazyTouchHandler(self))
         TouchSetStyle(self)
+
+
+_BUSY_FRAME_CACHE = {}
+
+
+def _draw_busy_dot(size, color_hex):
+    img = QImage(size, size, QImage.Format_ARGB32)
+    img.fill(Qt.transparent)
+    painter = QPainter(img)
+    painter.setPen(Qt.white)
+    painter.setRenderHint(QPainter.Antialiasing, True)
+    painter.setBrush(QBrush(QColor(color_hex)))
+    painter.drawEllipse(0, 0, img.width() - 1, img.height() - 1)
+    painter.end()
+    return img
+
+
+def render_busy_frames(width, height, dot_size=16, dark_hex="#808080", bright_hex="#fcce04"):
+    """Pre-render and cache the 8 rotated QPixmap frames for BusyAnimation."""
+    key = (width, height, dot_size, dark_hex, bright_hex)
+    cached = _BUSY_FRAME_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    dark = _draw_busy_dot(dot_size, dark_hex)
+    bright = _draw_busy_dot(dot_size, bright_hex)
+    radius = min(width, height) // 2 - dot_size
+    frames = []
+    for step in range(0, 360, 45):
+        pm = QPixmap(width, height)
+        pm.fill(Qt.transparent)
+        painter = QPainter(pm)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.translate(width // 2, height // 2)
+        painter.rotate(45 + step)
+        painter.drawImage(0, radius, bright)
+        for _ in range(7):
+            painter.rotate(45)
+            painter.drawImage(0, radius, dark)
+        painter.end()
+        frames.append(pm)
+
+    result = (tuple(frames), dark, bright)
+    _BUSY_FRAME_CACHE[key] = result
+    return result
 
 
 class BusyAnimation(QWidget):
@@ -507,8 +568,8 @@ class BusyAnimation(QWidget):
     expired = pyqtSignal()
 
     def __init__(self, parent=None, process=None, timeout_s=None):
-        # if an process or a timeout is specified, then we the widget
-        # closes itself if process.poll() returns True, or if the
+        # if an process or a timeout is specified, then the widget
+        # closes itself if process.poll() is not None, or if the
         # timeout is expired, respectively.
         super(BusyAnimation, self).__init__(parent)
         self.resize(64, 64)
@@ -526,20 +587,11 @@ class BusyAnimation(QWidget):
         self.atimer = QTimer(self)
         self.atimer.timeout.connect(self.animate)
         self.atimer.start(200)
-        # create small circle bitmaps for animation
-        self.dark = self.draw(16, QColor("#808080"))
-        self.bright = self.draw(16, QColor("#fcce04"))
+        # reuse pre-rendered frames to avoid rotating bitmaps on every tick
+        self._frames, self.dark, self.bright = render_busy_frames(self.width(), self.height())
 
     def draw(self, size, color):
-        img = QImage(size, size, QImage.Format_ARGB32)
-        img.fill(Qt.transparent)
-        painter = QPainter(img)
-        painter.setPen(Qt.white)
-        painter.setRenderHint(QPainter.Antialiasing, True)
-        painter.setBrush(QBrush(color))
-        painter.drawEllipse(0, 0, img.width() - 1, img.height() - 1)
-        painter.end()
-        return img
+        return _draw_busy_dot(size, color.name() if isinstance(color, QColor) else color)
 
     def timer_expired(self):
         # App launch expired without callback ...
@@ -551,11 +603,11 @@ class BusyAnimation(QWidget):
         # apps or with apps crashing.
         #
         # We might tell the user that the app ended unexpectedly
-        if self.process is not None and self.process.poll():
+        if self.process is not None and self.process.poll() is not None:
             self.close()
             return
-        self.step += 45
-        self.repaint()
+        self.step = (self.step + 45) % 360
+        self.update()
 
     def close(self):
         self.etimer.stop()
@@ -564,15 +616,8 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).deleteLater()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height()) // 2 - 16
+        frame_idx = (self.step // 45) % len(self._frames)
         painter = QPainter()
         painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.translate(self.width() // 2, self.height() // 2)
-        painter.rotate(45)
-        painter.rotate(self.step)
-        painter.drawImage(0, radius, self.bright)
-        for i in range(7):
-            painter.rotate(45)
-            painter.drawImage(0, radius, self.dark)
+        painter.drawPixmap(0, 0, self._frames[frame_idx])
         painter.end()
