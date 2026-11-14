@@ -30,4 +30,11 @@ if [ -n "$GIT_VERSION" ] ; then
     exit 1
   fi
 fi
+
+# Precompile Python bytecode in /opt/ftc (keep .py sources for direct execution/tracebacks)
+if [ -x "$HOST_DIR/bin/python3" ] && [ -d "$TARGET/opt/ftc" ]; then
+  find "$TARGET/opt/ftc" -type d -name '__pycache__' -exec rm -rf {} +
+  "$HOST_DIR/bin/python3" -m compileall -q -f -s "$TARGET" -p / "$TARGET/opt/ftc"
+fi
+
 echo "done"
