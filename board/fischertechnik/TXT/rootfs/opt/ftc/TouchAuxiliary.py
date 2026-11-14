@@ -2,16 +2,34 @@
 # -*- coding: utf-8 -*-
 #
 import sys, time, os, shlex
-import numpy
-try:
-    import cv2
-except:
-    print("no opencv")
 
 from subprocess import *
 from TouchStyle import *
 from threading import Timer
 from touch_keyboard import TouchKeyboard
+
+def _ensure_cv2():
+    """Import OpenCV lazily so dialog-only callers avoid loading numpy/cv2."""
+    mod = globals().get("cv2")
+    if mod is None:
+        try:
+            import cv2 as _cv2
+            globals()["cv2"] = _cv2
+            return _cv2
+        except Exception:
+            print("no opencv")
+            return None
+    return mod
+
+
+def __getattr__(name):
+    if name == "numpy":
+        import numpy as _numpy
+        globals()["numpy"] = _numpy
+        return _numpy
+    if name == "cv2":
+        return _ensure_cv2()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 try:
     if TouchStyle_version<1.2:
@@ -237,15 +255,20 @@ def TouchAuxFTCamIsPresent():
      
     # initialize camera
     try:
-        cap = cv2.VideoCapture(CAM_DEV)       
-        if not cap.isOpened(): return False
-        else:                  return True
+        cv = _ensure_cv2()
+        if cv is None:
+            return False
+        cap = cv.VideoCapture(CAM_DEV)
+        opened = cap.isOpened()
+        cap.release()
+        return opened
     except: return False
   
 class TouchAuxCamWidget(QWidget):
     def __init__(self,cwidth:int=320, fps:int=10, parent=None):
 
         super(TouchAuxCamWidget, self).__init__(parent)
+        _ensure_cv2()
         
         self.zoom=False
         
