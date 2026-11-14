@@ -4,7 +4,7 @@
 echo 0 > /proc/sys/kernel/randomize_va_space
 
 # hide cursor; disable screensaver; disable vesa powerdown
-echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1
+echo -e "\033[?25l\033[9;0]\033[14;0]" > /dev/tty1 2>/dev/null
 
 # load ftc splash image. Use FT colors for progress bar
 psplash -n --filename /etc/ftc-logo.png -y 212 --BarCol FCCE04 --BarBkCol 347ECC --BkCol 000000 &
@@ -26,7 +26,11 @@ for i in /etc/init.d/S??* ;do
 done
 
 # calculate the step size for the progress bar
-SPLASH_STEP=$((100/SPLASH_MAX))
+if [ $SPLASH_MAX -gt 0 ]; then
+    SPLASH_STEP=$((100/SPLASH_MAX))
+else
+    SPLASH_STEP=100
+fi
 
 # Start all init scripts in /etc/init.d
 # executing them in numerical order.
@@ -39,11 +43,11 @@ for i in /etc/init.d/S??* ;do
 
      SPLASH=$((SPLASH+SPLASH_STEP))
 
-     if [ "$i" == "$SPLASH_LAST" ] ; then
+     if [ "$i" = "$SPLASH_LAST" ] ; then
         psplash-write "PROGRESS 100"
         psplash-write "QUIT"
      else
-       psplash-write "PROGRESS $SPLASH"
+        psplash-write "PROGRESS $SPLASH"
      fi
 
      case "$i" in
