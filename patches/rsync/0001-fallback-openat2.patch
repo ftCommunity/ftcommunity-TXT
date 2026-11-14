@@ -1,0 +1,24 @@
+--- a/syscall.c
++++ b/syscall.c
+@@ -35,7 +35,20 @@
+ 
+ #ifdef __linux__
+ #include <sys/syscall.h>
++#if __has_include(<linux/openat2.h>)
+ #include <linux/openat2.h>
++#else
++#include <linux/types.h>
++struct open_how {
++	__u64 flags;
++	__u64 mode;
++	__u64 resolve;
++};
++#define RESOLVE_NO_MAGICLINKS	0x02
++#define RESOLVE_BENEATH		0x08
++#endif
++#ifndef SYS_openat2
++#define SYS_openat2 437
++#endif
+ #endif
+ 
+ #include "ifuncs.h"
