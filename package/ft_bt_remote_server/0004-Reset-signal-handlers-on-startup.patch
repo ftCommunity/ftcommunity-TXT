@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ftcommunity-TXT <dev@ftcommunity.de>
+Date: Fri, 13 Nov 2026 17:56:00 +0100
+Subject: [PATCH] Reset SIGINT and SIGTERM dispositions at startup
+
+When started in the background by a shell (e.g.
+`sudo /usr/bin/ft_bt_remote_start.sh &` in the GUI app), POSIX sh sets
+SIGINT and SIGQUIT to SIG_IGN. Reset SIGINT and SIGTERM to SIG_DFL at
+the beginning of main() so `pkill -SIGINT ft_bt_remote_se` and signalfd
+can terminate the server cleanly.
+---
+ src/ft_bt_remote_server.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/ft_bt_remote_server.c b/src/ft_bt_remote_server.c
+index 2222222..3333333 100644
+--- a/src/ft_bt_remote_server.c
++++ b/src/ft_bt_remote_server.c
+@@ -906,6 +906,9 @@ int main(int argc, char *argv[])
+ 	int opt;
+ 	sigset_t mask;
+ 
++	signal(SIGINT, SIG_DFL);
++	signal(SIGTERM, SIG_DFL);
++
+ 	struct server server;
+ 	memset(&server, 0, sizeof(server));
+ 	
+-- 
+2.43.0
