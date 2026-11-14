@@ -6,6 +6,8 @@
 import os
 import socket
 import struct
+import time
+import weakref
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -493,12 +495,506 @@ class TouchMessageBox(TouchDialog):
         return None, None
 
 
+class _LazyTouchHandler(QObject):
+    """Defer importing touch_keyboard until a QLineEdit is actually tapped."""
+    def __init__(self, parent):
+        QObject.__init__(self, parent)
+        self._handler = None
+
+    def eventFilter(self, widget, event):
+        if (event.type() == QEvent.MouseButtonPress
+                and widget.inherits("QLineEdit")
+                and not widget.inherits("FocusLineEdit")):
+            if self._handler is None:
+                import touch_keyboard
+                self._handler = touch_keyboard.TouchHandler(self.parent())
+            return self._handler.eventFilter(widget, event)
+        return False
+
+
+class _TouchWindowObserver(QObject):
+    """Forward spontaneous QWindow mouse events from a single top-level window to TouchTapGuard."""
+
+    def __init__(self, guard):
+        super(_TouchWindowObserver, self).__init__(guard)
+        self._guard = guard
+
+    def eventFilter(self, obj, event):
+        etype = event.type()
+        if etype in (QEvent.MouseButtonPress, QEvent.MouseMove, QEvent.MouseButtonRelease):
+            self._guard._handle_window_mouse(etype, event)
+        return False
+
+
+class TouchTapGuard(QObject):
+    """Track pointer displacement, dropouts, and scroll state to reject swipe-triggered taps."""
+
+    DEFAULT_MAX_TAP_DISTANCE = 10
+    DEFAULT_MIN_TAP_HOLD_MS = 110
+    DEFAULT_COALESCE_GAP_MS = 140
+    DEFAULT_POST_DRAG_COOLDOWN_MS = 250
+
+    def __init__(
+        self,
+        scroll_area=None,
+        scroller=None,
+        max_tap_distance=DEFAULT_MAX_TAP_DISTANCE,
+        min_tap_hold_ms=DEFAULT_MIN_TAP_HOLD_MS,
+        coalesce_gap_ms=DEFAULT_COALESCE_GAP_MS,
+        post_drag_cooldown_ms=DEFAULT_POST_DRAG_COOLDOWN_MS,
+        filter_viewport_clicks=False,
+        parent=None,
+    ):
+        super(TouchTapGuard, self).__init__(parent or scroll_area)
+        self._scroll_area = scroll_area
+        self._scroller = scroller
+        self._viewport = (
+            scroll_area.viewport()
+            if hasattr(scroll_area, "viewport")
+            else scroll_area
+        )
+        self._max_dist = max_tap_distance
+        self._min_tap_hold_ms = min_tap_hold_ms
+        self._coalesce_gap_ms = coalesce_gap_ms
+        self._coalesce_gap_s = coalesce_gap_ms / 1000.0
+        self._post_drag_cooldown_s = post_drag_cooldown_ms / 1000.0
+        self._filter_viewport_clicks = bool(filter_viewport_clicks)
+
+        # Fallback per-widget state (used only before QWindow events arrive, e.g. direct QTest calls)
+        self._press_pos = None
+        self._press_scroll = None
+        self._suppressed = False
+        self._forwarding = False
+        self._gesture_suppressed = False
+
+        # Authoritative physical pointer timeline on windowHandle() before QScroller buffering/replay
+        self._window_observer = _TouchWindowObserver(self)
+        self._hooked_top_widget_ref = None
+        self._hooked_window_id = None
+        self._seen_window_events = False
+        self._phys_active = False
+        self._phys_press_pos = None
+        self._phys_press_ts = 0
+        self._phys_press_mono = 0.0
+        self._phys_press_scroll = None
+        self._phys_moved = False
+        self._phys_suppressed = False
+        self._chain_origin_pos = None
+        self._last_phys_press_pos = None
+        self._last_phys_release_pos = None
+        self._last_phys_release_mono = None
+        self._last_phys_release_ts = 0
+        self._last_phys_dur_ms = 0.0
+        self._last_phys_was_drag = False
+        self._last_phys_suppressed = False
+        self._last_drag_mono = None
+        self._last_phys_stroke_id = 0
+
+        # Deferred confirmation timer for single-sample (< min_tap_hold_ms) releases
+        self._pending_widget_ref = None
+        self._pending_callback = None
+        self._pending_stroke_id = -1
+        self._pending_timer = QTimer(self)
+        self._pending_timer.setSingleShot(True)
+        self._pending_timer.timeout.connect(self._fire_pending_tap)
+
+    def _current_scroll_value(self):
+        if self._scroll_area is None or not hasattr(self._scroll_area, "verticalScrollBar"):
+            return None
+        vbar = self._scroll_area.verticalScrollBar()
+        return vbar.value() if vbar is not None else None
+
+    def _scrolled_since(self, press_scroll):
+        if press_scroll is None:
+            return False
+        cur = self._current_scroll_value()
+        return cur is not None and abs(cur - press_scroll) > 2
+
+    def _on_window_destroyed(self, *_args):
+        self._hooked_window_id = None
+        self._hooked_top_widget_ref = None
+
+    def attach_window_observer(self):
+        """Install passive mouse observer on the top-level QWindow hosting our scroll area."""
+        host = self._viewport or self._scroll_area
+        if host is None:
+            return
+        top = host.window() if hasattr(host, "window") else None
+        wh = top.windowHandle() if top is not None else None
+        if wh is None:
+            return
+        try:
+            win_id = int(wh.winId())
+        except Exception:
+            win_id = id(top)
+        old_top = self._hooked_top_widget_ref() if self._hooked_top_widget_ref is not None else None
+        if self._hooked_window_id == win_id and old_top is top:
+            return
+        wh.installEventFilter(self._window_observer)
+        try:
+            wh.destroyed.connect(self._on_window_destroyed)
+        except Exception:
+            pass
+        self._hooked_window_id = win_id
+        self._hooked_top_widget_ref = weakref.ref(top)
+
+    def _in_scroll_viewport(self, global_pos):
+        if QApplication.activePopupWidget() is not None:
+            return False
+        vp = self._viewport
+        if vp is None or not vp.isVisible():
+            return False
+        return vp.rect().contains(vp.mapFromGlobal(global_pos))
+
+    def _cancel_pending_tap(self):
+        if self._pending_timer.isActive():
+            self._pending_timer.stop()
+        self._pending_widget_ref = None
+        self._pending_callback = None
+        self._pending_stroke_id = -1
+
+    def _schedule_deferred_tap(self, widget, callback):
+        self._cancel_pending_tap()
+        self._pending_widget_ref = weakref.ref(widget) if widget is not None else None
+        self._pending_callback = callback
+        self._pending_stroke_id = self._last_phys_stroke_id
+        self._pending_timer.start(self._coalesce_gap_ms)
+
+    def _fire_pending_tap(self):
+        cb = self._pending_callback
+        w_ref = self._pending_widget_ref
+        stroke_id = self._pending_stroke_id
+        self._pending_widget_ref = None
+        self._pending_callback = None
+        self._pending_stroke_id = -1
+        if cb is None or self._phys_active or stroke_id != self._last_phys_stroke_id:
+            return
+        if self._gesture_suppressed or self._last_phys_suppressed or self.is_scroller_scrolling():
+            return
+        if QApplication.activePopupWidget() is not None:
+            return
+        if w_ref is not None:
+            w = w_ref()
+            try:
+                if w is None or not w.isVisible() or not w.isEnabled():
+                    return
+            except RuntimeError:
+                return
+        cb()
+
+    def is_scroller_scrolling(self):
+        return (
+            self._scroller is not None
+            and self._scroller.state() in (QScroller.Dragging, QScroller.Scrolling)
+        )
+
+    def _moved_too_far(self, global_pos, origin=None):
+        ref = origin if origin is not None else self._press_pos
+        if ref is None:
+            return False
+        return (global_pos - ref).manhattanLength() > self._max_dist
+
+    def _elapsed_ms(self, start_ts, start_mono, end_ts, end_mono):
+        if (
+            start_ts
+            and end_ts >= start_ts
+            and QApplication.platformName() != "offscreen"
+        ):
+            return float(end_ts - start_ts)
+        return (end_mono - start_mono) * 1000.0
+
+    def _any_moved_too_far(self, global_pos, origins):
+        return any(self._moved_too_far(global_pos, origin) for origin in origins if origin is not None)
+
+    def _active_drag_detected(self, global_pos):
+        return (
+            self._any_moved_too_far(global_pos, (self._phys_press_pos, self._chain_origin_pos))
+            or self._scrolled_since(self._phys_press_scroll)
+            or self.is_scroller_scrolling()
+        )
+
+    def _on_window_press(self, event, now):
+        global_pos = event.globalPos()
+        if not self._in_scroll_viewport(global_pos):
+            return
+        self._seen_window_events = True
+        self._gesture_suppressed = False
+        self._cancel_pending_tap()
+
+        scrolling = self.is_scroller_scrolling()
+        ev_ts = event.timestamp()
+        within_gap = False
+        if self._last_phys_release_mono is not None:
+            gap_ms = self._elapsed_ms(
+                self._last_phys_release_ts,
+                self._last_phys_release_mono,
+                ev_ts,
+                now,
+            )
+            within_gap = (
+                gap_ms <= self._coalesce_gap_ms
+                or (now - self._last_phys_release_mono) <= self._coalesce_gap_s
+            )
+        if within_gap:
+            if self._chain_origin_pos is None:
+                self._chain_origin_pos = self._last_phys_press_pos
+            displaced = self._any_moved_too_far(
+                global_pos,
+                (self._last_phys_release_pos, self._last_phys_press_pos, self._chain_origin_pos),
+            )
+            suppressed = (
+                scrolling
+                or self._last_phys_was_drag
+                or self._last_phys_suppressed
+                or displaced
+            )
+        else:
+            self._chain_origin_pos = global_pos
+            suppressed = scrolling
+
+        self._phys_active = True
+        self._phys_press_pos = global_pos
+        self._phys_press_ts = ev_ts
+        self._phys_press_mono = now
+        self._phys_press_scroll = self._current_scroll_value()
+        self._phys_moved = False
+        self._phys_suppressed = suppressed
+        if suppressed:
+            self._last_drag_mono = now
+
+    def _on_window_release(self, event, now):
+        global_pos = event.globalPos()
+        ev_ts = event.timestamp()
+        dur_ms = self._elapsed_ms(self._phys_press_ts, self._phys_press_mono, ev_ts, now)
+        moved = self._phys_moved or self._active_drag_detected(global_pos)
+        in_cooldown = (
+            self._last_drag_mono is not None
+            and (self._phys_press_mono - self._last_drag_mono) <= self._post_drag_cooldown_s
+            and dur_ms < self._min_tap_hold_ms
+        )
+        suppressed = self._phys_suppressed or moved or in_cooldown or self._gesture_suppressed
+        if suppressed or moved:
+            self._last_drag_mono = now
+
+        self._last_phys_press_pos = self._phys_press_pos
+        self._last_phys_release_pos = global_pos
+        self._last_phys_release_mono = now
+        self._last_phys_release_ts = ev_ts
+        self._last_phys_dur_ms = dur_ms
+        self._last_phys_was_drag = moved or self.is_scroller_scrolling()
+        self._last_phys_suppressed = suppressed
+        self._last_phys_stroke_id += 1
+        self._phys_active = False
+
+    def _handle_window_mouse(self, etype, event):
+        now = time.monotonic()
+        if etype == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            self._on_window_press(event, now)
+        elif etype == QEvent.MouseMove and self._phys_active and (event.buttons() & Qt.LeftButton):
+            if self._active_drag_detected(event.globalPos()):
+                self._phys_moved = True
+                self._phys_suppressed = True
+                self._last_drag_mono = now
+        elif etype == QEvent.MouseButtonRelease and self._phys_active and event.button() == Qt.LeftButton:
+            self._on_window_release(event, now)
+
+    def mark_suppressed(self):
+        self._suppressed = True
+        self._gesture_suppressed = True
+        self._phys_suppressed = True
+        self._last_phys_suppressed = True
+        self._cancel_pending_tap()
+
+    def _current_window_suppressed(self):
+        if self._gesture_suppressed or self.is_scroller_scrolling():
+            return True
+        if self._phys_active:
+            return self._phys_suppressed
+        return self._last_phys_suppressed
+
+    def on_press(self, global_pos):
+        self.attach_window_observer()
+        self._gesture_suppressed = False
+        if self._seen_window_events:
+            return not self._current_window_suppressed()
+        if self.is_scroller_scrolling():
+            self._press_pos = None
+            self._press_scroll = None
+            self._suppressed = True
+            return False
+        self._press_pos = global_pos
+        self._press_scroll = self._current_scroll_value()
+        self._suppressed = False
+        return True
+
+    def on_move(self, global_pos):
+        if self._seen_window_events:
+            return not self._current_window_suppressed()
+        if self._press_pos is not None and not self._suppressed:
+            if self._moved_too_far(global_pos) or self._scrolled_since(self._press_scroll):
+                self._suppressed = True
+        return not self._suppressed
+
+    def consume_release(self, global_pos, widget=None, callback=None):
+        """Return 'allow', 'defer', or 'suppress' for a button release."""
+        self.attach_window_observer()
+        if self._seen_window_events:
+            suppressed = (
+                self._current_window_suppressed()
+                or self._scrolled_since(self._phys_press_scroll)
+            )
+            self._gesture_suppressed = False
+            if suppressed:
+                self._cancel_pending_tap()
+                return "suppress"
+            if callback is not None and self._last_phys_dur_ms < self._min_tap_hold_ms:
+                self._schedule_deferred_tap(widget, callback)
+                return "defer"
+            return "allow"
+
+        suppress = (
+            self._suppressed
+            or self._gesture_suppressed
+            or self._moved_too_far(global_pos)
+            or self._scrolled_since(self._press_scroll)
+            or self.is_scroller_scrolling()
+        )
+        self._press_pos = None
+        self._press_scroll = None
+        self._suppressed = False
+        self._gesture_suppressed = False
+        return "suppress" if suppress else "allow"
+
+    def should_suppress_release(self, global_pos):
+        return self.consume_release(global_pos) == "suppress"
+
+    def eventFilter(self, obj, event):
+        etype = event.type()
+        if etype in (QEvent.Show, QEvent.ParentChange, QEvent.ShowToParent, QEvent.WindowActivate, QEvent.Paint):
+            self.attach_window_observer()
+            return False
+
+        if not self._filter_viewport_clicks or self._forwarding:
+            return False
+        if etype == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            if not self.on_press(event.globalPos()):
+                event.accept()
+                return True
+        elif etype == QEvent.MouseMove and (event.buttons() & Qt.LeftButton):
+            self.on_move(event.globalPos())
+        elif etype == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+            if self.should_suppress_release(event.globalPos()):
+                # Release outside viewport so item views reset pressed state without clicking.
+                cancel_pos = QPoint(-1, -1)
+                cancel_ev = QMouseEvent(
+                    QEvent.MouseButtonRelease,
+                    cancel_pos,
+                    obj.mapToGlobal(cancel_pos),
+                    Qt.LeftButton,
+                    Qt.NoButton,
+                    event.modifiers(),
+                )
+                self._forwarding = True
+                try:
+                    QApplication.sendEvent(obj, cancel_ev)
+                finally:
+                    self._forwarding = False
+                event.accept()
+                return True
+        return False
+
+
+def configure_touch_scroller(
+    widget,
+    drag_distance_px=10,
+    suppress_drag_clicks=False,
+    scroll_area=None,
+    max_tap_distance=10,
+):
+    """Enable left-button kinetic scrolling with DPI-scaled thresholds and shared tap guard."""
+    QScroller.grabGesture(widget, QScroller.LeftMouseButtonGesture)
+    scroller = QScroller.scroller(widget)
+    props = scroller.scrollerProperties()
+    screen = QApplication.primaryScreen()
+    dpi = screen.physicalDotsPerInchY() if screen is not None else 0.0
+    if dpi > 0:
+        props.setScrollMetric(
+            QScrollerProperties.DragStartDistance,
+            drag_distance_px * 0.0254 / dpi,
+        )
+    props.setScrollMetric(QScrollerProperties.MaximumClickThroughVelocity, 0.0)
+    scroller.setScrollerProperties(props)
+    area = scroll_area
+    if area is None and isinstance(widget.parentWidget(), QAbstractScrollArea):
+        area = widget.parentWidget()
+    if suppress_drag_clicks or area is not None:
+        guard = getattr(area, "_touch_tap_guard", None) if area is not None else None
+        if guard is None:
+            guard = TouchTapGuard(
+                area or widget,
+                scroller=scroller,
+                max_tap_distance=max_tap_distance,
+                filter_viewport_clicks=suppress_drag_clicks,
+                parent=widget,
+            )
+            widget.installEventFilter(guard)
+            guard.attach_window_observer()
+            if area is not None:
+                area._touch_tap_guard = guard
+        widget._touch_tap_guard = guard
+    return scroller
+
+
 class TouchApplication(QApplication):
     def __init__(self, args):
-        QApplication.__init__(self, args)        
-        import touch_keyboard
-        self.installEventFilter(touch_keyboard.TouchHandler(self))
+        QApplication.__init__(self, args)
+        self.installEventFilter(_LazyTouchHandler(self))
         TouchSetStyle(self)
+
+
+_BUSY_FRAME_CACHE = {}
+
+
+def _draw_busy_dot(size, color_hex):
+    img = QImage(size, size, QImage.Format_ARGB32)
+    img.fill(Qt.transparent)
+    painter = QPainter(img)
+    painter.setPen(Qt.white)
+    painter.setRenderHint(QPainter.Antialiasing, True)
+    painter.setBrush(QBrush(QColor(color_hex)))
+    painter.drawEllipse(0, 0, img.width() - 1, img.height() - 1)
+    painter.end()
+    return img
+
+
+def render_busy_frames(width, height, dot_size=16, dark_hex="#808080", bright_hex="#fcce04"):
+    """Pre-render and cache the 8 rotated QPixmap frames for BusyAnimation."""
+    key = (width, height, dot_size, dark_hex, bright_hex)
+    cached = _BUSY_FRAME_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    dark = _draw_busy_dot(dot_size, dark_hex)
+    bright = _draw_busy_dot(dot_size, bright_hex)
+    radius = min(width, height) // 2 - dot_size
+    frames = []
+    for step in range(0, 360, 45):
+        pm = QPixmap(width, height)
+        pm.fill(Qt.transparent)
+        painter = QPainter(pm)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.translate(width // 2, height // 2)
+        painter.rotate(45 + step)
+        painter.drawImage(0, radius, bright)
+        for _ in range(7):
+            painter.rotate(45)
+            painter.drawImage(0, radius, dark)
+        painter.end()
+        frames.append(pm)
+
+    result = (tuple(frames), dark, bright)
+    _BUSY_FRAME_CACHE[key] = result
+    return result
 
 
 class BusyAnimation(QWidget):
@@ -507,8 +1003,8 @@ class BusyAnimation(QWidget):
     expired = pyqtSignal()
 
     def __init__(self, parent=None, process=None, timeout_s=None):
-        # if an process or a timeout is specified, then we the widget
-        # closes itself if process.poll() returns True, or if the
+        # if an process or a timeout is specified, then the widget
+        # closes itself if process.poll() is not None, or if the
         # timeout is expired, respectively.
         super(BusyAnimation, self).__init__(parent)
         self.resize(64, 64)
@@ -526,20 +1022,11 @@ class BusyAnimation(QWidget):
         self.atimer = QTimer(self)
         self.atimer.timeout.connect(self.animate)
         self.atimer.start(200)
-        # create small circle bitmaps for animation
-        self.dark = self.draw(16, QColor("#808080"))
-        self.bright = self.draw(16, QColor("#fcce04"))
+        # reuse pre-rendered frames to avoid rotating bitmaps on every tick
+        self._frames, self.dark, self.bright = render_busy_frames(self.width(), self.height())
 
     def draw(self, size, color):
-        img = QImage(size, size, QImage.Format_ARGB32)
-        img.fill(Qt.transparent)
-        painter = QPainter(img)
-        painter.setPen(Qt.white)
-        painter.setRenderHint(QPainter.Antialiasing, True)
-        painter.setBrush(QBrush(color))
-        painter.drawEllipse(0, 0, img.width() - 1, img.height() - 1)
-        painter.end()
-        return img
+        return _draw_busy_dot(size, color.name() if isinstance(color, QColor) else color)
 
     def timer_expired(self):
         # App launch expired without callback ...
@@ -551,11 +1038,11 @@ class BusyAnimation(QWidget):
         # apps or with apps crashing.
         #
         # We might tell the user that the app ended unexpectedly
-        if self.process is not None and self.process.poll():
+        if self.process is not None and self.process.poll() is not None:
             self.close()
             return
-        self.step += 45
-        self.repaint()
+        self.step = (self.step + 45) % 360
+        self.update()
 
     def close(self):
         self.etimer.stop()
@@ -564,15 +1051,8 @@ class BusyAnimation(QWidget):
         super(BusyAnimation, self).deleteLater()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height()) // 2 - 16
+        frame_idx = (self.step // 45) % len(self._frames)
         painter = QPainter()
         painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.translate(self.width() // 2, self.height() // 2)
-        painter.rotate(45)
-        painter.rotate(self.step)
-        painter.drawImage(0, radius, self.bright)
-        for i in range(7):
-            painter.rotate(45)
-            painter.drawImage(0, radius, self.dark)
+        painter.drawPixmap(0, 0, self._frames[frame_idx])
         painter.end()

@@ -12,17 +12,21 @@ import platform
 import xml.etree.ElementTree as ET
 
 from TouchStyle import TouchDialog, TouchApplication, \
-    BUTTON_THREAD, getScreenSize, BusyAnimation
-from touch_keyboard import TouchKeyboard
+    BUTTON_THREAD, getScreenSize, BusyAnimation, \
+    TouchTapGuard, configure_touch_scroller
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtNetwork import *
 
-LOGFILE="/tmp/launcher.log"
-from logger import *
-init_logger(LOGFILE)
+LOGFILE = "/tmp/launcher.log"
+if __name__ == "__main__":
+    # Expose __main__ as "launcher" so plugins importing LauncherPlugin reuse
+    # this module instead of importing launcher.py a second time.
+    sys.modules.setdefault("launcher", sys.modules[__name__])
+    from logger import init_logger
+    init_logger(LOGFILE)
 
 PLUGINS_DIR = "plugins"
 
@@ -170,16 +174,45 @@ class StatusBar(QWidget):
         self.setObjectName("statusbar")
         self.setVisible(True)
         self.setAutoFillBackground(True)
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update)
-        self.timer.start(2000) # replant timer in ms
         # scan for plugins
         self.plugins = {}
         for file in os.listdir(os.path.join(BASE, PLUGINS_DIR)):
             if file.endswith(".py"):
                 fname = os.path.splitext(os.path.basename(file))[0]
                 self.plugins[fname] = __import__(PLUGINS_DIR + "." + fname,
-                                            globals(), locals(), ['object']) 
+                                            globals(), locals(), ['object'])
+        self._pixmap_cache = {}
+        self._last_snapshot = None
+        self._cached_time = ""
+        self._cached_pixmaps = []
+        self._refresh_state(repaint=False)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self._refresh_state)
+        self.timer.start(3000) # check plugins/clock periodically; repaint only on change
+
+    def _refresh_state(self, repaint=True):
+        time_str = QLocale().toString(QTime.currentTime(), QLocale.ShortFormat)
+        raw_icons = []
+        for name in sorted(self.plugins):
+            data = self.plugins[name].icon()
+            raw_icons.append(tuple(data) if data else None)
+        snapshot = (time_str, tuple(raw_icons))
+        if snapshot == self._last_snapshot:
+            return
+        self._last_snapshot = snapshot
+        self._cached_time = time_str
+        pixmaps = []
+        for key in raw_icons:
+            if key is not None:
+                pix = self._pixmap_cache.get(key)
+                if pix is None:
+                    pix = QPixmap(list(key))
+                    self._pixmap_cache[key] = pix
+                if not pix.isNull():
+                    pixmaps.append(pix)
+        self._cached_pixmaps = pixmaps
+        if repaint:
+            super(StatusBar, self).update()
 
     def mousePressEvent(self, event):
         popup = StatusPopup(self.plugins, self, self.parent())
@@ -193,20 +226,16 @@ class StatusBar(QWidget):
         painter.fillRect(self.rect(), self.palette().color(self.backgroundRole()))
         # draw the time at the very right
         painter.drawText(QRect(QPoint(0, 0), self.size()),
-              Qt.AlignRight, QLocale().toString(QTime.currentTime(), QLocale.ShortFormat))
-        # draw all plugin icons fromt he left
+              Qt.AlignRight, self._cached_time)
+        # draw all cached plugin icons from the left
         x = 0
-        for name in sorted(self.plugins):
-            plugin = self.plugins[name]
-            # request icon from plugin
-            icon = QPixmap(plugin.icon())
-            if icon:
-                painter.drawPixmap(x, 0, icon)
-                x += icon.width()
+        for icon in self._cached_pixmaps:
+            painter.drawPixmap(x, 0, icon)
+            x += icon.width()
         painter.end()
 
     def update(self):
-        self.repaint()
+        self._refresh_state(repaint=True)
 
 
 class TouchTopWidget(QWidget):
@@ -265,9 +294,10 @@ class Icon(QPixmap):
 
 
 # let the user enter the name of a new folder
-class FolderName(TouchKeyboard):
-    def __init__(self, parent=None):
-        super(FolderName, self).__init__(parent)
+def FolderName(parent=None):
+    """Lazily import TouchKeyboard only when creating a new folder."""
+    from touch_keyboard import TouchKeyboard
+    return TouchKeyboard(parent)
 
 
 class FolderOpIcon(QToolButton):
@@ -692,6 +722,7 @@ class AppPopup(QFrame):
 class AppIcon(QToolButton):
     refresh = pyqtSignal()
     go_to_folder = pyqtSignal(object)
+    MAX_TAP_DISTANCE = 10
 
     def __init__(self, app, parent=None):
         super(AppIcon, self).__init__(parent)
@@ -704,14 +735,72 @@ class AppIcon(QToolButton):
 
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setObjectName("launcher-icon")
-        
+        self._tap_guard = None
+
+    def _get_tap_guard(self):
+        if self._tap_guard is None:
+            parent = self.parentWidget()
+            scroll_area = None
+            while parent is not None:
+                if isinstance(parent, QScrollArea):
+                    scroll_area = parent
+                    break
+                parent = parent.parentWidget()
+            guard = getattr(scroll_area, "_touch_tap_guard", None) if scroll_area is not None else None
+            if guard is None:
+                scroller = getattr(scroll_area, "scroller", None) if scroll_area is not None else None
+                if scroller is None and scroll_area is not None:
+                    for target in (scroll_area.viewport(), scroll_area):
+                        if QScroller.hasScroller(target):
+                            scroller = QScroller.scroller(target)
+                            break
+                guard = TouchTapGuard(
+                    scroll_area,
+                    scroller=scroller,
+                    max_tap_distance=self.MAX_TAP_DISTANCE,
+                    parent=scroll_area or self,
+                )
+                if scroll_area is not None:
+                    scroll_area._touch_tap_guard = guard
+            self._tap_guard = guard
+        return self._tap_guard
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if not self._get_tap_guard().on_press(event.globalPos()):
+                event.ignore()
+                return
+        QToolButton.mousePressEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton:
+            if not self._get_tap_guard().on_move(event.globalPos()):
+                self.setDown(False)
+                event.ignore()
+                return
+        QToolButton.mouseMoveEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            decision = self._get_tap_guard().consume_release(
+                event.globalPos(),
+                widget=self,
+                callback=self.click,
+            )
+            if decision != "allow":
+                self.setDown(False)
+                event.accept()
+                return
+        QToolButton.mouseReleaseEvent(self, event)
 
     def event(self, event):
         if event.type() != QEvent.Gesture:
             return QToolButton.event(self, event)
-        
+
         for g in event.activeGestures():
             if g.state() == Qt.GestureFinished:
+                self._get_tap_guard().mark_suppressed()
+                self.setDown(False)
                 # get all the app details from the IconGrid
                 popup = AppPopup(self)
                 popup.refresh.connect(self.on_refresh)
@@ -748,11 +837,26 @@ class IconGrid(QWidget):
         # event to know the final size when creating the icon grid
         self.columns = getScreenSize().width() // self.columnWidth
         self.button_app = None
+        self._page_cache = {}
 
         self.createAppIcons()
         for i in range(self.columns):
             self.grid.setColumnMinimumWidth(i, self.columnWidth)
-        
+
+    def _detach_grid_widgets(self):
+        while self.grid.count():
+            item = self.grid.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.hide()
+
+    def clearCache(self):
+        """Destroy cached AppIcon widgets across all folders."""
+        self._detach_grid_widgets()
+        for _apps_ref, buttons in self._page_cache.values():
+            for btn in buttons:
+                btn.deleteLater()
+        self._page_cache.clear()
 
     def setButtonApp(self, app):
         self.button_app = app
@@ -763,36 +867,42 @@ class IconGrid(QWidget):
 
     def setPath(self, path):
         # empty path given? Return root
-        if path == "":
-            return self.apps.getRoot()
+        if not path:
+            self.setApps(self.apps.getRoot())
+            return
         # otherwise try to set path
         self.setApps(self.apps.getRoot().getFolderList(path.split("/")))
 
     def createAppIcons(self):
-        # remove all existing widgets from grid
-        w = self.grid.takeAt(0)
-        while w:
-            w.widget().deleteLater()
-            w = self.grid.takeAt(0)
-        # create pages to hold every app
-        index = 0
-        for app in self.apps:
-            # create a launch button for this app
-            but = AppIcon(app, self)
-            but.refresh.connect(self.on_refresh)
-            but.go_to_folder.connect(self.on_go_to_folder)
-            if "exec" in app:
-                but.clicked.connect(self.do_launch)
-            else:
-                but.clicked.connect(self.do_open_folder)
+        self._detach_grid_widgets()
+
+        cache_key = id(self.apps)
+        cached = self._page_cache.get(cache_key)
+        if cached is not None and cached[0] is self.apps:
+            buttons = cached[1]
+        else:
+            buttons = []
+            for app in self.apps:
+                but = AppIcon(app, self)
+                but.refresh.connect(self.on_refresh)
+                but.go_to_folder.connect(self.on_go_to_folder)
+                if "exec" in app:
+                    but.clicked.connect(self.do_launch)
+                else:
+                    but.clicked.connect(self.do_open_folder)
+                buttons.append(but)
+            self._page_cache[cache_key] = (self.apps, buttons)
+
+        for index, but in enumerate(buttons):
             self.grid.addWidget(but, index // self.columns, index % self.columns, Qt.AlignCenter)
-            index += 1
+            but.show()
 
     def on_refresh(self):
-        # the item tree has changed 
+        # the item tree has changed
         # write updated tree to disk
         self.apps.getRoot().export()
-        # refresh the view
+        # rebuild cached icons to reflect folder changes
+        self.clearCache()
         self.createAppIcons()
 
     def on_go_to_folder(self, apps):
@@ -857,7 +967,7 @@ class TcpServer(QTcpServer):
 
     def receiveMessage(self):
         # check clients for data
-        for s in self.connections:
+        for s in list(self.connections):
             if s.canReadLine():
                 line = str(s.readLine(), "utf-8").strip()
                 if len(line) > 0:
@@ -889,10 +999,14 @@ class TcpServer(QTcpServer):
                         print("Unknown command ", cmd)
 
     def removeConnection(self):
-        pass
+        sock = self.sender()
+        if sock in self.connections:
+            self.connections.remove(sock)
+        if sock is not None:
+            sock.deleteLater()
 
     def socketError(self):
-        pass
+        self.removeConnection()
 
 
 class LauncherPlugin(QObject):
@@ -923,7 +1037,7 @@ class LauncherPlugin(QObject):
 class LauncherPluginAdapter:
     """Adapter for running lightweight apps as launcher plugins.
 
-    Implements parts of the subprocess.Popen API (poll(), kill(), returncode)
+    Implements parts of the subprocess.Popen API (poll(), kill(), wait(), returncode)
     in order to keep changes to FtcGuiApplication as minimal as possible
     """
     def __init__(self, launcher, module_script):
@@ -932,7 +1046,9 @@ class LauncherPluginAdapter:
         import importlib, re
         module_name = re.search(BASE + "/(.+).py", module_script).group(1).replace("/", ".")
         try:
-            module = importlib.reload(importlib.import_module(module_name))
+            module = sys.modules.get(module_name)
+            if module is None:
+                module = importlib.import_module(module_name)
             self.plugin = module.createPlugin(launcher)
         except Exception as e:
             print(e)
@@ -943,6 +1059,9 @@ class LauncherPluginAdapter:
         if self.returncode is None and self.plugin and self.plugin.isClosed():
             self.kill()
         return self.returncode
+
+    def wait(self, timeout=None):
+        return self.poll()
 
     def kill(self):
         if self.plugin:
@@ -959,7 +1078,7 @@ class VerticalScrollArea(QScrollArea):
         self.setFrameStyle(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        QScroller.grabGesture(self, QScroller.LeftMouseButtonGesture);
+        self.scroller = configure_touch_scroller(self.viewport(), scroll_area=self)
         self.setWidget(content)
 
         
@@ -968,9 +1087,11 @@ class Launcher(TouchApplication):
         super(Launcher, self).__init__(args)
         # category setup also loads the locale
         self.category_setup()
-        # load stylesheet from the same place the script was loaded from
-        self.setStyleSheet( "file:///" + BASE + "/themes/" + THEME + "/style.qss")
+        # TouchApplication.__init__ already applied default style; only override custom themes
+        if THEME != "default":
+            self.setStyleSheet("file:///" + BASE + "/themes/" + THEME + "/style.qss")
         self.app_process = None
+        self._launching = False
         # create TCP server so other programs can request a icon list refresh
         # or launch an app
         self.tcpServer = TcpServer()
@@ -1056,41 +1177,61 @@ class Launcher(TouchApplication):
         except:
             pass
 
-    def settings_load(self):
+    def settings_read(self):
+        path = ""
+        button_launch = None
         if not os.path.isfile(self.settings_file()):
-            return False
+            return path, button_launch
 
         config = configparser.RawConfigParser()
         config.read(self.settings_file())
 
         if config.has_option('view', 'button_launch'):
-            self.button_launch = config.get('view', 'button_launch')
-            self.icons.setButtonApp(self.button_launch)
-
-        # get view path 
+            button_launch = config.get('view', 'button_launch')
         if config.has_option('view', 'path'):
             path = config.get('view', 'path')
+        return path, button_launch
+
+    def settings_load(self):
+        if not os.path.isfile(self.settings_file()):
+            return False
+
+        path, button_launch = self.settings_read()
+        if button_launch is not None:
+            self.button_launch = button_launch
+            self.icons.setButtonApp(self.button_launch)
+        if path:
             self.icons.setPath(path)
-        
+
         return True
 
     def launch_app(self, executable, managed, name):
         self.settings_save()
 
-        if self.app_is_running():
+        if self._launching or self.app_is_running():
             return
 
         # get managed state
         if managed.lower() == "text":
             # text mode apps will be handled by Raphaels new external system
             return
-     
-        # run the executable
-        self.app_executable = executable
 
-        if managed.lower() == "launcher-plugin":
-            self.app_process = LauncherPluginAdapter(self, executable)
-        else:
+        self._launching = True
+        try:
+            # run the executable
+            self.app_executable = executable
+
+            if managed.lower() == "launcher-plugin":
+                # Paint busy feedback before synchronous plugin import/initialization
+                self.popup = BusyAnimation(parent=self.w)
+                self.popup.show()
+                QCoreApplication.processEvents(QEventLoop.ExcludeUserInputEvents)
+                try:
+                    self.app_process = LauncherPluginAdapter(self, executable)
+                finally:
+                    self.on_busyExpired()
+                return
+
             # assume that we can just launch enything under non-windows
             if platform.system() != 'Windows':
                 # give app the current locale
@@ -1119,10 +1260,12 @@ class Launcher(TouchApplication):
                 os.environ['PYTHONPATH'] = BASE
                 self.app_process = subprocess.Popen( ("pythonw", str(executable)) )
 
-        # display some busy icon
-        self.popup = BusyAnimation(parent=self.w, process=self.app_process, timeout_s=20)
-        self.popup.expired.connect(self.on_busyExpired)
-        self.popup.show()
+            # display some busy icon
+            self.popup = BusyAnimation(parent=self.w, process=self.app_process, timeout_s=20)
+            self.popup.expired.connect(self.on_busyExpired)
+            self.popup.show()
+        finally:
+            self._launching = False
 
     def on_log_timer(self):
         # check if process is still alive
@@ -1194,11 +1337,14 @@ class Launcher(TouchApplication):
         }
 
     def on_rescan(self):
+        current_path = self.icons.getPath()
         # re-translate categories as the language app may have triggered this
         self.category_setup()
         # rescan all apps
         self.apps = self.scan_app_dirs()
-        self.icons.setApps(self.apps)
+        self.icons.clearCache()
+        target = (self.apps.getFolderList(current_path.split("/")) if current_path else None) or self.apps
+        self.icons.setApps(target)
 
     def on_get_app(self, s):
         if self.app_is_running():
@@ -1212,11 +1358,10 @@ class Launcher(TouchApplication):
     def on_stop_app(self):
         if self.app_is_running():
             self.app_process.kill()
-            while self.app_process.poll() is None:
+            try:
+                self.app_process.wait(timeout=2)
+            except Exception:
                 pass
-            # give app a second to terminate
-            # fix for https://github.com/ftCommunity/ftcommunity-TXT/issues/50
-            time.sleep(1)
 
     # read a number of entries from the manifest and return them 
     # as a dictionary
@@ -1274,7 +1419,8 @@ class Launcher(TouchApplication):
                     if os.path.isfile(manifestfile):
                         # get app info
                         manifest = configparser.RawConfigParser()
-                        manifest.read_file(open(manifestfile, "r", encoding="utf8"))
+                        with open(manifestfile, "r", encoding="utf8") as mf:
+                            manifest.read_file(mf)
 
                         app = self.manifest_import(app_dir, manifest) 
                         root_applist.append(app)
@@ -1363,8 +1509,13 @@ class Launcher(TouchApplication):
         # scan for available apps
         self.apps = self.scan_app_dirs()
         self.w = TouchTopWidget()
-        # create icon grid
-        self.icons = IconGrid(self.apps)
+        initial_path, button_launch = self.settings_read()
+        initial_apps = (self.apps.getFolderList(initial_path.split("/")) if initial_path else None) or self.apps
+        # create icon grid once directly for the target startup folder
+        self.icons = IconGrid(initial_apps)
+        if button_launch is not None:
+            self.button_launch = button_launch
+            self.icons.setButtonApp(button_launch)
         self.icons.open_folder.connect(self.on_open_folder)
         self.icons.launch.connect(self.on_launch)
         # connect power button to icon grid
@@ -1372,8 +1523,6 @@ class Launcher(TouchApplication):
         # create a scrollarea for the icons
         self.scroll = VerticalScrollArea(self.icons, self.w)
         self.w.addWidget(self.scroll)
-        # try to load current settings
-        self.settings_load()
         self.w.show()
 
 
