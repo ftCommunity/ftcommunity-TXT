@@ -26,9 +26,9 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
  }
  
  /**
-@@ -346,6 +350,7 @@
-              pLcdCmd, par->pdata->display.pLcdCmd, 
-              pLcdData, par->pdata->display.pLcdData);
+@@ -358,6 +362,7 @@
+                  pLcdData, par->pdata->display.pLcdData);
+     }
  
 +    printk(KERN_WARNING "ft-TXT LCD V1.1\n");
  /*
@@ -36,7 +36,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
      psCmWkupReg->clkmod_dpll_disp = (psCmWkupReg->clkmod_dpll_disp & 0x0007) | 0x00000004;    // set Bypass Mode
 @@ -384,131 +389,111 @@
      pLcdBase->clkc_enable = 0x00000002;         // LIDD Clock enable
- */
+
      // Display initialisieren
 -    *pLcdCmd = 0x0001;                          // 1.   Software Reset schreiben
 -    mdelay(120);                             //      Wait 120msek

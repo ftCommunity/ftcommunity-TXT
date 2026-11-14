@@ -1,0 +1,44 @@
+From: Google Antigravity <antigravity@google.com>
+Subject: [PATCH] mmc: sdhci-omap: use optional regulator lookup and preserve vmmc caps
+
+1. When regulator_get() is used, systems with dummy regulators enabled
+return a dummy regulator instead of an error. Because dummy regulators
+do not report supported voltages, sdhci_omap_regulator_get_caps() computes
+caps = 0 and clears all host voltage capabilities. Use
+regulator_get_optional() so missing pbias/vqmmc regulators return -ENODEV.
+
+2. If neither pbias nor vqmmc is provided and hardware CAPA has no voltage
+bits set (e.g. an SDIO controller never initialized by the bootloader),
+fall back to querying vmmc so SDHCI_CAN_VDD_* is populated cleanly.
+
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -945,7 +945,7 @@ static unsigned int sdhci_omap_regulator_get_caps(struct device *dev,
+ 	struct regulator *reg;
+ 	unsigned int caps = 0;
+ 
+-	reg = regulator_get(dev, name);
++	reg = regulator_get_optional(dev, name);
+ 	if (IS_ERR(reg))
+ 		return ~0U;
+ 
+@@ -974,10 +974,16 @@ static int sdhci_omap_set_capabilities(struct sdhci_host *host)
+ 	vqmmc = sdhci_omap_regulator_get_caps(dev, "vqmmc");
+ 	caps = pbias & vqmmc;
+ 
+-	if (pbias != ~0U && vqmmc == ~0U)
++	if (pbias != ~0U && vqmmc == ~0U) {
+ 		dev_warn(dev, "vqmmc regulator missing for pbias\n");
+-	else if (caps == ~0U)
+-		return 0;
++	} else if (caps == ~0U) {
++		reg = sdhci_omap_readl(omap_host, SDHCI_OMAP_CAPA);
++		if (reg & (CAPA_VS18 | CAPA_VS30 | CAPA_VS33))
++			return 0;
++		caps = sdhci_omap_regulator_get_caps(dev, "vmmc");
++		if (caps == ~0U)
++			return 0;
++	}
+ 
+ 	/*
+ 	 * Quirk handling to allow 3.0V vqmmc with a valid 3.3V PBIAS. This is

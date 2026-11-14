@@ -1,7 +1,7 @@
 diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fb_ili9341_txt.c
 --- linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c	1970-01-01 01:00:00.000000000 +0100
 +++ linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fb_ili9341_txt.c	2016-02-23 20:31:57.000000000 +0100
-@@ -0,0 +1,718 @@
+@@ -0,0 +1,732 @@
 +/*
 + * FB driver for the ILI9341 LCD display controller
 + *
@@ -33,6 +33,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +#include <linux/init.h>
 +#include <linux/gpio.h>
 +#include <linux/delay.h>
++#include <linux/io.h>
 +
 +#include "fbtft.h"
 +
@@ -314,7 +315,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +
 +        fbtft_par_dbg(DEBUG_VERIFY_GPIOS, par, "%s()\n", __func__);
 +
-+        pdata = par->info->device->platform_data;
++        pdata = par->pdata;
 +        if (!pdata) {
 +                dev_warn(par->info->device,
 +                        "%s(): buswidth value is not available\n", __func__);
@@ -334,21 +335,32 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +
 +	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
 +
-+	pLcdBase = ioremap_nocache(par->pdata->display.pLcdBase, 4096);
-+
-+
-+	psCmPerReg = ioremap_nocache(CM_PER, sizeof(struct cm_per_pll));
-+	psCmWkupReg = ioremap_nocache(CM_WKUP, sizeof(struct cm_wkup_pll));
-+	psCmDpllReg = ioremap_nocache(CM_DPLL, sizeof(struct cm_dpll));
-+
++	pLcdBase = ioremap((par->pdata && par->pdata->display.pLcdBase) ? par->pdata->display.pLcdBase : 0x4830E000, 4096);
++	psCmPerReg = ioremap(CM_PER, sizeof(struct cm_per_pll));
++	psCmWkupReg = ioremap(CM_WKUP, sizeof(struct cm_wkup_pll));
++	psCmDpllReg = ioremap(CM_DPLL, sizeof(struct cm_dpll));
++	if (psCmPerReg) {
++		int timeout = 100000;
++		if ((psCmPerReg->lcdc_clkctrl & 0x3) != 0x2)
++			psCmPerReg->lcdc_clkctrl = 0x00000002;
++		while ((psCmPerReg->lcdc_clkctrl & 0x00030000) != 0 && --timeout)
++			udelay(1);
++		if (timeout == 0)
++			printk(KERN_WARNING "ft-TXT: LCDC clock wait timeout! (clkctrl=0x%08x)\n", psCmPerReg->lcdc_clkctrl);
++	}
++	if (!pLcdBase) {
++		dev_err(par->info->device, "Failed to map LCDC registers\n");
++		return -ENOMEM;
++	}
 +
 +    pLcdCmd = (unsigned short volatile *)  &pLcdBase->lidd_cs0_addr;
 +    pLcdData = (unsigned short volatile *) &pLcdBase->lidd_cs0_data;
 +
-+
-+    printk(KERN_INFO "ft-TXT|%s:: %p(%lX) %p(%lX)\n", __func__,
-+             pLcdCmd, par->pdata->display.pLcdCmd, 
-+             pLcdData, par->pdata->display.pLcdData);
++    if (par->pdata) {
++        printk(KERN_INFO "ft-TXT|%s:: %p(%lX) %p(%lX)\n", __func__,
++                 pLcdCmd, par->pdata->display.pLcdCmd, 
++                 pLcdData, par->pdata->display.pLcdData);
++    }
 +
 +/*
 +    // First Set PLL 
@@ -375,7 +387,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +    }
 +    while ((((psCmWkupReg->idlest_dpll_disp) & 0x00000001) == 0x00000000) );           // wait for Lock Mode 
 +    printk(KERN_INFO "%s:: wait Lock\n", __func__);
-+
++*/
 +
 +    // now PRCM Switching
 +    psCmDpllReg->clksel_lcdc_pixel_clk = 0x00000000;                // set to use Display PLL
@@ -386,7 +398,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +    pLcdBase->lidd_ctrl = 0x00000003;           // MPU80 Mode   
 +    pLcdBase->lidd_cs0_conf = 0x1064394F;       // 0001 0000 0110 0100 0011 1001 0100 1111 = 0x1064 394F
 +    pLcdBase->clkc_enable = 0x00000002;         // LIDD Clock enable
-+*/
++
 +    // Display initialisieren
 +    *pLcdCmd = 0x0001;                          // 1.   Software Reset schreiben
 +    mdelay(120);                             //      Wait 120msek
@@ -674,7 +686,7 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +    Negative: Par1 Par2 [...] Par15
 +*/
 +#define CURVE(num, idx)  curves[num*par->gamma.num_values + idx]
-+static int set_gamma(struct fbtft_par *par, unsigned long *curves)
++static int set_gamma(struct fbtft_par *par, u32 *curves)
 +{
 +	int i;
 +
@@ -697,6 +709,8 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +
 +static struct fbtft_display display = {
 +	.regwidth = 16,
++	.buswidth = 16,
++	.backlight = 1,
 +	.width = WIDTH,
 +	.height = HEIGHT,
 +	/*.txbuflen = TXBUFLEN,*/
@@ -720,62 +734,6 @@ diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fb_ili9341_txt.c linux-ti-l
 +MODULE_DESCRIPTION("FB driver for the ILI9341 LCD display controller for TXT");
 +MODULE_AUTHOR("Christian Vogelgsang");
 +MODULE_LICENSE("GPL");
-diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft_device.c linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft_device.c
---- linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft_device.c	2016-02-18 21:58:59.000000000 +0100
-+++ linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft_device.c	2016-02-26 23:47:47.438867804 +0100
-@@ -1214,6 +1214,52 @@
- 			}
- 		}
- 	}, {
-+		.name = "txt_ili9341",
-+		.pdev = &(struct platform_device) {
-+			.name = "fb_ili9341_txt",
-+			.id = 0,
-+			.dev = {
-+				.release = fbtft_device_pdev_release,
-+				.platform_data = &(struct fbtft_platform_data) {
-+					.display = {
-+						.pLcdBase = 0x4830E000,
-+						.pLcdCmd = 0x14,
-+						.pLcdData= 0x18,
-+				
-+						.buswidth = 16,
-+						.txbuflen = -1, /* buffer like display */
-+						.backlight = 1,
-+					},
-+					.gpios = (const struct fbtft_gpio []) {
-+
-+					/*	{ "reset", 18 },
-+						{ "dc", 86 },
-+						{ "wr", 87 },
-+						{ "cs", 89 },
-+						{ "db00", 70 },
-+						{ "db01", 71 },
-+						{ "db02", 72 },
-+						{ "db03", 73 },
-+						{ "db04", 74 },
-+						{ "db05", 75 },
-+						{ "db06", 76 },
-+						{ "db07", 77 },
-+						{ "db08", 78 },
-+						{ "db09", 79 },
-+						{ "db10", 80 },
-+						{ "db11", 81 },
-+						{ "db12", 8 },
-+						{ "db13", 9 },
-+						{ "db14", 10 },
-+						{ "db15", 11 },*/
-+									
-+						{ "led", 7 },
-+						{},
-+					},
-+				},
-+			},
-+		}
-+	}, {
- 		/* This should be the last item.
- 		 * Used with the custom argument
- 		 */
 diff -ruN linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft.h linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft.h
 --- linux-ti-linux-4.1.y/drivers/staging/fbtft/fbtft.h	2016-02-18 21:58:59.000000000 +0100
 +++ linux-ti-linux-4.1.y.patched/drivers/staging/fbtft/fbtft.h	2016-02-26 23:47:47.486868042 +0100

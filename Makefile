@@ -46,15 +46,24 @@ rootfs: $(BUILD_DIR)/rootfs/.config $(INITRAMFS_DIR)/initramfs.cpio
 	$(MAKE) -C $(BUILD_DIR)/rootfs
 	mkdir -p $(IMAGE_DIR)
 	cp $(BUILD_DIR)/rootfs/images/rootfs.squashfs $(IMAGE_DIR)/rootfs.img
-	cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage
-	cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb
+	if [ -f $(BUILD_DIR)/rootfs/images/uImage.device_tree ]; then \
+		cp $(BUILD_DIR)/rootfs/images/uImage.device_tree $(IMAGE_DIR)/uImage; \
+	else \
+		cp $(BUILD_DIR)/rootfs/images/uImage $(IMAGE_DIR)/uImage; \
+	fi
+	dtb="$(firstword $(wildcard $(BUILD_DIR)/rootfs/build/linux-*/arch/arm/boot/dts/device_tree.dtb))"; \
+	if [ -n "$$dtb" ] && [ -f "$$dtb" ]; then \
+		cp "$$dtb" $(IMAGE_DIR)/am335x-kno_txt.dtb; \
+	else \
+		cp $(BUILD_DIR)/rootfs/images/device_tree.dtb $(IMAGE_DIR)/am335x-kno_txt.dtb; \
+	fi
 
 .PHONY: initramfs
 initramfs: $(BUILD_DIR)/initramfs/.config
 	$(MAKE) -C $(BUILD_DIR)/initramfs
 
 .PHONY: copy-initramfs
-$(INITRAMFS_DIR)/initramfs.cpio copy-iniramfs: initramfs
+$(INITRAMFS_DIR)/initramfs.cpio copy-initramfs: initramfs
 	mkdir -p $(INITRAMFS_DIR)
 	cp $(BUILD_DIR)/initramfs/images/rootfs.cpio $(INITRAMFS_DIR)/initramfs.cpio
 
