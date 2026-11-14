@@ -6,28 +6,49 @@
 # - fix segfault after network problems
 
 import sys, os, io, time
-import configparser, zipfile, shutil
-import semantic_version, subprocess
-from pathlib import Path
+import configparser, re, shutil, subprocess
 
 from TouchStyle import *
 
 from PyQt5.QtNetwork import *
 from PyQt5 import QtCore
 
-import xml.etree.ElementTree as ET
-
 from launcher import LauncherPlugin
 
-try:
-    FW_VERSION = semantic_version.Version(Path('/etc/fw-ver.txt').open().read())
-except:
-    FW_VERSION = semantic_version.Version("0.10.8")
+_SEMVER_MOD = None
+
+
+def _semver():
+    """Lazily import semantic_version to avoid blocking initial window display."""
+    global _SEMVER_MOD
+    if _SEMVER_MOD is None:
+        import semantic_version
+        _SEMVER_MOD = semantic_version
+    return _SEMVER_MOD
+
+
+def _read_fw_version_str():
+    try:
+        with open('/etc/fw-ver.txt', 'r', encoding='utf-8') as fh:
+            return fh.read().strip() or "0.10.8"
+    except OSError:
+        return "0.10.8"
+
+
+def _get_fw_version():
+    return _semver().Version(_read_fw_version_str())
+
+
+def _get_alternate_branch():
+    nums = re.findall(r"\d+", _read_fw_version_str())
+    major, minor, patch = (int(nums[i]) if i < len(nums) else 0 for i in range(3))
+    return "v%d.%d.%d" % (major, minor, patch)
+
 
 # url of the "app store"
 URL = "https://raw.githubusercontent.com/ftCommunity/ftcommunity-apps/%s/packages/"
 MAIN_BRANCH = "master"
-ALTERNATE_BRANCH = "v%d.%d.%d" % (FW_VERSION.major, FW_VERSION.minor, FW_VERSION.patch)
+ALTERNATE_BRANCH = _get_alternate_branch()
 PACKAGEFILE = "00packages"
 
 # predefined alternate repositories, currently only githib is supported
@@ -92,18 +113,19 @@ def append_parameter(package, app, id, lkey, parms):
     # i.e. a "version" that is guaranteed to be lower than
     # any real version
     if id == 'version':
+        sv = _semver()
         if val:
             try:
-                val = semantic_version.Version.coerce(val)
+                val = sv.Version.coerce(val)
             except ValueError:
-                val = semantic_version.Version("0.0.0-invalid+" + val)
+                val = sv.Version("0.0.0-invalid+" + val)
         else:
-            val = semantic_version.Version("0.0.0-missing")
+            val = sv.Version("0.0.0-missing")
 
     # ... and 'firmware' entries into semantic version specs
     if val and id == 'firmware':
         try:
-            val = semantic_version.Spec(val)
+            val = _semver().Spec(val)
         except ValueError:
             val = None
 
@@ -128,62 +150,38 @@ class BusyAnimation(QWidget):
         self.atimer.timeout.connect(self.animate)
         self.atimer.start(200)
 
-        # create small circle bitmaps for animation
-        self.dark = self.draw(16, QColor("#808080"))
-        self.bright = self.draw(16, QColor("#fcce04"))
-        
+        self._frames, self.dark, self.bright = render_busy_frames(self.width(), self.height())
+
     def progress(self, perc):
         self.percent = perc
         self.repaint()
-    
+
     def draw(self, size, color):
-        img = QImage(size, size, QImage.Format_ARGB32)
-        img.fill(Qt.transparent)
-
-        painter = QPainter(img)
-        painter.setPen(Qt.white)
-        painter.setRenderHint(QPainter.Antialiasing, True)
-        painter.setBrush(QBrush(color))
-        painter.drawEllipse(0, 0, img.width()-1, img.height()-1)
-        painter.end()
-
-        return img
+        from TouchStyle import _draw_busy_dot
+        return _draw_busy_dot(size, color.name() if isinstance(color, QColor) else color)
 
     def animate(self):
-        self.step += 45
-        self.repaint()
+        self.step = (self.step + 45) % 360
+        self.update()
 
     def close(self):
         self.atimer.stop()
         super(BusyAnimation, self).close()
 
     def paintEvent(self, event):
-        radius = min(self.width(), self.height())//2 - 16
+        frame_idx = (self.step // 45) % len(self._frames)
         painter = QPainter()
         painter.begin(self)
+        painter.drawPixmap(0, 0, self._frames[frame_idx])
 
         if self.percent >= 0:
             font = painter.font()
-            # half the size than the current font size 
             if font.pointSize() < 0:
                 font.setPixelSize(font.pixelSize() // 3)
             else:
                 font.setPointSize(font.pointSize() // 3)
-            # set the modified font to the painter */
             painter.setFont(font)
-
-            # draw text in center
-            painter.drawText(QRect(0, 0, self.width(), self.height()), Qt.AlignCenter, str(self.percent)+"%" )
-
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        painter.translate(self.width()//2, self.height()//2)
-        painter.rotate(45)
-        painter.rotate(self.step)
-        painter.drawImage(0,radius, self.bright)
-        for i in range(7):
-            painter.rotate(45)
-            painter.drawImage(0,radius, self.dark)
+            painter.drawText(QRect(0, 0, self.width(), self.height()), Qt.AlignCenter, str(self.percent)+"%")
 
         painter.end()
 
@@ -274,6 +272,7 @@ class PackageLoader(NetworkAccessManager):
             self.result.emit(result)
             return
             
+        import zipfile
         print("Received", len(result[1]), "bytes")
 
         # check if we really received a zip file
@@ -286,6 +285,7 @@ class PackageLoader(NetworkAccessManager):
         self.result.emit(unzip_result)
 
     def install_zip(self,f):
+        import zipfile
         z = zipfile.ZipFile(f)
         try:
             z.getinfo("manifest")
@@ -575,6 +575,7 @@ class PackageListLoader(NetworkAccessManager):
         packages.read_file(packages_str)
         apps = packages.sections() 
         applist = []
+        fw_version = _get_fw_version()
         for app in apps:
             appparms = {}
             # name and uuid entries are mandatory
@@ -596,7 +597,7 @@ class PackageListLoader(NetworkAccessManager):
 
                 # if the app has a firmware spec, check if it matches the
                 # current firmware and only append the app if it does
-                if (not 'firmware' in appparms) or FW_VERSION in appparms['firmware']:
+                if (not 'firmware' in appparms) or fw_version in appparms['firmware']:
 
                     # create a tuple of app name and its parameters
                     # check for language specific name first
@@ -620,24 +621,31 @@ class AppListWidget(QListWidget):
         self.setIconSize(QSize(32,32))
         self.parent = parent
 
-        # scan for installed apps
+        # defer scanning local apps & fetching feeds until the window is displayed
         self.url = URL
-        self.installed_apps = self.scan_installed_app_dirs()
-
-        # start package list download
+        self.installed_apps = None
         self.apps = []
         self.apps_by_uuid = {}
         self.active_loaders = {}
-        for branch in (MAIN_BRANCH, ALTERNATE_BRANCH):
-            loader = PackageListLoader(self.url, branch)
-            self.active_loaders[branch] = loader;
-            loader.result.connect(self.onLoadPackageList)
         self.busy = BusyAnimation(parent)
         self.busy.show()
 
         # react on clicks
         self.itemClicked.connect(self.onItemClicked)
         self.setIconSize(QSize(32, 32))
+        QTimer.singleShot(0, self.start_loading)
+
+    def ensure_installed_apps(self):
+        if self.installed_apps is None:
+            self.installed_apps = self.scan_installed_app_dirs()
+
+    def start_loading(self):
+        if not self.active_loaders:
+            for branch in (MAIN_BRANCH, ALTERNATE_BRANCH):
+                loader = PackageListLoader(self.url, branch)
+                self.active_loaders[branch] = loader
+                loader.result.connect(self.onLoadPackageList)
+        self.ensure_installed_apps()
 
     # collect results from a package list loader
     # and pass those results to onResult when the 
@@ -698,7 +706,8 @@ class AppListWidget(QListWidget):
                     if os.path.isfile(manifestfile):
                         # get app name
                         manifest = configparser.RawConfigParser()
-                        manifest.read_file(open(manifestfile, "r", encoding="utf8"))
+                        with open(manifestfile, "r", encoding="utf8") as mf:
+                            manifest.read_file(mf)
 
                         # add everything the gui needs
                         append_parameter(manifest, None, 'name', lkey, appparms)
@@ -732,6 +741,7 @@ class AppListWidget(QListWidget):
 
     # store server reply
     def onResult(self, result):
+        self.ensure_installed_apps()
         self.busy.close()
 
         if not result[0]:
@@ -879,6 +889,7 @@ class FtcGuiPlugin(LauncherPlugin):
         self.mainWindow.show()
 
     def load_repos(self):
+        import xml.etree.ElementTree as ET
         repos = [ ]
         
         try:
@@ -898,6 +909,7 @@ class FtcGuiPlugin(LauncherPlugin):
         return repos
 
     def save_repos(self):
+        import xml.etree.ElementTree as ET
         root_element = ET.Element("repositories")
         for r in self.repos:
             repo_element = ET.SubElement(root_element, "repository")
