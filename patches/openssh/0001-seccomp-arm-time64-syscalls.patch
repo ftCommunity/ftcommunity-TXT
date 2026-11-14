@@ -1,0 +1,33 @@
+--- a/sandbox-seccomp-filter.c
++++ b/sandbox-seccomp-filter.c
+@@ -63,6 +63,30 @@
+ #include <asm/zcrypt.h>
+ #endif
+ 
++/*
++ * Some external toolchains (e.g. Arm GNU Toolchain 14.2) ship older Linux UAPI
++ * headers (< 5.1) alongside a newer glibc (2.40) that invokes ARM EABI time64
++ * syscalls on modern kernels. Provide fallback definitions so the preauth
++ * seccomp filter whitelists those time64 syscalls too.
++ */
++#if defined(__arm__) && defined(__NR_SYSCALL_BASE)
++# ifndef __NR_clock_gettime64
++#  define __NR_clock_gettime64		(__NR_SYSCALL_BASE + 403)
++# endif
++# ifndef __NR_clock_nanosleep_time64
++#  define __NR_clock_nanosleep_time64	(__NR_SYSCALL_BASE + 407)
++# endif
++# ifndef __NR_pselect6_time64
++#  define __NR_pselect6_time64		(__NR_SYSCALL_BASE + 413)
++# endif
++# ifndef __NR_ppoll_time64
++#  define __NR_ppoll_time64		(__NR_SYSCALL_BASE + 414)
++# endif
++# ifndef __NR_futex_time64
++#  define __NR_futex_time64		(__NR_SYSCALL_BASE + 422)
++# endif
++#endif
++
+ #include <errno.h>
+ #include <signal.h>
+ #include <stdarg.h>
