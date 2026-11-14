@@ -464,7 +464,7 @@ class AppDialog(TouchDialog):
         text = QTextEdit()
         text.setReadOnly(True)
         text.setTextInteractionFlags (QtCore.Qt.NoTextInteraction)    
-        QScroller.grabGesture(text.viewport(), QScroller.LeftMouseButtonGesture);
+        configure_touch_scroller(text.viewport())
         
         for i in sorted(parms):
             if(AppDialog.format(i)):
@@ -613,7 +613,7 @@ class AppListWidget(QListWidget):
         super(AppListWidget, self).__init__(parent)
 
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        QScroller.grabGesture(self.viewport(), QScroller.LeftMouseButtonGesture);
+        configure_touch_scroller(self.viewport(), suppress_drag_clicks=True, scroll_area=self)
         
         self.setUniformItemSizes(True)
         self.setViewMode(QListView.ListMode)
